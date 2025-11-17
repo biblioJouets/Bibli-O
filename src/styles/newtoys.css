@@ -1,0 +1,78 @@
+.newToysSection {
+    background-color: #DAEEE6 ;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 2rem; 
+}
+
+.ToysSectionMask {
+    width: 100%;
+    overflow: hidden;
+}
+
+.ToysSectionWrapper {
+    display: flex;
+    width: max-content;
+    animation: spin 30s linear infinite; 
+}
+
+.ToysSection {
+    gap: 3rem; 
+    display: flex;
+    text-align: center;
+    flex-shrink: 0; 
+    padding: 0 1rem;
+}
+
+.toyItemContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem; 
+    margin: 0 3rem;
+}
+
+.toyItem {
+    border-radius: 25%;
+    padding: 5px; 
+}
+.toyItemContainer:nth-child(4n + 1) .toyItem {
+    background-color: #88D4AB; 
+}
+
+.toyItemContainer:nth-child(4n + 2) .toyItem {
+    background-color: #ffe264;
+}
+
+.toyItemContainer:nth-child(4n + 3) .toyItem {
+    background-color: #FF8C94;
+}
+
+.toyItemContainer:nth-child(4n + 4) .toyItem {
+    background-color: #6EC1E4; 
+}
+.newToyImage {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 25%; 
+    margin: 0; 
+    display: block; 
+}
+
+.toyItemContainer p {
+    font-size: 1.25rem; 
+    font-weight: 600; 
+    margin: 0;
+}
+
+@keyframes spin {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}

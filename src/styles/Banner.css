@@ -1,0 +1,288 @@
+/* ---------------------------------- */
+/* --- BANNIERE SECTION --- */
+/* ---------------------------------- */
+.Banner {
+  width: auto;
+  height: 65vh;
+  position: relative;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Bulles pastel dynamiques */
+.Banner::before,
+.Banner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.7;
+  z-index: 1;
+  animation: float 12s ease-in-out infinite alternate;
+}
+
+.Banner::before {
+  top: 10%;
+  left: -10%;
+  width: 300px;
+  height: 300px;
+  background: #a5f3fc;
+}
+
+.Banner::after {
+  bottom: -10%;
+  right: -10%;
+  width: 350px;
+  height: 350px;
+  background: #f9a8d4;
+}
+
+/* Contenu principal */
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 8vw;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: #2E1D21;
+  max-width: 600px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 2rem;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.banner-title {
+  font-size: 2.8rem;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner-subtitle {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Icônes flottantes */
+.floating-icon {
+  position: absolute;
+  font-size: 1.8rem;
+  opacity: 0.7;
+  animation: float 8s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-30px);
+  }
+}
+
+/* Boutons */
+.button-group.desktop {
+  display: block;
+}
+
+.button-group.mobile {
+  display: none;
+}
+
+.button-group button {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button-group button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+.shape {
+  position: absolute;
+  opacity: 0.5; 
+  filter: blur(25px); 
+  
+  transition: all 0.3s ease-in-out;
+}
+
+/* Couleurs spécifiques */
+.blue {
+  background-color: #6EC1E4; 
+}
+
+.yellow {
+  background-color: #FEE7B6; 
+}
+
+/* Forme 1: Top-Left */
+.shape.top-left {
+  width: 350px;
+  height: 300px;
+  top: -70px;
+  left: -80px;
+  /* border-radius complexe pour une forme non symétrique */
+  border-radius: 40% 60% 70% 30% / 40% 50% 50% 60%;
+}
+
+/* Forme 2: Top-Right */
+.shape.top-right {
+  width: 450px;
+  height: 380px;
+  top: -120px;
+  right: -100px;
+  border-radius: 60% 40% 30% 70% / 60% 70% 30% 40%;
+}
+
+/* Forme 3: Bottom-Left  */
+.shape.bottom-left {
+  width: 380px;
+  height: 420px;
+  bottom: -90px;
+  left: -60px;
+  border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+}
+
+/* Forme 4: Bottom-Right */
+.shape.bottom-right {
+  width: 300px;
+  height: 250px;
+  bottom: -70px;
+  right: -50px;
+  border-radius: 50% 50% 30% 70% / 50% 40% 60% 50%;
+}
+
+/* Tu peux ajouter plus de formes si tu veux varier davantage */
+.shape.mid-left {
+  width: 250px;
+  height: 280px;
+  top: 30%;
+  left: -100px;
+  background-color: #A8E6CF; 
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  opacity: 0.4;
+  filter: blur(30px);
+}
+/* Positionnement des formes */
+.top-left {
+  width: 300px; 
+  height: 300px;
+  top: -50px; 
+  left: -50px;
+}
+
+.top-right {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -100px;
+}
+
+.bottom-left {
+  width: 350px;
+  height: 350px;
+  bottom: -80px;
+  left: -80px;
+}
+
+.bottom-right {
+  width: 320px;
+  height: 320px;
+  bottom: -60px;
+  right: -60px;
+}
+/* --- Responsive --- */
+@media screen and (max-width: 768px) {
+  .Banner {
+    height: auto;
+    min-height: 70vh;
+    flex-direction: column;
+  }
+
+  .banner-content {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #1f2937;
+    background: rgba(255, 255, 255, 0.6);
+    max-width: 85%;
+    padding: 1.5rem;
+  }
+.banner-image {
+  width: 100%;
+  height: 100%;
+  min-height: 70vh;
+  object-fit: cover;
+    object-position: center;
+
+}
+  .banner-title {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .banner-subtitle {
+    font-size: 0.8rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .button-group.desktop {
+    display: none;
+  }
+
+  .button-group.mobile {
+    display:flex;
+   
+
+  }
+  .button-group.mobile .Red {
+ padding : 0rem 1rem;
+    align-items: center;
+    white-space: nowrap;
+
+  }
+.shape {
+    opacity: 0.6;
+    filter: blur(15px);
+  }
+  .shape.top-left {
+    width: 200px; height: 180px;
+    top: -40px; left: -50px;
+    border-radius: 40% 60% 70% 30% / 40% 50% 50% 60%; 
+  }
+  .shape.top-right {
+    width: 280px; height: 320px;
+    top: -60px; right: -60px;
+    border-radius: 70% 80% 40% 70% / 60% 70% 30% 40%;
+  }
+  .shape.bottom-left {
+    width: 220px; height: 250px;
+    bottom: -50px; left: -40px;
+    border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
+  }
+  .shape.bottom-right {
+    width: 180px; height: 150px;
+    bottom: -40px; right: -30px;
+    border-radius: 50% 50% 30% 70% / 50% 40% 60% 50%;
+  }
+  .shape.mid-left {
+    width: 150px; height: 180px;
+    top: 25%; left: -80px;
+  }
+}

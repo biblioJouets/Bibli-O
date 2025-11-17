@@ -1,0 +1,211 @@
+/* CardsPlan.css */
+
+.CardsPlans-Container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: 40px;
+    padding: 60px 40px;
+    max-width: 1800px;
+    margin: 0 auto; 
+    box-sizing: border-box;
+}
+
+.CardPlan {
+    background-color: white;
+    padding: 80px 70px;
+    border-radius: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex: 1 1 0;
+    min-width: 300px;
+    max-width: 550px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    min-height: 400px;
+    box-sizing: border-box;
+}
+
+/* TITRE + PRIX */
+.CardPlan-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.3px;
+}
+
+.CardPlan-price {
+    font-size: 42px;
+    font-weight: 700;
+    color: #2E1D21;
+    margin: 0 0 35px 0;
+}
+
+.CardPlan-price::after {
+    content: '/mois';
+    font-size: 20px;
+    font-weight: 400;
+    color: #6B7280;
+    margin-left: 4px;
+}
+
+/* COULEURS DES THÈMES */
+.theme-red .CardPlan-title {
+    color: #FFB4BA;
+}
+
+.theme-green .CardPlan-title {
+    color: #88D4AB;
+}
+
+.theme-yellow .CardPlan-title {
+    color: #FFD88C;
+}
+
+/* BADGE POPULAIRE */
+.theme-green::before {
+    content: 'Le Plus Populaire';
+    position: absolute;
+    top: -15px;
+    right: 30px;
+    background-color: #88D4AB;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* BORDURE SPÉCIFIQUE */
+.theme-green {
+    border: 4px solid #88D4AB;
+}
+
+/* LISTE DES AVANTAGES */
+.CardPlan-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.CardPlan-list li {
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 16px;
+    font-size: 19px;
+    line-height: 1.6;
+}
+
+.CardPlan-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* COULEURS DES CHECKMARKS */
+.theme-red .CardPlan-list li::before {
+    color: #FFB4BA;
+}
+
+.theme-green .CardPlan-list li::before {
+    color: #88D4AB;
+}
+
+.theme-yellow .CardPlan-list li::before {
+    color: #FFD88C;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+/* Grands écrans (jusqu’à 1440px) */
+@media (max-width: 1440px) {
+    .CardsPlans-Container {
+        padding: 40px 30px;
+        gap: 30px;
+    }
+
+    .CardPlan {
+        padding: 50px 40px;
+        min-height: 350px;
+    }
+}
+
+/* Tablette entre 1024px et 768px */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .CardsPlans-Container {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        padding: 40px 30px;
+    }
+
+    .CardPlan {
+        flex: 0 1 45%;
+        max-width: 420px; /* largeur uniforme */
+        min-width: 420px;
+        padding: 45px 35px;
+        min-height: 320px;
+    }
+
+    .CardPlan-title {
+        font-size: 1.7rem;
+    }
+
+    .CardPlan-price {
+        font-size: 36px;
+    }
+
+    .CardPlan-list li {
+        font-size: 17px;
+    }
+}
+
+/* Mobile (jusqu’à 767px) → passage en vertical */
+@media (max-width: 767px) {
+    .CardsPlans-Container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 25px;
+        padding: 20px 16px; /* marge latérale pour éviter les bords */
+    }
+
+    .CardPlan {
+        padding: 50px 90px;
+        min-height: auto;
+    }
+
+    /* Centre le badge en mobile */
+    .theme-green::before {
+        top: -15px;
+        right: 50%;
+        transform: translateX(50%);
+    }
+
+    .CardPlan-price {
+        font-size: 34px;
+        margin-bottom: 25px;
+    }
+
+    .CardPlan-title {
+        font-size: 20px;
+    }
+
+    .CardPlan-list li {
+        font-size: 16px;
+        padding-left: 28px;
+        margin-bottom: 12px;
+    }
+
+    .CardPlan-price::after {
+        font-size: 18px;
+    }
+}

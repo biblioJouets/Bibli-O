@@ -1,0 +1,71 @@
+.buttonDuo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    margin-top: 2rem;
+}
+
+.Button {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    color: white;
+    gap: 30px;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+}
+
+.Blue {
+    background-color: rgba(110, 193, 228, 0.8); 
+}
+
+.Red {
+    background-color: #FF8C94;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+.Yellow{
+    background-color: #ffe264;
+    
+}
+.Green{
+    background-color: #88D4AB;
+    
+}
+
+.Button:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.Blue:hover {
+    background-color: #6EC1E4;
+}
+
+
+/* --- RESPONSIVE --- */
+@media screen and (max-width: 768px) {
+    .buttonDuo {
+        flex-direction: column; 
+        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5rem; 
+        
+    }
+
+    .Button {
+        width: 100%;
+        max-width: 250px;
+        text-align: center;
+        font-size: 0.9rem; 
+        padding: 10px 20px;
+    }
+}

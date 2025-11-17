@@ -1,0 +1,65 @@
+.sliderLogoWrapper {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  padding: 20px 0;
+}
+
+.sliderLogoContainer {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  animation: slide 40s linear infinite;
+}
+
+.sliderLogoImage {
+  width: 160px;
+  height: auto;
+  object-fit: contain;
+}
+
+.sliderLogoImage:hover {
+  filter: grayscale(0%) brightness(1);
+  transform: scale(1.1);
+}
+
+/* Animation de défilement infini */
+@keyframes slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ✅ Responsive */
+@media (max-width: 1024px) {
+  .sliderLogoImage {
+    width: 120px;
+  }
+  .sliderLogoContainer {
+    gap: 40px;
+    animation-duration: 30s;
+  }
+}
+
+@media (max-width: 768px) {
+  .sliderLogoImage {
+    width: 90px;
+  }
+  .sliderLogoContainer {
+    gap: 30px;
+    animation-duration: 25s;
+  }
+}
+
+@media (max-width: 480px) {
+  .sliderLogoImage {
+    width: 70px;
+  }
+  .sliderLogoContainer {
+    gap: 20px;
+    animation-duration: 20s;
+  }
+}

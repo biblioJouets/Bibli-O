@@ -1,0 +1,116 @@
+.catalogOverviewSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+
+
+.BubulleTags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin-bottom : 5rem; 
+  margin-top: 40px;
+}
+
+.BubulleTag {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  border: 5px solid white;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 10px;
+}
+
+.BubulleTag:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.bubulleIcon {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+}
+
+/* Color variants */
+.BubulleTag.tag-0 { background: #FF8C94; }
+.BubulleTag.tag-1 { background: #88D4AB; }
+.BubulleTag.tag-2 { background: #ffe264; }
+.BubulleTag.tag-3 { background: #6EC1E4; }
+.BubulleTag.tag-4 { background: #b78ad3; }
+.BubulleTag.tag-5 { background: #f59453; }
+
+
+/* Tablettes (≤1024px) */
+@media (max-width: 1024px) {
+  .BubulleTag {
+    width: 160px;
+    height: 160px;
+  }
+  .bubulleIcon {
+    font-size: 2rem;
+  }
+  .catalogOverviewSection h2 {
+    font-size: 1.8rem;
+  }
+}
+
+/* Mobiles (≤768px) */
+@media (max-width: 768px) {
+  .BubulleTags {
+    gap: 20px;
+  }
+
+  .BubulleTag {
+    width: 130px;
+    height: 130px;
+    font-size: 0.9rem;
+  }
+
+  .bubulleIcon {
+    font-size: 1.8rem;
+  }
+
+  .catalogOverviewSection h2 {
+    font-size: 1.6rem;
+  }
+
+  .catalogOverviewSection p {
+    font-size: 1rem;
+    max-width: 90%;
+  }
+}
+
+/* Très petits écrans (≤480px) */
+@media (max-width: 480px) {
+  .BubulleTag {
+    width: 100px;
+    height: 100px;
+    font-size: 0.8rem;
+  }
+
+  .bubulleIcon {
+    font-size: 1.5rem;
+  }
+
+  .catalogOverviewSection h2 {
+    font-size: 1.4rem;
+  }
+
+  .catalogOverviewSection p {
+    font-size: 0.95rem;
+  }
+}

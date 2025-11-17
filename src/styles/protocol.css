@@ -1,0 +1,116 @@
+.SectionProtocol {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+     padding: 2rem 1rem;
+}
+
+.Text ul {
+    list-style: none;
+    text-align: start;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+.Text li{
+    line-height: 1.6;
+    
+}
+.TextImage {
+    max-width: 1640px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+.ImageProtocolWrapper {
+    width: 100%;
+}
+
+.ImageProtocol {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+.Text {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.Text h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.Text p {
+    line-height: 1.6;
+}
+
+.Text .ButtonDuo .Blue {
+ padding: 0rem 2rem;
+}
+.Text .ButtonDuo .Red {
+ padding: 0rem 2rem;
+}
+/* Responsive pour tablettes */
+@media (max-width: 1224px) {
+  
+.Text .ButtonDuo .Blue {
+ font-size: 0.8rem;
+}
+.Text .ButtonDuo .Red {
+ font-size: 0.8rem;
+}
+    
+}
+@media (max-width: 990px) {
+  
+.Text .ButtonDuo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+    
+}
+
+
+@media (max-width: 768px) {
+    .Text .ButtonDuo{
+    flex-direction: row-reverse;
+    white-space: nowrap;
+}
+    .TextImage {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .SectionProtocol {
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* Responsive pour mobiles */
+@media (max-width: 480px) {
+    .SectionProtocol h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .Text h3 {
+        font-size: 1.2rem;
+    }
+    
+    .Text {
+        padding: 0.5rem;
+    }
+}

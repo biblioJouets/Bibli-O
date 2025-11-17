@@ -1,65 +1,121 @@
-import Image from "next/image";
+import React from "react";
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+//import components
+import Header from "../components/Header";
+import Banner from "../components/Banner";
+import ButtonBlue from "../components/ButtonBlue";
+                    {/* Ajouter le composant NewToys après ajout de nouveau jouet  */}
+
+// import NewToys from "../components/NewToys";
+import CatalogOverview from "../components/CatalogOverview";
+import CommitmentCard from "../components/CommitmentCard";
+import CardsPlans from "../components/CardsPlans";
+import Protocol from "../components/protocol";
+import CardContentMission from "../components/CardsContentMission";
+import FAQ from "../components/FAQ"
+import Newsletter from "../components/Newsletter";
+import FunctionalityCard from "../components/FunctionalityCard";
+import Footer from "../components/Footer"
+//import style
+import '../components/style/homepage.css';
+//import icon 
+import leaf from "../assets/icon/leaf.png";
+import wash from "../assets/icon/wash.png";
+import zen from "../assets/icon/zen.png";
+import euro from "../assets/icon/euro.png";
+import { Redo } from 'lucide-react';
+
+
+function Homepage() {
+    return (
+        <>
+        
+            <div className="Container">
+                <Header />
+               <Banner />
+           
+                <div className="functionalityCardsSection">
+                    <h2>Comment fonctionne Bibli'O Jouets ?</h2>
+                    <div className="functionalityCardsContainer">
+                    <FunctionalityCard className="firstCard"
+                        title=" Choisissez votre Plan"
+                        description=" Sélectionnez votre abonnement avec le nombre de jouets qui vous convient, avec ou sans engagement."
+                        number="1️⃣"
+                    />
+<Redo className="arrow arrow-top" />
+
+                    <FunctionalityCard className="secondCard"
+                        title=" Choisissez vos jouets"
+                        description="Choisissez parmi notre large sélection de jouets éducatifs adaptés à l'âge et aux intérêts de vos enfants."
+                        number="2️⃣"
+                    />
+                    <Redo className="arrow arrow-bottom" />
+                    <FunctionalityCard className="thirdCard"
+                        title=" Livré, Jouez, échangez"
+                        description="Votre sélection de jouets est livrée propre et prête à jouer chez vous ou en point relais. Échangez si vous le souhaitez*."
+                        number="3️⃣"
+                    />
+                    </div>
+                    <ButtonBlue  
+                        text="Voir les abonnements"
+                        href="/abonnements"
+                    />
+                    </div>
+                    
+                     <div className="commitmentsSection">
+                    <h2>Pourquoi louer plutôt qu'acheter ?</h2>
+                    <div className="commitmentCards">
+                          <CommitmentCard className="hygiene"
+                            title="Hygiène"
+                            description="Tous nos jouets sont soigneusement nettoyés et désinfectés avant et après chaque location, garantissant un environnement de jeu sain pour vos enfants."
+                            icon={wash}
+                            iconClassName="icon-large"
+                        />
+                        <CommitmentCard
+                            title="Écologie"
+                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
+                            icon={leaf}
+                        />
+                       
+                         <CommitmentCard
+                            title="Practicité"
+                            description="Profitez de la commodité de notre service de location, avec une livraison rapide et un retour facile des jouets à la fin de la période de location."
+                            icon={zen}
+                        />
+                         <CommitmentCard
+                            title="Économie"
+                            description="Optez pour une solution économique en louant des jouets de qualité à moindre coût, tout en offrant à vos enfants une variété d'expériences ludiques."
+                            icon={euro}
+                        />
+                        
+                    </div>
+                    </div>
+                    {/* Ajouter le composant NewToys après ajout de nouveau jouet  */}
+                {/* <div className="newToysContainer">
+                    <NewToys />
+                </div> */}
+                <CardContentMission />
+                    <CatalogOverview />
+               <Protocol />
+                        <div className="CardsPlansSections">
+                            <h2> Nos Plans Mensuels </h2>
+                        <CardsPlans />
+                        
+                        </div>
+                        
+                          <FAQ />
+
+          <Newsletter />
+
+                        </div>
+
+    
+ 
+ 
+    <Footer />
+           
+        </>
+    );
 }
+
+export default Homepage;

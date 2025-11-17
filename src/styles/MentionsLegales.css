@@ -1,0 +1,118 @@
+/* Style global du conteneur */
+
+
+.mentions-legales-container {
+  max-width: 1440px; 
+  margin: 2rem auto; 
+  padding: 1rem 2rem;
+  line-height: 1.6;
+  color: #2E1D21;
+  
+ 
+}
+
+/* Style des titres */
+.mentions-legales-container h1 {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #FF8C94;;
+}
+
+.mentions-legales-container h2 {
+  font-size: 2.2rem !important;
+  margin-top: 2.5rem !important; /* Espace avant chaque section */
+  margin-bottom: 1rem !important;
+  border-bottom: 2px solid #FF8C94 !important; /* Ligne de séparation légère */
+  padding-bottom: 0.5rem !important;
+  color: #FF8C94 !important;
+}
+.mentions-legales-container h2::before,
+.mentions-legales-container h2::after {
+  content: none !important; 
+  all: unset; 
+}
+/* Style des paragraphes, listes et adresses */
+.mentions-legales-container p,
+.mentions-legales-container ul,
+.mentions-legales-container dl,
+.mentions-legales-container address {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.mentions-legales-container ul {
+  padding-left: 20px;
+}
+
+.mentions-legales-container li {
+  margin-bottom: 0.5rem;
+}
+
+/* Style des liens (accessibilité) */
+.mentions-legales-container a {
+  text-decoration: none;
+  color: #2E1D21;
+  font-weight: 600;
+}
+
+.mentions-legales-container a:hover {
+  text-decoration: underline;
+}
+
+/* Style pour la liste de définitions <dl> (Éditeur, Hébergeur) */
+.info-list {
+  display: grid;
+  grid-template-columns: 180px 1fr; /* Colonne pour le terme, colonne pour la data */
+  gap: 10px 20px; /* Espace entre les lignes et les colonnes */
+}
+
+.info-list dt { /* Le "terme" (ex: SIRET) */
+  font-weight: bold;
+  color: #555;
+}
+
+.info-list dd { /* La "définition" (ex: 992 548...) */
+  margin: 0; /* Annule la marge par défaut du navigateur */
+}
+
+/* Style pour <address> */
+.mentions-legales-container address {
+  font-style: normal; /* Annule l'italique par défaut */
+  line-height: 1.7;
+}
+
+.litiges {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #666;
+}
+
+/* Responsive pour les petits écrans */
+@media (max-width: 600px) {
+  .mentions-legales-container {
+    padding: 1rem;
+  }
+
+  .mentions-legales-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .mentions-legales-container h2 {
+    font-size: 1.4rem;
+  }
+
+  /* La grille de la <dl> passe sur une seule colonne */
+  .info-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .info-list dt {
+    margin-top: 0.75rem; /* Espace le terme */
+  }
+
+  .info-list dd {
+    margin-bottom: 0.5rem; /* Espace la définition */
+  }
+}

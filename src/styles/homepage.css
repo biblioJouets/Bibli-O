@@ -1,0 +1,122 @@
+/* --- Styles de base (Desktop) --- */
+.Container {
+    width: 100%;
+   
+}
+h2 {
+    font-size: 2.5rem; 
+    color: #FFFFFF ;
+ font-weight: 800; 
+    text-transform: uppercase; 
+    position: relative;
+    display: inline-block; 
+    margin-bottom: 3.5rem; 
+    padding: 0.5em 1em;
+    z-index: 1; 
+    transition: transform 0.2s ease-out; 
+}
+
+h2:before {
+content: '';
+    background-color: #FF8C94;
+   transform: skewX(-5deg);
+    border-radius: 20px;
+     position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    box-shadow: 0 10px 26px rgba(94, 204, 238, 0.9);
+
+}
+
+
+
+h2.biblio-jouets:hover {
+    transform: translate(-3px, -3px);
+}
+
+h2.biblio-jouets:hover::after {
+    top: 3px; 
+    left: 3px; 
+    right: -3px;
+    bottom: -3px;
+}
+
+
+
+.CardsPlansSections{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* ---------------------------------- */
+/* --- FORM SECTION --- */
+/* ---------------------------------- */
+.formHomePageSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.FormTextContent{
+    display: grid;
+    width: 100%;
+    max-width: 1440px;;
+    margin: 0 auto;
+    padding: 3rem;
+    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: center;  
+}
+.formHomePage{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+
+.functionalityCardsSection{
+    display:flex; 
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding-bottom: 8rem;
+}
+
+.seePlansButton{
+    padding-left: 45px;
+}
+/* ---------------------------------- */
+/* --- RESPONSIVE (MOBILE) --- */
+/* ---------------------------------- */
+@media screen and (max-width: 1024px) {
+
+ h2 {
+    font-size: 2rem; }
+}
+
+
+@media screen and (max-width: 768px) {
+    .FormTextContent{
+        grid-template-columns: 1fr;
+    }
+    h2 {
+    font-size: 1.5rem; }
+
+ h2:before {
+content: '';
+   
+}
+@media screen and (max-width: 594px) {
+
+ h2 {
+    font-size: 1.3rem; }
+}
+
+}
+
+

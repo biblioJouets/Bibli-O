@@ -1,0 +1,42 @@
+.cardContentMissionSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 4rem;
+}
+.cardsContentMission{
+    display: flex;
+    width: auto;
+    gap: 30px;
+    margin-top: 2rem;
+}
+
+.cardContentMission{
+    background-color: #ffffff;
+    max-width: 450px;
+    padding: 2rem 4rem;
+    border-radius: 25px;
+}
+.yellowCardContent{
+    box-shadow: rgba(192, 182, 37, 0.5) 0px 4px 12px;
+}
+.redCardContent{
+    box-shadow: rgba(233, 35, 35, 0.5) 0px 4px 12px;
+}
+
+.greenCardContent{
+    box-shadow: rgba(17, 179, 71, 0.5) 0px 4px 12px;
+}
+
+.CardContentName, .CardContentTitle{
+    font-weight: 800;
+    font-size: large;
+
+}
+@media screen and (max-width: 768px) {
+.cardsContentMission{
+    flex-direction: column;
+
+}
+}

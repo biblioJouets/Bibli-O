@@ -1,0 +1,117 @@
+/* CardsPlansButtons.css - Responsive & harmonisé avec CardsPlan.css */
+
+/* ===== STYLE DE BASE ===== */
+.CardsPlans-Container .Button.Red,
+.CardsPlans-Container .Button.Green,
+.CardsPlans-Container .Button.Yellow {
+    display: block !important;
+    width: 100% !important;
+    padding: 5px 55px !important;
+    border: none !important;
+    border-radius: 30px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    margin-top: 25px !important;
+    margin-bottom: 30px !important;
+    transition: all 0.3s ease !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    white-space: nowrap;
+}
+
+/* ===== VARIANTS DE COULEURS ===== */
+
+/* Rouge */
+.CardsPlans-Container .Button.Red {
+    background-color: #FFB4BA !important;
+    color: white !important;
+}
+.CardsPlans-Container .Button.Red:hover {
+    background-color: #FF9FA7 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(255, 180, 186, 0.3) !important;
+}
+.CardsPlans-Container .Button.Red:active {
+    transform: translateY(0) !important;
+}
+
+/* Vert */
+.CardsPlans-Container .Button.Green {
+    background-color: #88D4AB !important;
+    color: white !important;
+}
+.CardsPlans-Container .Button.Green:hover {
+    background-color: #75C499 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(136, 212, 171, 0.3) !important;
+}
+.CardsPlans-Container .Button.Green:active {
+    transform: translateY(0) !important;
+}
+
+/* Jaune */
+.CardsPlans-Container .Button.Yellow {
+    background-color: #FFD88C !important;
+    color: white !important;
+}
+.CardsPlans-Container .Button.Yellow:hover {
+    background-color: #FFC96F !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(255, 216, 140, 0.3) !important;
+}
+.CardsPlans-Container .Button.Yellow:active {
+    transform: translateY(0) !important;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* --- Grand écran --- */
+@media (max-width: 1440px) {
+    .CardsPlans-Container .Button.Red,
+    .CardsPlans-Container .Button.Green,
+    .CardsPlans-Container .Button.Yellow {
+        font-size: 15px !important;
+        padding: 0px 40px !important;
+        margin-top: 20px !important;
+        margin-bottom: 25px !important;
+    }
+}
+
+/* --- Tablette --- */
+/* Tablette (entre 1024px et 767px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .CardsPlans-Container .Button.Red,
+    .CardsPlans-Container .Button.Green,
+    .CardsPlans-Container .Button.Yellow {
+        width: 80% !important; /* plus petit que 100% */
+        max-width: 280px !important;
+        margin: 20px auto !important; /* centré */
+        font-size: 15px !important;
+        padding: 0px 25px !important;
+        border-radius: 25px !important;
+    }
+}
+
+
+/* --- Mobile --- */
+@media (max-width: 767px) {
+    .CardsPlans-Container .Button.Red,
+    .CardsPlans-Container .Button.Green,
+    .CardsPlans-Container .Button.Yellow {
+        width: 100% !important;
+        max-width: 400px !important;
+        font-size: 14px !important;
+        padding: 0px 35px !important;
+        margin: 15px auto 20px auto !important; 
+        border-radius: 25px !important;
+    }
+
+    /* Effet tactile plus doux sur mobile */
+    .CardsPlans-Container .Button.Red:hover,
+    .CardsPlans-Container .Button.Green:hover,
+    .CardsPlans-Container .Button.Yellow:hover {
+        transform: none !important;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+}

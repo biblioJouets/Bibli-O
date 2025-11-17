@@ -1,0 +1,398 @@
+/* Import Font Awesome */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* Container principal */
+.in-building-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFD93D 0%, #FF6B9D 25%, #C154C1 50%, #4ECDC4 75%, #95E1D3 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Jouets flottants */
+.floating-toys {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.toy {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.3;
+  color: #fff;
+}
+
+.toy-1 {
+  top: 10%;
+  left: 10%;
+  animation: float-1 6s ease-in-out infinite;
+}
+
+.toy-2 {
+  top: 20%;
+  right: 15%;
+  animation: float-2 7s ease-in-out infinite;
+}
+
+.toy-3 {
+  bottom: 30%;
+  left: 20%;
+  animation: float-3 8s ease-in-out infinite;
+}
+
+.toy-4 {
+  top: 60%;
+  right: 25%;
+  animation: float-4 5s ease-in-out infinite;
+}
+
+.toy-5 {
+  bottom: 15%;
+  right: 10%;
+  animation: float-5 6.5s ease-in-out infinite;
+}
+
+.toy-6 {
+  top: 40%;
+  left: 5%;
+  animation: float-6 7.5s ease-in-out infinite;
+}
+
+.toy-7 {
+  top: 75%;
+  left: 40%;
+  animation: float-7 6s ease-in-out infinite;
+}
+
+.toy-8 {
+  top: 15%;
+  left: 50%;
+  animation: float-8 8.5s ease-in-out infinite;
+}
+
+/* Animations de flottement pour les jouets */
+@keyframes float-1 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(20px, -30px) rotate(5deg);
+  }
+  50% {
+    transform: translate(-15px, -50px) rotate(-5deg);
+  }
+  75% {
+    transform: translate(30px, -25px) rotate(3deg);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-25px, 40px) rotate(-8deg);
+  }
+  66% {
+    transform: translate(15px, 20px) rotate(8deg);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-30px, 20px) rotate(10deg);
+  }
+  50% {
+    transform: translate(20px, 40px) rotate(-10deg);
+  }
+  75% {
+    transform: translate(-10px, 30px) rotate(5deg);
+  }
+}
+
+@keyframes float-4 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-40px, -30px) rotate(-15deg);
+  }
+}
+
+@keyframes float-5 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(35px, -20px) rotate(12deg);
+  }
+  66% {
+    transform: translate(-20px, -35px) rotate(-12deg);
+  }
+}
+
+@keyframes float-6 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(25px, 35px) rotate(-7deg);
+  }
+  50% {
+    transform: translate(-30px, 50px) rotate(7deg);
+  }
+  75% {
+    transform: translate(10px, 25px) rotate(-3deg);
+  }
+}
+
+@keyframes float-7 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(20px, -40px) rotate(15deg);
+  }
+}
+
+@keyframes float-8 {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-35px, 30px) rotate(9deg);
+  }
+  66% {
+    transform: translate(25px, -25px) rotate(-9deg);
+  }
+}
+
+/* Avions volants */
+.flying-planes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.plane {
+  position: absolute;
+  font-size: 2rem;
+  color: #fff;
+  opacity: 0.6;
+}
+
+.plane-1 {
+  top: 15%;
+  left: -10%;
+  animation: fly-horizontal-1 12s linear infinite;
+}
+
+.plane-2 {
+  top: 65%;
+  right: -10%;
+  animation: fly-horizontal-2 10s linear infinite;
+}
+
+.plane-3 {
+  top: -10%;
+  left: 30%;
+  animation: fly-diagonal-1 15s linear infinite;
+}
+
+.plane-4 {
+  bottom: -10%;
+  right: 20%;
+  animation: fly-diagonal-2 13s linear infinite;
+}
+
+/* Animations des avions */
+@keyframes fly-horizontal-1 {
+  0% {
+    left: -10%;
+    transform: rotate(45deg);
+  }
+  100% {
+    left: 110%;
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes fly-horizontal-2 {
+  0% {
+    right: -10%;
+    transform: rotate(-135deg);
+  }
+  100% {
+    right: 110%;
+    transform: rotate(-135deg);
+  }
+}
+
+@keyframes fly-diagonal-1 {
+  0% {
+    top: -10%;
+    left: 30%;
+    transform: rotate(135deg);
+  }
+  100% {
+    top: 110%;
+    left: 70%;
+    transform: rotate(135deg);
+  }
+}
+
+@keyframes fly-diagonal-2 {
+  0% {
+    bottom: -10%;
+    right: 20%;
+    transform: rotate(-45deg);
+  }
+  100% {
+    bottom: 110%;
+    right: 80%;
+    transform: rotate(-45deg);
+  }
+}
+
+/* Contenu central */
+.content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4rem 3rem;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  margin: 2rem;
+  border: 6px solid #FF6B9D;
+}
+
+/* Titre avec animation de pioche */
+.title-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  color: #2E1D21;
+  margin: 0;
+  display: inline-block;
+}
+
+.pickaxe {
+  position: absolute;
+  top: -40px;
+  right: -60px;
+  font-size: 2.5rem;
+  color: #FF6B9D;
+  animation: pickaxe-hit 1.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Animation de la pioche qui tape */
+@keyframes pickaxe-hit {
+  0%, 100% {
+    transform: rotate(-20deg) translateY(0);
+  }
+  15% {
+    transform: rotate(-45deg) translateY(-10px);
+  }
+  30% {
+    transform: rotate(-20deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-20deg) translateY(0);
+  }
+}
+
+/* Sous-titre */
+.subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 2.5rem;
+  font-weight: 600;
+}
+
+/* Bouton CTA */
+.cta-button {
+  background: linear-gradient(135deg, #FF6B9D 0%, #C154C1 100%);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(255, 107, 157, 0.6);
+}
+
+.cta-button:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.cta-button i {
+  font-size: 1.3rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  
+  .pickaxe {
+    font-size: 1.8rem;
+    top: -30px;
+    right: -40px;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .cta-button {
+    font-size: 1rem;
+    padding: 0.8rem 2rem;
+  }
+  
+  .toy {
+    font-size: 2rem;
+  }
+  
+  .plane {
+    font-size: 1.5rem;
+  }
+  
+  .content {
+    padding: 3rem 2rem;
+    margin: 1rem;
+  }
+}
