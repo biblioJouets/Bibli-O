@@ -1,45 +1,31 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import logo from "../assets/logoBiblioJouets.png";
-import "./style/Footer.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSquareFacebook, faSquareInstagram, faSquareLinkedin, faTiktok  } from '@fortawesome/free-brands-svg-icons'
+'use client';
 
-function Footer() {
+import Image from 'next/image';
+import Link from 'next/link';
+import 'styles/Footer.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSquareFacebook, faSquareInstagram, faSquareLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
+
+const logo = "/assets/logoBiblioJouets.png"
+export default function Footer() {
   return (
     <footer className="footer">
-        
       <div className="footer-container">
         {/* Bloc logo */}
-          <div className="footer-columns">
-        <div className="footer-logo-section">
-          <img src={logo} alt="Logo Bibli'O Jouets" className="footer-logo" />
-        </div>
+        <div className="footer-columns">
+          <div className="footer-logo-section">
+            <Image src={logo} alt="Logo Bibli'O Jouets" className="footer-logo" width={150} height={50} />
+          </div>
 
-        {/* Colonnes principales */}
-      
+          {/* Colonnes principales */}
           {/* Colonne Bibli'O */}
           <div className="footer-column">
             <p className="footer-title">Bibli'O</p>
             <ul>
-              <li>
-                <Link to="/contact">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                
-  
-                <Link to="/bibliotheque">
-                  bibliothèque de jouets
-                </Link>
-              </li>
-              <li>
-                <Link to="/abonnements">Abonnements</Link>
-              </li>
-              <li>
-                <Link to="/faq">FAQ</Link>
-              </li>
+              <li><Link href="/contact">Contact</Link></li>
+              <li><Link href="/bibliotheque">Bibliothèque de jouets</Link></li>
+              <li><Link href="/abonnements">Abonnements</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
             </ul>
           </div>
 
@@ -47,18 +33,9 @@ function Footer() {
           <div className="footer-column">
             <p className="footer-title">Informations</p>
             <ul>
-              <li>
-                <Link to="/conditions-generales-utilisation">
-                  Conditions générales d'utilisation
-                </Link>
-              </li>
-              
-              <li>
-                <Link to="/conditions-generales-de-vente">Conditions générales de ventes</Link>
-              </li>
-              <li>
-                <Link to="/mentions-legales">Mentions légales</Link>
-              </li>
+              <li><Link href="/conditions-generales-utilisation">Conditions générales d'utilisation</Link></li>
+              <li><Link href="/conditions-generales-de-vente">Conditions générales de ventes</Link></li>
+              <li><Link href="/mentions-legales">Mentions légales</Link></li>
             </ul>
           </div>
 
@@ -66,8 +43,6 @@ function Footer() {
           <div className="footer-column">
             <p className="footer-title">Nos réseaux sociaux</p>
             <ul className="footer-coordonnees">
-            
-              
               <li>
                 <a
                   className="social-link facebook"
@@ -127,5 +102,3 @@ function Footer() {
     </footer>
   );
 }
-
-export default Footer;

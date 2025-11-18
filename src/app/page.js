@@ -1,37 +1,33 @@
-import React from "react";
+"use client";
 
 //import components
-import Header from "../components/Header";
-import Banner from "../components/Banner";
-import ButtonBlue from "../components/ButtonBlue";
-                    {/* Ajouter le composant NewToys après ajout de nouveau jouet  */}
+
+import ButtonBlue from "@/components/ButtonBlue";
 
 // import NewToys from "../components/NewToys";
-import CatalogOverview from "../components/CatalogOverview";
-import CommitmentCard from "../components/CommitmentCard";
-import CardsPlans from "../components/CardsPlans";
-import Protocol from "../components/protocol";
-import CardContentMission from "../components/CardsContentMission";
-import FAQ from "../components/FAQ"
-import Newsletter from "../components/Newsletter";
-import FunctionalityCard from "../components/FunctionalityCard";
-import Footer from "../components/Footer"
+import Banner from "@/components/Banner";
+import CatalogOverview from "@/components/CatalogOverview";
+import CommitmentCard from "@/components/CommitmentCard";
+import CardsPlans from "@/components/CardsPlans";
+import Protocol from "@/components/protocol";
+import CardContentMission from "@/components/CardsContentMission";
+import FAQ from "@/components/FAQ"
+import Newsletter from "@/components/Newsletter";
+import FunctionalityCard from "@/components/FunctionalityCard";
 //import style
-import '../components/style/homepage.css';
+import '@/styles/homepage.css';
 //import icon 
-import leaf from "../assets/icon/leaf.png";
-import wash from "../assets/icon/wash.png";
-import zen from "../assets/icon/zen.png";
-import euro from "../assets/icon/euro.png";
 import { Redo } from 'lucide-react';
 
-
+const WASHIMAGE = "assets/icons/wash.png";
+const LEAFIMAGE = "assets/icons/leaf.png";
+const ZENIMAGE = "assets/icons/zen.png";
+const EUROIMAGE = "assets/icons/euro.png";
 function Homepage() {
     return (
         <>
         
             <div className="Container">
-                <Header />
                <Banner />
            
                 <div className="functionalityCardsSection">
@@ -64,31 +60,30 @@ function Homepage() {
                     
                      <div className="commitmentsSection">
                     <h2>Pourquoi louer plutôt qu'acheter ?</h2>
-                    <div className="commitmentCards">
-                          <CommitmentCard className="hygiene"
-                            title="Hygiène"
-                            description="Tous nos jouets sont soigneusement nettoyés et désinfectés avant et après chaque location, garantissant un environnement de jeu sain pour vos enfants."
-                            icon={wash}
-                            iconClassName="icon-large"
-                        />
-                        <CommitmentCard
-                            title="Écologie"
-                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
-                            icon={leaf}
-                        />
-                       
-                         <CommitmentCard
-                            title="Practicité"
-                            description="Profitez de la commodité de notre service de location, avec une livraison rapide et un retour facile des jouets à la fin de la période de location."
-                            icon={zen}
-                        />
-                         <CommitmentCard
-                            title="Économie"
-                            description="Optez pour une solution économique en louant des jouets de qualité à moindre coût, tout en offrant à vos enfants une variété d'expériences ludiques."
-                            icon={euro}
-                        />
-                        
-                    </div>
+<div className="commitmentCards">
+  <CommitmentCard
+    className="hygiene"
+    title="Hygiène"
+    description="Tous nos jouets sont soigneusement nettoyés et désinfectés avant et après chaque location, garantissant un environnement de jeu sain pour vos enfants."
+    icon={WASHIMAGE} 
+iconClassName="icon-large"    />
+  <CommitmentCard
+    title="Écologie"
+    description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
+    icon={LEAFIMAGE} />
+
+  <CommitmentCard
+    title="Practicité"
+    description="Profitez de la commodité de notre service de location, avec une livraison rapide et un retour facile des jouets à la fin de la période de location."
+    icon={ZENIMAGE}
+  />
+
+  <CommitmentCard
+    title="Économie"
+    description="Optez pour une solution économique en louant des jouets de qualité à moindre coût, tout en offrant à vos enfants une variété d'expériences ludiques."
+    icon={EUROIMAGE}
+  />
+</div>
                     </div>
                     {/* Ajouter le composant NewToys après ajout de nouveau jouet  */}
                 {/* <div className="newToysContainer">
@@ -112,7 +107,6 @@ function Homepage() {
     
  
  
-    <Footer />
            
         </>
     );

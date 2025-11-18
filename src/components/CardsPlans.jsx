@@ -7,7 +7,7 @@ import ButtonRed from "./ButtonRed";
 import ButtonGreen from "./ButtonGreen";
 import ButtonYellow from "./ButtonYellow";
 
-import "./style/CardsPlansButtons.css";
+import "@/styles/CardsPlansButtons.css";
 
 //Création des lists des cards 
 

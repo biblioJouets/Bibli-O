@@ -1,12 +1,7 @@
-import React from "react";
-// Importez votre fichier CSS pour que le style soit appliqué
-import "../components/style/MentionsLegales.css"; 
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import "@/styles/MentionsLegales.css"; 
+
 function MentionsLegales() {
   return (
-   <div className="mentions-legales-pages">
-    <Header />
    
     <div className="mentions-legales-container">
       <h1>Mentions Légales</h1>
@@ -114,8 +109,7 @@ function MentionsLegales() {
         </p>
       </section>
     </div>
-<Footer />
-    </div> 
+
   );
 }
 

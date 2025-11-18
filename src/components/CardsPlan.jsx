@@ -3,7 +3,7 @@
 import React from "react";
 
 //css 
-import "./style/CardsPlan.css"
+import "styles/CardsPlan.css"
 
 function CardsPlan ({title, price, button, list, theme }) {
     const cardClasses = `CardPlan ${theme}`;

@@ -1,15 +1,57 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model OrderProducts {
+  createdAt DateTime @db.Timestamptz(6)
+  updatedAt DateTime @db.Timestamptz(6)
+  OrderId   Int
+  ProductId Int
+  Orders    Orders   @relation(fields: [OrderId], references: [id], onDelete: Cascade)
+  Products  Products @relation(fields: [ProductId], references: [id], onDelete: Cascade)
+
+  @@id([OrderId, ProductId])
+}
+
+model Orders {
+  id            Int             @id @default(autoincrement())
+  totalAmount   Float
+  status        String?         @default("pending") @db.VarChar(255)
+  createdAt     DateTime        @db.Timestamptz(6)
+  updatedAt     DateTime        @db.Timestamptz(6)
+  userId        Int?
+  OrderProducts OrderProducts[]
+  Users         Users?          @relation(fields: [userId], references: [id])
+}
+
+model Products {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(255)
+  description   String?
+  price         Float
+  stock         Int             @default(0)
+  createdAt     DateTime        @db.Timestamptz(6)
+  updatedAt     DateTime        @db.Timestamptz(6)
+  OrderProducts OrderProducts[]
+}
+
+model Users {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @db.Timestamptz(6)
+  updatedAt DateTime @db.Timestamptz(6)
+  Orders    Orders[]
+}
+
+model newsletter_subscribers {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique @db.VarChar(255)
+  createdAt DateTime? @db.Timestamptz(6)
 }

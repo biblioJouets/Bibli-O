@@ -1,12 +1,9 @@
 import React from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import "../components/style/Cgu.css";
+
+import "@/components/style/Cgu.css";
 
 function Cgu() {
   return (
-    <div className="PageCGU">
-    <Header />
     <div className="cgu-container">
       <h1>Conditions Générales d’Utilisation (CGU)</h1>
       <p className="preamble">Bibli’o Jouets</p>
@@ -378,8 +375,6 @@ function Cgu() {
           jour de l’utilisation du Site fait foi.
         </p>
       </footer>
-    </div>
-<Footer />
     </div>
   );
 }

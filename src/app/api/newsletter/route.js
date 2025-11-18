@@ -1,22 +1,17 @@
-import express from "express";
-import { addSubscriber } from "./newsletter.service.js";
+import { newsletterController } from '@/lib/modules/newsletter/newsletter.controller';
 
-const router = express.Router();
+// POST /api/newsletter
+export async function POST(request) {
+  return newsletterController.subscribe(request);
+}
 
-router.post("/", async (req, res) => {
-  const { email } = req.body;
+// GET /api/newsletter
+export async function GET(request) {
+  return newsletterController.getAll(request);
+}
 
-  if (!email || !email.includes("@")) {
-    return res.status(400).json({ error: "Adresse e-mail invalide" });
-  }
-
-  const result = await addSubscriber(email);
-
-  if (result.success) {
-    res.status(201).json({ message: "Email enregistré !" });
-  } else {
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-});
-
-export default router;
+// DELETE /api/newsletter
+export async function DELETE(request) {
+  return newsletterController.unsubscribe(request);
+  
+}

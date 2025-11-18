@@ -1,20 +1,21 @@
-import imageEnfant from "../assets/imageEnfant.png";
-import BannerResponsive from "../assets/responsiveBanner.png";
-import ButtonDuo from "./ButtonDuo";
-import ButtonRed from "./ButtonRed";
-import "./style/Banner.css";
+"use client"; // obligatoire si tu as du state ou des effets
 
-function Banner() {
+import Image from "next/image";
+import ButtonDuo from "@/components/ButtonDuo";
+import ButtonRed from "@/components/ButtonRed";
+import "styles/Banner.css";
+
+export default function Banner() {
   return (
     <div className="Banner">
       <picture>
-        <source media="(max-width: 768px)" srcSet={BannerResponsive} />
-        <img src={imageEnfant} alt="Enfants jouant" className="banner-image" />
-        <div class="shape top-left blue"></div>
-  <div class="shape top-right yellow"></div>
-  <div class="shape mid-left"></div>
-  <div class="shape bottom-left yellow"></div>
-  <div class="shape bottom-right blue"></div>
+        <source media="(max-width: 768px)" srcSet="/assets/responsiveBanner.png" />
+        <img src="/assets/imageEnfant.png" alt="Enfants jouant" className="banner-image" />
+                <div class="shape top-left blue"></div>
+  <div className="shape top-right yellow"></div>
+  <div className="shape mid-left"></div>
+  <div className="shape bottom-left yellow"></div>
+  <div className="shape bottom-right blue"></div>
       </picture>
 
       <div className="banner-content">
@@ -22,26 +23,20 @@ function Banner() {
           Louez des jouets adaptés à votre enfant, livrés à domicile
         </h1>
         <p className="banner-subtitle">
-          Une bibliothèque de jouets sur abonnement pour permettre aux enfants
-          de découvrir régulièrement de nouveaux jeux, tout en allégeant le
-          budget des parents et en réduisant le gaspillage. Un service malin,
-          écolo et adapté à leurs rythme de curiosité.
+          Une bibliothèque de jouets sur abonnement pour permettre aux enfants de découvrir régulièrement de nouveaux jeux...
         </p>
-
-        <div className="floating-icon" style={{ top: "10%", right: "15%" }}>
+  <div className="floating-icon" style={{ top: "10%", right: "15%" }}>
           ⭐
         </div>
         <div className="floating-icon" style={{ bottom: "25%", left: "20%" }}>
           🧩
         </div>
-
         <div className="button-group desktop">
           <ButtonDuo
             blueText="Découvrir nos jouets"
             redText="Voir les abonnements"
             blueHref="/catalogue"
             redHref="/abonnements"
-            target="_self"
           />
         </div>
 
@@ -52,5 +47,3 @@ function Banner() {
     </div>
   );
 }
-
-export default Banner;

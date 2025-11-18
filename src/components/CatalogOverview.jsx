@@ -1,5 +1,5 @@
 import React from 'react';
-import "./style/catalogOverview.css";
+import "styles/catalogOverview.css";
 import SliderLogoSection from './SliderLogo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {

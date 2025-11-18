@@ -1,5 +1,6 @@
+'use client';
 import React, { useState } from 'react';
-import './style/cardsContentMission.css'
+import 'styles/cardsContentMission.css';
 const TestimonialSlider = () => {     
     const cardContentMission = [
         {

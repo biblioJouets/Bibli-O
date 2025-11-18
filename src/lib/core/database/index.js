@@ -1,26 +1,34 @@
-import { Sequelize } from "sequelize";
-import dotenv from "dotenv";
+// lib/core/database/index.js
+import { PrismaClient } from '@prisma/client';
 
-dotenv.config();
+// PrismaClient singleton pour éviter les connexions multiples
+const globalForPrisma = global;
 
-// Initialisation de Sequelize
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    port: process.env.DB_PORT,
-    logging: false, // mettre true pour voir les requêtes SQL
-  }
-);
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
 
-// Test de la connexion
-try {
-  await sequelize.authenticate();
-  console.log("✅ Connexion Sequelize + PostgreSQL réussie");
-} catch (error) {
-  console.error("❌ Erreur de connexion Sequelize :", error);
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
+// Test de connexion
+export async function connectDatabase() {
+  try {
+    await prisma.$connect();
+    console.log('✅ Connexion Prisma + PostgreSQL réussie');
+  } catch (error) {
+    console.error('❌ Erreur de connexion Prisma :', error);
+    process.exit(1);
+  }
+}
+
+// Déconnexion propre
+export async function disconnectDatabase() {
+  await prisma.$disconnect();
+}
+
+// Export par défaut
+export default prisma;

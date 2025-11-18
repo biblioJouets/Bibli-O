@@ -1,17 +1,23 @@
+'use client';
+
 import { useState } from 'react';
-import FAQIMAGE from '../assets/faq_image.webp';
+import Image from 'next/image';
 import ButtonBlue from './ButtonBlue';
 
 import {
   Heart,
   RefreshCw,
   XCircle,
-  HelpCircle, 
+  HelpCircle,
   ListChecks,
-  Users,      
-  Truck,     
-  Blocks,     
-} from 'lucide-react';import './style/FAQ.css';
+  Users,
+  Truck,
+  Blocks,
+} from 'lucide-react';
+
+import 'styles/FAQ.css';
+
+const FAQIMAGE = "/assets/faq_image.webp", alt="image d'une famille jouant avec des jouets éducatifs";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -37,31 +43,33 @@ const FAQ = () => {
       question: "Puis-je choisir les jouets pour mon enfant ?",
       answer: "Oui, bien sûr ! Vous avez la main sur le choix des jouets. Sur votre espace personnel, vous pourrez parcourir notre catalogue et sélectionner les jouets qui correspondent aux centres d'intérêt et à l'âge de votre enfant. Nous vous aiderons également avec des suggestions personnalisées pour des découvertes adaptées !"
     },
-     {
+    {
       icon: <Users size={20} />,
       question: "À qui s'adresse le service Bibli'O Jouets ?",
       answer: "Bibli'O Jouets est conçu pour toutes les familles avec des enfants de 0 à 8 ans qui souhaitent offrir une multitude de découvertes ludiques à leurs petits explorateurs, tout en adoptant une consommation plus responsable. Parents, grands-parents, tontons, tantines... bienvenue à tous ceux qui aiment jouer et la planète !"
     },
-     {
+    {
       icon: <HelpCircle size={20} />,
       question: "Pourquoi choisir la location plutôt que l'achat de jouets ?",
-answer: (
-    <>
-      Pour de multiples raisons géniales ! <br />
-      <strong>Écologie :</strong> Vous participez activement à l'économie circulaire et réduisez le gaspillage. <br />
-      <strong>Économie :</strong> Accédez à des jouets de qualité sans dépenser une fortune et sans vous encombrer. <br />
-      <strong>Nouveauté :</strong> Votre enfant bénéficie d'une variété constante de jouets, toujours adaptés à son développement, sans que vous ayez à les stocker ou à les revendre. <br />
-      <strong>Découverte :</strong> Permet à vos enfants d'expérimenter de nouveaux jeux et de développer de nouvelles compétences sans engagement à long terme.
-    </>
-  )},
- {
+      answer: (
+        <>
+          Pour de multiples raisons géniales ! <br />
+          <strong>Écologie :</strong> Vous participez activement à l'économie circulaire et réduisez le gaspillage. <br />
+          <strong>Économie :</strong> Accédez à des jouets de qualité sans dépenser une fortune et sans vous encombrer. <br />
+          <strong>Nouveauté :</strong> Votre enfant bénéficie d'une variété constante de jouets, toujours adaptés à son développement, sans que vous ayez à les stocker ou à les revendre. <br />
+          <strong>Découverte :</strong> Permet à vos enfants d'expérimenter de nouveaux jeux et de développer de nouvelles compétences sans engagement à long terme.
+        </>
+      )
+    },
+    {
       icon: <XCircle size={20} />,
       question: "Comment résilier mon abonnement ?",
       answer: "Vous êtes libre de partir quand vous le souhaitez (même si on espère que vous resterez longtemps !). La résiliation de votre abonnement se fait très simplement depuis votre espace client, en quelques clics. Pensez simplement à le faire avant la date de renouvellement de votre abonnement mensuel."
-    }, {
+    },
+    {
       icon: <Truck size={20} />,
       question: "Est-ce que Bibli'O Jouets livre partout en France ?",
-      answer: "Nous proposons plusieurs options de livraison et de retrait !  Selon votre zone, vous pourrez choisir entre le retrait gratuit en point relais, la livraison locale à domicile (en fonction de votre abonnement). L'objectif est de vous faciliter la vie !"
+      answer: "Nous proposons plusieurs options de livraison et de retrait ! Selon votre zone, vous pourrez choisir entre le retrait gratuit en point relais, la livraison locale à domicile (en fonction de votre abonnement). L'objectif est de vous faciliter la vie !"
     },
     {
       icon: <Blocks size={20} />,
@@ -86,8 +94,8 @@ answer: (
           <h2 className="faq-support-label">FAQ</h2>
           <h1 className="faq-title">Les questions des (grands) curieux</h1>
           <p className="faq-subtitle">
-            On vous dit tout sur le fonctionnemenet de Bibli'O Jouets. Une question en particulier ? {' '}
-            <a href="#" className="faq-link">Contacter nous directement </a>.
+            On vous dit tout sur le fonctionnement de Bibli'O Jouets. Une question en particulier ?{' '}
+            <a href="#" className="faq-link">Contacter nous directement</a>.
           </p>
 
           <div className="faq-accordion">
@@ -113,24 +121,23 @@ answer: (
 
         <div className="faq-right">
           <div className="faq-image-wrapper">
-            <img 
+            <Image 
               src={FAQIMAGE} 
               alt="image d'une famille jouant avec des jouets éducatifs" 
               className="faq-image"
+              width={400} 
+              height={400} 
             />
           </div>
-          
         </div>
       </div>
       <div className='faqButtonPosition'>
-      <ButtonBlue 
-          text={"Je commence maintenant"}
+        <ButtonBlue 
+          text="Je commence maintenant"
           href="/abonnement"
-          />
-          </div>
+        />
+      </div>
     </div>
-    
-    
   );
 };
 

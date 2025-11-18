@@ -1,12 +1,8 @@
-import React from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import "../components/style/Cgv.css";
+
+import "@/styles/Cgv.css";
 
 function Cgv() {
   return (
-    <div className="cgv-page">
-<Header />
 
 
     <div className="cgv-container">
@@ -178,8 +174,6 @@ function Cgv() {
         <p>Ces CGV sont valables à compter du 7 octobre 2025. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
       </footer>
     </div>
-<Footer />
-        </div>
   );
 }
 

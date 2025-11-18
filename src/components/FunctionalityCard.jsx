@@ -1,5 +1,5 @@
 import React from "react";
-import '../components/style/functionalitycard.css';
+import 'styles/functionalitycard.css';
 
 function functionalityCard({ title, description, number, className = "", numberClassName = ""}){
     const rootClass = `functionality-card ${className}`.trim();

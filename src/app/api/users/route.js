@@ -1,8 +1,9 @@
-import express from "express";
-import { UserController } from "./user.controller.js";
+import { userController } from '@/lib/modules/users/user.controller';
 
-const router = express.Router();
+export async function POST(request) {
+  return userController.create(request);
+}
 
-router.get("/", UserController.getAll);
-
-export default router;
+export async function GET(request) {
+  return userController.getAll(request);
+}

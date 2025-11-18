@@ -1,5 +1,5 @@
 import React from "react";
-import '../components/style/commitmentcard.css';
+import 'styles/CommitmentCard.css';
 
 
 function CommitmentCard({ title, description, icon, className = "", iconClassName = "" }) {

@@ -1,54 +1,55 @@
-import React, { useState } from "react";
+'use client';
+
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import "./style/newsletter.css";
+import 'styles/newsletter.css';
 
-const Newsletter = () => {
+export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!email || !email.includes("@")) {
-    setShowError(true);
-    setTimeout(() => setShowError(false), 6000);
-    return;
-  }
-
-  setIsSending(true);
-
-  try {
-    const response = await fetch("http://localhost:5000/api/newsletter", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    if (response.ok) {
-      setSent(true);
-      setEmail("");
-      setTimeout(() => setSent(false), 8000);
-    } else {
-      const data = await response.json();
-      console.error("Erreur backend:", data.error);
+    if (!email || !email.includes("@")) {
       setShowError(true);
       setTimeout(() => setShowError(false), 6000);
+      return;
     }
-  } catch (error) {
-    console.error("Erreur réseau:", error);
-    setShowError(true);
-    setTimeout(() => setShowError(false), 6000);
-  } finally {
-    setIsSending(false);
-  }
-};
+
+    setIsSending(true);
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setSent(true);
+        setEmail("");
+        setTimeout(() => setSent(false), 8000);
+      } else {
+        const data = await response.json();
+        console.error("Erreur backend:", data.error);
+        setShowError(true);
+        setTimeout(() => setShowError(false), 6000);
+      }
+    } catch (error) {
+      console.error("Erreur réseau:", error);
+      setShowError(true);
+      setTimeout(() => setShowError(false), 6000);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="newsletter-container">
-      {/* Bulles décoratives */}
       <div className="newsletter-bubble blue"></div>
       <div className="newsletter-bubble pink"></div>
       <div className="newsletter-bubble green"></div>
@@ -82,14 +83,12 @@ const Newsletter = () => {
             </button>
           </div>
 
-          {/* Message d'erreur */}
           {showError && (
             <div className="error-message">
               ⚠️ Oups ! Vérifie ton adresse e-mail 📧
             </div>
           )}
 
-          {/* Message de succès */}
           {sent && (
             <div className="success-animation">
               <div className="success-text">
@@ -101,7 +100,6 @@ const Newsletter = () => {
             </div>
           )}
 
-          {/* Explosion de confettis */}
           {sent && (
             <div className="confetti">
               {[...Array(50)].map((_, i) => {
@@ -130,7 +128,6 @@ const Newsletter = () => {
         </div>
       </div>
 
-      {/* Avion qui s'envole hors du bouton */}
       {isSending && (
         <div className="flying-plane-container">
           <FontAwesomeIcon 
@@ -141,6 +138,4 @@ const Newsletter = () => {
       )}
     </div>
   );
-};
-
-export default Newsletter;
+}

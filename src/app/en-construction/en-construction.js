@@ -1,12 +1,9 @@
-import React from 'react';
-import '../components/style/inBuilding.css';
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import '@/styles/inBuilding.css';
+
 
 const InBuilding = () => {
   return (
-    <div className='in-building-page'>  
-    <Header />
+
     <div className="in-building-container">
       {/* Jouets flottants en arrière-plan */}
       <div className="floating-toys">
@@ -42,8 +39,7 @@ const InBuilding = () => {
         </button>
       </div>
     </div>
-<Footer />
-    </div>
+
   );
 };
 

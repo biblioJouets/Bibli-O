@@ -1,4 +1,4 @@
-import './style/button.css'
+import 'styles/Button.css'
 
 function ButtonGreen ({text, href, target = "_self"}) {
     return( 
