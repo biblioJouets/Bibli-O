@@ -1,3 +1,5 @@
+ @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
  .error404-container {
           /* Fonds */
           --color-bg-primary: #FFF7EB;
@@ -28,7 +30,6 @@
           box-sizing: border-box;
         }
 
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
 
         /* ============================================
            CONTAINER PRINCIPAL

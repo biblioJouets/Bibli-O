@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home } from 'lucide-react';
-import "../components/style/Error404.css";
+import "@/styles/Error404.css";
 
 const Error404Pages = () => {
   return (

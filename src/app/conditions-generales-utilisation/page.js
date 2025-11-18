@@ -1,6 +1,6 @@
 import React from "react";
 
-import "@/components/style/Cgu.css";
+import "@/styles/Cgu.css";
 
 function Cgu() {
   return (
