@@ -1,6 +1,7 @@
 /* --- Styles de base (Desktop) --- */
 .Container {
     width: 100%;
+    margin-top: 100px;
    
 }
 h2 {
@@ -94,7 +95,11 @@ h2.biblio-jouets:hover::after {
 /* --- RESPONSIVE (MOBILE) --- */
 /* ---------------------------------- */
 @media screen and (max-width: 1024px) {
-
+.Container {
+    width: 100%;
+    margin-top: 60px;
+   
+}
  h2 {
     font-size: 2rem; }
 }
