@@ -73,7 +73,7 @@ export default function HeaderBiblioJouets() {
         </button>
 
         {/* Liens de navigation */}
-        <Link href="/catalogue" onClick={closeBurger}>Nos Jouets</Link>
+        <Link href="/bibliotheque" onClick={closeBurger}>Nos Jouets</Link>
         <Link href="/fonctionnement" onClick={closeBurger}>Comment ça marche ?</Link>
         <Link href="/abonnements" onClick={closeBurger}>Nos Abonnements</Link>
         <Link href="/a-propos" onClick={closeBurger}>À Propos</Link>

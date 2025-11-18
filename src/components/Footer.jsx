@@ -14,7 +14,7 @@ export default function Footer() {
         {/* Bloc logo */}
         <div className="footer-columns">
           <div className="footer-logo-section">
-            <Image src={logo} alt="Logo Bibli'O Jouets" className="footer-logo" width={150} height={50} />
+            <Image src={logo} alt="Logo Bibli'O Jouets" className="footer-logo" width={100} height={100} />
           </div>
 
           {/* Colonnes principales */}
