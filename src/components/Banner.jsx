@@ -35,7 +35,7 @@ export default function Banner() {
           <ButtonDuo
             blueText="Découvrir nos jouets"
             redText="Voir les abonnements"
-            blueHref="/catalogue"
+            blueHref="/bibliotheque"
             redHref="/abonnements"
           />
         </div>

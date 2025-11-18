@@ -13,5 +13,4 @@ export async function GET(request) {
 // DELETE /api/newsletter
 export async function DELETE(request) {
   return newsletterController.unsubscribe(request);
-  
 }

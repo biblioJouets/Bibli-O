@@ -51,7 +51,9 @@ model Users {
 }
 
 model newsletter_subscribers {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique @db.VarChar(255)
-  createdAt DateTime? @db.Timestamptz(6)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("createdat") @db.Timestamptz(6)
+
+  @@map("newsletter_subscribers")
 }

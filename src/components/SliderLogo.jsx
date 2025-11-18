@@ -35,7 +35,6 @@ export default function SliderLogo() {
             className="sliderLogoImage"
             width={120}
             height={80}
-            quality={80}
           />
         ))}
       </div>

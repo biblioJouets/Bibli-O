@@ -26,6 +26,8 @@ export const newsletterController = {
         { status: 201 }
       );
     } catch (error) {
+      console.error('Erreur dans newsletterController.subscribe :', error);
+      console.error('Stack trace :', error.stack);
       if (error.message.includes('déjà inscrit')) {
         return NextResponse.json(
           { success: false, message: error.message },
@@ -34,7 +36,10 @@ export const newsletterController = {
       }
 
       return NextResponse.json(
-        { success: false, message: 'Erreur serveur' },
+        { success: false, message: 'Erreur serveur',
+          error: error.message,
+    
+         },
         { status: 500 }
       );
     }

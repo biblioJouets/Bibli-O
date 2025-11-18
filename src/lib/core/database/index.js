@@ -13,14 +13,15 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
+console.log(' Prisma Client initialisé:', prisma ? 'OK' : 'UNDEFINED');
 
 // Test de connexion
 export async function connectDatabase() {
   try {
     await prisma.$connect();
-    console.log('✅ Connexion Prisma + PostgreSQL réussie');
+    console.log(' Connexion Prisma + PostgreSQL réussie');
   } catch (error) {
-    console.error('❌ Erreur de connexion Prisma :', error);
+    console.error(' Erreur de connexion Prisma :', error);
     process.exit(1);
   }
 }
