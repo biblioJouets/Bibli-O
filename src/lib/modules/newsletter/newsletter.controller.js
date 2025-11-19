@@ -1,5 +1,9 @@
-import { newsletterService } from './newsletter.service.js';
+import { newsletterService } from './newsletter.service';
 import { NextResponse } from 'next/server';
+
+// Validation email RFC 5322 simplifiée mais robuste
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LENGTH = 254; // RFC 5321
 
 export const newsletterController = {
   // POST /api/newsletter - S'inscrire
@@ -7,15 +11,25 @@ export const newsletterController = {
     try {
       const { email } = await request.json();
 
-      // Validation
-      if (!email || !email.includes('@')) {
+      // Validation email
+      if (!email || typeof email !== 'string') {
+        return NextResponse.json(
+          { success: false, message: 'Email requis et doit être une chaîne' },
+          { status: 400 }
+        );
+      }
+
+      const trimmedEmail = email.trim().toLowerCase();
+
+      // Vérifier format et longueur
+      if (!EMAIL_REGEX.test(trimmedEmail) || trimmedEmail.length > MAX_EMAIL_LENGTH) {
         return NextResponse.json(
           { success: false, message: 'Email invalide' },
           { status: 400 }
         );
       }
 
-      const newsletter = await newsletterService.subscribe(email);
+      const newsletter = await newsletterService.subscribe(trimmedEmail);
 
       return NextResponse.json(
         {
@@ -26,8 +40,8 @@ export const newsletterController = {
         { status: 201 }
       );
     } catch (error) {
-      console.error('Erreur dans newsletterController.subscribe :', error);
-      console.error('Stack trace :', error.stack);
+      console.error('Erreur dans newsletterController.subscribe :', error.message);
+      
       if (error.message.includes('déjà inscrit')) {
         return NextResponse.json(
           { success: false, message: error.message },
@@ -36,10 +50,7 @@ export const newsletterController = {
       }
 
       return NextResponse.json(
-        { success: false, message: 'Erreur serveur',
-          error: error.message,
-    
-         },
+        { success: false, message: 'Erreur serveur' },
         { status: 500 }
       );
     }
@@ -77,13 +88,23 @@ export const newsletterController = {
         );
       }
 
-      await newsletterService.unsubscribe(email);
+      const trimmedEmail = email.trim().toLowerCase();
+
+      if (!EMAIL_REGEX.test(trimmedEmail) || trimmedEmail.length > MAX_EMAIL_LENGTH) {
+        return NextResponse.json(
+          { success: false, message: 'Email invalide' },
+          { status: 400 }
+        );
+      }
+
+      await newsletterService.unsubscribe(trimmedEmail);
 
       return NextResponse.json({
         success: true,
         message: 'Désinscription réussie',
       });
     } catch (error) {
+      console.error('Erreur dans unsubscribe :', error.message);
       return NextResponse.json(
         { success: false, message: 'Erreur serveur' },
         { status: 500 }

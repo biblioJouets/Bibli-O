@@ -76,7 +76,7 @@ export default function HeaderBiblioJouets() {
         <Link href="/bibliotheque" onClick={closeBurger}>Nos Jouets</Link>
         <Link href="/fonctionnement" onClick={closeBurger}>Comment ça marche ?</Link>
         <Link href="/abonnements" onClick={closeBurger}>Nos Abonnements</Link>
-        <Link href="/contact" onClick={closeBurger}>Nous contactez</Link>
+        <Link href="/contact" onClick={closeBurger}>Nous contacter</Link>
 
         {/* Actions secondaires (mobile) */}
         <div className="nav-actions-mobile">

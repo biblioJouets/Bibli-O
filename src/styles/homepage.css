@@ -51,6 +51,8 @@ h2.biblio-jouets:hover::after {
     display: flex;
     justify-content: center;
     align-items: center;
+      background-color: #DAEEE6;
+
 }
 /* ---------------------------------- */
 /* --- FORM SECTION --- */

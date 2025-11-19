@@ -5,23 +5,30 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 12+
 
+### Setup Environment
+1. Copy `.env.example` to `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+2. Update `.env.local` with your local database credentials.
+
+### Installation
 ```bash
+npm install
+npx prisma generate
+npx prisma db push  # Sync schema to database
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Security Notes
+- **Never commit `.env` or `.env.local`** — they contain sensitive credentials
+- `.env` files are ignored by `.gitignore` (see `.env.example` for template)
+- Run `npm audit` regularly to check for vulnerabilities
+- Security headers are configured in `next.config.mjs` (CSP, X-Frame-Options, HSTS, etc.)
 
 ## Learn More
 
