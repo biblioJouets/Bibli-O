@@ -38,7 +38,7 @@ function FormHomePage() {
 
   return (
     <div className="formHomePage">
-      <h2 className="form-title">Nous envoyer un message</h2>
+      <h3 className="form-title">Nous envoyer un message</h3>
       <form onSubmit={onSubmit}>
         <input type="text" id="name" name="name" placeholder="Nom" value={form.name} onChange={onChange} required />
         <input type="text" id="surname" name="surname" placeholder="Prénom" value={form.surname} onChange={onChange} required />

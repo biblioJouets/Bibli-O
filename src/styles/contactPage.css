@@ -240,8 +240,9 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
-.contactLeft h2 {
-  font-size: 3.2rem;
+#contact-page .contactLeft h2,
+#contact-page .contactLeft .contact-title {
+  font-size: 3.2rem ;
   margin-bottom: 1.5rem;
   font-weight: 800;
   line-height: 1.2;
@@ -251,6 +252,11 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+#contact-page .contactLeft h2::before {
+    content: none !important; /* Supprime le contenu généré */
+   
+}
+
 
 .contactLeft p {
   font-size: 1.15rem;
@@ -542,7 +548,7 @@
     max-width: 600px;
   }
 
-  .contactLeft h2 {
+  #contact-page .contactLeft h2 {
     font-size: 2.5rem;
   }
 
@@ -560,7 +566,7 @@
     padding: 2rem 4%;
   }
 
-  .contactLeft h2 {
+  #contact-page .contactLeft h2 {
     font-size: 2rem;
   }
 
@@ -598,7 +604,7 @@
 }
 
 @media screen and (max-width: 480px) {
-  .contactLeft h2 {
+  #contact-page .contactLeft h2 {
     font-size: 1.8rem;
   }
 
