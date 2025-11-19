@@ -1,4 +1,4 @@
-import { newsletterService } from './newsletter.service';
+import { newsletterService } from './newsletter.service.js';
 import { NextResponse } from 'next/server';
 
 export const newsletterController = {

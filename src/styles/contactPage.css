@@ -1,166 +1,620 @@
-.contactSection {
-  display: flex;
-  justify-content: space-between;
-  gap: 4rem;
-  padding: 4rem 10%;
-  flex-wrap: wrap;
+/* Variables de couleurs */
+:root {
+  /* Couleurs principales */
+  --color-blue: #6EC1E4;
+  --color-pink: #FF8C94;
+  --color-green: #88D4AB;
+  --color-yellow: #ffe264;
+  /* Couleurs pastel */
+  --color-pastel-blue: #DFF1F9;
+  --color-pastel-pink: #FFD9DC;
+  --color-pastel-green: #DAEEE6;
+  --color-pastel-yellow: #FFF7D4;
+  /* Couleurs de texte et fond */
+  --color-text: #2E1D21;
+  --color-bg-primary: #FAE9CF;
+  --color-bg-secondary: #FFFAF4;
+  --color-bg-tertiary: #FFF7EB;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Animations */
+/* ------------------------------------------------------------------------- */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotate(3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+  75% {
+    transform: translateY(-25px) rotate(2deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* Page de Contact Globale */
+/* ------------------------------------------------------------------------- */
+
+.contactPage {
+  background: linear-gradient(135deg, var(--color-bg-tertiary) 0%, var(--color-bg-primary) 100%);
+  color: var(--color-text);
+  overflow: hidden;
+  position: relative;
+  min-height: 90vh;
+  padding: 8rem 0rem 0rem 0rem;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Animation de Fond (Formes) */
+/* ------------------------------------------------------------------------- */
+
+.background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 1;
+  filter: blur(8px);
+  animation: float 15s ease-in-out infinite;
+}
+
+.shape.blue {
+  background: radial-gradient(circle, var(--color-pastel-blue) 0%, transparent 70%);
+  width: 200px;
+  height: 200px;
+  top: 10%;
+  left: 5%;
+  animation-duration: 20s;
+  animation-delay: 0s;
+}
+
+.shape.pink {
+  background: radial-gradient(circle, var(--color-pastel-pink) 0%, transparent 70%);
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 10%;
+  animation-duration: 18s;
+  animation-delay: 2s;
+}
+
+.shape.green {
+  background: radial-gradient(circle, var(--color-pastel-green) 0%, transparent 70%);
+  width: 250px;
+  height: 250px;
+  bottom: 10%;
+  left: 15%;
+  animation-duration: 22s;
+  animation-delay: 4s;
+}
+
+.shape.yellow {
+  background: radial-gradient(circle, var(--color-pastel-yellow) 0%, transparent 70%);
+  width: 120px;
+  height: 120px;
+  top: 75%;
+  left: 8%;
+  animation-duration: 16s;
+  animation-delay: 1s;
+}
+
+.shape.square {
+  background: linear-gradient(135deg, var(--color-pastel-blue) 0%, var(--color-pastel-green) 100%);
+  width: 140px;
+  height: 140px;
+  border-radius: 30px;
+  top: 30%;
+  right: 8%;
+  opacity: 0.4;
+  animation: spin 40s linear infinite, pulse 8s ease-in-out infinite;
+  filter: blur(10px);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Contenu de la Section Contact */
+/* ------------------------------------------------------------------------- */
+
+.contactSection {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5rem;
+  padding: 4rem 8%;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Bloc Gauche (Informations) */
+/* ------------------------------------------------------------------------- */
 
 .contactLeft {
-  flex: 1.5;
+  flex: 1;
+  min-width: 320px;
+  max-width: 550px;
+  animation: slideInLeft 0.8s ease-out;
 }
 
-.contactLeft p {
-  font-size: 1.2rem;
-  padding: 1rem;
-}
-
-.contactLeft h5 {
-  color: #f71344;
-  font-size: 2rem;
-  letter-spacing: 1px;
+.contactLeft .contact-subtitle {
+  color: var(--color-pink);
+  font-size: 1rem;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  padding-top: 5rem;
-  margin-bottom: -4rem;
-  margin-left: -70%;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  display: inline-block;
+  position: relative;
+  padding-left: 20px;
+}
+
+.contactLeft .contact-subtitle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-yellow);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .contactLeft h2 {
   font-size: 3.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+
+.contactLeft p {
+  font-size: 1.15rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  opacity: 0.9;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Élément de Contact (Email) */
+/* ------------------------------------------------------------------------- */
 
 .contactItem {
-  background-color: #ebe2d4;
-  border-radius: 10px;
-  border: solid 2px #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, white 0%, var(--color-bg-primary) 100%);
+  border-radius: 20px;
+  border: 3px solid var(--color-blue);
+  box-shadow: 0 10px 30px rgba(110, 193, 228, 0.2);
   display: flex;
   align-items: center;
-  margin: auto;
-  width: 80%;
+  width: 100%;
+  max-width: 480px;
   cursor: pointer;
-  transition: transform 0.3s ease;
-  margin-top: 1rem;
-  padding: 0.5rem 0 0.5rem 0.5rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin-bottom: 2rem;
+  padding: 1.2rem 1.5rem;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.contactItem p {
-  font-size: 1rem;
-  padding: 1rem 0rem 0rem 0rem;
+.contactItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(110, 193, 228, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.contactItem:hover::before {
+  left: 100%;
 }
 
 .contactItem:hover {
-  transform: scale(1.05);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(110, 193, 228, 0.35);
+  border-color: var(--color-pink);
 }
 
-.icons {
-  background-color: #2e1e21;
-  border-radius: 10px;
-  width: 50px;
-  height: 50px;
+.contactItem .icons {
+  background: linear-gradient(135deg, var(--color-blue) 0%, var(--color-green) 100%);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 2rem;
-  margin-left: 0.5rem;
-  color: #ffffff;
+  margin-right: 1.5rem;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: 0 5px 15px rgba(110, 193, 228, 0.4);
+  transition: all 0.3s ease;
+  animation: bounce 2s ease-in-out infinite;
 }
+
+.contactItem:hover .icons {
+  background: linear-gradient(135deg, var(--color-pink) 0%, var(--color-yellow) 100%);
+  transform: rotate(360deg) scale(1.1);
+  animation: none;
+}
+
+.contactItem p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Icônes Sociales */
+/* ------------------------------------------------------------------------- */
 
 .socialIcons {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   margin-top: 2rem;
-  margin-left: 6.5rem;
-  font-size: 1.6rem;
-  color: #2e1d21;
+  flex-wrap: wrap;
 }
 
-.socialIcons svg:hover {
-  color: #f71344;
-  cursor: pointer;
+.social-link {
+  font-size: 2.5rem;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  display: inline-block;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
+
+.social-link::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background-color: var(--color-text);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  font-weight: 600;
+}
+.social-link.facebook{
+  color: #1877f2;
+}
+.social-link.instagram{
+  color: #e1306c;
+}
+.social-link.linkedin{
+  color: #0a66c2;
+}
+.social-link.tiktok{
+  color: currentcolor;
+}
+.social-link:hover::after {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+.social-link:hover {
+  transform: translateY(-8px) rotate(-5deg) scale(1.2);
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.social-link.facebook:hover {
+  color: var(--color-blue);
+  filter: drop-shadow(0 8px 12px rgba(110, 193, 228, 0.5));
+}
+
+.social-link.instagram:hover {
+  color: var(--color-pink);
+  filter: drop-shadow(0 8px 12px rgba(255, 140, 148, 0.5));
+}
+
+.social-link.linkedin:hover {
+  color: var(--color-green);
+  filter: drop-shadow(0 8px 12px rgba(136, 212, 171, 0.5));
+}
+
+.social-link.tiktok:hover {
+  color: var(--color-yellow);
+  filter: drop-shadow(0 8px 12px rgba(255, 226, 100, 0.5));
+}
+
+/* ------------------------------------------------------------------------- */
+/* Bloc Droit (Formulaire) */
+/* ------------------------------------------------------------------------- */
 
 .contactRight {
   flex: 1;
-  padding: 2rem;
+  min-width: 320px;
+  max-width: 500px;
+  animation: slideInRight 0.8s ease-out;
 }
-@media screen and (max-width: 10px) {
+
+.contactRight .formHomePage {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 25px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  border: 4px solid var(--color-yellow);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
 }
+
+.contactRight .formHomePage::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--color-pastel-yellow) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.contactRight .formHomePage:hover::before {
+  opacity: 0.3;
+}
+
+.contactRight .formHomePage:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-color: var(--color-pink);
+}
+
+.contactRight .formHomePage .form-title {
+  color: var(--color-text);
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.contactRight .formHomePage .form-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 35%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-blue), var(--color-pink), var(--color-green), var(--color-yellow));
+  border-radius: 2px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.contactRight .formHomePage input,
+.contactRight .formHomePage textarea {
+  transition: all 0.3s ease;
+  border: 2px solid #e0e0e0;
+}
+
+.contactRight .formHomePage input:focus,
+.contactRight .formHomePage textarea:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(110, 193, 228, 0.2);
+  transform: translateY(-2px);
+}
+
+.contactRight .formHomePage button {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(110, 193, 228, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.contactRight .formHomePage button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.contactRight .formHomePage button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.contactRight .formHomePage button:hover {
+  background-color: var(--color-pink);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 140, 148, 0.4);
+}
+
+.contactRight .formHomePage button:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Media Queries (Responsive) */
+/* ------------------------------------------------------------------------- */
+
 @media screen and (max-width: 1024px) {
   .contactSection {
     flex-direction: column;
     align-items: center;
     padding: 3rem 5%;
+    gap: 3rem;
   }
-  .contactItem p {
-    font-size: 0.7 rem;
-  }
-  .contactLeft {
-    width: 60%;
-  }
-
-  .contactLeft h5 {
-    margin-left: 0;
-    text-align: center;
-    padding-top: 2rem;
-    margin-bottom: 0;
+  
+  .contactLeft,
+  .contactRight {
+    width: 100%;
+    max-width: 600px;
   }
 
   .contactLeft h2 {
-    text-align: center;
     font-size: 2.5rem;
   }
 
-  .contactLeft p {
-    text-align: center;
+  .background-shapes .shape {
+    opacity: 0.3;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .contactPage {
+    padding: 2rem 0;
+  }
+
+  .contactSection {
+    padding: 2rem 4%;
+  }
+
+  .contactLeft h2 {
+    font-size: 2rem;
+  }
+
+  .contactLeft .contact-subtitle {
     font-size: 0.9rem;
   }
 
+  .contactLeft p {
+    font-size: 1rem;
+  }
+
   .contactItem {
-    width: 100%;
-    margin: 1rem 0;
+    padding: 1rem;
+  }
+
+  .contactItem .icons {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    font-size: 1.2rem;
   }
 
   .socialIcons {
     justify-content: center;
-    margin-left: 0;
+    gap: 1rem;
   }
 
-  .contactRight {
-    padding: 2rem 0;
+  .social-link {
+    font-size: 2rem;
+  }
+
+  .background-shapes {
+    display: none;
   }
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 480px) {
   .contactLeft h2 {
-    font-size: 1.5rem;
-  }
-
-  .contactItem {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    width: 100%;
-  }
-
-  .icons {
-    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
   }
 
   .contactItem p {
-    font-size: 0.8rem;
-    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  .contactRight .formHomePage {
+    padding: 1.5rem;
   }
 
   .socialIcons {
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 1.4rem;
+    gap: 0.8rem;
   }
 
-  .contactLeft h5 {
-    padding-top: 1rem;
-    font-size: 1.5rem;
+  .social-link {
+    font-size: 1.8rem;
   }
 }

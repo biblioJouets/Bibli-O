@@ -1,8 +1,8 @@
 'use client';
 
 
-import InBuilding from "../en-construction/page";
+import ContactComponent from "@/components/contactPage";
 
 export default function ContactPage(){
-    return <InBuilding />
+    return <ContactComponent />
 }
