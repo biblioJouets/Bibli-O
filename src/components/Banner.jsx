@@ -1,4 +1,4 @@
-"use client"; // obligatoire si tu as du state ou des effets
+"use client"; 
 
 import Image from "next/image";
 import ButtonDuo from "@/components/ButtonDuo";
@@ -8,15 +8,37 @@ import "styles/Banner.css";
 export default function Banner() {
   return (
     <div className="Banner">
-      <picture>
-        <source media="(max-width: 768px)" srcSet="/assets/responsiveBanner.png" />
-        <img src="/assets/imageEnfant.png" alt="Enfants jouant avec un jeu de construction en bois" className="banner-image" fetchPriority="high"/>
-                <div className="shape top-left blue"></div>
-  <div className="shape top-right yellow"></div>
-  <div className="shape mid-left"></div>
-  <div className="shape bottom-left yellow"></div>
-  <div className="shape bottom-right blue"></div>
-      </picture>
+      
+      
+      <div className="banner-bg mobile-only">
+        <Image 
+            src="/assets/responsiveBanner.png" 
+            alt="Enfants jouant - version mobile"
+            fill
+            priority 
+            quality={90}
+            sizes="100vw" 
+            style={{ objectFit: "cover" }}
+        />
+      </div>
+
+      <div className="banner-bg desktop-only">
+        <Image 
+            src="/assets/imageEnfant.png" 
+            alt="Enfants jouant avec un jeu de construction en bois"
+            fill
+            priority
+            quality={90}
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+        />
+      </div>
+
+      <div className="shape top-left blue"></div>
+      <div className="shape top-right yellow"></div>
+      <div className="shape mid-left"></div>
+      <div className="shape bottom-left yellow"></div>
+      <div className="shape bottom-right blue"></div>
 
       <div className="banner-content">
         <h1 className="banner-title">
@@ -25,12 +47,14 @@ export default function Banner() {
         <p className="banner-subtitle">
           Une bibliothèque de jouets sur abonnement pour permettre aux enfants de découvrir régulièrement de nouveaux jeux...
         </p>
-  <div className="floating-icon" style={{ top: "10%", right: "15%" }}>
+        
+        <div className="floating-icon" style={{ top: "10%", right: "15%" }}>
           ⭐
         </div>
         <div className="floating-icon" style={{ bottom: "25%", left: "20%" }}>
           🧩
         </div>
+        
         <div className="button-group desktop">
           <ButtonDuo
             blueText="Découvrir nos jouets"
