@@ -16,7 +16,24 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Styles pour le lien d'évitement (Accessibilité) */
+.skip-link {
+  position: absolute;
+  top: -40px; /* Caché par défaut */
+  left: 0;
+  background: #000; /* Contraste fort */
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.3s;
+  text-decoration: none;
+  font-weight: bold;
+}
 
+/* Quand on sélectionne le lien avec TAB, il descend */
+.skip-link:focus {
+  top: 0;
+}
 /* Si vous avez besoin d'une zone racine spécifique, ciblez l'élément réellement présent
    dans votre rendu (avec l'App Router il n'y a pas forcément `#root`). */
 

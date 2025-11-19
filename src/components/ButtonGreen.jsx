@@ -1,12 +1,18 @@
-import 'styles/Button.css'
+import Link from 'next/link';
+import 'styles/Button.css';
 
 function ButtonGreen ({text, href, target = "_self"}) {
+    const destination = href || "#"; 
+
     return( 
-<a className="Button Green" 
-href={href} 
-target={target}>
-    <p>{text}</p>
-</a>
+        <Link 
+            href={destination} 
+            className="Button Green" 
+            target={target}
+        >
+            <p>{text}</p>
+        </Link>
     )
 }
+
 export default ButtonGreen;

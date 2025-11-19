@@ -10,7 +10,7 @@ export default function Banner() {
     <div className="Banner">
       <picture>
         <source media="(max-width: 768px)" srcSet="/assets/responsiveBanner.png" />
-        <img src="/assets/imageEnfant.png" alt="Enfants jouant" className="banner-image" />
+        <img src="/assets/imageEnfant.png" alt="Enfants jouant avec un jeu de construction en bois" className="banner-image" fetchPriority="high"/>
                 <div className="shape top-left blue"></div>
   <div className="shape top-right yellow"></div>
   <div className="shape mid-left"></div>

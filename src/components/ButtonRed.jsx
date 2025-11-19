@@ -1,12 +1,18 @@
-import 'styles/Button.css'
-
+import 'styles/Button.css';
+import Link from "next/link"; 
 function ButtonRed ({text, href, target = "_self"}) {
+
+    const destination = href || "#";
+
     return( 
-<a className="Button Red" 
-href={href} 
-target={target}>
-    <p>{text}</p>
-</a>
+        <Link 
+            href={destination} 
+            className="Button Red" 
+            target={target}
+        >
+            <p>{text}</p> 
+        </Link>
     )
 }
+
 export default ButtonRed;
