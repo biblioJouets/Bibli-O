@@ -1,6 +1,25 @@
 // src/lib/core/mailjet/index.js
 
 import Mailjet from "node-mailjet";
+import { z } from "zod";
+
+// -------------------------
+// Validation des emails envoyés
+// -------------------------
+const mailSchema = z.object({
+  toEmail: z.string().email(),
+  subject: z.string().min(1).max(200),
+  text: z.string().min(1).max(2000),
+});
+
+// -------------------------
+// Validation des contacts newsletter
+// -------------------------
+const contactSchema = z.object({
+  email: z.string().email(),
+  name: z.string().max(50).optional(),
+  listId: z.union([z.string(), z.number()]).optional(),
+});
 
 const mailjet = Mailjet.apiConnect(
   process.env.MAILJET_API_KEY,
@@ -8,25 +27,31 @@ const mailjet = Mailjet.apiConnect(
 );
 
 // -------------------------
-// 1) Envoi d'un email simple
+// 1) Envoi d'un email
 // -------------------------
 export async function sendMail({ toEmail, subject, text }) {
+  const validated = mailSchema.parse({ toEmail, subject, text });
+
+  const sanitized = {
+    toEmail: validated.toEmail.trim(),
+    subject: validated.subject.trim(),
+    text: validated.text.trim(),
+  };
+
   try {
-    await mailjet
-      .post("send", { version: "v3.1" })
-      .request({
-        Messages: [
-          {
-            From: {
-              Email: process.env.MAILJET_SENDER_EMAIL,
-              Name: "Bibli'O Jouets",
-            },
-            To: [{ Email: toEmail }],
-            Subject: subject,
-            TextPart: text,
+    await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: {
+            Email: process.env.MAILJET_SENDER_EMAIL,
+            Name: "Bibli'O Jouets",
           },
-        ],
-      });
+          To: [{ Email: sanitized.toEmail }],
+          Subject: sanitized.subject,
+          TextPart: sanitized.text,
+        },
+      ],
+    });
 
     return { success: true };
   } catch (err) {
@@ -35,21 +60,31 @@ export async function sendMail({ toEmail, subject, text }) {
   }
 }
 
-// -------------------------------------------------
-// 2) Ajouter un contact dans une liste Mailjet
-// -------------------------------------------------
+// -------------------------
+// 2) Ajouter un contact à la liste Mailjet
+// -------------------------
 export async function addContactToList({ email, name, listId }) {
+  const validated = contactSchema.parse({ email, name, listId });
+
+  const sanitized = {
+    email: validated.email.trim(),
+    name: validated.name?.trim(),
+    listId: validated.listId
+      ? Number(validated.listId)
+      : Number(process.env.MAILJET_CONTACT_LIST_ID),
+  };
+
   try {
-    // Création / mise à jour du contact
-    await mailjet.post("contact", { version: "v3" }).request({
-      Email: email,
-      Name: name || "",
-    });
+    // Création du contact
+    const payload = { Email: sanitized.email };
+    if (sanitized.name) payload.Name = sanitized.name;
+
+    await mailjet.post("contact", { version: "v3" }).request(payload);
 
     // Ajout dans la liste
     await mailjet.post("listrecipient", { version: "v3" }).request({
-      ContactAlt: email,
-      ListID: listId ?? process.env.MAILJET_CONTACT_LIST_ID,
+      ContactAlt: sanitized.email,
+      ListID: sanitized.listId,
       IsUnsubscribed: false,
     });
 

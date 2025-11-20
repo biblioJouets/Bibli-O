@@ -4,6 +4,11 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import 'styles/newsletter.css';
+import { z } from "zod";
+
+const newsletterSchema = z.object({
+  email: z.string().email().max(254),
+});
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
@@ -14,7 +19,9 @@ export default function Newsletter() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !email.includes("@")) {
+    try {
+      newsletterSchema.parse({ email }); // ✅ validation stricte front
+    } catch (err) {
       setShowError(true);
       setTimeout(() => setShowError(false), 6000);
       return;
@@ -47,7 +54,6 @@ export default function Newsletter() {
       setIsSending(false);
     }
   };
-
   return (
     <div className="newsletter-container">
       <div className="newsletter-bubble blue"></div>
