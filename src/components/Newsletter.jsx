@@ -1,4 +1,5 @@
 'use client';
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,11 +17,20 @@ export default function Newsletter() {
   const [isSending, setIsSending] = useState(false);
   const [showError, setShowError] = useState(false);
 
+  // 🔥 Nouveau : token hCaptcha
+  const [token, setToken] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Vérification du captcha avant tout
+    if (!token) {
+      alert("Veuillez prouver que vous n’êtes pas un robot 😅");
+      return;
+    }
+
     try {
-      newsletterSchema.parse({ email }); // ✅ validation stricte front
+      newsletterSchema.parse({ email });
     } catch (err) {
       setShowError(true);
       setTimeout(() => setShowError(false), 6000);
@@ -33,12 +43,13 @@ export default function Newsletter() {
       const response = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, hcaptchaToken: token }),
       });
 
       if (response.ok) {
         setSent(true);
         setEmail("");
+        setToken(null); // Réinitialise le captcha
         setTimeout(() => setSent(false), 8000);
       } else {
         const data = await response.json();
@@ -54,6 +65,7 @@ export default function Newsletter() {
       setIsSending(false);
     }
   };
+
   return (
     <div className="newsletter-container">
       <div className="newsletter-bubble blue"></div>
@@ -69,25 +81,35 @@ export default function Newsletter() {
         </p>
 
         <div className="form-newsletter">
-          <div className="input-wrapper">
-            <input
-              type="email"
-              placeholder="Ton adresse e-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="newsletter-input"
-            />
-            <button 
-              type="button"
-              onClick={handleSubmit}
-              className={`send-button ${isSending ? 'sending' : ''}`}
-            >
-              <FontAwesomeIcon 
-                icon={faPaperPlane} 
-                className={`plane-icon ${isSending ? 'flying' : ''}`}
+          <form onSubmit={handleSubmit}>
+            <div className="input-wrapper">
+              <input
+                type="email"
+                placeholder="Ton adresse e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="newsletter-input"
               />
-            </button>
-          </div>
+
+              <button
+                type="submit"
+                className={`send-button ${isSending ? 'sending' : ''}`}
+              >
+                <FontAwesomeIcon 
+                  icon={faPaperPlane}
+                  className={`plane-icon ${isSending ? 'flying' : ''}`}
+                />
+              </button>
+            </div>
+
+            {/* 🔥 hCaptcha intégré proprement */}
+            <div style={{ marginTop: "12px", marginBottom: "-5px" }}>
+              <HCaptcha
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
+                onVerify={setToken}
+              />
+            </div>
+          </form>
 
           {showError && (
             <div className="error-message">
