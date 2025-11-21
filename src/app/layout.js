@@ -1,5 +1,5 @@
 // /src/app/layout.js
-
+import CookieBanner from "@/components/CookieBanner"; 
 import HeaderBiblioJouets from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/app/globals.css";
@@ -35,7 +35,7 @@ export const metadata = {
 
 // --- 2. CONFIGURATION VIEWPORT (Mobile & UI) ---
 export const viewport = {
-  themeColor: '#FF8C94', // Mets ici la couleur principale de ta marque (s'affiche sur mobile)
+  themeColor: '#FF8C94', 
   width: 'device-width',
   initialScale: 1,
 };
@@ -53,23 +53,26 @@ if (process.env.NODE_ENV === 'development') {
 
 export default function RootLayout({ children }) {
   return (
-    // Ajout de la variable de police dans html pour l'utiliser en CSS si besoin
-    <html lang="fr" className={`${quicksand.variable} ${quicksand.className}`}>
+<html lang="fr" className={`${quicksand.variable} ${quicksand.className}`}>
       <body>
-        {/* --- 3. ACCESSIBILITÉ : LIEN D'ÉVITEMENT --- */}
-        {/* Ce lien est caché visuellement mais apparait au premier TAB clavier */}
+        {/* Accessibilité : skip link */}
         <a href="#main-content" className="skip-link">
           Aller au contenu principal
         </a>
 
+        {/* Header */}
         <HeaderBiblioJouets />
-        
-        {/* Ajout de l'ID pour que le lien d'évitement fonctionne */}
+
+        {/* Contenu principal */}
         <main id="main-content">
           {children}
         </main>
-        
+
+        {/* Footer */}
         <Footer />
+
+        {/* Bandeau cookies */}
+               <CookieBanner />
       </body>
     </html>
   );
