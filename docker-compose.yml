@@ -20,10 +20,8 @@ services:
     image: postgres:16-alpine
     container_name: biblio-db
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: lucas
-      POSTGRES_PASSWORD: lemdp
-      POSTGRES_DB: biblio_jouets
+    env_file:
+      - .env.production
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -42,3 +40,4 @@ networks:
     driver: bridge
   nginx-proxy-manager_default:
     external: true
+
