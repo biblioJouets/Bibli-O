@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -16,6 +14,7 @@ services:
         condition: service_healthy
     networks:
       - biblio-network
+      - nginx-proxy-manager_default
 
   db:
     image: postgres:16-alpine
@@ -41,3 +40,5 @@ volumes:
 networks:
   biblio-network:
     driver: bridge
+  nginx-proxy-manager_default:
+    external: true
