@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: biblio-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - biblio-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: biblio-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lucas
+      POSTGRES_PASSWORD: lemdp
+      POSTGRES_DB: biblio_jouets
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lucas -d biblio_jouets"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - biblio-network
+
+volumes:
+  postgres_data:
+
+networks:
+  biblio-network:
+    driver: bridge
