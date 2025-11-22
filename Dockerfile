@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Variables factices pour le build (pas utilisées en runtime)
+# Variables factices pour le build
 ENV DATABASE_URL="postgresql://fake:fake@localhost:5432/fake"
 ENV MAILJET_API_KEY="fake_key"
 ENV MAILJET_API_SECRET="fake_secret"
@@ -35,9 +35,13 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Créer le dossier cache avec les bonnes permissions
+RUN mkdir -p /app/.next/cache
+RUN chown -R nextjs:nodejs /app/.next
+
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
