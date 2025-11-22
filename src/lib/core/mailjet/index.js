@@ -4,6 +4,22 @@ import Mailjet from "node-mailjet";
 import { z } from "zod";
 
 // -------------------------
+// Vérification des variables d'environnement requises
+// -------------------------
+const requiredEnvVars = [
+  'MAILJET_API_KEY',
+  'MAILJET_API_SECRET', 
+  'MAILJET_SENDER_EMAIL',
+  'MAILJET_CONTACT_LIST_ID'
+];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.warn(`[WARN] Variable d'environnement manquante: ${envVar}`);
+  }
+}
+
+// -------------------------
 // Validation des emails envoyés
 // -------------------------
 const mailSchema = z.object({
@@ -69,10 +85,18 @@ export async function addContactToList({ email, name, listId }) {
   const sanitized = {
     email: validated.email.trim(),
     name: validated.name?.trim(),
-    listId: validated.listId
-      ? Number(validated.listId)
-      : Number(process.env.MAILJET_CONTACT_LIST_ID),
   };
+
+  // Déterminer le finalListId avec validation
+  const finalListId = validated.listId 
+    ? Number(validated.listId)
+    : Number(process.env.MAILJET_CONTACT_LIST_ID);
+
+  // Vérifier que finalListId est configuré et valide
+  if (!finalListId || isNaN(finalListId)) {
+    console.error('[ERROR] MAILJET_CONTACT_LIST_ID non configuré ou invalide');
+    return { success: false, message: 'Configuration Mailjet manquante' };
+  }
 
   try {
     // Création du contact
@@ -84,7 +108,7 @@ export async function addContactToList({ email, name, listId }) {
     // Ajout dans la liste
     await mailjet.post("listrecipient", { version: "v3" }).request({
       ContactAlt: sanitized.email,
-      ListID: sanitized.listId,
+      ListID: finalListId,
       IsUnsubscribed: false,
     });
 
