@@ -24,14 +24,14 @@ const nextConfig = {
           // ---------------------------
           //  CONTENT SECURITY POLICY
           // ---------------------------
-        {
+{
   key: "Content-Security-Policy",
   value: [
     "default-src 'self'",
     "script-src 'self' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
     "img-src 'self' data: https:",
-    "font-src 'self' https://fonts.gstatic.com",
+    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
     "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://sentry.hcaptcha.com",
     "frame-src https://hcaptcha.com https://*.hcaptcha.com",
     "frame-ancestors 'none'",
@@ -39,7 +39,6 @@ const nextConfig = {
     "form-action 'self'"
   ].join("; ")
 }
-
         ]
       }
     ];

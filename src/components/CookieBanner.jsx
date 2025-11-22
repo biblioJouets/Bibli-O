@@ -14,7 +14,6 @@ export default function CookieBanner() {
 
   return (
     <CookieConsent
-    debug={true}
       location="bottom"
       buttonText="Accepter et jouer"
       enableDeclineButton
