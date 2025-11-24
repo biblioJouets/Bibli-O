@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile
     container_name: biblio-app
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     env_file:
       - .env.production
     depends_on:
@@ -40,4 +38,3 @@ networks:
     driver: bridge
   nginx-proxy-manager_default:
     external: true
-
