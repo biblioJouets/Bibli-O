@@ -12,6 +12,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+ARG NEXT_PUBLIC_HCAPTCHA_SITE_KEY
+ENV NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY
+
 # Variables factices pour build (Prisma / Next.js)
 ENV DATABASE_URL="postgresql://fake:fake@localhost:5432/fake"
 ENV NEXT_PUBLIC_API_URL="https://bibliojouets.fr"
@@ -19,7 +22,6 @@ ENV MAILJET_API_KEY="fake_key"
 ENV MAILJET_API_SECRET="fake_secret"
 ENV MAILJET_SENDER_EMAIL="fake@email.com"
 ENV MAILJET_CONTACT_LIST_ID="123456"
-ENV NEXT_PUBLIC_HCAPTCHA_SITE_KEY="fake_hcaptcha_key"
 ENV HCAPTCHA_SECRET_KEY="fake_hcaptcha_secret"
 
 RUN npx prisma generate
