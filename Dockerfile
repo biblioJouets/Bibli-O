@@ -50,4 +50,4 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
-CMD ["node", "server.js"]
+CMD ["npx", "next", "start", "-p", "3000", "-H", "0.0.0.0"]
