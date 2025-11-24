@@ -134,7 +134,7 @@ const FAQ = () => {
       <div className='faqButtonPosition'>
         <ButtonBlue 
           text="Je commence maintenant"
-          href="/abonnement"
+          href="/abonnements"
         />
       </div>
     </div>
