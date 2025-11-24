@@ -39,7 +39,7 @@ export default function Protocol() {
           <ButtonDuo
             blueText="Découvrir nos jouets"
             redText="Voir les abonnements"
-            blueHref="/catalogue"
+            blueHref="/bibliotheque"
             redHref="/abonnements"
             target="_self"
           />

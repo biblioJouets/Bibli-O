@@ -65,7 +65,7 @@ export default function Banner() {
         </div>
 
         <div className="button-group mobile">
-          <ButtonRed text="Découvrir nos jouets" href="/catalogue" />
+          <ButtonRed text="Découvrir nos jouets" href="/bibliotheque" />
         </div>
       </div>
     </div>
