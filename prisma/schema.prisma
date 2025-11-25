@@ -7,6 +7,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+model Users {
+  id        Int      @id @default(autoincrement())
+  firstName String?  @db.VarChar(255)
+  lastName  String?  @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
+
+  // Gestion des rôles (Défaut : USER)
+  role      Role     @default(USER)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  Orders    Orders[]
+  Addresses Address[] // Un utilisateur peut avoir plusieurs adresses
+}
+
+// Modèle Adresse 
+model Address {
+  id        Int      @id @default(autoincrement())
+  name      String?  @db.VarChar(100) // Ex: "Maison", "Bureau"
+  street    String   @db.VarChar(255)
+  zipCode   String   @db.VarChar(20)
+  city      String   @db.VarChar(100)
+  country   String   @default("France") @db.VarChar(100)
+  
+  // Clé étrangère vers l'utilisateur
+  userId    Int
+  User      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 4. Modèle Commandes 
+model Orders {
+  id            Int             @id @default(autoincrement())
+  totalAmount   Float
+  
+  // On utilise l'enum pour un suivi strict
+  status        OrderStatus     @default(PENDING)
+  
+  // Champs logistique
+  trackingNumber String?        @db.VarChar(100) // Numéro de suivi Colissimo/Mondial Relay
+  
+  // ... (Champs Shipping ajoutés à l'étape précédente) ...
+  shippingName    String?       @db.VarChar(255)
+  shippingAddress String?       @db.VarChar(255)
+  shippingZip     String?       @db.VarChar(20)
+  shippingCity    String?       @db.VarChar(100)
+
+  createdAt      DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(6)
+  
+  userId        Int?
+  Users         Users?          @relation(fields: [userId], references: [id])
+  OrderProducts OrderProducts[]
+}
+
+enum OrderStatus {
+  PENDING      // En attente de paiement/validation
+  PREPARING    // En cours de préparation
+  SHIPPED      // Expédié chez le client
+  ACTIVE       // Reçu par le client (Location en cours)
+  RETURNING    // En cours de retour
+  RETURNED     // Reçu par vous (en attente vérification)
+  COMPLETED    // Vérifié et clôturé
+  CANCELLED    // Annulé
+}
 model OrderProducts {
   createdAt DateTime @db.Timestamptz(6)
   updatedAt DateTime @db.Timestamptz(6)
@@ -18,36 +91,32 @@ model OrderProducts {
   @@id([OrderId, ProductId])
 }
 
-model Orders {
-  id            Int             @id @default(autoincrement())
-  totalAmount   Float
-  status        String?         @default("pending") @db.VarChar(255)
-  createdAt     DateTime        @db.Timestamptz(6)
-  updatedAt     DateTime        @db.Timestamptz(6)
-  userId        Int?
-  OrderProducts OrderProducts[]
-  Users         Users?          @relation(fields: [userId], references: [id])
-}
-
 model Products {
   id            Int             @id @default(autoincrement())
   name          String          @db.VarChar(255)
   description   String?
-  price         Float
+  price         Float           // Prix de l'abonnement ou valeur caution ? À définir
   stock         Int             @default(0)
-  createdAt     DateTime        @db.Timestamptz(6)
-  updatedAt     DateTime        @db.Timestamptz(6)
+  
+  // --- Nouveaux champs pour l'Admin ---
+  brand         String?         @db.VarChar(100) // Marque (VTech, Lego...)
+  ageRange      String?         @db.VarChar(50)  // Ex: "3-6 ans"
+  images        String[]        // Tableau d'URLs d'images
+  condition     ProductCondition @default(NEW)
+  isFeatured    Boolean         @default(false)  // Mettre en avant sur l'accueil
+  
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(6)
+  
   OrderProducts OrderProducts[]
 }
 
-model Users {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  Orders    Orders[]
+enum ProductCondition {
+  NEW
+  GOOD
+  FAIR
+  REPAIRING    // En réparation (indisponible)
+  RETIRED      // Retiré du stock
 }
 
 model newsletter_subscribers {

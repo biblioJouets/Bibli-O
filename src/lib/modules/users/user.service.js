@@ -4,46 +4,49 @@ import bcrypt from 'bcryptjs';
 export const userService = {
   // Créer un utilisateur
   async create(userData) {
-    const { email, password, firstName, lastName, ...rest } = userData;
+    const { 
+      email, password, firstName, lastName, phone, address, ...rest 
+    } = userData;
 
-    // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    return await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        ...rest,
-      },
+    const createData = {
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      phone,
+      role: 'USER', // Sécurité : on force le rôle USER à l'inscription
+      ...rest,
+    };
+
+    if (address && address.street) {
+      createData.Addresses = {
+        create: {
+          name: address.name || "Domicile",
+          street: address.street,
+          zipCode: address.zipCode,
+          city: address.city,
+          country: address.country || "France"
+        }
+      };
+    }
+
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.create({ 
+      data: createData,
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        address: true,
-        city: true,
-        zipCode: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        // Exclure le password
+        id: true, email: true, firstName: true, lastName: true, role: true, Addresses: true,
       },
     });
   },
 
   // Récupérer tous les utilisateurs
   async getAll() {
-    return await prisma.user.findMany({
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.findMany({
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        createdAt: true,
+        id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -51,68 +54,53 @@ export const userService = {
 
   // Récupérer un utilisateur par ID
   async getById(id) {
-    return await prisma.user.findUnique({
-      where: { id },
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.findUnique({
+      where: { id: parseInt(id) }, // Assurez-vous que l'ID est un entier
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        address: true,
-        city: true,
-        zipCode: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
+        id: true, email: true, firstName: true, lastName: true, phone: true,
+        role: true, createdAt: true, updatedAt: true,
+        Addresses: true, // On inclut les adresses
       },
     });
   },
 
   // Récupérer un utilisateur par email
   async getByEmail(email) {
-    return await prisma.user.findUnique({
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.findUnique({
       where: { email },
     });
   },
 
-  // Mettre à jour un utilisateur
+  // Mettre à jour
   async update(id, userData) {
     const { password, ...rest } = userData;
     const data = { ...rest };
 
-    // Si le mot de passe est modifié
     if (password) {
       data.password = await bcrypt.hash(password, 10);
     }
 
-    return await prisma.user.update({
-      where: { id },
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.update({
+      where: { id: parseInt(id) },
       data,
       select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        address: true,
-        city: true,
-        zipCode: true,
-        role: true,
-        updatedAt: true,
+        id: true, email: true, firstName: true, lastName: true, role: true, updatedAt: true,
       },
     });
   },
 
-  // Supprimer un utilisateur
+  // Supprimer
   async delete(id) {
-    return await prisma.user.delete({
-      where: { id },
+    // CORRECTION ICI : prisma.users
+    return await prisma.users.delete({
+      where: { id: parseInt(id) },
     });
   },
 
-  // Vérifier le mot de passe
   async verifyPassword(plainPassword, hashedPassword) {
     return await bcrypt.compare(plainPassword, hashedPassword);
-  },
+  }
 };
