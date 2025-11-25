@@ -2,6 +2,7 @@
 import CookieBanner from "@/components/CookieBanner"; 
 import HeaderBiblioJouets from "@/components/Header";
 import Footer from "@/components/Footer";
+import SessionProviderClient from "@/components/SessionProviderClient"; 
 import "@/app/globals.css";
 import { Quicksand } from "next/font/google";
 
@@ -67,19 +68,13 @@ export default function RootLayout({ children }) {
           Aller au contenu principal
         </a>
 
-        {/* Header */}
-        <HeaderBiblioJouets />
+      <SessionProviderClient>
+          <HeaderBiblioJouets />
+          <main>{children}</main>
+          <Footer />
+          <CookieBanner />
+        </SessionProviderClient>
 
-        {/* Contenu principal */}
-        <main id="main-content">
-          {children}
-        </main>
-
-        {/* Footer */}
-        <Footer />
-
-        {/* Bandeau cookies */}
-               <CookieBanner />
       </body>
     </html>
   );

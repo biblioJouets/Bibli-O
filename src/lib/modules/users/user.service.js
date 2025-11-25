@@ -32,7 +32,6 @@ export const userService = {
       };
     }
 
-    // CORRECTION ICI : prisma.users
     return await prisma.users.create({ 
       data: createData,
       select: {
@@ -43,7 +42,6 @@ export const userService = {
 
   // Récupérer tous les utilisateurs
   async getAll() {
-    // CORRECTION ICI : prisma.users
     return await prisma.users.findMany({
       select: {
         id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
@@ -54,13 +52,12 @@ export const userService = {
 
   // Récupérer un utilisateur par ID
   async getById(id) {
-    // CORRECTION ICI : prisma.users
     return await prisma.users.findUnique({
       where: { id: parseInt(id) }, // Assurez-vous que l'ID est un entier
       select: {
         id: true, email: true, firstName: true, lastName: true, phone: true,
         role: true, createdAt: true, updatedAt: true,
-        Addresses: true, // On inclut les adresses
+        Addresses: true, 
       },
     });
   },

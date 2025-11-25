@@ -1,15 +1,10 @@
 
 import { NextResponse } from 'next/server';
+import { userController } from '@/lib/modules/users/user.controller';
 
 // POST /api/users - Désactivé temporairement
 export async function POST(request) {
-  return NextResponse.json(
-    { 
-      success: false, 
-      message: "Cette fonctionnalité n'est pas encore disponible." 
-    },
-    { status: 503 }
-  );
+  return userController.create(request);
 }
 
 // GET /api/users - Désactivé temporairement
