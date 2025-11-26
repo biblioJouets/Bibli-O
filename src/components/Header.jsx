@@ -5,17 +5,17 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { Menu, X, User, ShoppingCart } from "lucide-react";
 import Image from 'next/image';
 import Link from 'next/link';
-import ButtonContactHeader from './ButtonBlue';
+import 'styles/Button.css'; 
 import 'styles/header.css';
 
 const logo = "/assets/logoBiblioJouets.png"
 
-
 export default function HeaderBiblioJouets() {
+  const { data: session } = useSession();
+
   const [isBurgerOpen, setBurgerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef(null);
-  const { data: session } = useSession();
 
   // Gestion du clic en dehors du menu
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function HeaderBiblioJouets() {
         <Link href="/" className="logo-link">
           <Image src={logo} alt="Logo Bibli'O Jouets" className="logo-img" 
            width={150}   
-  height={50} 
+           height={50} 
           />
         </Link>
       </div>
@@ -64,7 +64,9 @@ export default function HeaderBiblioJouets() {
         </button>
       )}
 
-      {/* Navigation principale */}
+      {/* =========================================
+          NAVIGATION PRINCIPALE + MOBILE DRAWER
+         ========================================= */}
       <div ref={menuRef} className={`nav-menu ${isBurgerOpen ? "open" : ""}`}>
         <button
           className="close-menu-button"
@@ -74,45 +76,105 @@ export default function HeaderBiblioJouets() {
           <X size={24} color="#2E1D21" />
         </button>
 
-        {/* Liens de navigation */}
+        {/* 1. Liens TOUJOURS visibles (Desktop & Mobile) */}
         <Link href="/bibliotheque" onClick={closeBurger}>Nos Jouets</Link>
         <Link href="/fonctionnement" onClick={closeBurger}>Comment ça marche ?</Link>
         <Link href="/abonnements" onClick={closeBurger}>Nos Abonnements</Link>
         <Link href="/contact" onClick={closeBurger}>Nous contacter</Link>
 
-        {/* Actions secondaires (mobile) */}
+        {/* 2. Liens UNIQUEMENT MOBILE (Cachés sur Desktop via CSS) */}
         <div className="nav-actions-mobile">
-          <Link href="/mon-compte" onClick={closeBurger} className="action-link">
-            <User size={20} />
-            <span>Mon Compte</span>
-          </Link>
-          <Link href="/panier" onClick={closeBurger} className="action-link">
-            <ShoppingCart size={20} />
-            <span>Panier</span>
-          </Link>
+          
+          {session ? (
+            <>
+              {/* --- CAS CONNECTÉ (MOBILE) --- */}
+              
+              {session.user.role === 'ADMIN' && (
+                <Link 
+                  href="/admin" 
+                  onClick={closeBurger}
+                  style={{ color: '#FF8C94', fontWeight: 'bold' }}
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+
+              <Link href="/mon-compte" onClick={closeBurger} className="action-link">
+                <User size={20} />
+                <span>Mon Compte</span>
+              </Link>
+              
+              <Link href="/panier" onClick={closeBurger} className="action-link">
+                <ShoppingCart size={20} />
+                <span>Panier</span>
+              </Link>
+
+              <Link 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  signOut({ callbackUrl: '/' });
+                  closeBurger();
+                }}
+                style={{ borderTop: '1px solid #eee', marginTop: '10px', paddingTop: '15px' }}
+              >
+                Se déconnecter
+              </Link>
+            </>
+          ) : (
+            <>
+              {/* --- CAS NON CONNECTÉ (MOBILE) --- */}
+              <Link href="/inscription" onClick={closeBurger}>S'inscrire</Link>
+              <Link href="/connexion" onClick={closeBurger}>Se connecter</Link>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Actions secondaires et CTA (desktop) */}
+      {/* =========================================
+          ACTIONS DESKTOP (Droite du header)
+         ========================================= */}
       <div className="header-actions">
+        
+        {/* Icônes (Visibles seulement si connecté) */}
+        {session && (
+          <>
+            <Link href="/mon-compte" className="icon-link" aria-label="Mon compte">
+              <User size={22} />
+            </Link>
+            <Link href="/panier" className="icon-link" aria-label="Panier">
+              <ShoppingCart size={22} />
+            </Link>
+          </>
+        )}
+
+        {/* Boutons (Admin / Auth) */}
         {session ? (
-            <>
-              {session.user.role === 'ADMIN' && (
-                 <Link href="/admin">Admin Dashboard</Link>
-              )}
-              <span>Bonjour, {session.user.name}</span>
-              <button onClick={() => signOut()}>Se déconnecter</button>
-            </>
-         ) : (
-            <button onClick={() => signIn()}>Se connecter</button>
-         )}
-        <Link href="/mon-compte" className="icon-link" aria-label="Mon compte">
-          <User size={22} />
-        </Link>
-        <Link href="/panier" className="icon-link" aria-label="Panier">
-          <ShoppingCart size={22} />
-        </Link>
-        <ButtonContactHeader text="S'abonner" href="/abonnements" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {session.user.role === 'ADMIN' && (
+               <Link href="/admin" style={{ fontWeight: 'bold', color: '#FF8C94' }}>
+                 Admin
+               </Link>
+            )}
+            
+            <button 
+              className="Button Blue" 
+              onClick={() => signOut({ callbackUrl: '/' })}
+              style={{ padding: '15px 20px' }} 
+            >
+              Se déconnecter
+            </button>
+          </div>
+        ) : (
+          <button 
+            className="Button Blue" 
+            onClick={() => signIn()}
+                          style={{ padding: '15px 20px' }} 
+
+          >
+            Se connecter
+          </button>
+        )}
       </div>
     </nav>
   );
