@@ -66,9 +66,9 @@ export const authOptions = {
     }
   },
   secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: '/connexion', // (Optionnel) Si tu as une page de login dédiée
-  },
+  // pages: {
+  //   signIn: '/connexion', 
+  // },
 };
 
 const handler = NextAuth(authOptions);

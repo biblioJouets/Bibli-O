@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { Menu, X, User, ShoppingCart } from "lucide-react";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ export default function HeaderBiblioJouets() {
   const [isBurgerOpen, setBurgerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef(null);
+  const { data: session } = useSession();
 
   // Gestion du clic en dehors du menu
   useEffect(() => {
@@ -93,6 +95,17 @@ export default function HeaderBiblioJouets() {
 
       {/* Actions secondaires et CTA (desktop) */}
       <div className="header-actions">
+        {session ? (
+            <>
+              {session.user.role === 'ADMIN' && (
+                 <Link href="/admin">Admin Dashboard</Link>
+              )}
+              <span>Bonjour, {session.user.name}</span>
+              <button onClick={() => signOut()}>Se déconnecter</button>
+            </>
+         ) : (
+            <button onClick={() => signIn()}>Se connecter</button>
+         )}
         <Link href="/mon-compte" className="icon-link" aria-label="Mon compte">
           <User size={22} />
         </Link>
