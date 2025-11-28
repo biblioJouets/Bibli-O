@@ -39,38 +39,52 @@ export const productController = {
   },
 
   // Get Par id ( un produit )
-  async getById(request, { params }) {
+async getById(request, { params }) {
     try {
-      const { id } = params;
+      // ⚠️ CORRECTION : On attend les params
+      const resolvedParams = await params; 
+      const id = resolvedParams.id;
+
       const product = await productService.getById(id);
       
       if (!product) return NextResponse.json({ message: "Produit non trouvé" }, { status: 404 });
       
       return NextResponse.json(product);
     } catch (error) {
+      console.error("Erreur GET produit:", error); // Ajout du log pour voir l'erreur
       return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
     }
   },
-
-  // UPDATE
+// PUT: Update
   async update(request, { params }) {
     try {
-      const { id } = params;
+      // ⚠️ CORRECTION : On attend les params
+      const resolvedParams = await params; 
+      const id = resolvedParams.id;
+
       const body = await request.json();
+      
+      // On passe l'ID et le body au service
       const updatedProduct = await productService.update(id, body);
+      
       return NextResponse.json(updatedProduct);
     } catch (error) {
+      console.error("Erreur UPDATE produit:", error); // Très important pour debugger
       return NextResponse.json({ message: "Erreur mise à jour" }, { status: 500 });
     }
   },
 
-  // DELETE
+  // DELETE: Delete
   async delete(request, { params }) {
     try {
-      const { id } = params;
+      // ⚠️ CORRECTION : On attend les params
+      const resolvedParams = await params; 
+      const id = resolvedParams.id;
+
       await productService.delete(id);
       return NextResponse.json({ message: "Produit supprimé avec succès" });
     } catch (error) {
+      console.error("Erreur DELETE produit:", error);
       return NextResponse.json({ message: "Erreur suppression" }, { status: 500 });
     }
   }

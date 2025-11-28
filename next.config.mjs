@@ -3,6 +3,16 @@ const nextConfig = {
   output: 'standalone',
   images: {
     unoptimized: false,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lego.com',
+      },
+    ],
   },
 
   async headers() {
