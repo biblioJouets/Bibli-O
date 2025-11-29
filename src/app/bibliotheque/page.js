@@ -62,7 +62,7 @@ export default function LibraryPage() {
 
   // Liste des catégories uniques pour le select (calculé dynamiquement)
   const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-  const ageRanges = ["0-1 an", "1-3 ans", "3-6 ans", "6+ ans"]; // À adapter selon tes données
+  const ageRanges = ["0-1 an", "1-2 ans","2-3 ans", "3-4 ans", "4-5 ans", "5-6 ans", "6-7 ans", "7-8 ans"]; 
 
   return (
     <div className="bibliotheque-container">
