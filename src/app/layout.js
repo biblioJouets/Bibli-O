@@ -3,6 +3,9 @@ import CookieBanner from "@/components/CookieBanner";
 import HeaderBiblioJouets from "@/components/Header";
 import Footer from "@/components/Footer";
 import SessionProviderClient from "@/components/SessionProviderClient"; 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { CartProvider } from "@/context/CartContext";
 import "@/app/globals.css";
 import { Quicksand } from "next/font/google";
 
@@ -58,6 +61,7 @@ if (process.env.NODE_ENV === 'development') {
     originalConsoleError(...args);
   };
 }
+const session = await getServerSession(authOptions);
 
 export default function RootLayout({ children }) {
   return (
@@ -68,11 +72,13 @@ export default function RootLayout({ children }) {
           Aller au contenu principal
         </a>
 
-      <SessionProviderClient>
+      <SessionProviderClient session={session}>
+        <CartProvider>
           <HeaderBiblioJouets />
           <main>{children}</main>
           <Footer />
           <CookieBanner />
+        </CartProvider>
         </SessionProviderClient>
 
       </body>

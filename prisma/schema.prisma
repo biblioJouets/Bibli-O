@@ -30,6 +30,7 @@ model Users {
   Orders    Orders[]
   Addresses Address[] // Un utilisateur peut avoir plusieurs adresses
   reviews   Reviews[]
+  cart      Cart?
 }
 
 // Modèle Adresse 
@@ -46,7 +47,30 @@ model Address {
   User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// 4. Modèle Commandes 
+model Cart {
+  id     Int   @id @default(autoincrement())
+  userId Int   @unique // Un seul panier par utilisateur
+  user   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items CartItem[] // Liste des articles
+
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model CartItem {
+  id Int @id @default(autoincrement())
+
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  quantity Int @default(1)
+
+  @@unique([cartId, productId])
+}
+
 model Orders {
   id          Int   @id @default(autoincrement())
   totalAmount Float
@@ -132,6 +156,7 @@ model Products {
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   OrderProducts OrderProducts[]
+  cartItems     CartItem[]
 }
 
 // Nouveau modèle pour les avis clients

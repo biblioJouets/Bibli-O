@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useCart } from "@/context/CartContext";
 import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package } from 'lucide-react';
 import '@/styles/productDetail.css';
 
@@ -14,11 +15,11 @@ export default function ProductDetailClient({ product }) {
     
   const [selectedImage, setSelectedImage] = useState(images[0]);
 
-  // Fonction factice d'ajout au panier (en attendant le contexte global)
-  const handleAddToCart = () => {
-    alert(`🎁 ${product.name} a été ajouté au panier ! (Simulation)`);
-    // Ici, plus tard, on appellera cartContext.addItem(product)
-  };
+const { addToCart } = useCart();
+
+const handleAddToCart = () => {
+  addToCart(product.id, 1);
+};
 
   return (
     <div className="product-page-container">
