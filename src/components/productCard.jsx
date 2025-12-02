@@ -3,12 +3,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import ButtonBlue from './ButtonBlue';
+import { useCart } from "@/context/CartContext";
+import '@/styles/Button.css';
 
 export default function ProductCard({ product }) {
+
+  const { addToCart } = useCart();
+
   // Gestion de l'image par défaut
   const mainImage = product.images && product.images.length > 0 
     ? product.images[0] 
     : '/assets/toys/jouet1.jpg';
+const handleAddToCart = (e) => {
+  e.preventDefault()
+  addToCart(product.id, 1);
+};
 
   return (
     <div className="product-card">
@@ -48,7 +57,13 @@ export default function ProductCard({ product }) {
 
       <div className="product-action-footer">
         <div className="buttonPanier">
-           <ButtonBlue href="/panier" text="Ajouter au panier" />
+          <button 
+             className="Button Blue" 
+             onClick={handleAddToCart}
+            
+           >
+             Ajouter au panier
+           </button>
         </div>
       </div>
 
