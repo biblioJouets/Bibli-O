@@ -11,43 +11,35 @@ const quicksand = Quicksand({
   variable: "--font-quicksand",
 });
 
-// --- 1. CONFIGURATION SEO GLOBALE ---
 export const metadata = {
+  icons: {
+    icon: '/favicon.ico',
+  },
+  
   title: {
     default: "Bibli'O jouets - Ludothèque et Location de jeux",
     template: "%s | Bibli'O jouets",
   },
   
-  // CORRECTION 1 : J'ai ajouté "Bibliojouets" (attaché) dans la phrase naturellement
   description: "Découvrez Bibliojouets (Bibli'O), votre service de location de jouets éducatifs par abonnement. Une solution ludique, économique et écologique pour toute la famille.",
   
-  // CORRECTION 2 : Ajout des variantes orthographiques que les gens vont taper
   keywords: ["bibliojouets", "biblio jouets", "bibli o jouets", "ludothèque", "jeux de société", "location jeux", "abonnement jouets", "famille"],
   
   openGraph: {
     title: "Bibli'O jouets - Location par abonnement", 
     description: "Une solution pratique, ludique, économique et écologique pour toute la famille.",
-    
-    // CORRECTION 3 : Vérifie bien si c'est avec ou sans tiret ici !
-    // Si ton site est bibliojouets.fr, enlève le tiret ci-dessous :
-    url: 'https://www.bibliojouets.fr', 
-    
+        url: 'https://www.bibliojouets.fr', 
     siteName: "Bibli'O jouets",
     locale: 'fr_FR',
     type: 'website',
   },
-  
-  // CORRECTION 4 : Idem, attention au tiret
-  metadataBase: new URL('https://www.bibliojouets.fr'),
+    metadataBase: new URL('https://www.bibliojouets.fr'),
 };
-// --- 2. CONFIGURATION VIEWPORT (Mobile & UI) ---
 export const viewport = {
   themeColor: '#FF8C94', 
   width: 'device-width',
   initialScale: 1,
 };
-
-// Code dev existant (inchangé)
 if (process.env.NODE_ENV === 'development') {
   const originalConsoleError = console.error;
   console.error = (...args) => {
