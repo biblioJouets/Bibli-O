@@ -77,15 +77,14 @@ export default function Newsletter() {
         <h2 className="newsletter-title">✨ Restons connectés ! ✨</h2>
         
         <p className="text-content">
-          Pour être au courant des derniers trésors ajoutés à notre collection, des ateliers créatifs pour vos enfants ou de nos soirées jeux, laissez-nous simplement votre email. L'aventure bibli'O Jouets continue dans votre boîte mail !! ✨
-        </p>
+Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Laissez-nous votre email pour embarquer : l'aventure Bibli'O Jouets continue directement dans votre boîte de réception ! 🎁"        </p>
 
         <div className="form-newsletter">
           <form onSubmit={handleSubmit}>
             <div className="input-wrapper">
               <input
                 type="email"
-                placeholder="Ton adresse e-mail"
+                placeholder="votre adresse email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="newsletter-input"
@@ -113,7 +112,7 @@ export default function Newsletter() {
 
           {showError && (
             <div className="error-message">
-              ⚠️ Oups ! Vérifie ton adresse e-mail 📧
+              ⚠️ Oups ! Vérifiez votre adresse email 📧
             </div>
           )}
 

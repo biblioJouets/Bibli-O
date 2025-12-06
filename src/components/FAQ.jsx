@@ -95,7 +95,7 @@ const FAQ = () => {
           <h1 className="faq-title">Les questions des (grands) curieux</h1>
           <p className="faq-subtitle">
             On vous dit tout sur le fonctionnement de Bibli'O Jouets. Une question en particulier ?{' '}
-            <a href="#" className="faq-link">Contacter nous directement</a>.
+            <a href="/contact" className="faq-link">Contacter nous directement</a>.
           </p>
 
           <div className="faq-accordion">

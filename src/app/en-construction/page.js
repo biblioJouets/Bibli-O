@@ -33,7 +33,7 @@ const InBuilding = () => {
           <i className="fas fa-hammer pickaxe"></i>
         </div>
         
-        <p className="subtitle">Nous préparons quelque chose de génial pour toi ! 🎉</p>
+        <p className="subtitle">Nous préparons quelque chose de génial ! 🎉</p>
         
         <button className="cta-button" onClick={() => window.location.href = '/'}>
           <i className="fas fa-home"></i> Retour à l'accueil
