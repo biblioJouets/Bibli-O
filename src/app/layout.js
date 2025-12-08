@@ -18,7 +18,7 @@ const quicksand = Quicksand({
 // --- 1. CONFIGURATION SEO GLOBALE ---
 export const metadata = {
   title: {
-    default: "Bibli'O jouets - Ludothèque et Location de jeux",
+    default: "Bibli'O jouets - Location de jeux",
     template: "%s | Bibli'O jouets",
   },
   

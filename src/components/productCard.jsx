@@ -2,9 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import ButtonBlue from './ButtonBlue';
 import { useCart } from "@/context/CartContext";
-import '@/styles/Button.css';
 
 export default function ProductCard({ product }) {
 

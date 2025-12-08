@@ -198,14 +198,15 @@
   padding: 0 1.5rem 1.5rem 1.5rem; /* Marges internes en bas */
   margin-top: auto; /* Pousse le bouton vers le bas si les titres sont courts */
   justify-content: center;
+  margin: auto;
 }
 .buttonPanier .Button.Blue {
-  padding: 3px 20px !important;   
+  padding: 15px 25px;
   font-size: 0.9rem !important;  
+  display: inline-block;
   text-align: center;
-  display: block;
 }
-
+é
 /* Petit effet au survol spécifique à ce bouton */
 .buttonPanier .Button.Blue:hover {
   transform: translateY(-2px);
