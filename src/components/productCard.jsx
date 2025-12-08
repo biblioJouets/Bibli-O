@@ -8,6 +8,15 @@ export default function ProductCard({ product }) {
 
   const { addToCart } = useCart();
 
+  const isNew = () => {
+    if (!product.createdAt) return false;
+    const createdDate = new Date(product.createdAt);
+    const now = new Date();
+
+    const diffTime = Math.abs(now - createdDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 14; // affichage badge "Nouveau" durant 2 semaines
+  }
   // Gestion de l'image par défaut
   const mainImage = product.images && product.images.length > 0 
     ? product.images[0] 
@@ -23,6 +32,9 @@ const handleAddToCart = (e) => {
         
         <div className="product-image-wrapper">
           <span className="product-badge">{product.ageRange || 'Tout âge'}</span>
+          {isNew() && (
+            <span className="product-badge-new">NOUVEAU </span>
+          )}
           <Image 
             src={mainImage} 
             alt={product.name} 

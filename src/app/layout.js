@@ -61,9 +61,11 @@ if (process.env.NODE_ENV === 'development') {
     originalConsoleError(...args);
   };
 }
+
+export default async function RootLayout({ children }) {
+
 const session = await getServerSession(authOptions);
 
-export default function RootLayout({ children }) {
   return (
 <html lang="fr" className={`${quicksand.variable} ${quicksand.className}`}>
       <body>
