@@ -120,6 +120,7 @@
 }
 .icon-link {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: center;
   width: 45px;
@@ -135,6 +136,24 @@
   background-color: #ffe264;
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 4px 12px rgba(255, 140, 148, 0.3);
+}
+.cart-badge-desktop {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #FF8C94; /* Rose Bibli'O */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white; /* Pour détacher visuellement de l'icône */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ========================================
@@ -166,7 +185,43 @@
 .nav-actions-mobile {
   display: none;
 }
+.cart-badge-mobile {
+  background-color: #FF8C94;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 2px 10px;
+  border-radius: 12px;
+  animation: popIn 0.3s ease;
+}
+.burger-button {
+    position: relative;
+}
+.cart-badge-dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: #FF8C94;
+    border-radius: 50%;
+    border: 2px solid white;
+}
 
+/* Animation d'apparition "Pop" */
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 /* ========================================
    RESPONSIVE TABLETTE (< 1003px)
    ======================================== */

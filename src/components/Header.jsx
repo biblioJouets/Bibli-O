@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Menu, X, User, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 import Image from 'next/image';
 import Link from 'next/link';
 import 'styles/Button.css'; 
@@ -12,6 +13,7 @@ const logo = "/assets/logoBiblioJouets.png"
 
 export default function HeaderBiblioJouets() {
   const { data: session } = useSession();
+  const { cartCount } = useCart();
 
   const [isBurgerOpen, setBurgerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -61,6 +63,7 @@ export default function HeaderBiblioJouets() {
           aria-label="Toggle menu"
         >
           <Menu size={28} color="#2E1D21" />
+          {cartCount > 0 && <span className="cart-badge-dot"></span>}
         </button>
       )}
 
@@ -76,13 +79,11 @@ export default function HeaderBiblioJouets() {
           <X size={24} color="#2E1D21" />
         </button>
 
-        {/* 1. Liens TOUJOURS visibles (Desktop & Mobile) */}
         <Link href="/bibliotheque" onClick={closeBurger}>Nos Jouets</Link>
         <Link href="/fonctionnement" onClick={closeBurger}>Comment ça marche ?</Link>
         <Link href="/abonnements" onClick={closeBurger}>Nos Abonnements</Link>
         <Link href="/contact" onClick={closeBurger}>Nous contacter</Link>
 
-        {/* 2. Liens UNIQUEMENT MOBILE (Cachés sur Desktop via CSS) */}
         <div className="nav-actions-mobile">
           
           {session ? (
@@ -107,6 +108,8 @@ export default function HeaderBiblioJouets() {
               <Link href="/panier" onClick={closeBurger} className="action-link">
                 <ShoppingCart size={20} />
                 <span>Panier</span>
+                 {cartCount > 0 && <span className="cart-badge-dot"></span>}
+                
               </Link>
 
               <Link 
@@ -132,11 +135,11 @@ export default function HeaderBiblioJouets() {
       </div>
 
       {/* =========================================
-          ACTIONS DESKTOP (Droite du header)
+           DESKTOP (Droite du header)
          ========================================= */}
       <div className="header-actions">
         
-        {/* Icônes (Visibles seulement si connecté) */}
+        {/* Icônes si connecté */}
         {session && (
           <>
             <Link href="/mon-compte" className="icon-link" aria-label="Mon compte">
@@ -144,6 +147,9 @@ export default function HeaderBiblioJouets() {
             </Link>
             <Link href="/panier" className="icon-link" aria-label="Panier">
               <ShoppingCart size={22} />
+              {cartCount > 0 && (
+                <span className="cart-badge-desktop">{cartCount}</span>
+              )}
             </Link>
           </>
         )}
