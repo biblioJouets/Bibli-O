@@ -178,7 +178,7 @@ export default function PanierPage() {
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Truck size={18} color="#88D4AB" /> Livraison
             </span>
-            <span style={{ color: "#88D4AB", fontWeight: "bold" }}>INCLUSE</span>
+            <span style={{ color: "#88D4AB", fontWeight: "bold" }}>OFFERTE</span>
           </div>
 
           {/*  FORMULE DYNAMIQUE */}
@@ -231,7 +231,7 @@ export default function PanierPage() {
                 <CheckCircle size={14} /> Sans engagement
              </div>
              <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#88D4AB" }}>
-                <CheckCircle size={14} /> Nettoyage inclus
+                <CheckCircle size={14} /> Nettoyage & désinfection
              </div>
           </div>
 
