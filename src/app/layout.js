@@ -17,7 +17,7 @@ export const metadata = {
   },
   
   title: {
-    default: "Bibli'O jouets - Ludothèque et Location de jeux",
+    default: "Bibli'O jouets - Location de jeux pour enfants",
     template: "%s | Bibli'O jouets",
   },
   
