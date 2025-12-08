@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package } from 'lucide-react';
+import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle } from 'lucide-react';
 import '@/styles/productDetail.css';
 
 export default function ProductDetailClient({ product }) {
@@ -17,8 +17,13 @@ export default function ProductDetailClient({ product }) {
 
 const { addToCart } = useCart();
 
+//vérification dans le stock 
+const isOutOfStock =  product.stock <=0;
+
 const handleAddToCart = () => {
+  if(!isOutOfStock) { 
   addToCart(product.id, 1);
+  }
 };
 
   return (
@@ -31,7 +36,19 @@ const handleAddToCart = () => {
       <div className="product-main">
         {/* --- COLONNE GAUCHE : GALERIE --- */}
         <div className="gallery-container">
-          <div className="main-image-wrapper">
+          <div className="main-image-wrapper" style={{ opacity: isOutOfStock ? 0.5 : 1 }}>
+            {isOutOfStock && (
+                <div style={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10,
+                    background: 'rgba(0,0,0,0.7)', color: 'white',
+                    padding: '1rem 2rem', borderRadius: '10px',
+                    fontWeight: 'bold', fontSize: '1.5rem'
+                }}>
+                    MOMENTANÉMENT LOUÉ
+                </div>
+            )}
             <Image 
               src={selectedImage} 
               alt={product.name} 
@@ -63,15 +80,19 @@ const handleAddToCart = () => {
           )}
         </div>
 
-        {/* --- COLONNE DROITE : INFOS --- */}
+        {/* --- COLONNE DROITE  --- */}
         <div className="product-info">
           <div className="brand-badge">{product.brand || 'Bibli\'O'}</div>
           <h1 className="product-title">{product.name}</h1>
           <p className="product-ref">Réf: {product.reference}</p>
 
           <div className="price-block">
-0€ <span className="price-period">avec votre abonnement au lieu de </span> {product.price}€ </div>
-
+            {isOutOfStock ? (
+                <span style={{ color: '#999', fontSize: '1.2rem' }}>Ce jouet est actuellement chez une autre famille 🏠</span>
+            ) : (
+                <>0€ <span className="price-period">avec votre abonnement au lieu de </span> {product.price}€</>
+            )}
+          </div>
           <p className="description">{product.description}</p>
 
           {/* Tags */}
@@ -85,10 +106,21 @@ const handleAddToCart = () => {
 
           {/* Boutons d'action */}
           <div className="actions">
-            <button className="add-to-cart-btn" onClick={handleAddToCart}>
-              <ShoppingCart size={20} />
-              Ajouter au panier
-            </button>
+          {isOutOfStock ? (
+                <button 
+                    disabled 
+                    className="add-to-cart-btn" 
+                    style={{ backgroundColor: '#ccc', cursor: 'not-allowed', transform: 'none' }}
+                >
+                    <XCircle size={20} />
+                    Indisponible
+                </button>
+            ) : (
+                <button className="add-to-cart-btn" onClick={handleAddToCart}>
+                    <ShoppingCart size={20} />
+                    Ajouter au panier
+                </button>
+            )}
 
             {product.manualUrl && (
               <a href={product.manualUrl} target="_blank" rel="noopener noreferrer" className="manual-btn">
