@@ -27,12 +27,20 @@ export default function AdminProductsPage() {
 
     // Modèle vide
     const emptyProduct = {
-        reference: "", name: "", description: "", price: 0, stock: 1,
+        reference: "BJ", name: "", description: "", price: 0, stock: 1,
         brand: "", ageRange: "", category: "", tags: [], images: [],
-        manualUrl: "", weight: 0, length: 0, width: 0, height: 0,
-        pieceCount: 0, condition: "NEW", isFeatured: false
+        manualUrl: "", weight: "", length: "", width: "", height: "",
+        pieceCount: "", condition: "NEW", isFeatured: false
     };
 
+    const getFrenchCondition = (condition) => {
+    switch (condition) {
+        case 'NEW': return 'NEUF';
+        case 'GOOD': return 'TRÈS BON';
+        case 'FAIR': return 'BON';
+        default: return condition; // Si inconnu, affiche la valeur brute
+    }
+}
     // --- CHARGEMENT ---
     useEffect(() => {
         fetchProducts();
@@ -215,8 +223,7 @@ export default function AdminProductsPage() {
                                 </td>
                                 <td style={{fontWeight: '600'}}>{product.name}</td>
                                 <td>{product.brand}</td>
-                                <td><span className="badge badge-condition">{product.condition}</span></td>
-                                <td>{product.stock}</td>
+                                <td><span className="badge badge-condition">{getFrenchCondition(product.condition)}</span></td>                                <td>{product.stock}</td>
                                 <td>
                                     {product.stock > 0 ? <span className="badge badge-instock">Oui</span> : <span className="badge badge-outstock">Non</span>}
                                 </td>
@@ -288,8 +295,14 @@ export default function AdminProductsPage() {
                                     {/* Chiffres */}
                                     <div className="form-group">
                                         <label>Prix (Valeur) € *</label>
-                                        <input type="number" step="0.01" required value={currentProduct.price} onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} />
-                                    </div>
+<input 
+                                            type="number" 
+                                            step="0.01" 
+                                            required 
+                                            value={currentProduct.price} 
+                                            onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} 
+                                            placeholder="0.00" // Optionnel : Ajoute un placeholder visuel
+                                        />                                    </div>
                                     <div className="form-group">
                                         <label>Stock *</label>
                                         <input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} />
@@ -343,26 +356,50 @@ export default function AdminProductsPage() {
                                     {/* Dimensions & Technique */}
                                     <div className="form-group">
                                         <label>Poids (kg)</label>
-                                        <input type="number" step="0.1" value={currentProduct.weight || 0} onChange={e => setCurrentProduct({...currentProduct, weight: e.target.value})} />
-                                    </div>
+                                        <input 
+                                            type="number" 
+                                            step="0.1" 
+                                            value={currentProduct.weight} // RETIRER LE "|| 0" ICI
+                                            onChange={e => setCurrentProduct({...currentProduct, weight: e.target.value})} 
+                                            placeholder="0"
+                                        />                                    </div>
                                     <div className="form-group">
                                         <label>Nb Pièces</label>
-                                        <input type="number" value={currentProduct.pieceCount || 0} onChange={e => setCurrentProduct({...currentProduct, pieceCount: e.target.value})} />
-                                    </div>
+                                        <input 
+                                            type="number" 
+                                            value={currentProduct.pieceCount}
+                                            onChange={e => setCurrentProduct({...currentProduct, pieceCount: e.target.value})} 
+                                            placeholder="0"
+                                        />                                    </div>
 
                                     {/* --- AJOUT DES DIMENSIONS MANQUANTES --- */}
                                     <div className="form-group">
                                         <label>Longueur (cm)</label>
-                                        <input type="number" step="0.1" value={currentProduct.length || 0} onChange={e => setCurrentProduct({...currentProduct, length: e.target.value})} />
-                                    </div>
+<input 
+                                            type="number" 
+                                            step="0.1" 
+                                            value={currentProduct.length} // RETIRER LE "|| 0" ICI
+                                            onChange={e => setCurrentProduct({...currentProduct, length: e.target.value})} 
+                                            placeholder="0"
+                                        />                                    </div>
                                     <div className="form-group">
                                         <label>Largeur (cm)</label>
-                                        <input type="number" step="0.1" value={currentProduct.width || 0} onChange={e => setCurrentProduct({...currentProduct, width: e.target.value})} />
-                                    </div>
+<input 
+                                            type="number" 
+                                            step="0.1" 
+                                            value={currentProduct.width} // RETIRER LE "|| 0" ICI
+                                            onChange={e => setCurrentProduct({...currentProduct, width: e.target.value})} 
+                                            placeholder="0"
+                                        />                                    </div>
                                     <div className="form-group">
                                         <label>Hauteur (cm)</label>
-                                        <input type="number" step="0.1" value={currentProduct.height || 0} onChange={e => setCurrentProduct({...currentProduct, height: e.target.value})} />
-                                    </div>
+<input 
+                                            type="number" 
+                                            step="0.1" 
+                                            value={currentProduct.height} // RETIRER LE "|| 0" ICI
+                                            onChange={e => setCurrentProduct({...currentProduct, height: e.target.value})} 
+                                            placeholder="0"
+                                        />                                    </div>
                                     
                                     <div className="form-group full-width">
                                         <label>Notice PDF</label>
