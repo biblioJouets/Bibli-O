@@ -23,8 +23,8 @@ export default function Protocol() {
             className="ImageProtocol"
             src={Nettoyage}
             alt="Image du protocole de nettoyage et de réparation des jouets Bibli'O Jouets"
-            width={400} // largeur souhaitée
-            height={400} // hauteur souhaitée
+            width={400} 
+            height={400} 
           />
         </div>
         <div className="Text">

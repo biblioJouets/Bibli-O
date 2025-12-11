@@ -7,8 +7,12 @@ services:
         NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
     container_name: biblio-app
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     env_file:
       - .env.production
+    volumes:
+      - ./public/uploads:/app/public/uploads
     depends_on:
       db:
         condition: service_healthy

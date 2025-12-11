@@ -23,7 +23,7 @@ function CardsPlans(){
 {/* === Carte 1 Rouge | Decouverte Card ===*/}
 <CardsPlan
 title={"Découverte"}
-price={"19€"}
+price={"19"}
 theme="theme-red"
 button={<ButtonRed text="L'offre découverte" href="/abonnements"/>}
 list={decouverteList}

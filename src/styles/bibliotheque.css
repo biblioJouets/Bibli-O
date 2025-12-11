@@ -1,0 +1,246 @@
+/* src/styles/bibliotheque.css */
+.bibliotheque-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: 80vh;
+  margin-top: 6rem;
+}
+
+.catalog-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.catalog-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.catalog-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* --- Barre de filtres --- */
+.filters-bar {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #f0f0f0;
+}
+
+.search-group {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.search-input {
+  width: 90%;
+  padding: 12px 5px;
+  padding-left: 45px;
+  border: 2px solid #eee;
+  border-radius: 50px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #6EC1E4;
+  box-shadow: 0 0 0 4px rgba(110, 193, 228, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.filter-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 10px 20px;
+  border: 2px solid #eee;
+  border-radius: 50px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #555;
+  transition: border-color 0.3s;
+}
+
+.filter-select:hover {
+  border-color: #FF8C94;
+}
+
+/* --- Grille de produits --- */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* --- Carte Produit --- */
+.product-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  height: 100%;
+  position: relative;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
+
+.product-image-wrapper {
+  position: relative;
+  height: 220px;
+  background-color: #f8f8f8;
+  overflow: hidden;
+}
+
+.product-image {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+}
+
+
+
+.product-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #88d4ab;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  animation: popIn 0.5s ease-out;
+}
+
+.product-badge-new {
+  position: absolute;
+  top: 15px;
+  right: 15px; 
+  background-color: #FF8C94;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px; 
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(255, 140, 148, 0.3);
+  z-index: 2;
+  animation: popIn 0.5s ease-out; 
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.product-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-brand {
+  color: #999;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.product-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2E1D21;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.product-rating {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.product-price {
+  margin-top: auto; /* Pousse le prix vers le bas */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Prend tout l'espace disponible */
+}
+
+.product-action-footer {
+  padding: 0 1.5rem 1.5rem 1.5rem; /* Marges internes en bas */
+  margin-top: auto; /* Pousse le bouton vers le bas si les titres sont courts */
+  justify-content: center;
+  margin: auto;
+}
+.buttonPanier .Button.Blue {
+  padding: 15px 25px;
+  font-size: 0.9rem !important;  
+  display: inline-block;
+  text-align: center;
+}
+é
+/* Petit effet au survol spécifique à ce bouton */
+.buttonPanier .Button.Blue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(110, 193, 228, 0.3);
+}
+.price-period {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: normal;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  grid-column: 1 / -1;
+  color: #777;
+}

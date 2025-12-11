@@ -7,6 +7,105 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+model Users {
+  id        Int     @id @default(autoincrement())
+  firstName String? @db.VarChar(255)
+  lastName  String? @db.VarChar(255)
+  email     String  @unique @db.VarChar(255)
+  password  String  @db.VarChar(255)
+  phone     String? @db.VarChar(20)
+
+  // Gestion des rôles (Défaut : USER)
+  role Role @default(USER)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  Orders    Orders[]
+  Addresses Address[] // Un utilisateur peut avoir plusieurs adresses
+  reviews   Reviews[]
+  cart      Cart?
+}
+
+// Modèle Adresse 
+model Address {
+  id      Int     @id @default(autoincrement())
+  name    String? @db.VarChar(100) // Ex: "Maison", "Bureau"
+  street  String  @db.VarChar(255)
+  zipCode String  @db.VarChar(20)
+  city    String  @db.VarChar(100)
+  country String  @default("France") @db.VarChar(100)
+
+  // Clé étrangère vers l'utilisateur
+  userId Int
+  User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id     Int   @id @default(autoincrement())
+  userId Int   @unique // Un seul panier par utilisateur
+  user   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items CartItem[] // Liste des articles
+
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+}
+
+model CartItem {
+  id Int @id @default(autoincrement())
+
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId Int
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  quantity Int @default(1)
+
+  @@unique([cartId, productId])
+}
+
+model Orders {
+  id          Int   @id @default(autoincrement())
+  totalAmount Float
+
+  // On utilise l'enum pour un suivi strict
+  status OrderStatus @default(PENDING)
+
+  // Champs logistique
+  trackingNumber String? @db.VarChar(100) // Numéro de suivi Colissimo/Mondial Relay
+
+  // ... (Champs Shipping ajoutés à l'étape précédente) ...
+  shippingName    String? @db.VarChar(255)
+  shippingAddress String? @db.VarChar(255)
+  shippingZip     String? @db.VarChar(20)
+  shippingCity    String? @db.VarChar(100)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  userId        Int?
+  Users         Users?          @relation(fields: [userId], references: [id])
+  OrderProducts OrderProducts[]
+}
+
+enum OrderStatus {
+  PENDING // En attente de paiement/validation
+  PREPARING // En cours de préparation
+  SHIPPED // Expédié chez le client
+  ACTIVE // Reçu par le client (Location en cours)
+  RETURNING // En cours de retour
+  RETURNED // Reçu par vous (en attente vérification)
+  COMPLETED // Vérifié et clôturé
+  CANCELLED // Annulé
+}
+
 model OrderProducts {
   createdAt DateTime @db.Timestamptz(6)
   updatedAt DateTime @db.Timestamptz(6)
@@ -18,36 +117,69 @@ model OrderProducts {
   @@id([OrderId, ProductId])
 }
 
-model Orders {
-  id            Int             @id @default(autoincrement())
-  totalAmount   Float
-  status        String?         @default("pending") @db.VarChar(255)
-  createdAt     DateTime        @db.Timestamptz(6)
-  updatedAt     DateTime        @db.Timestamptz(6)
-  userId        Int?
-  OrderProducts OrderProducts[]
-  Users         Users?          @relation(fields: [userId], references: [id])
-}
-
 model Products {
-  id            Int             @id @default(autoincrement())
-  name          String          @db.VarChar(255)
-  description   String?
-  price         Float
-  stock         Int             @default(0)
-  createdAt     DateTime        @db.Timestamptz(6)
-  updatedAt     DateTime        @db.Timestamptz(6)
+  id Int @id @default(autoincrement())
+
+  // --- Infos de base ---
+  reference   String  @unique @db.VarChar(50) // Référence unique du jouet
+  name        String  @db.VarChar(255)
+  description String?
+  price       Float // Prix de location
+  stock       Int     @default(0)
+
+  // --- Catégorisation ---
+  brand    String?  @db.VarChar(100)
+  ageRange String?  @db.VarChar(50) // Ex: "3-6 ans"
+  category String?  @db.VarChar(100) // Ex: "Jeu de construction", "Jeu de société"
+  tags     String[] // Ex: ["Bois", "Montessori", "Educatif"]
+
+  // --- Médias & Documents ---
+  images    String[] // URLs des images
+  manualUrl String? // URL du PDF de la notice
+
+  // --- Caractéristiques physiques ---
+  weight     Float? // Poids en KG
+  length     Float? // Longueur en cm
+  width      Float? // Largeur en cm
+  height     Float? // Hauteur en cm
+  pieceCount Int? // Nombre total de pièces
+
+  // --- État et Mise en avant ---
+  condition  ProductCondition @default(NEW)
+  isFeatured Boolean          @default(false)
+
+  // --- Relations & Stats ---
+  rating  Float     @default(0) // Note moyenne (calculée)
+  reviews Reviews[] // Relation vers les avis
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
   OrderProducts OrderProducts[]
+  cartItems     CartItem[]
 }
 
-model Users {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  Orders    Orders[]
+// Nouveau modèle pour les avis clients
+model Reviews {
+  id      Int     @id @default(autoincrement())
+  rating  Int // Note sur 5
+  comment String? @db.Text
+
+  userId Int
+  User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId Int
+  Product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+}
+
+enum ProductCondition {
+  NEW
+  GOOD
+  FAIR
+  REPAIRING // En réparation (indisponible)
+  RETIRED // Retiré du stock
 }
 
 model newsletter_subscribers {
