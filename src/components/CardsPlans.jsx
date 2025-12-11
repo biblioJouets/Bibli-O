@@ -23,7 +23,7 @@ function CardsPlans(){
 {/* === Carte 1 Rouge | Decouverte Card ===*/}
 <CardsPlan
 title={"Découverte"}
-price={"19"}
+price={"25.99€"}
 theme="theme-red"
 button={<ButtonRed text="L'offre découverte" href="/abonnements"/>}
 list={decouverteList}
@@ -31,7 +31,7 @@ list={decouverteList}
 {/* === Carte 2 verte | Standard Card ===*/}
 <CardsPlan
 title={"Standard"}
-price={"25€"}
+price={"39.99€"}
 theme="theme-green"
 button={<ButtonGreen text="L'offre Standard" href="/abonnements"/>}
 list={standardList}
@@ -39,7 +39,7 @@ list={standardList}
 {/* === Carte 3 Jaune | Premium Card ===*/}
 <CardsPlan
 title={"Premium"}
-price={"32€"}
+price={"55.99€"}
 theme="theme-yellow"
 button={<ButtonYellow text="L'offre Premium" href="/abonnements"/>}
 list={premiumList}
