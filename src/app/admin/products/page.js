@@ -295,14 +295,14 @@ export default function AdminProductsPage() {
                                     {/* Chiffres */}
                                     <div className="form-group">
                                         <label>Prix (Valeur) € *</label>
-<input 
+                                        <input 
                                             type="number" 
-                                            step="0.01" 
+                                            step="0" 
                                             required 
                                             value={currentProduct.price} 
                                             onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} 
-                                            placeholder="0.00" // Optionnel : Ajoute un placeholder visuel
-                                        />                                    </div>
+                                        />                                  
+                                        </div>
                                     <div className="form-group">
                                         <label>Stock *</label>
                                         <input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} />
