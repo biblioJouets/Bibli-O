@@ -4,27 +4,25 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle } from 'lucide-react';
+import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle, Check } from 'lucide-react';
 import '@/styles/productDetail.css';
 
 export default function ProductDetailClient({ product }) {
   // Gestion de la galerie d'images
   const images = product.images && product.images.length > 0 
     ? product.images 
-    : ['/assets/toys/jouet1.jpg']; // Image par défaut
+    : ['/assets/toys/jouet1.jpg'];
     
   const [selectedImage, setSelectedImage] = useState(images[0]);
+  const { addToCart } = useCart();
 
-const { addToCart } = useCart();
+  const isOutOfStock = product.stock <= 0;
 
-//vérification dans le stock 
-const isOutOfStock =  product.stock <=0;
-
-const handleAddToCart = () => {
-  if(!isOutOfStock) { 
-  addToCart(product.id, 1);
-  }
-};
+  const handleAddToCart = () => {
+    if(!isOutOfStock) { 
+      addToCart(product.id, 1);
+    }
+  };
 
   return (
     <div className="product-page-container">
@@ -34,53 +32,73 @@ const handleAddToCart = () => {
       </div>
 
       <div className="product-main">
-        {/* --- COLONNE GAUCHE : GALERIE --- */}
-        <div className="gallery-container">
-          <div className="main-image-wrapper" style={{ opacity: isOutOfStock ? 0.5 : 1 }}>
-            {isOutOfStock && (
-                <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10,
-                    background: 'rgba(0,0,0,0.7)', color: 'white',
-                    padding: '1rem 2rem', borderRadius: '10px',
-                    fontWeight: 'bold', fontSize: '1.5rem'
-                }}>
-                    MOMENTANÉMENT LOUÉ
-                </div>
+        
+        {/* --- COLONNE GAUCHE : GALERIE + POINTS FORTS --- */}
+        <div className="left-column">
+          <div className="gallery-container">
+            <div className="main-image-wrapper" style={{ opacity: isOutOfStock ? 0.5 : 1 }}>
+              {isOutOfStock && (
+                  <div style={{
+                      position: 'absolute', top: '50%', left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 10,
+                      background: 'rgba(0,0,0,0.7)', color: 'white',
+                      padding: '1rem 2rem', borderRadius: '10px',
+                      fontWeight: 'bold', fontSize: '1.5rem'
+                  }}>
+                      MOMENTANÉMENT LOUÉ
+                  </div>
+              )}
+              <Image 
+                src={selectedImage} 
+                alt={product.name} 
+                fill
+                className="main-image"
+                priority
+              />
+            </div>
+            
+            {/* Miniatures */}
+            {images.length > 1 && (
+              <div className="thumbnails">
+                {images.map((img, index) => (
+                  <button 
+                    key={index}
+                    className={`thumb-btn ${selectedImage === img ? 'active' : ''}`}
+                    onClick={() => setSelectedImage(img)}
+                  >
+                    <Image 
+                      src={img} 
+                      alt={`Vue ${index + 1}`} 
+                      width={80} 
+                      height={80} 
+                      className="thumb-img"
+                    />
+                  </button>
+                ))}
+              </div>
             )}
-            <Image 
-              src={selectedImage} 
-              alt={product.name} 
-              fill
-              className="main-image"
-              priority
-            />
           </div>
-          
-          {/* Miniatures (seulement si plusieurs images) */}
-          {images.length > 1 && (
-            <div className="thumbnails">
-              {images.map((img, index) => (
-                <button 
-                  key={index}
-                  className={`thumb-btn ${selectedImage === img ? 'active' : ''}`}
-                  onClick={() => setSelectedImage(img)}
-                >
-                  <Image 
-                    src={img} 
-                    alt={`Vue ${index + 1}`} 
-                    width={80} 
-                    height={80} 
-                    className="thumb-img"
-                  />
-                </button>
-              ))}
+
+          {/* --- SECTION "LES + DU PRODUIT" (Sous l'image) --- */}
+          {product.highlights && product.highlights.length > 0 && (
+            <div className="product-highlights-section" style={{marginTop: '3rem'}}>
+              <h3 style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#88D4AB', marginBottom: '1rem'}}>
+                Les + du produit
+              </h3>
+              <ul style={{listStyle: 'none', padding: 0}}>
+                {product.highlights.map((point, index) => (
+                  <li key={index} style={{display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', color: '#555', lineHeight: '1.5'}}>
+                    <Check size={20} color="#88D4AB" style={{flexShrink: 0, marginTop: '2px'}} />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
 
-        {/* --- COLONNE DROITE  --- */}
+        {/* --- COLONNE DROITE : INFOS --- */}
         <div className="product-info">
           <div className="brand-badge">{product.brand || 'Bibli\'O'}</div>
           <h1 className="product-title">{product.name}</h1>
@@ -93,7 +111,11 @@ const handleAddToCart = () => {
                 <>0€ <span className="price-period">avec votre abonnement au lieu de </span> {product.price}€</>
             )}
           </div>
-          <p className="description">{product.description}</p>
+
+          {/* DESCRIPTION AVEC SAUTS DE LIGNE */}
+          <div className="description" style={{ whiteSpace: 'pre-wrap' }}>
+            {product.description}
+          </div>
 
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
@@ -106,7 +128,7 @@ const handleAddToCart = () => {
 
           {/* Boutons d'action */}
           <div className="actions">
-          {isOutOfStock ? (
+            {isOutOfStock ? (
                 <button 
                     disabled 
                     className="add-to-cart-btn" 

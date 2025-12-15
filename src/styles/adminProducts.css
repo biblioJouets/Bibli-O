@@ -20,13 +20,42 @@
     color: #2E1D21;
 }
 
+/* --- RECHERCHE --- */
+.search-wrapper {
+    position: relative;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 10px 10px 45px;
+    border: 2px solid #eee;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    border-color: #6EC1E4;
+}
+
 /* --- TABLEAU --- */
 .table-container {
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     overflow: hidden;
-    overflow-x: auto; /* Pour le responsive */
+    overflow-x: auto;
 }
 
 .product-table {
@@ -53,16 +82,35 @@
 }
 
 .product-table tr:hover {
-    background-color: #fffbf5; /* Léger jaune au survol */
+    background-color: #fffbf5;
+}
+
+.img-thumbnail-wrapper {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.no-image-text {
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
 }
 
 /* --- BADGES --- */
 .badge {
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
     display: inline-block;
+    text-transform: uppercase;
 }
 
 .badge-instock {
@@ -76,8 +124,9 @@
 }
 
 .badge-condition {
-    background-color: #6EC1E4;
-    color: white;
+    background-color: #EAF7FC;
+    color: #6EC1E4;
+    border: 1px solid #6EC1E4;
 }
 
 /* --- TOOLBAR D'ACTIONS (FLOTTANTE) --- */
@@ -93,7 +142,7 @@
     display: flex;
     gap: 1.5rem;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     z-index: 100;
     animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -115,12 +164,16 @@
     align-items: center;
     font-size: 0.75rem;
     gap: 5px;
-    transition: transform 0.2s;
+    transition: transform 0.2s, color 0.2s;
 }
 
 .toolbar-btn:hover {
     transform: scale(1.1);
     color: #ffe264;
+}
+
+.toolbar-btn.delete:hover {
+    color: #FF8C94;
 }
 
 /* --- MODALE --- */
@@ -155,6 +208,18 @@
     border-bottom: 2px solid #eee;
     padding-bottom: 1rem;
 }
+.modal-header h2{
+    background-color: none !important;
+    
+}
+.modal-footer {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 2px solid #eee;
+    padding-top: 1rem;
+}
 
 /* --- FORMULAIRE --- */
 .form-grid {
@@ -177,6 +242,9 @@
     font-weight: 600;
     font-size: 0.9rem;
     color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .form-group input, 
@@ -187,30 +255,214 @@
     border-radius: 8px;
     font-family: inherit;
     transition: border-color 0.3s;
+    background-color: #fff;
 }
 
 .form-group input:focus, 
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: #6EC1E4;
 }
 
-.image-preview-grid {
+/* Zone Description Textarea */
+.form-group textarea {
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+/* --- IMAGES & DRAG AND DROP --- */
+.image-upload-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px dashed #ddd;
+}
+
+.image-upload-controls {
     display: flex;
     gap: 10px;
     margin-top: 10px;
-    flex-wrap: wrap;
 }
 
-.img-preview {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
+.btn-upload-trigger {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    background-color: white;
+    border: 2px solid #eee;
     border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.btn-upload-trigger:hover {
+    border-color: #6EC1E4;
+    color: #6EC1E4;
+}
+
+/* Grille des images */
+.image-grid {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.image-card {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #eee;
+    background: white;
+    cursor: grab;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.image-card:active {
+    cursor: grabbing;
+}
+
+.image-card.dragging {
+    opacity: 0.5;
+    border-color: #6EC1E4;
+    transform: scale(1.05);
+}
+
+.image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none; /* Important pour le DnD */
+}
+
+/* Bouton supprimer sur l'image */
+.btn-remove-image {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #FF8C94;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+.btn-remove-image:hover {
+    background: #FF8C94;
+    color: white;
+}
+
+/* Badge de position (1, 2, 3...) */
+.image-position-badge {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* --- LISTE "LES + DU PRODUIT" --- */
+.highlight-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.highlight-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.highlight-item span {
+    flex: 1;
+}
+
+/* --- BOUTONS GÉNÉRIQUES --- */
+.btn-cancel {
+    padding: 10px 20px;
+    border-radius: 30px;
     border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #f5f5f5;
+}
+
+.btn-icon-only {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.btn-icon-only:hover {
+    background-color: rgba(0,0,0,0.05);
 }
 
 @keyframes slideUp {
     from { transform: translate(-50%, 50px); opacity: 0; }
     to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+    .action-toolbar {
+        width: 90%;
+        padding: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .toolbar-info {
+        border-right: none;
+        width: 100%;
+        text-align: center;
+        padding-right: 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.3);
+        padding-bottom: 0.5rem;
+    }
 }

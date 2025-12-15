@@ -126,7 +126,8 @@ model Products {
   description String?
   price       Float // Prix de location
   stock       Int     @default(0)
-
+  highlights String[]
+  
   // --- Catégorisation ---
   brand    String?  @db.VarChar(100)
   ageRange String?  @db.VarChar(50) // Ex: "3-6 ans"
