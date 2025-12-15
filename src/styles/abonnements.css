@@ -1,0 +1,321 @@
+/* src/styles/abonnements.css */
+
+/* --- Variables Charte --- */
+:root {
+  --col-blue: #6EC1E4;
+  --col-pink: #FF8C94;
+  --col-green: #88D4AB;
+  --col-yellow: #ffe264;
+  --col-text: #2E1D21;
+  --bg-cream: #FFFAF4;
+  --bg-white: #FFFFFF;
+}
+
+.abonnements-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-cream);
+  color: var(--col-text);
+  overflow-x: hidden;
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* --- 1. Hero Section --- */
+.abo-hero {
+  text-align: center;
+  padding: 5rem 1.5rem;
+  background: radial-gradient(circle at top, #DFF1F9 0%, var(--bg-cream) 70%);
+}
+
+.abo-hero h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.highlight-blue { color: var(--col-blue); }
+.highlight-pink { color: var(--col-pink); }
+
+.abo-hero p {
+  font-size: 1.25rem;
+  max-width: 800px;
+  margin: 0 auto 2.5rem;
+  color: #555;
+}
+
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.badge {
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* --- 2. Marques (Bandeau) --- */
+.abo-brands {
+  background: white;
+  padding: 2rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.abo-brands p {
+  color: #888;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.brands-scroller {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3rem;
+  opacity: 0.7;
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(100%);
+  transition: filter 0.3s;
+}
+
+.brand-logo:hover {
+  filter: grayscale(0%);
+}
+
+/* --- 3. Steps (Cartes Blanches) --- */
+.abo-how {
+  padding: 5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.abo-how h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: var(--col-text);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+}
+
+.step-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.02);
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 auto 1.5rem;
+}
+
+.num-1 { background: var(--col-blue); }
+.num-2 { background: var(--col-green); }
+.num-3 { background: var(--col-yellow); }
+.num-4 { background: var(--col-pink); }
+
+.step-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.step-card p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* --- 4. Plans Section (Couleur de fond différente) --- */
+.abo-plans-section {
+  background: #FFF0F5; /* Fond rosé très pâle pour distinguer */
+  padding: 5rem 1rem;
+  position: relative;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.plans-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.plans-container-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Important pour l'alignement vertical */
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Mise en avant de la carte Standard */
+.plan-wrapper-featured {
+  position: relative;
+  transform: scale(1.05); /* Légèrement plus gros */
+  z-index: 2;
+}
+
+.best-seller-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--col-pink);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(255, 140, 148, 0.4);
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .plan-wrapper-featured {
+    transform: scale(1);
+    margin-top: 1rem;
+  }
+}
+
+/* Override Colors for Plans (Vital pour le look) */
+.plans-container-wrapper .theme-red { border-top-color: var(--col-pink) !important; }
+.plans-container-wrapper .theme-red .ButtonRed { 
+  background-color: var(--col-pink) !important; 
+  border-color: var(--col-pink) !important; 
+}
+
+.plans-container-wrapper .theme-green { border-top-color: var(--col-green) !important; }
+.plans-container-wrapper .theme-green .ButtonGreen { 
+  background-color: var(--col-green) !important; 
+  border-color: var(--col-green) !important; 
+}
+
+.plans-container-wrapper .theme-yellow { border-top-color: var(--col-yellow) !important; }
+.plans-container-wrapper .theme-yellow .ButtonYellow { 
+  background-color: var(--col-yellow) !important; 
+  border-color: var(--col-yellow) !important;
+  color: var(--col-text) !important; 
+}
+
+/* --- 5. Benefices Detaillés (Zig Zag) --- */
+.abo-benefits-detailed {
+  padding: 5rem 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.benefit-row {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  margin-bottom: 5rem;
+}
+
+.benefit-row.reverse {
+  flex-direction: row-reverse;
+}
+
+.benefit-text {
+  flex: 1;
+}
+
+.benefit-text h3 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--col-text);
+  line-height: 1.2;
+}
+
+.benefit-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.benefit-visual {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.benefit-visual img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  background: white;
+  padding: 2rem;
+  border-radius: 30px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* --- 6. FAQ --- */
+.abo-faq {
+  padding: 5rem 1.5rem;
+  background: white;
+  text-align: center;
+}
+
+.abo-faq h2 {
+  font-size: 2.2rem;
+  margin-bottom: 3rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .benefit-row, .benefit-row.reverse {
+    flex-direction: column;
+    text-align: center;
+    gap: 2rem;
+  }
+  
+  .abo-hero h1 { font-size: 2.2rem; }
+  
+  .plans-container-wrapper {
+    align-items: center;
+  }
+}

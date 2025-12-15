@@ -55,6 +55,7 @@ export default function ProductDetailClient({ product }) {
                 fill
                 className="main-image"
                 priority
+                unoptimized
               />
             </div>
             
@@ -73,6 +74,7 @@ export default function ProductDetailClient({ product }) {
                       width={80} 
                       height={80} 
                       className="thumb-img"
+                      unoptimized
                     />
                   </button>
                 ))}
