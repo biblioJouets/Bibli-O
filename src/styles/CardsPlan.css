@@ -67,7 +67,7 @@
 
 /* BADGE POPULAIRE */
 .theme-green::before {
-    content: 'Le Plus Populaire';
+    content: 'Le préféré des parents';
     position: absolute;
     top: -15px;
     right: 30px;

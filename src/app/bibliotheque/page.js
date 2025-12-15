@@ -70,7 +70,7 @@ export default function LibraryPage() {
     <div className="bibliotheque-container">
       
       <header className="catalog-header">
-        <h1 className="catalog-title">Notre Ludothèque 🧸</h1>
+        <h1 className="catalog-title">Nos jouets 🧸</h1>
         <p className="catalog-subtitle">Explorez notre collection de jouets éco-responsables</p>
       </header>
 
