@@ -116,7 +116,7 @@ export default function HeaderBiblioJouets() {
                 href="#" 
                 onClick={(e) => {
                   e.preventDefault();
-                  signOut({ callbackUrl: '/' });
+                  signOut({ callbackUrl: window.location.origin });
                   closeBurger();
                 }}
                 style={{ borderTop: '1px solid #eee', marginTop: '10px', paddingTop: '15px' }}
@@ -164,12 +164,12 @@ export default function HeaderBiblioJouets() {
             )}
             
             <button 
-              className="Button Blue" 
-              onClick={() => signOut({ callbackUrl: '/' })}
-              style={{ padding: '15px 20px' }} 
-            >
-              Se déconnecter
-            </button>
+  className="Button Blue" 
+  onClick={() => signOut({ callbackUrl: window.location.origin })}
+  style={{ padding: '15px 20px' }} 
+>
+  Se déconnecter
+</button>
           </div>
         ) : (
           <button 
