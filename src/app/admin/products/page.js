@@ -303,8 +303,8 @@ export default function AdminProductsPage() {
                                 <td>
                                     <div className="img-thumbnail-wrapper">
                                         {product.images?.[0] ? (
-                                            <Image src={product.images[0]} alt="" fill style={{objectFit:'cover'}}/>
-                                        ) : (
+                                        <Image src={product.images[0]} alt="" fill style={{objectFit:'cover'}} unoptimized />  
+                                      ) : (
                                             <span className="no-image-text">Aucune</span>
                                         )}
                                     </div>
@@ -469,8 +469,7 @@ export default function AdminProductsPage() {
                                                     onDragOver={handleDragOver}
                                                     onDrop={() => handleDrop(i)}
                                                 >
-                                                    <Image src={img} alt="preview" fill />
-                                                    <span className="image-position-badge">{i + 1}</span>
+                                                <Image src={img} alt="preview" fill unoptimized />                                                    <span className="image-position-badge">{i + 1}</span>
                                                     {modalMode !== 'view' && (
                                                         <button type="button" onClick={() => removeImage(i)} className="btn-remove-image">
                                                             <X size={14}/>
