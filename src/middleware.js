@@ -4,10 +4,20 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(request) {
   const response = NextResponse.next();
   const origin = request.headers.get("origin");
-
-
   const path = request.nextUrl.pathname;
-  // Origines autorisées
+
+  // --- 0. LAISSER PASSER LES FICHIERS STATIQUES (Sécurité ceinture et bretelles) ---
+  // Si le matcher rate, ceci sauvera l'affichage des images
+  if (
+    path.startsWith("/uploads") || 
+    path.startsWith("/_next") || 
+    path.startsWith("/favicon.ico") ||
+    path.startsWith("/api/upload") // On laisse l'upload accessible pour le moment (géré par le controller)
+  ) {
+    return NextResponse.next();
+  }
+
+  // --- 1. GESTION CORS ---
   const allowedOrigins = [
     "https://www.bibliojouets.fr",
     "https://bibliojouets.fr",
@@ -15,7 +25,7 @@ export async function middleware(request) {
     "https://www.bibliojouets.com",
   ];
 
-  // Autoriser localhost en développement uniquement
+  // Autoriser localhost en développement
   if (process.env.NODE_ENV === "development") {
     allowedOrigins.push("http://localhost:3000");
     allowedOrigins.push("http://127.0.0.1:3000");
@@ -41,9 +51,7 @@ export async function middleware(request) {
     return new NextResponse(null, { status: 204, headers: response.headers });
   }
 
-
-// --- 2. Sécurité NextAuth ---
-// On récupère le token (secret doit être dans .env)
+  // --- 2. SÉCURITÉ NEXTAUTH ---
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET 
@@ -54,8 +62,7 @@ export async function middleware(request) {
 
   // Cas A : Non connecté essayant d'accéder à une page privée
   if ((isAdminRoute || isUserRoute) && !token) {
-    // Redirection vers login (ou accueil pour l'instant)
-    const url = new URL("/api/auth/signin", request.url);
+    const url = new URL("/connexion", request.url); // J'ai remis /connexion car c'est ta page de login
     url.searchParams.set("callbackUrl", path);
     return NextResponse.redirect(url);
   }
@@ -65,17 +72,13 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-
   return response;
 }
-//route à surveiller
+
+// Configuration du matcher (Routes surveillées)
 export const config = {
   matcher: [
-    // API routes
-    "/api/:path*",
-    // Pages protégées
-    "/admin/:path*",
-    "/mon-compte/:path*",
-    "/panier/:path*"
+    // La regex négative (?!) exclut tout ce qui commence par ces chemins
+    '/((?!_next/static|_next/image|favicon.ico|uploads|api/upload).*)',
   ],
 };
