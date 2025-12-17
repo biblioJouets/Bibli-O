@@ -3,37 +3,34 @@ import fs from 'fs';
 import path from 'path';
 
 export async function GET(request, { params }) {
-    const { filename } = params;
-
-    // --- DIAGNOSTIC DU CHEMIN ---
-    // On affiche dans la console du serveur où il croit être
-    const cwd = process.cwd();
-    const filePath = path.join(cwd, 'public/uploads', filename);
-    
-    console.log(`[DEBUG] Requete pour: ${filename}`);
-    console.log(`[DEBUG] Dossier de travail (CWD): ${cwd}`);
-    console.log(`[DEBUG] Chemin complet testé: ${filePath}`);
-
     try {
-        if (!fs.existsSync(filePath)) {
-            console.error(`[DEBUG] Fichier introuvable: ${filePath}`);
-            // On renvoie un message clair au navigateur
-            return new NextResponse(
-                `Erreur 404: Le fichier n'existe pas sur le disque.\nChemin cherché: ${filePath}`, 
-                { status: 404 }
-            );
+        const resolvedParams = await params;
+        const filename = resolvedParams.filename;
+
+        if (!filename) {
+            return new NextResponse("Nom de fichier manquant", { status: 400 });
         }
 
+        // Construction du chemin absolu
+        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+
+        // Vérification de l'existence sur le disque
+        if (!fs.existsSync(filePath)) {
+            console.error(`[GET UPLOAD] Fichier introuvable sur le disque : ${filePath}`);
+            return new NextResponse("Image non trouvée", { status: 404 });
+        }
+
+        // Lecture du fichier
         const fileBuffer = fs.readFileSync(filePath);
 
-        // Détection simple du type mime
+        // Détermination du type MIME
         const ext = path.extname(filename).toLowerCase();
         let contentType = 'application/octet-stream';
         if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
         else if (ext === '.png') contentType = 'image/png';
+        else if (ext === '.webp') contentType = 'image/webp';
         else if (ext === '.pdf') contentType = 'application/pdf';
         else if (ext === '.svg') contentType = 'image/svg+xml';
-        else if (ext === '.webp') contentType = 'image/webp';
 
         return new NextResponse(fileBuffer, {
             headers: {
@@ -43,11 +40,7 @@ export async function GET(request, { params }) {
         });
 
     } catch (error) {
-        console.error("[DEBUG] CRASH:", error);
-        // On renvoie l'erreur technique au navigateur pour la lire
-        return new NextResponse(
-            `Erreur 500 (Crash): ${error.message}\nStack: ${error.stack}`, 
-            { status: 500 }
-        );
+        console.error("[GET UPLOAD ERROR]", error);
+        return new NextResponse(`Erreur serveur : ${error.message}`, { status: 500 });
     }
 }
