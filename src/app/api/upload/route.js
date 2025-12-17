@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import path from 'path';
+import fs from 'fs';
 
 export async function POST(request) {
   try {
@@ -8,38 +9,38 @@ export async function POST(request) {
     const file = data.get('file');
 
     if (!file) {
-      return NextResponse.json({ success: false, message: "Aucun fichier fourni" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "Aucun fichier reçu" }, { status: 400 });
     }
 
-    // Convertir le fichier en Buffer (données brutes)
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Sécuriser le nom du fichier (Timestamp + nom nettoyé)
-    const filename = Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    
-    // Définir le chemin de sauvegarde
+    // Nettoyage du nom de fichier
+    const originalName = file.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '');
+    const filename = Date.now() + '-' + originalName;
+
+    // --- CORRECTION CHEMIN ABSOLU ---
+    // On utilise process.cwd() pour être sûr d'être à la racine du projet dans Docker
     const uploadDir = path.join(process.cwd(), 'public/uploads');
     
-    // S'assurer que le dossier existe
-    try {
-        await mkdir(uploadDir, { recursive: true });
-    } catch (e) {
-        // Le dossier existe déjà, on continue
+    // On s'assure que le dossier existe (au cas où)
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
     }
 
     const filePath = path.join(uploadDir, filename);
 
-    // Écrire le fichier sur le disque (dans le volume Docker)
+    console.log(`[UPLOAD DEBUG] Sauvegarde vers : ${filePath}`);
+
+    // Écriture du fichier
     await writeFile(filePath, buffer);
-    
-    // Retourner l'URL publique
-    const fileUrl = `/uploads/${filename}`;
-    
-    return NextResponse.json({ success: true, url: fileUrl });
+    console.log(`[UPLOAD DEBUG] Succès !`);
+
+    // Retourne l'URL relative pour la BDD
+    return NextResponse.json({ success: true, url: `/uploads/${filename}` });
 
   } catch (error) {
-    console.error("Erreur serveur upload:", error);
-    return NextResponse.json({ success: false, message: "Erreur lors de l'enregistrement du fichier" }, { status: 500 });
+    console.error("[UPLOAD ERROR]", error);
+    return NextResponse.json({ success: false, message: "Erreur serveur upload" }, { status: 500 });
   }
 }
