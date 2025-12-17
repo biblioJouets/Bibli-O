@@ -1,50 +1,40 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import mime from 'mime'; // Tu n'as peut-être pas cette lib, on va faire sans pour être sûr
 
 export async function GET(request, { params }) {
-    // 1. Récupérer le nom du fichier
     const { filename } = params;
 
-    // 2. Chemin absolu vers le dossier uploads (monté via Docker)
-    const filePath = path.join(process.cwd(), 'public/uploads', filename);
+    // --- DIAGNOSTIC DU CHEMIN ---
+    // On affiche dans la console du serveur où il croit être
+    const cwd = process.cwd();
+    const filePath = path.join(cwd, 'public/uploads', filename);
+    
+    console.log(`[DEBUG] Requete pour: ${filename}`);
+    console.log(`[DEBUG] Dossier de travail (CWD): ${cwd}`);
+    console.log(`[DEBUG] Chemin complet testé: ${filePath}`);
 
     try {
         if (!fs.existsSync(filePath)) {
-            return new NextResponse("Fichier non trouvé", { status: 404 });
+            console.error(`[DEBUG] Fichier introuvable: ${filePath}`);
+            // On renvoie un message clair au navigateur
+            return new NextResponse(
+                `Erreur 404: Le fichier n'existe pas sur le disque.\nChemin cherché: ${filePath}`, 
+                { status: 404 }
+            );
         }
 
-        // 3. Lire le fichier
         const fileBuffer = fs.readFileSync(filePath);
 
-        // 4. Déterminer le type MIME manuellement (plus robuste sans dépendance externe)
+        // Détection simple du type mime
         const ext = path.extname(filename).toLowerCase();
         let contentType = 'application/octet-stream';
+        if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+        else if (ext === '.png') contentType = 'image/png';
+        else if (ext === '.pdf') contentType = 'application/pdf';
+        else if (ext === '.svg') contentType = 'image/svg+xml';
+        else if (ext === '.webp') contentType = 'image/webp';
 
-        switch (ext) {
-            case '.jpg':
-            case '.jpeg':
-                contentType = 'image/jpeg';
-                break;
-            case '.png':
-                contentType = 'image/png';
-                break;
-            case '.gif':
-                contentType = 'image/gif';
-                break;
-            case '.webp':
-                contentType = 'image/webp';
-                break;
-            case '.svg':
-                contentType = 'image/svg+xml';
-                break;
-            case '.pdf':
-                contentType = 'application/pdf';
-                break;
-        }
-
-        // 5. Renvoyer le fichier
         return new NextResponse(fileBuffer, {
             headers: {
                 'Content-Type': contentType,
@@ -53,7 +43,11 @@ export async function GET(request, { params }) {
         });
 
     } catch (error) {
-        console.error("Erreur lecture fichier:", error);
-        return new NextResponse("Erreur serveur", { status: 500 });
+        console.error("[DEBUG] CRASH:", error);
+        // On renvoie l'erreur technique au navigateur pour la lire
+        return new NextResponse(
+            `Erreur 500 (Crash): ${error.message}\nStack: ${error.stack}`, 
+            { status: 500 }
+        );
     }
 }
