@@ -1,321 +1,752 @@
-/* src/styles/abonnements.css */
+/* --- IMPORT FONTS --- */
+/* Import de la police Quicksand pour un look arrondi et doux */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
 
-/* --- Variables Charte --- */
+/* --- VARIABLES CSS (DA) --- */
 :root {
+  /* Couleurs Principales */
   --col-blue: #6EC1E4;
   --col-pink: #FF8C94;
   --col-green: #88D4AB;
   --col-yellow: #ffe264;
+  --col-yellow-mi-pastel: #f7e7a2;
+  /* Couleurs Pastel */
+  --col-pastel-blue: #DFF1F9;
+  --col-pastel-pink: #FFD9DC;
+  --col-pastel-green: #DAEEE6;
+  --col-pastel-yellow: #FFF7D4;
+
+  /* Texte et Fonds */
   --col-text: #2E1D21;
-  --bg-cream: #FFFAF4;
-  --bg-white: #FFFFFF;
+  --col-bg-light: #FFFAF4;  /* Fond neutre principal */
+  --col-bg-warm: #FFF7EB;   /* Fond beige chaud (Section Pourquoi) */
+  --col-bg-accent: #FAE9CF; /* Fond un peu plus soutenu (Section Prix) */
+
+  /* Dimensions */
+  --container-width: 1140px;
+  --border-radius-lg: 25px;
+  --border-radius-md: 15px;
 }
 
-.abonnements-page {
-  width: 100%;
+/* --- STYLES GÉNERAUX / RESET BASIQUE --- */
+.subscription-page {
+  color: var(--col-text);
+  margin-top: 80px;
+  background-color: var(--col-bg-light);
+  overflow-x: hidden; 
+}
+
+h1, h2, h3 {
+  font-weight: 800 !important;
+  margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.5rem; line-height: 1.2; }
+h2 { font-size: 2rem !important; text-align: center !important; margin-bottom: 2.5rem !important; background-color: none !important;}
+h3 { font-size: 1.3rem; }
+p { line-height: 1.6; }
+
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  
+}
+
+section {
+  padding: 80px 0;
+}
+
+/* --- BOUTONS --- */
+.btn {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 50px; /* Boutons très arrondis */
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-primary { background-color: var(--col-pink); color: white; }
+.btn-pink { background-color: var(--col-pink); color: white; }
+.btn-yellow { background-color: var(--col-yellow); color: var(--col-text); }
+
+.btn-outline-blue { border: 2px solid var(--col-blue); color: var(--col-blue); background: transparent; }
+.btn-outline-green { border: 2px solid var(--col-green); color: var(--col-green); background: transparent; }
+
+.btn-large { padding: 16px 40px; font-size: 1.2rem; }
+
+/* =========================================
+   SECTION HERO
+========================================= */
+.hero-section {
+  position: relative;
+  padding-top: 200px;
+  padding-bottom: 160px;
+  background-color: var(--col-pastel-blue);
+  overflow: hidden;
+padding-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* --- GESTION DES FORMES D'ARRIÈRE-PLAN --- */
+.hero-bg-shapes .shape {
+  position: absolute;
+  z-index: 0;
+}
+
+.hero-bg-shapes .shape-blue {
+  top: -180px;
+  left: -150px;
+  width: 500px; /* Beaucoup plus grand */
+  height: 400px;
+  background-color: var(--col-blue);
+  opacity: 1;
+  border-radius: 100% 20% 100% 80% ;
+  transform: rotate(10deg); 
+}
+.hero-bg-shapes .shape-blue2 {
+  top: -50px;
+  left: 250px;
+  width: 300px; 
+  height: 200px;
+  background-color: var(--col-blue);
+  opacity: 1;
+  border-radius: 0% 60% 90% 50% ;
+  transform: rotate(15deg); 
+}
+.hero-bg-shapes .shape-pink {
+  top: 40px;
+  right: -200px; 
+  width: 700px; 
+  height: 650px;
+  background-color: var(--col-pastel-pink);
+  opacity: 1;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  transform: rotate(10deg);
+}
+
+/* --- AJOUT DE LA VAGUE DU BAS EN CSS (Bonus) --- */
+.wave-container {
+    position: absolute;
+    bottom: -1;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0; 
+    z-index: 1;
+}
+
+.wave-container svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px); /* Petite astuce pour éviter une ligne blanche sur certains écrans */
+    height: 60px; 
+}
+
+/* --- LE CONTENU --- */
+.hero-content {
+  display: flex;
+  align-items: center; 
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  max-width: 1200px; 
+  margin: 0 auto;
+}
+
+.hero-text {
+    flex: 1.1; /* On donne un peu plus de place au texte */
+    padding-right: 50px;
+}
+
+.hero-text h1 {
+    font-size: 2.8rem; 
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+.shape-white{
+  background-color: white;
+  padding: 20px;
+  border-radius:70% 70% 70% 70% ;
+  margin: auto 0;
+
+}
+.hero-text .subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    max-width: 90%;
+}
+
+.hero-benefits-list {
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: var(--col-text); 
+    font-weight: 500;
+}
+.hero-benefits-list span { margin-right: 20px; display: inline-block; }
+
+
+/* --- L'IMAGE --- */
+.hero-image {
+    flex: 1;
+    text-align: right; /* On aligne l'image à droite */
+    position: relative;
+    margin-right: -40px;
+    margin-top: 20px;
+}
+
+.hero-image img {
+  max-width: 115%; 
+  height: auto;
+  object-fit: contain;
+  transform: rotate(2deg);
+}
+
+/* =========================================
+   SECTION POURQUOI CHOISIR
+========================================= */
+.why-section { background-color: var(--col-bg-warm); }
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  text-align: center;
+}
+
+.benefit-card { padding: 20px; }
+
+.icon-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2.5rem; /* Taille de l'emoji */
+}
+.icon-yellow { background-color: var(--col-pastel-yellow); color: var(--col-yellow); }
+.icon-blue { background-color: var(--col-pastel-blue); color: var(--col-blue); }
+.icon-green { background-color: var(--col-pastel-green); color: var(--col-green); }
+.icon-pink { background-color: var(--col-pastel-pink); color: var(--col-pink); }
+
+
+/* =========================================
+   SECTION COMMENT ÇA MARCHE
+========================================= */
+.how-it-works-section { background-color: var(--col-bg-warm); }
+
+.steps-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding: 40px 0;
+}
+
+/* Ligne pointillée connectrice */
+.steps-connector.desktop-only {
+  position: absolute;
+  top: 70px; /* Ajuster selon la hauteur des blobs */
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  border-top: 3px dashed var(--col-pastel-blue);
+  z-index: 0;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-number-shape {
+  display: inline-block;
+  padding: 35px 35px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; /* Forme "blob" organique */
+  font-weight: 700;
+  margin-bottom: 20px;
+  min-width: 140px;
+}
+.step-item .shape-blue { background-color: var(--col-pastel-blue); }
+.step-item .shape-yellow { background-color: var(--col-yellow-mi-pastel); }
+.step-item .shape-green { background-color: var(--col-pastel-green); }
+.step-item .shape-pink { background-color: var(--col-pastel-pink); }
+
+
+/* =========================================
+   SECTION PRICING (FORMULES)
+========================================= */
+.pricing-section { background-color: var(--col-bg-accent); }
+
+.pricing-grid {
+  display: flex;
+  justify-content: center;
+  align-items: stretch; /* Pour que les cartes aient la même hauteur */
+  gap: 20px;
+  padding-top: 20px; /* Espace pour la bannière "Préféré" */
+}
+
+.pricing-card {
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  flex: 1;
+  max-width: 350px;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-cream);
-  color: var(--col-text);
-  overflow-x: hidden;
-  font-family: var(--font-sans, sans-serif);
-}
-
-/* --- 1. Hero Section --- */
-.abo-hero {
-  text-align: center;
-  padding: 5rem 1.5rem;
-  background: radial-gradient(circle at top, #DFF1F9 0%, var(--bg-cream) 70%);
-}
-
-.abo-hero h1 {
-  font-size: 3rem;
-  font-weight: 900;
-  margin-bottom: 1.5rem;
-  line-height: 1.1;
-}
-
-.highlight-blue { color: var(--col-blue); }
-.highlight-pink { color: var(--col-pink); }
-
-.abo-hero p {
-  font-size: 1.25rem;
-  max-width: 800px;
-  margin: 0 auto 2.5rem;
-  color: #555;
-}
-
-.hero-badges {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.badge {
-  background: white;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.05);
-}
-
-/* --- 2. Marques (Bandeau) --- */
-.abo-brands {
-  background: white;
-  padding: 2rem 1rem;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-}
-
-.abo-brands p {
-  color: #888;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-}
-
-.brands-scroller {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 3rem;
-  opacity: 0.7;
-}
-
-.brand-logo {
-  height: 40px;
-  width: auto;
-  object-fit: contain;
-  filter: grayscale(100%);
-  transition: filter 0.3s;
-}
-
-.brand-logo:hover {
-  filter: grayscale(0%);
-}
-
-/* --- 3. Steps (Cartes Blanches) --- */
-.abo-how {
-  padding: 5rem 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.abo-how h2 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: var(--col-text);
-}
-
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 2rem;
-}
-
-.step-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 20px;
-  text-align: center;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
   transition: transform 0.3s ease;
-  border: 1px solid rgba(0,0,0,0.02);
+  border-radius: 25px;
+  position: relative
 }
 
-.step-card:hover {
-  transform: translateY(-5px);
-}
-
-.step-number {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: white;
-  margin: 0 auto 1.5rem;
-}
-
-.num-1 { background: var(--col-blue); }
-.num-2 { background: var(--col-green); }
-.num-3 { background: var(--col-yellow); }
-.num-4 { background: var(--col-pink); }
-
-.step-card h3 {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.step-card p {
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.5;
-}
-
-/* --- 4. Plans Section (Couleur de fond différente) --- */
-.abo-plans-section {
-  background: #FFF0F5; /* Fond rosé très pâle pour distinguer */
-  padding: 5rem 1rem;
-  position: relative;
-}
-
-.plans-header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.plans-header h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.plans-container-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* Important pour l'alignement vertical */
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
-/* Mise en avant de la carte Standard */
-.plan-wrapper-featured {
-  position: relative;
-  transform: scale(1.05); /* Légèrement plus gros */
+/* Carte mise en avant */
+.pricing-card.highlighted {
+  transform: scale(1.05);
   z-index: 2;
+  border: 2px solid var(--col-yellow);
 }
 
-.best-seller-badge {
+
+.preferred-banner {
   position: absolute;
-  top: -15px;
+  top: -18px; 
   left: 50%;
   transform: translateX(-50%);
-  background: var(--col-pink);
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9rem;
+  background-color: var(--col-yellow);
+  color: var(--col-text);
+  font-weight: 700;
+  letter-spacing: 2px; 
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(255, 140, 148, 0.4);
-  z-index: 10;
+  padding: 10px 24px;
+  border-radius: 30px; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
 }
 
-@media (max-width: 768px) {
-  .plan-wrapper-featured {
-    transform: scale(1);
-    margin-top: 1rem;
-  }
+.pricing-header {
+  padding: 25px;
+  text-align: center;
+  border-top-left-radius: 25px; 
+  border-top-right-radius: 25px;
+}
+.header-blue { background-color: var(--col-pastel-blue); }
+.header-pink { background-color: var(--col-pastel-pink); }
+.header-green { background-color: var(--col-pastel-green); }
+
+.pricing-body {
+  padding: 30px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Override Colors for Plans (Vital pour le look) */
-.plans-container-wrapper .theme-red { border-top-color: var(--col-pink) !important; }
-.plans-container-wrapper .theme-red .ButtonRed { 
-  background-color: var(--col-pink) !important; 
-  border-color: var(--col-pink) !important; 
+.price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--col-text);
+  margin-bottom: 25px;
+}
+.price-large { font-size: 3rem; color: var(--col-pink); }
+.per-month { font-size: 1rem; font-weight: 400; color: #777; }
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+  text-align: left;
+  display: inline-block;
+  flex-grow: 1;
 }
 
-.plans-container-wrapper .theme-green { border-top-color: var(--col-green) !important; }
-.plans-container-wrapper .theme-green .ButtonGreen { 
-  background-color: var(--col-green) !important; 
-  border-color: var(--col-green) !important; 
+.features-list li {
+  margin-bottom: 12px;
+  position: relative;
+  padding-left: 25px;
 }
 
-.plans-container-wrapper .theme-yellow { border-top-color: var(--col-yellow) !important; }
-.plans-container-wrapper .theme-yellow .ButtonYellow { 
-  background-color: var(--col-yellow) !important; 
-  border-color: var(--col-yellow) !important;
-  color: var(--col-text) !important; 
+.features-list li::before {
+  content: '•'; position: absolute; left: 0; color: #ccc; font-size: 1.5em; line-height: 1; top: -2px;
 }
 
-/* --- 5. Benefices Detaillés (Zig Zag) --- */
-.abo-benefits-detailed {
-  padding: 5rem 1.5rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
+/* Puces "Check" pour la carte mise en avant */
+.checkout-list li { padding-left: 0; }
+.checkout-list li::before { content: none; }
 
-.benefit-row {
+
+.pricing-body button { width: 100%; margin-top: auto; /* Pousse le bouton vers le bas */ }
+
+/* =========================================
+   SECTION OFFRE SUR MESURE (CUSTOM)
+========================================= */
+.custom-offer-card {
+  margin-top: 60px; /* Espace avec les cartes du dessus */
+  background-color: var(--col-bg-light); /* Fond clair ou blanc */
+  border: 3px dashed var(--col-yellow); /* Bordure en pointillés pour l'effet "Bonus" */
+  border-radius: var(--border-radius-lg);
+  padding: 40px;
   display: flex;
   align-items: center;
-  gap: 4rem;
-  margin-bottom: 5rem;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 }
 
-.benefit-row.reverse {
-  flex-direction: row-reverse;
+/* Petit effet de fond décoratif (optionnel) */
+.custom-offer-card::before {
+  content: '';
+  position: absolute;
+  top: -50px; left: -50px; width: 150px; height: 150px;
+  background-color: var(--col-pastel-yellow);
+  border-radius: 50%;
+  z-index: 0;
 }
 
-.benefit-text {
+.custom-offer-content {
   flex: 1;
+  padding-right: 40px;
+  position: relative;
+  z-index: 1;
 }
 
-.benefit-text h3 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+.custom-offer-content h3 {
   color: var(--col-text);
-  line-height: 1.2;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
 }
 
-.benefit-text p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #555;
+.custom-badge {
+  display: inline-block;
+  background-color: var(--col-pastel-yellow);
+  color: #dfa800; /* Un jaune plus foncé pour le texte */
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
-.benefit-visual {
-  flex: 1;
+.custom-offer-details {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
   display: flex;
-  justify-content: center;
+  gap: 20px;
 }
 
-.benefit-visual img {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  background: white;
-  padding: 2rem;
-  border-radius: 30px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+.custom-offer-details li {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* --- 6. FAQ --- */
-.abo-faq {
-  padding: 5rem 1.5rem;
+/* Partie Droite : Prix et Bouton */
+.custom-offer-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Aligner à droite */
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  min-width: 250px; /* S'assurer que ça ne s'écrase pas */
+}
+
+.custom-price-box {
+  text-align: right;
+}
+
+.custom-price-box .label {
+  display: block;
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.custom-price-box .price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--col-text);
+}
+
+.custom-price-box .price small {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #777;
+}
+
+
+
+/* =========================================
+   SECTION SOCIAL PROOF & FAQ
+========================================= */
+.social-faq-section {
+  background-color: var(--col-bg-light);
+  position: relative;
+}
+
+/* Formes décoratives d'arrière-plan */
+.testimonials-col { position: relative; }
+.blob {
+  position: absolute; border-radius: 50%; z-index: 0; opacity: 0.3;
+}
+.blob-1 { top: 50px; left: -50px; width: 200px; height: 200px; background: var(--col-pastel-green); }
+.blob-2 { bottom: 50px; right: 50px; width: 150px; height: 150px; background: var(--col-pastel-blue); }
+
+
+.social-faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+  position: relative; z-index: 1; /* Au-dessus des blobs */
+}
+
+/* Témoignages */
+.testimonial-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  max-width: 80%;
+}
+.testimonial-right { align-items: flex-end; margin-left: auto; }
+
+.testimonial-bubble {
+  padding: 20px 25px;
+  border-radius: 20px;
+  background-color: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  margin-bottom: 15px;
+  position: relative;
+  font-style: italic;
+}
+/* Petit triangle de la bulle */
+.testimonial-bubble::after {
+  content: ''; position: absolute; bottom: -10px; left: 30px;
+  border-width: 10px 10px 0; border-style: solid; border-color: white transparent;
+}
+.testimonial-right .testimonial-bubble::after { left: auto; right: 30px; }
+
+.bubble-green { background-color: var(--col-pastel-green); }
+.bubble-green::after { border-color: var(--col-pastel-green) transparent; }
+.bubble-yellow { background-color: var(--col-pastel-yellow); }
+.bubble-yellow::after { border-color: var(--col-pastel-yellow) transparent; }
+
+
+.testimonial-user { display: flex; align-items: center; }
+.user-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover;}
+.testimonial-right .testimonial-user { flex-direction: row-reverse; }
+.testimonial-right .user-avatar { margin-right: 0; margin-left: 15px; }
+
+
+/* FAQ (Accordéon) */
+.faq-list { display: flex; flex-direction: column; gap: 15px; }
+.faq-item {
   background: white;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.faq-question {
+  width: 100%;
+  text-align: left;
+  padding: 20px;
+  background: none; border: none;
+  font-family: inherit; font-weight: 700; font-size: 1.1rem; color: var(--col-text);
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer;
+}
+.faq-toggle { font-size: 1.5rem; color: var(--col-blue); }
+.faq-answer {
+  padding: 0 20px 20px; color: #555;
+}
+
+
+/* =========================================
+   SECTION FOOTER CTA
+========================================= */
+.footer-cta-section {
+  background-color: var(--col-green);
+  color: white;
   text-align: center;
+  padding: 80px 0;
+}
+.footer-cta-section h2 { color: white; margin-bottom: 30px; }
+
+
+/* =========================================
+   RESPONSIVE / MEDIA QUERIES
+========================================= */
+
+/* =========================================
+   RESPONSIVE / MEDIA QUERIES
+========================================= */
+
+/* --- TABLETTE ET PETIT PC (< 1024px) --- */
+@media (max-width: 1024px) {
+  
+  .pricing-grid {
+    gap: 30px; 
+    /* On permet le scroll horizontal si besoin ou le wrap */
+    flex-wrap: wrap; 
+  }
+  
+  .pricing-card { 
+    min-width: 300px; /* On s'assure que les cartes ne sont pas trop fines */
+  }
 }
 
-.abo-faq h2 {
-  font-size: 2.2rem;
-  margin-bottom: 3rem;
+/* --- TABLETTE PORTRAIT (< 992px) --- */
+@media (max-width: 992px) {
+  /* GLOBAL */
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.75rem !important; }
+
+  /* HERO */
+  .hero-section { padding-top: 120px; padding-bottom: 0; }
+  .hero-content { 
+    flex-direction: column-reverse; /* Image au dessus, texte en dessous (ou l'inverse selon préférence) */
+    text-align: center; 
+  }
+  
+  .hero-text { 
+    padding-right: 0; 
+    margin-top: 40px; 
+    z-index: 5; /* Texte bien au dessus des formes */
+  }
+  
+  .hero-image { 
+    margin-right: 0; 
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .hero-image img {
+    max-width: 80%; /* Image un peu plus petite sur tablette */
+    transform: rotate(0deg); /* On enlève la rotation pour gagner de la place */
+  }
+
+  .hero-benefits-list { 
+    justify-content: center; 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 15px;
+  }
+  .hero-benefits-list span { margin-right: 0; }
+
+  /* POURQUOI CHOISIR */
+  .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* STEPS */
+  .steps-container { flex-wrap: wrap; justify-content: center; gap: 40px; }
+  .step-item { flex: 1 1 40%; }
+  .steps-connector.desktop-only { display: none; }
+
+  /* PRICING */
+  .pricing-grid { flex-direction: column; align-items: center; }
+  .pricing-card { width: 100%; max-width: 450px; margin-bottom: 20px;}
+  
+  /* On désactive l'agrandissement de la carte "Highlight" sur mobile pour l'alignement */
+  .pricing-card.highlighted { transform: none; margin-top: 20px; } 
+
+  /* SOCIAL / FAQ */
+  .social-faq-grid { grid-template-columns: 1fr; gap: 60px; }
+  .testimonial-item { max-width: 100%; }
 }
 
-/* --- Responsive --- */
-@media (max-width: 900px) {
-  .benefit-row, .benefit-row.reverse {
+/* --- MOBILE (< 768px) --- */
+@media (max-width: 768px) {
+  /* HERO SHAPES */
+  /* On réduit drastiquement les formes décoratives qui gênent sur mobile */
+/* .hero-bg-shapes .shape-pink { width: 450px; height: 300px; top: 150px; right: -50px;}  */
+  
+  /* WAVE SVG */
+  .wave-container svg { height: 40px; } /* Vague plus petite */
+
+  /* OFFRE SUR MESURE */
+  .custom-offer-card {
     flex-direction: column;
     text-align: center;
-    gap: 2rem;
+    padding: 30px 20px;
+    margin: 0 auto;
+    width: 80%  ;
   }
   
-  .abo-hero h1 { font-size: 2.2rem; }
+  .custom-offer-content { padding-right: 0; margin-bottom: 30px; }
   
-  .plans-container-wrapper {
+  .custom-offer-details {
+    flex-direction: column;
     align-items: center;
+    gap: 10px;
   }
+
+  .custom-offer-action { align-items: center; width: 100%; min-width: auto; }
+}
+
+/* --- PETIT MOBILE (iPhone SE, Androids étroits < 480px) --- */
+/* C'est ici qu'on gère le 320px */
+@media (max-width: 480px) {
+  
+  /* TYPOGRAPHIE */
+  h1 { font-size: 1.8rem; } /* Titre plus petit */
+  .hero-text .subtitle { font-size: 1rem; }
+  
+  /* HERO */
+  .hero-image img { max-width: 100%; }
+  
+  /* BOUTONS */
+  .btn { width: 100%; text-align: center; box-sizing: border-box; } /* Boutons pleine largeur pour le clic facile */
+  
+  /* GRIDS */
+  .benefits-grid { grid-template-columns: 1fr; } /* 1 colonne */
+  .step-item { flex: 1 1 100%; } /* 1 étape par ligne */
+  
+  /* PRICING CARD & BADGE */
+  .pricing-card { 
+    max-width: 90%; 
+    border-radius: 20px;
+  }
+
+  /* Ajustement du badge pour qu'il ne dépasse pas de l'écran */
+  .preferred-banner {
+    font-size: 0.75rem; /* Texte plus petit */
+    padding: 8px 15px;
+    letter-spacing: 1px;
+    width: 80%; /* Largeur max */
+    text-align: center;
+    white-space: normal; /* Autorise le texte à passer à la ligne si vraiment trop petit */
+    line-height: 1.2;
+  }
+  
+  /* OFFRE SUR MESURE */
+  .custom-offer-card { 
+    margin: 0 auto;
+    padding: 20px 25px; 
+    border-width: 2px;
+    width: 80%;
+  }
+  
+  .custom-price-box .price { font-size: 1.8rem; }
+  
+  /* FAQ */
+  .faq-question { font-size: 1rem; padding: 15px; }
+  
+  /* SOCIAL PROOF */
+  .testimonial-bubble { font-size: 0.9rem; }
+  .user-avatar { width: 40px; height: 40px; }
+  
+  /* FOOTER */
+  .footer-cta-section { padding: 50px 20px; }
 }

@@ -1,223 +1,226 @@
 /* src/app/abonnements/page.js */
-
-
 'use client';
 
+import '@/styles/abonnements.css';
+import Image from 'next/image'
+import React, { useState } from 'react';
+// Composant pour un élément de la FAQ (Accordéon)
+const FAQItem = ({ question, answer }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-import InBuilding from "../en-construction/page";
+  return (
+    <div className="faq-item">
+      <button className={`faq-question ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(!isOpen)}>
+        {question}
+        <span className="faq-toggle">{isOpen ? '−' : '+'}</span>
+      </button>
+      {isOpen && <div className="faq-answer"><p>{answer}</p></div>}
+    </div>
+  );
+};
 
-export default function SubscriptionsPage(){
-    return <InBuilding />
-}
+const SubscriptionPage = () => {
+  // Données factices pour les témoignages et la FAQ (à remplacer par les vraies données)
+  const faqs = [
+    { q: "Et si un jouet est cassé...?", a: "Pas de panique ! L'usure normale est incluse. Pour la casse plus importante, l'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien." },
+    { q: "Comment sont nettoyés les jouets ?", a: "Nous prenons l'hygiène très au sérieux. Chaque jouet est minutieusement nettoyé et désinfecté avec des produits écologiques avant d'être remis en circulation." },
+    { q: "Quand un jouet a fait son temps ?", a: "Quand votre enfant ne joue plus avec, vous le remettez dans sa boîte et vous nous le renvoyez pour en choisir un nouveau !" },
+    { q: "Comment sont sélectionnés les jouets ?", a: "Notre équipe d'experts sélectionne des jouets éducatifs, durables et amusants, souvent inspirés des méthodes Montessori." },
+  ];
 
-// 'use client';
+  return (
+    <div className="subscription-page">
+      {/* --- SECTION PRICING (FORMULES) --- */}
+      <section className="pricing-section">
+        <div className="container">
+          <h2>Nos formules flexibles, sans engagement</h2>
+          <div className="pricing-grid">
+            {/* CARTE 1 : Découverte */}
+            <div className="pricing-card">
+              <div className="pricing-header header-blue">
+                <h3>Découverte</h3>
+              </div>
+              <div className="pricing-body">
+                <div className="price">25.99€ <span className="per-month">/ mois</span></div>
+                <ul className="features-list">
+                  <li>2 Jouets</li>
+                  <li>Soit 12.99€ par jouets </li>
+                  <li>Livraison et retour inclus</li>
+                  <li>Assurance "Casse"</li>
+                  <li>Nettoyage baby self</li>
+                  <li>Annulable en 1 clic</li>
 
-// import React from 'react';
-// import Image from 'next/image';
+                </ul>
+                <button className="btn btn-outline-blue">Choisir L'offre Découverte</button>
+              </div>
+            </div>
 
-// // Composants UI
-// import CardsPlan from '@/components/CardsPlan';
-// import ButtonRed from '@/components/ButtonRed';
-// import ButtonGreen from '@/components/ButtonGreen';
-// import ButtonYellow from '@/components/ButtonYellow';
-// import FAQ from '@/components/FAQ';
+            {/* CARTE 2 : Standard (Mise en avant) */}
+            <div className="pricing-card highlighted">
+           <div className="preferred-banner">LE PRÉFÉRÉ DES PARENTS</div>
+              <div className="pricing-header header-pink">
+                <h3>Standard</h3>
+              </div>
+              <div className="pricing-body">
+                <div className="price price-large">39.99€ <span className="per-month">/ mois</span></div>
+                <ul className="features-list checkout-list">
+                  <li>✅ 4 Jouets</li>
+                  <li>✅Soit 9.99€ par jouets </li>
+                  <li>✅ Livraison et retour inclus</li>
+                  <li>✅ Assurance "Casse"</li>
+                  <li>✅ Nettoyage baby self</li>
+                  <li>✅ Annulable en 1 clic</li>
 
-// // Styles
-// import '@/styles/abonnements.css';
-// import '@/styles/CardsPlan.css';
+                </ul>
+                <button className="btn btn-pink">Je veux l'Offre Standard</button>
+              </div>
+            </div>
 
-// // Assets : Icônes
-// import iconEuro from '../../../public/assets/icons/euro.png';
-// import iconLeaf from '../../../public/assets/icons/leaf.png';
-// import iconWash from '../../../public/assets/icons/wash.png';
-// import iconZen from '../../../public/assets/icons/zen.png';
+            {/* CARTE 3 : L'Aventurier */}
+            <div className="pricing-card">
+              <div className="pricing-header header-green">
+                <h3>Premium</h3>
+              </div>
+              <div className="pricing-body">
+                <div className="price">55.99€ <span className="per-month">/ mois</span></div>
+                <ul className="features-list">
+                  <li>6 Jouets</li>
+                  <li>Soit 9.33€ par jouets</li>
+                  <li>Accès prioritaire aux nouveautés</li>
+                  <li>Livraison  Prioritaire</li>
+                  <li>Livraison et retour inclus</li>
+                  <li>Assurance "Casse"</li>
+                  <li>Nettoyage baby self</li>
+                  <li>Annulable en 1 clic</li>
 
-// // Assets : Marques (Preuve de qualité)
-// import logoHape from '../../../public/assets/logo/Hape.webp';
-// import logoJanod from '../../../public/assets/logo/janod.webp';
-// import logoVtech from '../../../public/assets/logo/vtech.webp';
-// import logoLilliputiens from '../../../public/assets/logo/lilliputiens.webp';
-// import logoDjeco from '../../../public/assets/logo/smallfoot.webp'; // Remplacement si Djeco absent, ou autre
 
-// export default function SubscriptionsPage() {
-
-//   // Listes enrichies avec arguments "Massue" (Valeur réelle)
-//   const listDecouverte = [
-//     "2 jouets / mois",
-//     "Valeur boutique : ~60€",
-//     "Soit 35€ d'économie/mois",
-//     "Échange illimité",
-//     "Assurance Casse incluse ✅"
-//   ];
-
-//   const listStandard = [
-//     "4 jouets / mois",
-//     "Valeur boutique : ~120€",
-//     "Soit 80€ d'économie/mois",
-//     "Échange illimité",
-//     "Assurance Casse incluse ✅"
-//   ];
-
-//   const listPremium = [
-//     "6 jouets / mois",
-//     "Valeur boutique : ~180€",
-//     "Soit 125€ d'économie/mois",
-//     "Échange illimité",
-//     "Assurance Casse incluse ✅"
-//   ];
-
-//   return (
-//     <main className="abonnements-page">
+                </ul>
+                <button className="btn btn-outline-green">Choisir l'offre Premium</button>
+              </div>
+            </div>
+          </div>
+          {/* --- NOUVELLE SECTION : OFFRE SUR MESURE --- */}
+          <div className="custom-offer-card">
+            <div className="custom-offer-content">
+              <div className="custom-badge">FAMILLES NOMBREUSES & PROS</div>
+              <h3>Envie de plus de folie ?</h3>
+              <p>
+                L'offre Premium ne suffit pas ? Ajoutez jusqu'à <strong>3 jouets supplémentaires</strong> à votre box pour seulement <strong>9€ / jouet</strong>.
+              </p>
+              <ul className="custom-offer-details">
+                <li> Base Premium (6 jouets)</li>
+                <li> Jusqu'à 9 jouets au total</li>
+                <li> Idéal fratries & Ass. Mat.</li>
+              </ul>
+            </div>
+            
+            <div className="custom-offer-action">
+              <div className="custom-price-box">
+                <span className="label">Option "Maxi Box"</span>
+                <span className="price">+9€ <small>/ jouet sup.</small></span>
+              </div>
+              <button className="btn btn-yellow btn-large">Demander mon offre sur mesure</button>
+            </div>
+          </div>
+        </div>
+      </section>
       
-//       {/* 1. HERO : Promesse de valeur immédiate */}
-//       <section className="abo-hero">
-//         <div className="hero-content">
-//           <h1>
-//             Jouez <span className="highlight-blue">plus</span>, 
-//             dépensez <span className="highlight-pink">moins</span>.
-//           </h1>
-//           <p>
-//             Accédez à +500 jouets de grandes marques (Janod, Hape, VTech...) pour le prix d'un seul.
-//             <br/>L'abonnement sans engagement qui grandit avec votre enfant.
-//           </p>
-//           <div className="hero-badges">
-//             <span className="badge">📦 Livraison offerte</span>
-//             <span className="badge">✨ Sans engagement</span>
-//             <span className="badge">🛡️ Assurance casse incluse</span>
-//           </div>
-//         </div>
-//       </section>
+      {/* --- SECTION POURQUOI CHOISIR --- */}
+      <section className="why-section">
+        <div className="container">
+          <h2>Pourquoi choisir Bibli'O Jouets ?</h2>
+          <div className="benefits-grid">
+            <div className="benefit-card">
+              <div className="icon-circle icon-yellow">🧩</div>
+              <h3>L'éveil permanent</h3>
+              <p>Des jouets adaptés à chaque étape de développement pour stimuler leur curiosité sans cesse.</p>
+            </div>
+            <div className="benefit-card">
+              <div className="icon-circle icon-blue">💰</div>
+              <h3>Budget maîtrisé</h3>
+              <p>Profitez de jouets de haute qualité (bois, éducatifs...) pour une fraction du prix d'achat.</p>
+            </div>
+            <div className="benefit-card">
+              <div className="icon-circle icon-green">🌍</div>
+              <h3>La planète dit merci</h3>
+              <p>Consommer mieux en partageant. Moins de production de plastique, plus de bon sens.</p>
+            </div>
+            <div className="benefit-card">
+              <div className="icon-circle icon-pink">📦</div>
+              <h3>Adieu le bazar !</h3>
+              <p>Votre salon respire enfin. Quand ils ne jouent plus, hop, retour à l'envoyeur !</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-//       {/* 2. MARQUES : La réassurance par la qualité (NOUVEAU) */}
-//       <section className="abo-brands">
-//         <p>Ils font confiance à Bibli'O Jouets pour l'éveil de vos enfants</p>
-//         <div className="brands-scroller">
-//           <Image src={logoJanod} alt="Janod" className="brand-logo" />
-//           <Image src={logoHape} alt="Hape" className="brand-logo" />
-//           <Image src={logoVtech} alt="Vtech" className="brand-logo" />
-//           <Image src={logoLilliputiens} alt="Lilliputiens" className="brand-logo" />
-//           <Image src={logoDjeco} alt="Smallfoot" className="brand-logo" />
-//         </div>
-//       </section>
 
-//       {/* 3. COMMENT CA MARCHE : Visuel et simple */}
-//       <section className="abo-how">
-//         <h2>L'expérience Bibli'O en 4 étapes</h2>
-//         <div className="steps-grid">
-//           <div className="step-card">
-//             <div className="step-number num-1">1</div>
-//             <h3>Créez votre Box</h3>
-//             <p>Sélectionnez vos jouets favoris parmi notre catalogue éducatif (Montessori, éveil, construction...).</p>
-//           </div>
-//           <div className="step-card">
-//             <div className="step-number num-2">2</div>
-//             <h3>Recevez & Jouez</h3>
-//             <p>Livraison rapide en point relais. Profitez des jouets aussi longtemps que vous le souhaitez.</p>
-//           </div>
-//           <div className="step-card">
-//             <div className="step-number num-3">3</div>
-//             <h3>Échangez</h3>
-//             <p>Envie de nouveauté ? Renvoyez gratuitement la box et choisissez-en une nouvelle.</p>
-//           </div>
-//           <div className="step-card">
-//             <div className="step-number num-4">4</div>
-//             <h3>Un coup de ❤️ ?</h3>
-//             <p>Vos enfants ne veulent plus lâcher un jouet ? Achetez-le à tarif préférentiel (-30% min).</p>
-//           </div>
-//         </div>
-//       </section>
 
-//       {/* 4. LES OFFRES : Focus sur la rentabilité */}
-//       <section className="abo-plans-section" id="offres">
-//         <div className="plans-header">
-//           <h2>Choisissez votre rythme</h2>
-//           <p>Tout est inclus : Livraison, Retours, Nettoyage, Assurance casse.</p>
-//         </div>
-        
-//         <div className="plans-container-wrapper">
-//           {/* Offre Découverte */}
-//           <CardsPlan
-//             title="Découverte"
-//             price="25.99€"
-//             theme="theme-red" 
-//             button={<ButtonRed text="Je commence l'aventure" href="/inscription?plan=decouverte" />}
-//             list={listDecouverte}
-//           />
+    
 
-//           {/* Offre Standard (Mise en avant) */}
-//           <div className="plan-wrapper-featured">
-//             <div className="best-seller-badge">Le Préféré des Parents ❤️</div>
-//             <CardsPlan
-//               title="Standard"
-//               price="39.99€"
-//               theme="theme-green"
-//               button={<ButtonGreen text="Je choisis Standard" href="/inscription?plan=standard" />}
-//               list={listStandard}
-//             />
-//           </div>
+      {/* --- SECTION SOCIAL PROOF & FAQ --- */}
+      <section className="social-faq-section">
+        <div className="container social-faq-grid">
+          {/* Colonne gauche : Témoignages */}
+          <div className="testimonials-col">
+             {/* Formes décoratives d'arrière-plan */}
+             <div className="blob blob-1"></div>
+             <div className="blob blob-2"></div>
 
-//           {/* Offre Premium */}
-//           <CardsPlan
-//             title="Premium"
-//             price="55.99€"
-//             theme="theme-yellow"
-//             button={<ButtonYellow text="Je choisis Premium" href="/inscription?plan=premium" />}
-//             list={listPremium}
-//           />
-//         </div>
-//       </section>
+            <h2>Ils adorent Bibli'O Jouets</h2>
+            <div className="testimonial-item">
+              <div className="testimonial-bubble bubble-green">
+                "C'est génial, mon fils a toujours des nouveautés et mon salon n'est plus envahi ! Le service client est au top."
+              </div>
+              <div className="testimonial-user">
+                {/* REMPLACER IMAGE */}
+                  <Image
+                    src="/assets/enfant2_abo.webp"
+                    alt="Enfant joyeux découvrant ses jouets Bibli'O"
+                    className="user-avatar"
+                    width={800}  
+                    height={200}
+                    priority
+                    
+                />
+                <span>Sophie, maman de Léo (3 ans)</span>
+              </div>
+            </div>
+            <div className="testimonial-item testimonial-right">
+               <div className="testimonial-bubble bubble-yellow">
+                "Les jouets sont de super qualité, propres, et le concept de rotation est parfait pour l'éveil. Je recommande !"
+              </div>
+               <div className="testimonial-user">
+                 {/* REMPLACER IMAGE */}
+                <Image
+                    src="/assets/enfant1_abo.webp"
+                    alt="Enfant joyeux découvrant ses jouets Bibli'O"
+                    className="user-avatar"
+                    width={800}  
+                    height={200}
+                    priority
+                    
+                />             
+                <span>Marc, papa de Zoé (18 mois)</span>
+              </div>
+            </div>
+          </div>
 
-//       {/* 5. POURQUOI S'ABONNER (Bénéfices détaillés) */}
-//       <section className="abo-benefits-detailed">
-//         <div className="benefit-row">
-//           <div className="benefit-text">
-//             <h3>💰 Dites stop au gaspillage financier</h3>
-//             <p>
-//               Un enfant se lasse d'un jouet en moyenne après 3 semaines. 
-//               Au lieu d'acheter 120€ de jouets chaque mois, louez-les pour 39€.
-//               <strong> C'est mathématique : vous économisez plus de 800€ par an.</strong>
-//             </p>
-//           </div>
-//           <div className="benefit-visual">
-//              <Image src={iconEuro} alt="Economie" />
-//           </div>
-//         </div>
+          {/* Colonne droite : FAQ */}
+          <div className="faq-col">
+            <h2>Vos questions fréquentes</h2>
+            <div className="faq-list">
+              {faqs.map((faq, index) => (
+                <FAQItem key={index} question={faq.q} answer={faq.a} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-//         <div className="benefit-row reverse">
-//           <div className="benefit-text">
-//             <h3>🛡️ Zen, la casse est incluse !</h3>
-//             <p>
-//               Parce que ce sont des enfants, et que la vie est faite d'accidents.
-//               Une pièce cassée ? Un jouet abîmé ? 
-//               <strong> Pas de stress, ni de frais supplémentaires.</strong> 
-//               L'usure normale et la casse accidentelle sont couvertes par votre abonnement.
-//             </p>
-//           </div>
-//           <div className="benefit-visual">
-//              <Image src={iconZen} alt="Zen" />
-//           </div>
-//         </div>
+   
+    </div>
+  );
+};
 
-//         <div className="benefit-row">
-//           <div className="benefit-text">
-//             <h3>✨ Hygiène irréprochable</h3>
-//             <p>
-//               Nous ne plaisantons pas avec la propreté. Chaque jouet retourné passe par notre "Station de Lavage" :
-//               contrôle de sécurité, nettoyage vapeur haute pression et désinfection écologique.
-//             </p>
-//           </div>
-//           <div className="benefit-visual">
-//              <Image src={iconWash} alt="Propreté" />
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* 6. FAQ */}
-//       <section className="abo-faq">
-//         <h2>Questions Fréquentes</h2>
-//         <FAQ />
-//       </section>
-
-//     </main>
-//   );
-// }
+export default SubscriptionPage;
