@@ -1,6 +1,7 @@
 import prisma from '@/lib/core/database';
 import bcrypt from 'bcryptjs';
 
+
 export const userService = {
   // Créer un utilisateur
   async create(userData) {
@@ -100,4 +101,14 @@ export const userService = {
   async verifyPassword(plainPassword, hashedPassword) {
     return await bcrypt.compare(plainPassword, hashedPassword);
   }
+  
+};
+
+export const updateUser = async (id, data) => {
+  const { password, role, ...safeData } = data;
+  
+  return await prisma.users.update({
+    where: { id: parseInt(id) },
+    data: safeData,
+  });
 };
