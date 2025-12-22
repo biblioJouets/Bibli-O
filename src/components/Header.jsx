@@ -116,8 +116,8 @@ export default function HeaderBiblioJouets() {
                 href="#" 
                 onClick={(e) => {
                   e.preventDefault();
-                  signOut({ callbackUrl: window.location.origin });
-                  closeBurger();
+                signOut({ callbackUrl: '/' })                  
+                closeBurger();
                 }}
                 style={{ borderTop: '1px solid #eee', marginTop: '10px', paddingTop: '15px' }}
               >

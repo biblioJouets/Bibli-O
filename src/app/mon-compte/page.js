@@ -96,7 +96,7 @@ export default function MonComptePage() {
   if (loading) return <div className="p-10 text-center">Chargement...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-10 max-w-5xl">
+    <div className="container mt-10 mx-auto px-4 py-10 max-w-5xl">
       <h1 className="text-3xl font-bold mb-8 text-[#2E1D21]">Mon Espace Client</h1>
 
       {/* Navigation Onglets */}
