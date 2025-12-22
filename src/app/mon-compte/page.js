@@ -22,6 +22,15 @@ export default function MonComptePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
 
+  //states Adresses
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    street: '',
+    postalCode: '',
+    city: '',
+    country: 'France'
+  });
+
   // Redirection si non connecté
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/connexion');
@@ -34,28 +43,58 @@ export default function MonComptePage() {
     }
   }, [session]);
 
-  const fetchData = async (userId) => {
+ const fetchData = async (userId) => {
     try {
-      // 1. Récupérer les infos user à jour
+      setLoading(true); // On affiche le chargement
+      
+      // 1. Récupérer les infos user
       const resUser = await fetch(`/api/users/${userId}`);
       const userData = await resUser.json();
-      if (resUser.ok) setProfile(userData);
 
-      // 2. Récupérer l'historique des commandes (Il faudra créer cette route API si elle n'existe pas, voir note plus bas)
-      // Pour l'instant, on simule ou on appelle une route dédiée
-      // Note: Idéalement créer route /api/orders/user/[id]
+      if (resUser.ok) {
+        // 👇 FIX : On vérifie si les données sont dans 'userData' ou 'userData.data'
+        // Cela gère les deux cas possibles de ton API
+        const userProfile = userData.data || userData;
+        
+        console.log("Données reçues :", userProfile); // Pour débugger si besoin
+        setProfile(userProfile);
+      }
+
+      // 2. Récupérer l'historique des commandes
       const resOrders = await fetch(`/api/orders/user/${userId}`); 
       if (resOrders.ok) {
         const ordersData = await resOrders.json();
-        setOrders(ordersData);
+        // Pareil pour les commandes, parfois c'est dans .data
+        setOrders(Array.isArray(ordersData) ? ordersData : ordersData.data || []);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Erreur chargement données:", err);
     } finally {
       setLoading(false);
     }
   };
+const handleAddAddress = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/users/${session.user.id}/addresses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAddress)
+      });
 
+      if (res.ok) {
+        // Si succès, on recharge les données pour voir la nouvelle adresse
+        fetchData(session.user.id); 
+        setShowAddressForm(false); // On ferme le formulaire
+        setNewAddress({ street: '', postalCode: '', city: '', country: 'France' }); // Reset
+        setMessage('✅ Adresse ajoutée !');
+      } else {
+        setMessage('❌ Erreur lors de l\'ajout.');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setIsSaving(true);
@@ -179,51 +218,187 @@ export default function MonComptePage() {
 
       {/* CONTENU : Onglet Infos */}
       {activeTab === 'infos' && (
-        <form onSubmit={handleUpdateProfile} className="max-w-lg bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-xl font-bold mb-6">Modifier mon profil</h3>
+        <div className="space-y-6">
           
-          <div className="mb-4">
-            <label className="block text-sm font-bold mb-2">Email (Non modifiable)</label>
-            <input type="email" value={profile.email} disabled className="w-full p-2 border bg-gray-100 rounded" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-bold mb-2">Prénom</label>
-              <input 
-                type="text" 
-                value={profile.firstName || ''} 
-                onChange={(e) => setProfile({...profile, firstName: e.target.value})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-[#6EC1E4]"
-              />
+          {/* --- 1. EN-TÊTE PROFIL (Avatar + Résumé) --- */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-6">
+            <div className="h-20 w-20 rounded-full bg-[var(--col-gold)] flex items-center justify-center text-black text-2xl font-bold shadow-md">
+              {/* Correction ici : on utilise 'profile' au lieu de 'user' */}
+              {profile.firstName?.[0] || '?'}{profile.lastName?.[0] || '?'}
             </div>
             <div>
-              <label className="block text-sm font-bold mb-2">Nom</label>
-              <input 
-                type="text" 
-                value={profile.lastName || ''} 
-                onChange={(e) => setProfile({...profile, lastName: e.target.value})}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-[#6EC1E4]"
-              />
+              <h2 className="text-2xl font-bold text-[#2E1D21]">
+                {profile.firstName} {profile.lastName}
+              </h2>
+              <p className="text-gray-500 flex items-center gap-2 text-sm mt-1">
+                {/* On gère le cas où createdAt n'est pas encore chargé */}
+                📅 Membre depuis le {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('fr-FR') : '...'}
+              </p>
+              <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                Compte Vérifié
+              </span>
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-bold mb-2">Téléphone (Pour suivi colis)</label>
-            <input 
-              type="tel" 
-              value={profile.phone || ''} 
-              onChange={(e) => setProfile({...profile, phone: e.target.value})}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-[#6EC1E4]"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* --- 2. INFORMATIONS PERSONNELLES --- */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold flex items-center gap-2 text-[#2E1D21]">
+                  ✏️ Mes coordonnées
+                </h3>
+              </div>
+              
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Prénom</label>
+                    <input 
+                      type="text" 
+                      name="firstName"
+                      value={profile.firstName || ''}
+                      onChange={(e) => setProfile({...profile, firstName: e.target.value})}
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nom</label>
+                    <input 
+                      type="text" 
+                      name="lastName"
+                      value={profile.lastName || ''}
+                      onChange={(e) => setProfile({...profile, lastName: e.target.value})}
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email (Non modifiable)</label>
+                  <div className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed">
+                    ✉️ {profile.email}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Téléphone</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-400">📞</span>
+                    <input 
+                      type="tel" 
+                      name="phone"
+                      value={profile.phone || ''}
+                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                      className="w-full pl-10 p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                {message && (
+                  <div className={`p-2 rounded text-center text-sm ${message.includes('succès') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {message}
+                  </div>
+                )}
+
+                <button type="submit" disabled={isSaving} className="w-full mt-4 btn btn-primary py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-all">
+                  {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                </button>
+              </form>
+            </div>
+
+            {/* --- 3. CARNET D'ADRESSES & SÉCURITÉ --- */}
+            <div className="space-y-6">
+              
+              {/* Bloc Adresses */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-[#2E1D21]">
+                  📍 Mes adresses
+                </h3>
+                
+                {/* LISTE DES ADRESSES EXISTANTES */}
+                {profile.Addresses && profile.Addresses.length > 0 ? (
+                  <div className="space-y-3 mb-4">
+                    {profile.Addresses.map((addr) => (
+                      <div key={addr.id} className="p-3 border border-gray-200 rounded-lg text-sm bg-gray-50 flex justify-between items-center">
+                        <div>
+                          <p className="font-bold text-[#2E1D21]">{addr.street}</p>
+                          <p>{addr.postalCode} {addr.city}</p>
+                          <p className="text-gray-500 text-xs mt-1">{addr.country}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  !showAddressForm && (
+                    <div className="text-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-4">
+                      <p className="text-sm text-gray-500">Aucune adresse enregistrée</p>
+                    </div>
+                  )
+                )}
+                
+                {/* FORMULAIRE D'AJOUT (Masqué par défaut) */}
+                {showAddressForm ? (
+                  <form onSubmit={handleAddAddress} className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h4 className="font-bold text-sm mb-3">Nouvelle adresse</h4>
+                    <div className="space-y-3">
+                      <input 
+                        type="text" 
+                        placeholder="Numéro et rue" 
+                        required
+                        className="w-full p-2 border rounded text-sm"
+                        value={newAddress.street}
+                        onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="Code Postal" 
+                          required
+                          className="w-full p-2 border rounded text-sm"
+                          value={newAddress.postalCode}
+                          onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="Ville" 
+                          required
+                          className="w-full p-2 border rounded text-sm"
+                          value={newAddress.city}
+                          onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 mt-2">
+                        <button 
+                          type="button"
+                          onClick={() => setShowAddressForm(false)}
+                          className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-200 rounded"
+                        >
+                          Annuler
+                        </button>
+                        <button 
+                          type="submit"
+                          className="px-3 py-1 text-sm bg-[#6EC1E4] text-white rounded hover:bg-[#5aaac9]"
+                        >
+                          Valider
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                ) : (
+                  <button 
+                    onClick={() => setShowAddressForm(true)}
+                    className="w-full mt-2 text-sm text-[#6EC1E4] font-bold hover:underline flex items-center justify-center gap-1"
+                  >
+                    + Ajouter une nouvelle adresse
+                  </button>
+                )}
+              </div>
+            
+
+            </div>
           </div>
-
-          {message && <div className={`mb-4 p-2 rounded text-center ${message.includes('succès') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{message}</div>}
-
-          <button type="submit" disabled={isSaving} className="btn btn-primary w-full">
-            {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-          </button>
-        </form>
+        </div>
       )}
     </div>
   );
