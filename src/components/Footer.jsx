@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import 'styles/Footer.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareFacebook, faSquareInstagram, faSquareLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
+import { faSquareFacebook, faSquareInstagram, faLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
 
 const logo = "/assets/logoBiblioJouets.png"
 export default function Footer() {
@@ -76,8 +76,7 @@ export default function Footer() {
                   aria-label="Bibli'O Jouets sur LinkedIn"
                   title="LinkedIn"
                 >
-                  <FontAwesomeIcon className="social-icon" icon={faSquareLinkedin} />
-                </a>
+              <FontAwesomeIcon className="social-icon" icon={faLinkedin} />                </a>
               </li>
               <li>
                 <a

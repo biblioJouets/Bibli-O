@@ -8,7 +8,7 @@ import "@/styles/contactPage.css";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { faSquareFacebook, faSquareInstagram, faSquareLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
+import { faSquareFacebook, faSquareInstagram, faLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
 
 
 function ContactPage() {
@@ -72,7 +72,7 @@ function ContactPage() {
               aria-label="Bibli'O Jouets sur LinkedIn"
               title="LinkedIn"
             >
-              <FontAwesomeIcon icon={faSquareLinkedin} />
+              <FontAwesomeIcon icon={faLinkedin} />
             </a>
             
             <a

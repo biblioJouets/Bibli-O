@@ -105,10 +105,19 @@ export const userService = {
 };
 
 export const updateUser = async (id, data) => {
-  const { password, role, ...safeData } = data;
-  
-  return await prisma.users.update({
-    where: { id: parseInt(id) },
-    data: safeData,
-  });
+  const dataToUpdate = {};
+if (data.firstName) dataToUpdate.firstName = data.firstName;
+  if (data.lastName) dataToUpdate.lastName = data.lastName;
+  if (data.phone) dataToUpdate.phone = data.phone;
+  if (data.email) dataToUpdate.email = data.email;
+  try {
+    return await prisma.users.update({
+      where: { id: parseInt(id) },
+      data: dataToUpdate,
+    });
+  } catch (error) {
+    console.error("Erreur Prisma updateUser:", error);
+    throw error;
+  }
+
 };

@@ -10,24 +10,31 @@ export async function GET(request, context) {
 
 export async function PUT(request, { params }) {
   try {
-    const id = parseInt(params.id);
+    // --- FIX NEXT.JS 15 : On doit attendre params ---
+    const resolvedParams = await params; 
+    const id = parseInt(resolvedParams.id);
+    
+    // Vérification ID valide
+    if (isNaN(id)) {
+        return NextResponse.json({ error: "ID invalide" }, { status: 400 });
+    }
+
     const body = await request.json();
     
-    // Récupération de la session
+    // --- SÉCURITÉ : Vérifier que c'est bien l'utilisateur connecté ---
     const session = await getServerSession(authOptions);
-
-    // 👇 SECURITE : On convertit les deux ID en entiers pour être sûr que "5" == 5
-    // Si pas de session OU si l'ID de la session ne correspond pas à l'ID de l'URL
     if (!session || parseInt(session.user.id) !== id) {
-       return NextResponse.json({ error: "Non autorisé : Vous ne pouvez modifier que votre propre profil." }, { status: 401 });
+       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
     
+    // Appel au service (qui va nettoyer les données, voir étape 2)
     const updatedUser = await updateUser(id, body);
+    
     return NextResponse.json(updatedUser);
 
   } catch (error) {
-    console.error("Erreur API PUT:", error);
-    return NextResponse.json({ error: "Erreur mise à jour" }, { status: 500 });
+    console.error("ERREUR API PUT:", error);
+    return NextResponse.json({ error: "Erreur mise à jour profil" }, { status: 500 });
   }
 }
 
