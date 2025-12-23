@@ -223,7 +223,6 @@ const handleAddAddress = async (e) => {
           {/* --- 1. EN-TÊTE PROFIL (Avatar + Résumé) --- */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-6">
             <div className="h-20 w-20 rounded-full bg-[var(--col-gold)] flex items-center justify-center text-black text-2xl font-bold shadow-md">
-              {/* Correction ici : on utilise 'profile' au lieu de 'user' */}
               {profile.firstName?.[0] || '?'}{profile.lastName?.[0] || '?'}
             </div>
             <div>

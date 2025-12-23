@@ -1,19 +1,78 @@
 import prisma from '@/lib/core/database';
 import { sendBrevoTemplate } from '@/lib/core/brevo/client';
 
+// ============================================================
+//  1. FONCTIONS D'ENVOI D'EMAIL (Exportées pour les tests)
+// ============================================================
+
+/**
+ * Envoie l'email de confirmation de commande
+ * @param {object} orderInfo - Objet contenant { id, totalAmount, user: { email, firstName }, products: [] }
+ */
+export const sendOrderConfirmation = async (orderInfo) => {
+  try {
+    // 1. On prépare la liste SIMPLE (Juste les noms)
+    const productsList = orderInfo.products.map(product => ({
+      NAME: product.name
+      // On retire PRICE ici, inutile
+    }));
+
+    const emailParams = {
+      PRENOM: orderInfo.user.firstName || "Client",
+      COMMANDE_ID: orderInfo.id,
+      // Le total est bien le montant de l'abonnement (ex: 39.99) passé lors de la création
+      TOTAL: Number(orderInfo.totalAmount).toFixed(2), 
+      DATE_DEBUT: new Date().toLocaleDateString('fr-FR'),
+      LIVRAISON: "Point Relais",
+      PRODUCTS: productsList 
+    };
+
+    await sendBrevoTemplate(orderInfo.user.email, 8, emailParams);
+    console.log(`[BREVO] Email confirmation envoyé pour commande #${orderInfo.id}`);
+  } catch (error) {
+    console.error("[BREVO] Erreur sendOrderConfirmation:", error);
+    throw error;
+  }
+};
+/**
+ * Envoie l'étiquette de retour
+ * @param {object} orderInfo - Objet contenant { id, user: { email, firstName }, returnLabelUrl }
+ */
+export const sendReturnLabel = async (orderInfo) => {
+  try {
+    // ID 9 = Ton Template "Étiquette Retour" (Si tu ne l'as pas encore créé, mets 8 pour tester)
+    const TEMPLATE_ID_RETOUR = 8; // <--- Mets l'ID de ton template retour ici
+
+    const emailParams = {
+      PRENOM: orderInfo.user.firstName || "Client",
+      COMMANDE_ID: orderInfo.id,
+    };
+
+    // Le 4ème argument est l'URL de la pièce jointe (PDF)
+    await sendBrevoTemplate(orderInfo.user.email, TEMPLATE_ID_RETOUR, emailParams, orderInfo.returnLabelUrl);
+    console.log(`[BREVO] Email étiquette retour envoyé pour commande #${orderInfo.id}`);
+  } catch (error) {
+    console.error("[BREVO] Erreur sendReturnLabel:", error);
+    throw error;
+  }
+};
+
+// ============================================================
+//  2. LOGIQUE COMMANDE (Service)
+// ============================================================
+
 /**
  * Création d'une commande à partir d'un panier
  */
 export const createOrder = async (userId, cartData, totalAmount, shippingData) => {
-  // 1. Création de la commande en base de données
+  // 1. Création BDD
   const newOrder = await prisma.orders.create({
     data: {
       userId: userId,
       totalAmount: totalAmount,
-      status: 'PENDING', // ou 'PREPARING' selon ta logique
-      mondialRelayPointId: shippingData.mondialRelayPointId, // ID du point relais
+      status: 'PENDING',
+      mondialRelayPointId: shippingData.mondialRelayPointId,
       shippingName: shippingData.shippingName,
-      // ... autres champs d'adresse si besoin
       OrderProducts: {
         create: cartData.items.map(item => ({
           ProductId: item.productId
@@ -22,57 +81,43 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
     }
   });
 
-  // 2. Récupération des infos utilisateur pour l'email (Prénom, Email)
+  // 2. Récupération User
   const user = await prisma.users.findUnique({
     where: { id: userId }
   });
 
-  // 3. Préparation et Envoi de l'email BREVO
-  // On place cela dans un try/catch silencieux pour ne pas bloquer la commande si l'email échoue
+  // 3. Envoi Email (via la fonction partagée)
+  // On met dans un try/catch silencieux pour ne pas faire planter la commande si le mail échoue
   try {
-    const emailParams = {
-      PRENOM: user.firstName || "Client",
-      COMMANDE_ID: newOrder.id,
-      TOTAL: newOrder.totalAmount,
-      DATE_DEBUT: new Date().toLocaleDateString('fr-FR'),
-      // On force "Point Relais" puisque tu ne fais que ça
-      LIVRAISON: "Point Relais", 
-      // On prend le nom du premier article pour l'exemple
-      NOM_ARTICLE_1: cartData.items[0]?.product?.name || "Sélection de jouets",
-      PRIX_ARTICLE_1: cartData.items[0]?.product?.price || "-",
-    };
-
-    // ID 8 correspond à ton template "Confirmation de commande"
-    await sendBrevoTemplate(user.email, 8, emailParams);
-    console.log(`[BREVO] Email de confirmation envoyé pour la commande #${newOrder.id}`);
-
+    await sendOrderConfirmation({
+      id: newOrder.id,
+      totalAmount: newOrder.totalAmount,
+      user: { email: user.email, firstName: user.firstName },
+      products: cartData.items.map(item => item.product)
+    });
   } catch (emailError) {
-    console.error("[BREVO] Erreur lors de l'envoi du mail de confirmation :", emailError);
-    // On ne 'throw' pas l'erreur ici, car la commande est bien créée, c'est juste le mail qui a raté.
+    console.error("[BREVO] Echec envoi mail auto après commande (pas grave, la commande est créée).");
   }
 
   return newOrder;
 };
 
 /**
- * Récupération de l'historique des commandes d'un utilisateur
+ * Récupération historique
  */
 export const getUserOrders = async (userId) => {
   try {
-    const orders = await prisma.orders.findMany({
+    return await prisma.orders.findMany({
       where: { userId: parseInt(userId) },
       include: {
         OrderProducts: {
-          include: {
-            Products: true // On récupère les détails des produits loués
-          }
+          include: { Products: true }
         }
       },
-      orderBy: { createdAt: 'desc' } // Les plus récentes en premier
+      orderBy: { createdAt: 'desc' }
     });
-    return orders;
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes utilisateur:", error);
+    console.error("Erreur getUserOrders:", error);
     throw error;
   }
 };
