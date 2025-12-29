@@ -1,4 +1,10 @@
 // /src/app/layout.js
+import "@/app/globals.css";
+
+import "@/styles/homepage.css"; 
+import "@/styles/cardsContentMission.css"; 
+import "@/styles/header.css";
+
 import CookieBanner from "@/components/CookieBanner"; 
 import HeaderBiblioJouets from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,7 +12,6 @@ import SessionProviderClient from "@/components/SessionProviderClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CartProvider } from "@/context/CartContext";
-import "@/app/globals.css";
 import { Quicksand } from "next/font/google";
 
 const quicksand = Quicksand({
@@ -40,7 +45,7 @@ export const metadata = {
     metadataBase: new URL('https://www.bibliojouets.fr'),
 };
 export const viewport = {
-  themeColor: '#FF8C94', 
+  themeColor: '#ffffffff', 
   width: 'device-width',
   initialScale: 1,
 };

@@ -74,7 +74,7 @@ export default function Newsletter() {
       <div className="newsletter-bubble yellow"></div>
 
       <div className="newsletter-content">
-        <h2 className="newsletter-title">✨ Restons connectés ! ✨</h2>
+        <h2 className="homePageSubTitle newsletter-title">✨ Restons connectés ! ✨</h2>
         
         <p className="text-content">
 Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Laissez-nous votre email pour embarquer : l'aventure Bibli'O Jouets continue directement dans votre boîte de réception ! 🎁"        </p>

@@ -55,7 +55,7 @@ function Homepage() {
                 {/* NOTE SEO : Remplacement de div par section pour délimiter le sujet */}
                 <section className="functionalityCardsSection" aria-labelledby="fonctionnement-title">
                     {/* NOTE A11Y : Ajout d'un ID pour lier le titre à la section */}
-                    <h2 id="fonctionnement-title">Comment fonctionne Bibli'O Jouets ?</h2>
+                    <h2 className="homePageSubTitle" id="fonctionnement-title">Comment fonctionne Bibli'O Jouets ?</h2>
                     
                     <div className="functionalityCardsContainer">
                         <FunctionalityCard className="firstCard"
@@ -90,7 +90,7 @@ function Homepage() {
                     
                 {/* NOTE SEO : Nouvelle section sémantique */}
                 <section className="commitmentsSection" aria-labelledby="engagements-title">
-                    <h2 id="engagements-title">Pourquoi louer plutôt qu'acheter ?</h2>
+                    <h2 className="homePageSubTitle" id="engagements-title">Pourquoi louer plutôt qu'acheter ?</h2>
                     <div className="commitmentCards">
                         <CommitmentCard
                             className="hygiene"
@@ -134,7 +134,7 @@ function Homepage() {
                 
                 {/* Section Plans */}
                 <section className="CardsPlansSections" aria-labelledby="plans-title">
-                    <h2 id="plans-title">Nos Plans Mensuels</h2>
+                    <h2 className="homePageSubTitle" id="plans-title">Nos Plans Mensuels</h2>
                     <CardsPlans />
                 </section>
                         

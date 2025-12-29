@@ -4,7 +4,6 @@
   padding: 60px 20px;
   max-width: auto;
   margin: 0 auto;
-  background: #FFFAF4;
 }
 
 .faq-content {
@@ -79,7 +78,7 @@
 }
 
 .faq-question-btn:hover {
-  background: #FFD9DC;
+  background: #FF8C94;
 }
 
 .faq-question-content {
