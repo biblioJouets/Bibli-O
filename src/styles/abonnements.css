@@ -214,7 +214,7 @@ padding-bottom: 0;
 /* =========================================
    SECTION POURQUOI CHOISIR
 ========================================= */
-.why-section { background-color: var(--col-bg-warm); }
+.why-section { background-color: var(--col-bg-light); }
 
 .benefits-grid {
   display: grid;
@@ -286,7 +286,7 @@ padding-bottom: 0;
 /* =========================================
    SECTION PRICING (FORMULES)
 ========================================= */
-.pricing-section { background-color: var(--col-bg-accent); }
+.pricing-section { background-color: var(  --col-bg-warm); }
 
 .pricing-grid {
   display: flex;
@@ -492,8 +492,8 @@ padding-bottom: 0;
    SECTION SOCIAL PROOF & FAQ
 ========================================= */
 .social-faq-section {
-  background-color: var(--col-bg-light);
-  position: relative;
+  background-color:#FFF7EB;
+    position: relative;
 }
 
 /* Formes décoratives d'arrière-plan */
