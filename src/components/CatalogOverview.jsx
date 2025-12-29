@@ -25,7 +25,7 @@ function CatalogOverview() {
 
   return (
     <div className="catalogOverviewSection">
-      <h2>Un aperçu de notre futur catalogue</h2>
+      <h2 className="homePageSubTitle">Un aperçu de notre futur catalogue</h2>
       <h3>Dès le lancement, accédez à des centaines de références triées sur le volet.</h3>
       <div className='BubulleTags'>
         {bubulleTagsList.map((item, index) => (

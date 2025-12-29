@@ -22,7 +22,7 @@ const TestimonialSlider = () => {
     ];   
     return (
 <div className='cardContentMissionSection'>
-<h2>Notre Mission</h2>
+<h2 className="homePageSubTitle">Notre Mission</h2>
 <div className='cardsContentMission'>
     <div className='cardContentMission redCardContent'>
         <p className='CardContentName'>{cardContentMission[0].name}</p>
