@@ -33,7 +33,7 @@ const SubscriptionPage = () => {
       {/* --- SECTION PRICING (FORMULES) --- */}
       <section className="pricing-section">
         <div className="container">
-          <h2>Nos formules flexibles, sans engagement test push main</h2>
+          <h2>Nos formules flexibles, sans engagement</h2>
           <div className="pricing-grid">
             {/* CARTE 1 : Découverte */}
             <div className="pricing-card">
