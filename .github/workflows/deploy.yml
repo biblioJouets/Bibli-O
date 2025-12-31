@@ -17,13 +17,21 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd ~/docker/Bibli-O
-            # Sauvegarder le .env.production
+            # 1. Aller dans le BON dossier
+            cd /root/Bibli-O
+
+            # 2. Sauvegarder vos clés API (le fichier .env ou .env.production)
+            # On le fait si le fichier existe pour ne pas le perdre
             cp .env.production /tmp/.env.production.backup 2>/dev/null || true
+
+            # 3. Récupérer le code
             git pull origin main
-            # Restaurer le .env.production
+
+            # 4. Restaurer les clés API (au cas où le pull les aurait écrasées)
             cp /tmp/.env.production.backup .env.production 2>/dev/null || true
-            docker compose down
-            docker compose build --no-cache
-            docker compose up -d
+
+            # 5. Relancer SANS couper le site (Build + Up en même temps)
+            docker compose up -d --build
+
+            # 6. Nettoyer les vieilles images pour gagner de la place
             docker image prune -f
