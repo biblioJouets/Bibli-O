@@ -15,7 +15,7 @@ COPY . .
 ARG NEXT_PUBLIC_HCAPTCHA_SITE_KEY
 ENV NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY
 
-# Variables factices pour build (Prisma / Next.js)
+# Variables factices pour le build
 ENV DATABASE_URL="postgresql://fake:fake@localhost:5432/fake"
 ENV NEXT_PUBLIC_API_URL="https://bibliojouets.fr"
 ENV MAILJET_API_KEY="fake_key"
@@ -32,21 +32,29 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Ajout indispensable pour Prisma
 RUN apk add --no-cache openssl
 
+# Création de l'utilisateur sécurisé
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Préparation du cache
 RUN mkdir -p /app/.next/cache
 RUN chown -R nextjs:nodejs /app/.next
 
+# COPIE DES FICHIERS AVEC LES BONNES PERMISSIONS
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
+# CORRECTION ICI : On donne le dossier prisma à l'utilisateur nextjs
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+# Note : Parfois nécessaire selon la config standalone
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
+# PASSAGE EN MODE NON-ROOT (Sécurité Maximale)
 USER nextjs
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
