@@ -4,6 +4,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/core/database";
 import bcrypt from "bcryptjs";
 
+// Détection : Est-ce qu'on doit sécuriser les cookies ?
+// On regarde si l'URL de production commence par https
+const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith("https");
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -17,8 +21,6 @@ export const authOptions = {
           return null;
         }
 
-        // 1. Chercher l'utilisateur dans la DB
-        // Attention : on utilise 'users' (pluriel) car c'est défini ainsi dans ton schema.prisma
         const user = await prisma.users.findUnique({
           where: { email: credentials.email }
         });
@@ -27,19 +29,17 @@ export const authOptions = {
           return null;
         }
 
-        // 2. Vérifier le mot de passe
         const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValid) {
           return null;
         }
 
-        // 3. Retourner l'utilisateur pour le token (sans le mdp)
         return {
-          id: user.id.toString(), // Convertir en string pour le JWT
-          name: user.firstName,   // On utilise le prénom pour l'affichage
+          id: user.id.toString(),
+          name: user.firstName,
           email: user.email,
-          role: user.role,        // On passe le rôle (USER ou ADMIN)
+          role: user.role,
         };
       }
     })
@@ -47,8 +47,20 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
+  // --- CORRECTION CRITIQUE POUR DOCKER LOCAL ---
+  // On force la configuration des cookies pour s'adapter au HTTP local
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies, // false en local (http), true en prod (https)
+      },
+    },
+  },
   callbacks: {
-    // Ajouter les infos personnalisées au JWT
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
@@ -56,7 +68,6 @@ export const authOptions = {
       }
       return token;
     },
-    // Rendre les infos disponibles dans la session (côté client)
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;

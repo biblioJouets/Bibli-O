@@ -114,8 +114,8 @@ enum OrderStatus {
 }
 
 model OrderProducts {
-  createdAt DateTime @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
   OrderId   Int
   ProductId Int
   Orders    Orders   @relation(fields: [OrderId], references: [id], onDelete: Cascade)
