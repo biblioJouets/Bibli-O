@@ -2,6 +2,9 @@ import { contactController } from '@/lib/modules/contact/contact.controller';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
+
+  
+
   return contactController.create(request);
 }
 

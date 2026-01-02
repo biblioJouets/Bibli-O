@@ -6,13 +6,11 @@ export async function middleware(request) {
   const origin = request.headers.get("origin");
   const path = request.nextUrl.pathname;
 
-  // --- 0. LAISSER PASSER LES FICHIERS STATIQUES (Sécurité ceinture et bretelles) ---
-  // Si le matcher rate, ceci sauvera l'affichage des images
+
   if (
     path.startsWith("/uploads") || 
     path.startsWith("/_next") || 
-    path.startsWith("/favicon.ico") ||
-    path.startsWith("/api/upload") // On laisse l'upload accessible pour le moment (géré par le controller)
+    path.startsWith("/favicon.ico")
   ) {
     return NextResponse.next();
   }
@@ -51,18 +49,28 @@ export async function middleware(request) {
     return new NextResponse(null, { status: 204, headers: response.headers });
   }
 
-  // --- 2. SÉCURITÉ NEXTAUTH ---
+  // --- 2. SÉCURITÉ & AUTHENTIFICATION ---
+  // On récupère le token MAINTENANT (avant de faire les vérifications)
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET 
   });
+
+  // PROTECTION UPLOAD : Seul l'Admin peut uploader
+  if (path.startsWith("/api/upload")) {
+      if (token?.role !== "ADMIN") {
+         return NextResponse.json({ message: "Non autorisé - Admin requis" }, { status: 401 });
+      }
+      // Si c'est un admin, on laisse passer vers la route d'upload
+      return response; 
+  }
 
   const isAdminRoute = path.startsWith("/admin");
   const isUserRoute = path.startsWith("/mon-compte") || path.startsWith("/panier");
 
   // Cas A : Non connecté essayant d'accéder à une page privée
   if ((isAdminRoute || isUserRoute) && !token) {
-    const url = new URL("/connexion", request.url); // J'ai remis /connexion car c'est ta page de login
+    const url = new URL("/connexion", request.url);
     url.searchParams.set("callbackUrl", path);
     return NextResponse.redirect(url);
   }
@@ -78,7 +86,8 @@ export async function middleware(request) {
 // Configuration du matcher (Routes surveillées)
 export const config = {
   matcher: [
-    // La regex négative (?!) exclut tout ce qui commence par ces chemins
-    '/((?!_next/static|_next/image|favicon.ico|uploads|api/upload).*)',
+    // IMPORTANT : J'ai retiré 'api/upload' de la liste d'exclusion ci-dessous
+    // Sinon le middleware ne s'active jamais pour l'upload !
+    '/((?!_next/static|_next/image|favicon.ico|uploads).*)',
   ],
 };

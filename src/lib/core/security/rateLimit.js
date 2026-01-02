@@ -1,11 +1,10 @@
-// Rate limiter simple en mémoire (suffisant pour site vitrine)
 
 const requests = new Map();
 
-const WINDOW_MS = 60 * 1000; // 1 minute
-const CLEANUP_INTERVAL = 5 * 60 * 1000; // Nettoyage toutes les 5 min
+const WINDOW_MS = 60 * 1000; 
+const CLEANUP_INTERVAL = 5 * 60 * 1000; 
 
-// Nettoyage périodique pour éviter les fuites mémoire
+
 if (typeof setInterval !== 'undefined') {
   setInterval(() => {
     const now = Date.now();
@@ -27,7 +26,6 @@ export function checkRateLimit(identifier, maxRequests = 5) {
   const data = requests.get(identifier);
 
   if (!data || now - data.windowStart > WINDOW_MS) {
-    // Nouvelle fenêtre
     requests.set(identifier, { count: 1, windowStart: now });
     return { allowed: true, remaining: maxRequests - 1, resetIn: WINDOW_MS };
   }
@@ -45,9 +43,7 @@ export function checkRateLimit(identifier, maxRequests = 5) {
   };
 }
 
-/**
- * Helper pour les routes API Next.js
- */
+
 export function getRateLimitKey(request) {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
