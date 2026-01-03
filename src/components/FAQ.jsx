@@ -36,7 +36,7 @@ const FAQ = () => {
     {
       icon: <XCircle size={20} />,
       question: "Que se passe-t-il si un jouet est cassé ou perdu ?",
-      answer: "Un accident est vite arrivé quand on joue ! Nous savons que cela fait partie de la vie des enfants. En cas de petite casse ou de perte d'une pièce mineure, pas de panique, c'est couvert par l'assurance qui est compris de le tarif de la location! Pour des dommages importants ou la perte totale d'un jouet, une participation financière pourra être demandée, mais nous favorisons toujours la réparation. L'idée est de jouer sans stress !"
+      answer: "Un accident est vite arrivé quand on joue ! Nous savons que cela fait partie de la vie des enfants. En cas de petite casse ou de perte d'une pièce mineure, pas de panique, c'est couvert par l'assurance qui est compris dans le tarif de la location! Pour des dommages importants ou la perte totale d'un jouet, une participation financière pourra être demandée, mais nous favorisons toujours la réparation. L'idée est de jouer sans stress !"
     },
     {
       icon: <ListChecks size={20} />,
@@ -69,7 +69,7 @@ const FAQ = () => {
     {
       icon: <Truck size={20} />,
       question: "Est-ce que Bibli'O Jouets livre partout en France ?",
-      answer: "Nous proposons plusieurs options de livraison et de retrait ! Selon votre zone, vous pourrez choisir entre le retrait gratuit en point relais, la livraison locale à domicile (en fonction de votre abonnement). L'objectif est de vous faciliter la vie !"
+      answer: "Nous proposons plusieurs options de livraison et de retrait ! Selon votre zone, vous pourrez choisir entre le retrait gratuit en point relais. L'objectif est de vous faciliter la vie !"
     },
     {
       icon: <Blocks size={20} />,

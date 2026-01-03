@@ -10,7 +10,8 @@ const listProtocole = [
   "​​1. Inspection : Contrôle complet des pièces à la réception.",
   "2. Désinfection : Nettoyage avec des produits écologiques et hypoallergéniques.",
   "3. Vérification : Second contrôle qualité pour une sécurité parfaite.",
-  "4. Emballage : Mise sous scellé pour garantir une hygiène intacte."
+  "4. Stockage : Mise en place dans des conditions optimales pour une hygiène intacte.",
+  "5. Emballage : Emballage soigné avant expédition pour garantir la propreté."
 ];
 
 export default function Protocol() {

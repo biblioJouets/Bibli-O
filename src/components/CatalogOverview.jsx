@@ -35,7 +35,7 @@ function CatalogOverview() {
           </div>
         ))}
       </div>
-      <h2>Nos futures marques partenaires</h2>
+      <h2>Nos marques partenaires</h2>
       <SliderLogoSection />
     </div>
   );

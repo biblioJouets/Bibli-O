@@ -134,7 +134,7 @@ function Homepage() {
                 
                 {/* Section Plans */}
                 <section className="CardsPlansSections" aria-labelledby="plans-title">
-                    <h2 className="homePageSubTitle" id="plans-title">Nos Plans Mensuels</h2>
+                    <h2 className="homePageSubTitle" id="plans-title">Nos abonnements Mensuels</h2>
                     <CardsPlans />
                 </section>
                         
