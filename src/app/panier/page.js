@@ -3,27 +3,40 @@
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Minus, Plus, Gift, Truck, CheckCircle } from "lucide-react";
+import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react"; // Ajout de Gift si manquant
 import ButtonBlue from "@/components/ButtonBlue";
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading } = useCart();
 
-  // Calcul du totale des produits 
+  // Calcul valeur théorique
   const cartValue = cart.items?.reduce((total, item) => {
     return total + (item.product.price * item.quantity);
   }, 0) || 0;
 
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
-  // --- LOGIQUE SUGGESTION ABONNEMENT ---
+  // --- LOGIQUE SUGGESTION ABONNEMENT (MISE À JOUR) ---
   const getSuggestedPlan = (count) => {
     // Cas standards
     if (count <= 2) return { name: "Découverte", price: "25.99€", contactLink: null };
     if (count <= 4) return { name: "Standard", price: "39.99€", contactLink: null };
     if (count <= 6) return { name: "Premium", price: "55.99€", contactLink: null };
     
-    // SUR DEVIS
+    // NOUVEAU : Option "Maxi Box" (7 à 9 jouets)
+    if (count <= 9) {
+        const extraToys = count - 6;
+        let totalPrice = 55.99 + (extraToys * 9);
+          totalPrice = totalPrice.toFixed(2);
+        return { 
+            name: "Maxi Box", 
+            price: `${totalPrice}€`, 
+            contactLink: null,
+            details: `Base Premium + ${extraToys} jouet(s) sup.`
+        };
+    }
+
+    // Au-delà de 9 jouets -> Sur devis
     return { 
         name: "Sur devis", 
         price: null, 
@@ -33,7 +46,8 @@ export default function PanierPage() {
 
   const suggestedPlan = getSuggestedPlan(itemCount);
 
-  if (!cart.items || cart.items.length === 0) {
+  // Affichage panier vide
+  if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
       <div style={{ 
         textAlign: "center", 
@@ -45,7 +59,7 @@ export default function PanierPage() {
         justifyContent: "center"
       }}>
         <div style={{ background: "#DAEEE6", padding: "2rem", borderRadius: "50%", marginBottom: "2rem" }}>
-            <Gift size={64} color="#88D4AB" />
+             <Gift size={64} color="#88D4AB" />
         </div>
         <h2 style={{ fontSize: "2rem", color: "#2E1D21", marginBottom: "1rem" }}>Votre coffre à jouets est vide 🛒</h2>
         <p style={{ color: "#666", fontSize: "1.1rem" }}>Commencez par ajouter des jeux pour composer votre box idéale !</p>
@@ -181,9 +195,9 @@ export default function PanierPage() {
             <span style={{ color: "#88D4AB", fontWeight: "bold" }}>OFFERTE</span>
           </div>
 
-          {/*  FORMULE DYNAMIQUE */}
+          {/* FORMULE DYNAMIQUE */}
           <div style={{ background: "#FFF7EB", padding: "20px", borderRadius: "15px", marginBottom: "25px" }}>
-            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>Formule suggérée :</p>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>Formule calculée :</p>
             
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#FF8C94" }}>{suggestedPlan.name}</span>
@@ -208,6 +222,13 @@ export default function PanierPage() {
                 )}
             </div>
             
+            {/* Affichage des détails si Maxi Box */}
+            {suggestedPlan.details && (
+                <p style={{ fontSize: "0.8rem", color: "#FF8C94", marginTop: "5px", fontWeight: "bold" }}>
+                    {suggestedPlan.details}
+                </p>
+            )}
+
             <p style={{ fontSize: "0.8rem", color: "#999", marginTop: "5px" }}>
                 {itemCount} jouets sélectionnés
             </p>
@@ -215,7 +236,7 @@ export default function PanierPage() {
 
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: "0.85rem", color: "#999", marginBottom: "15px" }}>
-                Aucun paiement n'est prélevé maintenant. Vous choisirez votre abonnement à l'étape suivante.
+                Aucun paiement n'est prélevé maintenant. Vous confirmerez votre abonnement à l'étape suivante.
             </p>
             <div style={{ width: "100%" }}>
                 {suggestedPlan.contactLink ? (
@@ -231,7 +252,7 @@ export default function PanierPage() {
                 <CheckCircle size={14} /> Sans engagement
              </div>
              <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#88D4AB" }}>
-                <CheckCircle size={14} /> Nettoyage & désinfection
+                <CheckCircle size={14} /> Nettoyage PRO
              </div>
           </div>
 

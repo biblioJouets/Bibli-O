@@ -20,6 +20,7 @@
     "@getbrevo/brevo": "^3.0.1",
     "@hcaptcha/react-hcaptcha": "^1.10.0",
     "@prisma/client": "^5.19.0",
+    "@stripe/stripe-js": "^8.6.0",
     "bcryptjs": "^2.4.3",
     "isomorphic-dompurify": "^2.19.0",
     "lucide-react": "^0.420.0",
@@ -30,6 +31,7 @@
     "react": "^19.2.3",
     "react-cookie-consent": "^9.0.0",
     "react-dom": "^19.2.3",
+    "stripe": "^20.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

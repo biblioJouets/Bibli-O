@@ -11,6 +11,7 @@ services:
       - "127.0.0.1:3000:3000"
     env_file:
       - .env.production
+      - NEXT_PUBLIC_URL=http://localhost:3000  #a retirer pour la prod 
     volumes:
       - ./public/uploads:/app/public/uploads
     depends_on:
@@ -26,7 +27,7 @@ services:
     container_name: biblio-db
     restart: unless-stopped
     ports: 
-        - "5432:5432"
+        - "5432:5432"    #a retirer pour la prod
     env_file:
       - .env.production
     volumes:

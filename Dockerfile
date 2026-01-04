@@ -23,6 +23,7 @@ ENV MAILJET_API_SECRET="fake_secret"
 ENV MAILJET_SENDER_EMAIL="fake@email.com"
 ENV MAILJET_CONTACT_LIST_ID="123456"
 ENV HCAPTCHA_SECRET_KEY="fake_hcaptcha_secret"
+ENV STRIPE_SECRET_KEY="sk_test_fake_build_key"
 
 RUN npx prisma generate
 RUN npm run build

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -21,14 +21,22 @@ export default function PaiementPage() {
     phone: ""
   });
 
-  // --- 1. CALCUL DU PRIX DE L'ABONNEMENT ---
+  // --- 1. CALCUL DU PRIX DE L'ABONNEMENT AVEC OPTION MAXI BOX ---
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   const getSubscriptionPrice = (count) => {
+    // Offres standards
     if (count <= 2) return 25.99;
     if (count <= 4) return 39.99;
     if (count <= 6) return 55.99;
-    return 0; // Cas "Sur devis"
+
+    // Offre Maxi Box (7 à 9 jouets) : 32€ + 9€ par jouet sup
+    if (count <= 9) {
+        const extra = count - 6;
+        const total = 55.99 + (extra * 9);
+    }
+
+    return 0; // Cas "Sur devis" (> 9)
   };
 
   const subscriptionPrice = getSubscriptionPrice(itemCount);
@@ -38,43 +46,50 @@ export default function PaiementPage() {
     return <div className="p-20 text-center">Votre panier est vide.</div>;
   }
 
-  const handleOrder = async (e) => {
+const handleOrder = async (e) => {
     e.preventDefault();
     
-    // Sécurité : Si panier trop gros (Sur devis), on bloque le paiement auto
+    // Sécurité Maxi Box
     if (subscriptionPrice === 0) {
-        alert("Pour plus de 6 jouets, veuillez nous contacter pour un devis.");
+        alert("Pour plus de 9 jouets, contactez-nous.");
         return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/orders", {
+      // 1. Sauvegarder l'adresse en BDD avant de partir chez Stripe (Optionnel mais bien)
+      // Tu peux faire un appel à ton API /api/users/[id]/addresses si tu veux
+      
+      // 2. Appeler notre route Checkout pour avoir l'URL Stripe
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartItems: cart.items,
-          totalAmount: subscriptionPrice, // <--- ON ENVOIE LE PRIX DE L'ABO
           shippingData: {
             shippingName: `${shipping.firstName} ${shipping.lastName}`,
             shippingAddress: shipping.address,
             shippingZip: shipping.zipCode,
             shippingCity: shipping.city,
-            mondialRelayPointId: "DOMICILE"
+            // ... autres champs
           }
         })
       });
 
-      if (res.ok) {
-        router.push("/confirmation-commande");
+      const data = await res.json();
+
+      if (data.url) {
+        // 3. Redirection vers Stripe !
+        window.location.href = data.url; 
       } else {
-        alert("Une erreur est survenue lors de la commande.");
+        alert("Erreur lors de l'initialisation du paiement.");
+        setIsSubmitting(false);
       }
+
     } catch (error) {
       console.error(error);
       alert("Erreur de connexion.");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -170,9 +185,10 @@ export default function PaiementPage() {
 
             {/* Détail du prix */}
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "1rem" }}>
-              <span>Formule ({itemCount} jouets)</span>
-              <strong>{subscriptionPrice}€ <span style={{fontSize: "0.7em", fontWeight: "normal"}}>/mois</span></strong>
-            </div>
+              <span>
+                {itemCount <= 6 ? `Formule (${itemCount} jouets)` : `Maxi Box (${itemCount} jouets)`}
+              </span>
+            <strong>{Number(subscriptionPrice).toFixed(2)}€ <span style={{fontSize: "0.7em", fontWeight: "normal"}}>/mois</span></strong>            </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", fontSize: "0.9rem", color: "#666" }}>
               <span>Livraison</span>
@@ -181,7 +197,7 @@ export default function PaiementPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", fontWeight: "bold", fontSize: "1.5rem", color: "#2E1D21" }}>
               <span>Total à régler</span>
-              <span>{subscriptionPrice}€</span>
+            <span>{Number(subscriptionPrice).toFixed(2)}€</span>
             </div>
 
             <button 
