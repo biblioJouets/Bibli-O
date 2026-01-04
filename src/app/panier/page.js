@@ -19,9 +19,9 @@ export default function PanierPage() {
   // --- LOGIQUE SUGGESTION ABONNEMENT ---
   const getSuggestedPlan = (count) => {
     // Cas standards
-    if (count <= 2) return { name: "Découverte", price: "19€", contactLink: null };
-    if (count <= 4) return { name: "Standard", price: "25€", contactLink: null };
-    if (count <= 6) return { name: "Premium", price: "32€", contactLink: null };
+    if (count <= 2) return { name: "Découverte", price: "25.99€", contactLink: null };
+    if (count <= 4) return { name: "Standard", price: "39.99€", contactLink: null };
+    if (count <= 6) return { name: "Premium", price: "55.99€", contactLink: null };
     
     // SUR DEVIS
     return { 
@@ -221,7 +221,7 @@ export default function PanierPage() {
                 {suggestedPlan.contactLink ? (
                      <ButtonBlue text="Demander un devis" href="/contact" />
                 ) : (
-                     <ButtonBlue text="Valider ma sélection" href="/abonnements" />
+                     <ButtonBlue text="Valider ma sélection" href="/paiement" />
                 )}
             </div>
           </div>

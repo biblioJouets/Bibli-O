@@ -16,6 +16,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    
     networks:
       - biblio-network
       - nginx-proxy-manager_default
@@ -24,6 +25,8 @@ services:
     image: postgres:16-alpine
     container_name: biblio-db
     restart: unless-stopped
+    ports: 
+        - "5432:5432"
     env_file:
       - .env.production
     volumes:
