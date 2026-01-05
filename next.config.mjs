@@ -28,24 +28,28 @@ const nextConfig = {
           // ---------------------------
           //  CONTENT SECURITY POLICY
           // ---------------------------
- {
-
-  key: "Content-Security-Policy",
-
-  value: [
+          {
+            key: "Content-Security-Policy",
+            value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://hcaptcha.com https://*.hcaptcha.com", 
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com",
+              // AJOUTS ICI : ajax.googleapis.com, widget.mondialrelay.com, unpkg.com
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://hcaptcha.com https://*.hcaptcha.com https://ajax.googleapis.com https://widget.mondialrelay.com https://unpkg.com", 
+              
+              // AJOUT ICI : unpkg.com (pour le CSS Leaflet)
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com https://unpkg.com",
+              
               "img-src 'self' data: https: https://hcaptcha.com https://*.hcaptcha.com",
               "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
-              "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://sentry.hcaptcha.com",
+              
+              // AJOUT ICI : widget.mondialrelay.com (pour les requêtes API du widget)
+              "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://sentry.hcaptcha.com https://widget.mondialrelay.com",
+              
               "frame-src https://hcaptcha.com https://*.hcaptcha.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'"
             ].join("; ")
-
-}
+          }
         ]
       }
     ];
