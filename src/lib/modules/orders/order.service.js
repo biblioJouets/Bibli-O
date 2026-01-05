@@ -65,7 +65,7 @@ export const sendReturnLabel = async (orderInfo) => {
  * Création d'une commande à partir d'un panier
  */
 export const createOrder = async (userId, cartData, totalAmount, shippingData) => {
-  // 1. Création BDD
+  // 1. Création de la commande en BDD
   const newOrder = await prisma.orders.create({
     data: {
       userId: userId,
@@ -73,6 +73,9 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
       status: 'PENDING',
       mondialRelayPointId: shippingData.mondialRelayPointId,
       shippingName: shippingData.shippingName,
+      shippingAddress: shippingData.shippingAddress,
+      shippingZip: shippingData.shippingZip,
+      shippingCity: shippingData.shippingCity,
       OrderProducts: {
         create: cartData.items.map(item => ({
           ProductId: item.productId
@@ -81,13 +84,25 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
     }
   });
 
-  // 2. Récupération User
+  // 2. MISE À JOUR DES STOCKS (Nouveau !) 📉
+  // On parcourt chaque article du panier pour décrémenter son stock
+  for (const item of cartData.items) {
+    await prisma.products.update({
+      where: { id: item.productId },
+      data: {
+        stock: {
+          decrement: item.quantity // On enlève la quantité commandée (généralement 1)
+        }
+      }
+    });
+  }
+
+  // 3. Récupération User pour l'email
   const user = await prisma.users.findUnique({
     where: { id: userId }
   });
 
-  // 3. Envoi Email (via la fonction partagée)
-  // On met dans un try/catch silencieux pour ne pas faire planter la commande si le mail échoue
+  // 4. Envoi Email (via Brevo)
   try {
     await sendOrderConfirmation({
       id: newOrder.id,
