@@ -76,6 +76,7 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
       shippingAddress: shippingData.shippingAddress,
       shippingZip: shippingData.shippingZip,
       shippingCity: shippingData.shippingCity,
+      shippingPhone: shippingData.shippingPhone,
       OrderProducts: {
         create: cartData.items.map(item => ({
           ProductId: item.productId

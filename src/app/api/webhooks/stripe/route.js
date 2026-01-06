@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers"; // Import standard
+import { headers } from "next/headers"; 
 import Stripe from "stripe";
 import prisma from "@/lib/core/database";
 import { createOrder } from "@/lib/modules/orders/order.service";
@@ -10,11 +10,10 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export async function POST(req) {
   const body = await req.text();
 
-  // --- CORRECTION NEXT.JS 16 ---
-  // headers() est maintenant une promesse, il faut mettre 'await'
+  // --- COMPATIBILITÉ NEXT.JS 15/16 ---
   const headersList = await headers(); 
   const sig = headersList.get("stripe-signature");
-  // -----------------------------
+  // -----------------------------------
 
   let event;
 
@@ -29,36 +28,50 @@ export async function POST(req) {
   // GESTION DE L'ÉVÉNEMENT
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const { userId, shippingName, shippingAddress, shippingCity, shippingZip, mondialRelayPointId } = session.metadata;
+
+    // 1. Extraction des métadonnées (envoyées depuis checkout/route.js)
+    const { 
+        userId, 
+        shippingName, 
+        shippingAddress, 
+        shippingCity, 
+        shippingZip, 
+        mondialRelayPointId, 
+        shippingPhone
+    } = session.metadata;
 
     console.log(`💰 Paiement validé pour le User ID: ${userId}`);
 
     try {
-      // 1. Récupérer le panier
+      // 2. Récupérer le panier
       const userCart = await prisma.cart.findUnique({
         where: { userId: parseInt(userId) },
         include: { items: { include: { product: true } } }
       });
 
       if (!userCart || userCart.items.length === 0) {
-        console.error("Panier vide ou introuvable pour ce paiement.");
+        console.error("❌ Panier vide ou introuvable pour ce paiement.");
         return NextResponse.json({ received: true });
       }
 
-      // 2. Créer la commande
+      // 3. Préparer les données pour la commande
       const totalAmount = session.amount_total / 100;
+      
       const shippingData = {
         shippingName,
         shippingAddress,
         shippingZip,
         shippingCity,
-        mondialRelayPointId: mondialRelayPointId || null
+        shippingPhone,
+        mondialRelayPointId: mondialRelayPointId && mondialRelayPointId !== "null" ? mondialRelayPointId : null
       };
 
+      // 4. Créer la commande via le service (C'est lui qui enregistre en BDD)
       const newOrder = await createOrder(parseInt(userId), userCart, totalAmount, shippingData);
-      console.log(`✅ Commande #${newOrder.id} créée avec succès !`);
+      
+      console.log(`✅ Commande #${newOrder.id} créée avec succès ! MR ID: ${shippingData.mondialRelayPointId}`);
 
-      // 3. Vider le panier
+      // 5. Vider le panier
       await prisma.cartItem.deleteMany({
         where: { cartId: userCart.id }
       });

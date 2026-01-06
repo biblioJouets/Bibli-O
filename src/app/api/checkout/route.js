@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
-import prisma from "@/lib/core/database";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+    
     // 1. Sécurité : Qui commande ?
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -16,7 +16,7 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { cartItems, shippingData } = body; // On récupère les infos du front
+    const { cartItems, shippingData } = body; 
     
     // Calcul du nombre de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -33,37 +33,32 @@ export async function POST(req) {
       line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
     } else {
       // MAXI BOX (7 à 9 jouets)
-      // 1. On facture la base Premium
       line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
-      // 2. On ajoute les jouets supplémentaires (ex: 8 jouets = 2 extras)
       const extraToys = count - 6;
       line_items.push({ price: process.env.STRIPE_PRICE_EXTRA_TOY, quantity: extraToys });
     }
 
-    // 3. Récupérer ou créer le client Stripe (Optionnel mais recommandé pour lier au user)
-    // Pour l'instant, on passe l'email directement à la session
-    
-    // 4. Créer la session Stripe
+    // 3. Créer la session Stripe
     const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"], // CB, Apple Pay, Google Pay auto
+      payment_method_types: ["card"],
       line_items: line_items,
-      mode: "subscription", // C'est un abonnement !
-      customer_email: session.user.email, // Pré-remplit l'email
+      mode: "subscription", 
+      customer_email: session.user.email,
       
-      // Où rediriger après le paiement ?
       success_url: `${baseUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/paiement`,
 
-      // Métadonnées : Pour savoir quoi faire quand le paiement réussit (Webhook)
+      // 4. METADONNÉES CRUCIALES (Passées au Webhook)
       metadata: {
-        userId: session.user.id, // ID de ton User Prisma (si tu l'as sous la main, sinon via email)
-        shippingName: shippingData.shippingName,
-        shippingAddress: shippingData.shippingAddress,
-        shippingCity: shippingData.shippingCity,
-        shippingZip: shippingData.shippingZip
+        userId: session.user.id,
+        shippingName: shippingData.shippingName || "",
+        shippingAddress: shippingData.shippingAddress || "",
+        shippingCity: shippingData.shippingCity || "",
+        shippingZip: shippingData.shippingZip || "",
+        // On force la conversion en string ou chaine vide pour éviter les bugs Stripe
+        mondialRelayPointId: shippingData.mondialRelayPointId ? String(shippingData.mondialRelayPointId) : ""
       },
       
-      // Optionnel : Demander l'adresse de facturation/livraison à Stripe aussi
       billing_address_collection: 'required',
     });
 

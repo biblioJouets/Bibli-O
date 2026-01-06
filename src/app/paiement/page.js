@@ -144,7 +144,9 @@ export default function PaiementPage() {
 
     try {
       const finalShippingData = {
-        shippingName: `${shipping.firstName} ${shipping.lastName}`,
+        shippingName: deliveryMode === 'MONDIAL_RELAY'
+        ? selectedRelay.name
+        : `${shipping.firstName} ${shipping.lastName}`,
         shippingPhone: shipping.phone,
         shippingAddress: deliveryMode === 'MONDIAL_RELAY' ? selectedRelay.address : shipping.address,
         shippingZip: deliveryMode === 'MONDIAL_RELAY' ? selectedRelay.zip : shipping.zipCode,

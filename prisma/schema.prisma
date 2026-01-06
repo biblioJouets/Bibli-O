@@ -87,7 +87,7 @@ model Orders {
   shippingAddress     String? @db.VarChar(255) // Adresse du point relais ou domicile
   shippingZip         String? @db.VarChar(20)
   shippingCity        String? @db.VarChar(100)
-
+  shippingPhone       String? @db.VarChar(20)
   // --- LOGISTIQUE RETOUR & LOCATION ---
   returnTrackingNumber String?   @db.VarChar(100) // Suivi retour client
   returnLabelUrl       String?  //pdf espace client
