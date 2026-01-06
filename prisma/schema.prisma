@@ -118,6 +118,7 @@ model OrderProducts {
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
   OrderId   Int
   ProductId Int
+  quantity  Int      @default(1)
   Orders    Orders   @relation(fields: [OrderId], references: [id], onDelete: Cascade)
   Products  Products @relation(fields: [ProductId], references: [id], onDelete: Cascade)
 

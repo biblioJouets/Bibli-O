@@ -3,7 +3,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from 'next/link';
-import { Package, Users, Settings } from 'lucide-react';
+import { Package, Users, Settings, ShoppingBag } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
@@ -39,14 +39,16 @@ export default function AdminDashboard() {
             </div>
         </Link>
 
-        {/* CARTE UTILISATEURS (Futur) */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center h-full opacity-60">
-            <div style={{background: '#FFF7EB', padding: '1.5rem', borderRadius: '50%', marginBottom: '1.5rem'}}>
-                <Users size={40} color="#FFD88C" />
+    {/* CARTE COMMANDES  */}
+        <Link href="/admin/orders" className="block">
+            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center text-center h-full cursor-pointer hover:-translate-y-1 transform duration-200">
+                <div style={{background: '#FFF7EB', padding: '1.5rem', borderRadius: '50%', marginBottom: '1.5rem'}}>
+                    <ShoppingBag size={40} color="#FFD88C" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Commandes</h3>
+                <p className="text-gray-500">Suivre les commandes et imprimer les fiches.</p>
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Utilisateurs</h3>
-            <p className="text-gray-500">Bientôt disponible : Gestion des comptes clients.</p>
-        </div>
+        </Link>
 
         {/* CARTE PARAMÈTRES (Futur) */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center h-full opacity-60">
