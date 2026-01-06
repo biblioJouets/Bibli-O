@@ -55,6 +55,7 @@ export async function POST(req) {
         shippingAddress: shippingData.shippingAddress || "",
         shippingCity: shippingData.shippingCity || "",
         shippingZip: shippingData.shippingZip || "",
+        shippingPhone: shippingData.shippingPhone || "",
         // On force la conversion en string ou chaine vide pour éviter les bugs Stripe
         mondialRelayPointId: shippingData.mondialRelayPointId ? String(shippingData.mondialRelayPointId) : ""
       },

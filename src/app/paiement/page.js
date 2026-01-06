@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Package, MapPin } from "lucide-react";
-// On n'importe plus Script de next/script pour ces librairies
-// import Script from "next/script"; 
+import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react"; // J'ai ajouté AlertCircle
 
 export default function PaiementPage() {
   const { cart, loading } = useCart();
@@ -16,7 +14,6 @@ export default function PaiementPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState("DOMICILE"); 
   const [selectedRelay, setSelectedRelay] = useState(null); 
-
   const [shipping, setShipping] = useState({
     firstName: "",
     lastName: "",
@@ -26,31 +23,60 @@ export default function PaiementPage() {
     phone: ""
   });
 
+  // --- 1. CONFIGURATION DES ZONES ÉLIGIBLES À DOMICILE ---
+  const AUTHORIZED_HOME_DELIVERY = {
+    "34690": ["FABREGUES", "FABRÈGUES"],
+    "34570": ["PIGNAN", "SAUSSAN"]
+  };
+
+  // Fonction utilitaire pour nettoyer le texte (enlever accents, mettre en majuscule)
+  const normalizeText = (text) => {
+    return text
+      .toUpperCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlève les accents
+      .trim(); 
+  };
+
+  // Vérifie si l'adresse saisie est éligible
+  const isEligibleForHome = () => {
+    if (deliveryMode !== 'DOMICILE') return true; // Si Mondial Relay, toujours OK
+
+    const zip = shipping.zipCode.trim();
+    const city = normalizeText(shipping.city);
+
+    // Si le code postal n'est pas dans la liste
+    if (!AUTHORIZED_HOME_DELIVERY[zip]) return false;
+
+    // Si le code postal est bon, on vérifie si la ville est dans la liste autorisée
+    const allowedCities = AUTHORIZED_HOME_DELIVERY[zip].map(c => normalizeText(c));
+    // On cherche si une des villes autorisées est contenue dans ce que l'utilisateur a écrit
+    return allowedCities.some(allowed => city.includes(allowed));
+  };
+  
+  const canSubmit = isEligibleForHome();
+
+
   // --- CALCUL DU PRIX ---
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const getSubscriptionPrice = (count) => {
     if (count <= 2) return 25.99;
     if (count <= 4) return 39.99;
     if (count <= 6) return 55.99;
-    if (count <= 9) {
-        const extra = count - 6;
-        return 55.99 + (extra * 9);
-    }
+    if (count <= 9) return 55.99 + ((count - 6) * 9);
     return 0;
   };
   const subscriptionPrice = getSubscriptionPrice(itemCount);
 
-  // --- CHARGEMENT SÉCURISÉ DES SCRIPTS (Le Correctif) ---
+  // --- CHARGEMENT SCRIPTS (Mondial Relay) ---
   useEffect(() => {
     const loadScripts = async () => {
-      // Fonction pour injecter un script manuellement
       const injectScript = (src, id) => {
         return new Promise((resolve, reject) => {
-          if (document.getElementById(id)) return resolve(); // Déjà là ? On zappe.
+          if (document.getElementById(id)) return resolve(); 
           const script = document.createElement("script");
           script.src = src;
           script.id = id;
-          script.async = false; // Bloquant pour l'ordre
+          script.async = false; 
           script.onload = resolve;
           script.onerror = reject;
           document.head.appendChild(script);
@@ -58,64 +84,46 @@ export default function PaiementPage() {
       };
 
       try {
-        // 1. On charge jQuery
         await injectScript("https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js", "jquery-script");
         
-        // 2. VERROU DE SÉCURITÉ : On attend que window.jQuery existe vraiment
         const waitForJQuery = setInterval(() => {
           if (window.jQuery) {
             clearInterval(waitForJQuery);
-            window.$ = window.jQuery; // On lie le $
-            console.log("✅ jQuery est prêt.");
+            window.$ = window.jQuery; 
 
-            // 3. Maintenant (et seulement maintenant), on charge le reste
             Promise.all([
               injectScript("https://unpkg.com/leaflet/dist/leaflet.js", "leaflet-js"),
               injectScript("https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js", "mr-plugin")
             ]).then(() => {
-              console.log("✅ Widget MR chargé sans erreur.");
-              // Si l'utilisateur est déjà sur l'onglet MR, on lance la carte
               if (deliveryMode === 'MONDIAL_RELAY') loadMondialRelayWidget();
             });
           }
-        }, 50); // On vérifie toutes les 50ms
-
+        }, 50);
       } catch (err) {
-        console.error("❌ Erreur chargement scripts:", err);
+        console.error("❌ Erreur scripts:", err);
       }
     };
-
     loadScripts();
-    
-    // Nettoyage éventuel (optionnel)
-    return () => {
-        // On ne supprime pas les scripts pour éviter de les recharger à chaque fois
-    };
-  }, []); // [] = Ne le faire qu'une fois au montage de la page
+  }, []); 
 
-  // Relance le widget si on change de mode (et que les scripts sont prêts)
   useEffect(() => {
      if (deliveryMode === 'MONDIAL_RELAY' && window.$ && window.$.fn.MR_ParcelShopPicker) {
          loadMondialRelayWidget();
      }
   }, [deliveryMode]);
 
-
   const loadMondialRelayWidget = () => {
     if (!window.$ || !window.$("#Zone_Widget").length) return;
-
     window.$("#Zone_Widget").html(""); 
-
     window.$("#Zone_Widget").MR_ParcelShopPicker({
       Target: "#Zone_Widget",
       Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID || "BDTEST13", 
       Country: "FR",
-      PostCode: shipping.zipCode || "59000", 
+      PostCode: shipping.zipCode || "34000", 
       ColLivMod: "24R",
       NbResults: "7",
       ShowResultsOnMap: true, 
       OnParcelShopSelected: (data) => {
-        console.log("Point Relais choisi :", data);
         setSelectedRelay({
           id: data.ID,
           name: data.Nom,
@@ -135,6 +143,12 @@ export default function PaiementPage() {
         return;
     }
 
+    // Blocage si livraison domicile non éligible
+    if (deliveryMode === 'DOMICILE' && !canSubmit) {
+        alert("La livraison à domicile n'est pas disponible pour votre adresse. Veuillez choisir Mondial Relay.");
+        return;
+    }
+
     if (deliveryMode === 'MONDIAL_RELAY' && !selectedRelay) {
         alert("Veuillez sélectionner un point relais sur la carte.");
         return;
@@ -145,8 +159,8 @@ export default function PaiementPage() {
     try {
       const finalShippingData = {
         shippingName: deliveryMode === 'MONDIAL_RELAY'
-        ? selectedRelay.name
-        : `${shipping.firstName} ${shipping.lastName}`,
+            ? selectedRelay.name
+            : `${shipping.firstName} ${shipping.lastName}`,
         shippingPhone: shipping.phone,
         shippingAddress: deliveryMode === 'MONDIAL_RELAY' ? selectedRelay.address : shipping.address,
         shippingZip: deliveryMode === 'MONDIAL_RELAY' ? selectedRelay.zip : shipping.zipCode,
@@ -164,16 +178,15 @@ export default function PaiementPage() {
       });
 
       const data = await res.json();
-
       if (data.url) {
         window.location.href = data.url; 
       } else {
-        alert("Erreur lors de l'initialisation du paiement.");
+        alert("Erreur init paiement.");
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error(error);
-      alert("Erreur de connexion.");
+      alert("Erreur connexion.");
       setIsSubmitting(false);
     }
   };
@@ -184,8 +197,6 @@ export default function PaiementPage() {
 
   return (
   <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "120px 20px" }}>
-    
-    {/* IMPORT DU CSS POUR LEAFLET (Indispensable pour l'affichage de la carte) */}
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
     <h1 style={{ fontSize: "2rem", marginBottom: "2rem", color: "#2E1D21", textAlign: "center" }}>
@@ -201,6 +212,13 @@ export default function PaiementPage() {
              <h2 style={{ fontSize: "1.3rem", marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
               <Truck color="#88D4AB" /> Mode de livraison
             </h2>
+
+            {/* MESSAGE D'INFORMATION IMPORTANT */}
+            <div style={{ background: "#EAF7FC", color: "#0077b6", padding: "15px", borderRadius: "8px", fontSize: "0.9rem", marginBottom: "20px", borderLeft: "4px solid #0077b6" }}>
+                <strong style={{display: "flex", alignItems: "center", gap: "5px"}}><AlertCircle size={16}/> Info Livraison :</strong>
+                La livraison à domicile est assurée par nos soins uniquement sur <strong>Fabrègues, Saussan et Pignan</strong>.
+                Pour toute autre ville, merci de choisir <strong>Mondial Relay</strong>.
+            </div>
 
             <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
                 <button 
@@ -241,16 +259,32 @@ export default function PaiementPage() {
                   value={shipping.lastName} onChange={(e) => setShipping({...shipping, lastName: e.target.value})} />
               </div>
 
+              {/* LOGIQUE D'AFFICHAGE ET D'ERREUR POUR DOMICILE */}
               {deliveryMode === 'DOMICILE' && (
                   <>
                     <input required placeholder="Adresse (Rue, n°...)" className="input-field"
                         value={shipping.address} onChange={(e) => setShipping({...shipping, address: e.target.value})} />
+                    
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "15px" }}>
-                        <input required placeholder="Code Postal" className="input-field"
-                        value={shipping.zipCode} onChange={(e) => setShipping({...shipping, zipCode: e.target.value})} />
-                        <input required placeholder="Ville" className="input-field"
-                        value={shipping.city} onChange={(e) => setShipping({...shipping, city: e.target.value})} />
+                        <input required placeholder="Code Postal (ex: 34570)" className="input-field"
+                        value={shipping.zipCode} 
+                        onChange={(e) => setShipping({...shipping, zipCode: e.target.value})} 
+                        style={{ border: !canSubmit && shipping.zipCode ? "2px solid red" : "1px solid #ddd" }}
+                        />
+                        <input required placeholder="Ville (ex: Pignan)" className="input-field"
+                        value={shipping.city} 
+                        onChange={(e) => setShipping({...shipping, city: e.target.value})} 
+                        style={{ border: !canSubmit && shipping.city ? "2px solid red" : "1px solid #ddd" }}
+                        />
                     </div>
+                    
+                    {/* Message d'erreur dynamique */}
+                    {!canSubmit && shipping.zipCode && shipping.city && (
+                        <div style={{ color: "red", fontSize: "0.85rem", marginTop: "-10px" }}>
+                            ⚠️ Livraison à domicile impossible pour cette zone ({shipping.city}). <br/>
+                            Veuillez choisir <strong>Mondial Relay</strong>.
+                        </div>
+                    )}
                   </>
               )}
 
@@ -271,14 +305,10 @@ export default function PaiementPage() {
               <input required placeholder="Téléphone (pour le suivi)" className="input-field"
                 value={shipping.phone} onChange={(e) => setShipping({...shipping, phone: e.target.value})} />
             
-              {/* ZONE WIDGET MONDIAL RELAY */}
               {deliveryMode === 'MONDIAL_RELAY' && (
                   <div style={{ marginTop: "20px" }}>
                       <p style={{marginBottom: "10px", fontWeight: "bold"}}>Choisissez votre point de retrait :</p>
-                      
-                      {/* C'est ici que la carte va s'afficher */}
                       <div id="Zone_Widget" style={{ width: "100%", height: "500px", background: "#f9f9f9", borderRadius: "10px" }}></div>
-                      
                       {selectedRelay && (
                           <div style={{ marginTop: "15px", padding: "15px", background: "#EAF7FC", border: "1px solid #6EC1E4", borderRadius: "10px", color: "#0077b6" }}>
                               <strong>Point sélectionné :</strong><br/>
@@ -288,7 +318,6 @@ export default function PaiementPage() {
                       )}
                   </div>
               )}
-
             </form>
           </div>
         </div>
@@ -300,6 +329,7 @@ export default function PaiementPage() {
               Mon Panier
             </h3>
             
+            {/* ... (Reste de l'affichage du panier identique) ... */}
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px", maxHeight: "200px", overflowY: "auto" }}>
               {cart.items?.map(item => (
                 <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.9rem", color: "#666" }}>
@@ -339,17 +369,17 @@ export default function PaiementPage() {
             <button 
               type="submit" 
               form="payment-form"
-              disabled={isSubmitting || subscriptionPrice === 0}
+              disabled={isSubmitting || subscriptionPrice === 0 || (deliveryMode === 'DOMICILE' && !canSubmit)}
               style={{ 
                 width: "100%", 
                 marginTop: "25px", 
-                background: isSubmitting ? "#ccc" : "#2E1D21", 
+                background: (isSubmitting || (deliveryMode === 'DOMICILE' && !canSubmit)) ? "#ccc" : "#2E1D21", 
                 color: "white", 
                 padding: "15px", 
                 borderRadius: "50px", 
                 fontWeight: "bold", 
                 border: "none", 
-                cursor: (isSubmitting || subscriptionPrice === 0) ? "not-allowed" : "pointer",
+                cursor: (isSubmitting || (deliveryMode === 'DOMICILE' && !canSubmit)) ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
                 fontSize: "1.1rem"
               }}
