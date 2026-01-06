@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, CreditCard, Package, MapPin } from "lucide-react";
-import Script from "next/script";
+import { ShieldCheck, Truck, Package, MapPin } from "lucide-react";
+// On n'importe plus Script de next/script pour ces librairies
+// import Script from "next/script"; 
 
 export default function PaiementPage() {
   const { cart, loading } = useCart();
@@ -13,8 +14,8 @@ export default function PaiementPage() {
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deliveryMode, setDeliveryMode] = useState("DOMICILE"); // 'DOMICILE' ou 'MONDIAL_RELAY'
-  const [selectedRelay, setSelectedRelay] = useState(null); // Stocke le point relais choisi
+  const [deliveryMode, setDeliveryMode] = useState("DOMICILE"); 
+  const [selectedRelay, setSelectedRelay] = useState(null); 
 
   const [shipping, setShipping] = useState({
     firstName: "",
@@ -39,19 +40,72 @@ export default function PaiementPage() {
   };
   const subscriptionPrice = getSubscriptionPrice(itemCount);
 
-  // --- CHARGEMENT DU WIDGET MONDIAL RELAY ---
+  // --- CHARGEMENT SÉCURISÉ DES SCRIPTS (Le Correctif) ---
   useEffect(() => {
-    // On vérifie que jQuery ET le plugin Mondial Relay sont bien chargés
-    if (deliveryMode === 'MONDIAL_RELAY' && window.$ && window.$.fn.MR_ParcelShopPicker) {
-      loadMondialRelayWidget();
-    }
+    const loadScripts = async () => {
+      // Fonction pour injecter un script manuellement
+      const injectScript = (src, id) => {
+        return new Promise((resolve, reject) => {
+          if (document.getElementById(id)) return resolve(); // Déjà là ? On zappe.
+          const script = document.createElement("script");
+          script.src = src;
+          script.id = id;
+          script.async = false; // Bloquant pour l'ordre
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      };
+
+      try {
+        // 1. On charge jQuery
+        await injectScript("https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js", "jquery-script");
+        
+        // 2. VERROU DE SÉCURITÉ : On attend que window.jQuery existe vraiment
+        const waitForJQuery = setInterval(() => {
+          if (window.jQuery) {
+            clearInterval(waitForJQuery);
+            window.$ = window.jQuery; // On lie le $
+            console.log("✅ jQuery est prêt.");
+
+            // 3. Maintenant (et seulement maintenant), on charge le reste
+            Promise.all([
+              injectScript("https://unpkg.com/leaflet/dist/leaflet.js", "leaflet-js"),
+              injectScript("https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js", "mr-plugin")
+            ]).then(() => {
+              console.log("✅ Widget MR chargé sans erreur.");
+              // Si l'utilisateur est déjà sur l'onglet MR, on lance la carte
+              if (deliveryMode === 'MONDIAL_RELAY') loadMondialRelayWidget();
+            });
+          }
+        }, 50); // On vérifie toutes les 50ms
+
+      } catch (err) {
+        console.error("❌ Erreur chargement scripts:", err);
+      }
+    };
+
+    loadScripts();
+    
+    // Nettoyage éventuel (optionnel)
+    return () => {
+        // On ne supprime pas les scripts pour éviter de les recharger à chaque fois
+    };
+  }, []); // [] = Ne le faire qu'une fois au montage de la page
+
+  // Relance le widget si on change de mode (et que les scripts sont prêts)
+  useEffect(() => {
+     if (deliveryMode === 'MONDIAL_RELAY' && window.$ && window.$.fn.MR_ParcelShopPicker) {
+         loadMondialRelayWidget();
+     }
   }, [deliveryMode]);
 
+
   const loadMondialRelayWidget = () => {
-    // On nettoie au cas où
+    if (!window.$ || !window.$("#Zone_Widget").length) return;
+
     window.$("#Zone_Widget").html(""); 
 
-    // Configuration du Widget
     window.$("#Zone_Widget").MR_ParcelShopPicker({
       Target: "#Zone_Widget",
       Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID || "BDTEST13", 
@@ -59,7 +113,7 @@ export default function PaiementPage() {
       PostCode: shipping.zipCode || "59000", 
       ColLivMod: "24R",
       NbResults: "7",
-      ShowResultsOnMap: true, // Demande la carte
+      ShowResultsOnMap: true, 
       OnParcelShopSelected: (data) => {
         console.log("Point Relais choisi :", data);
         setSelectedRelay({
@@ -125,59 +179,16 @@ export default function PaiementPage() {
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return <div className="p-20 text-center">Votre panier est vide.</div>;
   }
-  
-useEffect(() => {
-  const loadScripts = async () => {
-    const injectScript = (src, id) => {
-      return new Promise((resolve, reject) => {
-        if (document.getElementById(id)) return resolve();
-        const script = document.createElement("script");
-        script.src = src;
-        script.id = id;
-        script.async = false; 
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    };
 
-    try {
-      // 1. Charger jQuery
-      await injectScript("https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js", "jquery-script");
-      
-      // FORÇAGE : On attend que window.jQuery soit défini physiquement
-      let checkJQuery = setInterval(() => {
-        if (window.jQuery) {
-          clearInterval(checkJQuery);
-          window.$ = window.jQuery;
-          
-          // 2. Une fois jQuery certain, charger Leaflet et le Plugin MR
-          Promise.all([
-            injectScript("https://unpkg.com/leaflet/dist/leaflet.js", "leaflet-js"),
-            injectScript("https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js", "mr-plugin")
-          ]).then(() => {
-            console.log("✅ Système de livraison prêt.");
-            if (deliveryMode === 'MONDIAL_RELAY') loadMondialRelayWidget();
-          });
-        }
-      }, 50); // On vérifie toutes les 50ms
-
-    } catch (err) {
-      console.error("Erreur critique chargement scripts:", err);
-    }
-  };
-
-  loadScripts();
-}, [deliveryMode]);
-  // 4. Le rendu (return)
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "120px 20px" }}>
-      {/* GARDER LE CSS ICI */}
-      <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "120px 20px" }}>
+    
+    {/* IMPORT DU CSS POUR LEAFLET (Indispensable pour l'affichage de la carte) */}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-      <h1 style={{ fontSize: "2rem", marginBottom: "2rem", color: "#2E1D21", textAlign: "center" }}>
+    <h1 style={{ fontSize: "2rem", marginBottom: "2rem", color: "#2E1D21", textAlign: "center" }}>
         Finaliser mon abonnement 🔒
-      </h1>
+    </h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "40px" }} className="checkout-grid">
         

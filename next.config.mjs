@@ -36,8 +36,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://hcaptcha.com https://*.hcaptcha.com https://ajax.googleapis.com https://widget.mondialrelay.com https://unpkg.com", 
               
               // AJOUT ICI : unpkg.com (pour le CSS Leaflet)
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com https://unpkg.com",
-              
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com https://unpkg.com https://widget.mondialrelay.com",              
               "img-src 'self' data: https: https://hcaptcha.com https://*.hcaptcha.com",
               "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
               

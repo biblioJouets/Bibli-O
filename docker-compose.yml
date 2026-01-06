@@ -10,7 +10,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     env_file:
-      - .env.production
+      - .env # a passer en .env.production pour la prod
     environment:
       - NEXT_PUBLIC_URL=http://localhost:3000  #a retirer pour la prod 
       - NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID=BDTEST13  #a retirer pour la prod
@@ -29,9 +29,9 @@ services:
     container_name: biblio-db
     restart: unless-stopped
     ports: 
-        - "5432:5432"    #a retirer pour la prod
+        - "5433:5432"    #a retirer pour la prod
     env_file:
-      - .env.production
+      - .env # a passer en .env.production pour la prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
