@@ -5,15 +5,16 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
+        NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID: ${NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID}
+        NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
     container_name: biblio-app
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
     env_file:
-      - .env # a passer en .env.production pour la prod
-    environment:
-      - NEXT_PUBLIC_URL=http://localhost:3000  #a retirer pour la prod 
-      - NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID=BDTEST13  #a retirer pour la prod
+      - .env      
+
     volumes:
       - ./public/uploads:/app/public/uploads
     depends_on:
@@ -28,10 +29,9 @@ services:
     image: postgres:16-alpine
     container_name: biblio-db
     restart: unless-stopped
-    ports: 
-        - "5433:5432"    #a retirer pour la prod
+ 
     env_file:
-      - .env # a passer en .env.production pour la prod
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
