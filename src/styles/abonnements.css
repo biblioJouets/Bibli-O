@@ -59,14 +59,13 @@ section {
 /* --- BOUTONS --- */
 .btn {
   display: inline-block;
-  padding: 12px 28px;
+  padding: 12px 2px;
   border-radius: 50px; /* Boutons très arrondis */
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   border: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  font-family: 'Quicksand', sans-serif;
 }
 
 .btn:hover {
@@ -383,7 +382,7 @@ padding-bottom: 0;
 .checkout-list li::before { content: none; }
 
 
-.pricing-body button { width: 100%; margin-top: auto; /* Pousse le bouton vers le bas */ }
+.pricing-body a { width: 100%; margin-top: auto; /* Pousse le bouton vers le bas */ }
 
 /* =========================================
    SECTION OFFRE SUR MESURE (CUSTOM)
@@ -578,7 +577,7 @@ padding-bottom: 0;
    SECTION FOOTER CTA
 ========================================= */
 .footer-cta-section {
-  background-color: var(--col-green);
+  background-color: var(--col-blue);
   color: white;
   text-align: center;
   padding: 80px 0;

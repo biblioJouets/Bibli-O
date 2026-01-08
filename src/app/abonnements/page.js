@@ -4,6 +4,8 @@
 import '@/styles/abonnements.css';
 import Image from 'next/image'
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 // Composant pour un élément de la FAQ (Accordéon)
 const FAQItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +22,7 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const SubscriptionPage = () => {
+  const router = useRouter()
   // Données factices pour les témoignages et la FAQ (à remplacer par les vraies données)
   const faqs = [
     { q: "Et si un jouet est cassé...?", a: "Pas de panique ! L'usure normale est incluse. Pour la casse plus importante, l'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien." },
@@ -27,14 +30,18 @@ const SubscriptionPage = () => {
     { q: "Quand un jouet a fait son temps ?", a: "Quand votre enfant ne joue plus avec, vous le remettez dans sa boîte et vous nous le renvoyez pour en choisir un nouveau !" },
     { q: "Comment sont sélectionnés les jouets ?", a: "Notre équipe d'experts sélectionne des jouets éducatifs, durables et amusants, souvent inspirés des méthodes Montessori." },
   ];
-
-  return (
-    <div className="subscription-page">
+const handleSelectPlan = (planName, toyLimit, price) => {
+localStorage.setItem('selectedPlan', JSON.stringify({ name: planName, limit: toyLimit, price: price }));
+router.push('/bibliotheque');
+};
+return (
+  <div className="subscription-page">
       {/* --- SECTION PRICING (FORMULES) --- */}
       <section className="pricing-section">
         <div className="container">
           <h2>Nos formules flexibles, sans engagement</h2>
           <div className="pricing-grid">
+            
             {/* CARTE 1 : Découverte */}
             <div className="pricing-card">
               <div className="pricing-header header-blue">
@@ -49,15 +56,20 @@ const SubscriptionPage = () => {
                   <li>Assurance "Casse"</li>
                   <li>Nettoyage baby self</li>
                   <li>Annulable en 1 clic</li>
-
                 </ul>
-                <button className="btn btn-outline-blue">Choisir L'offre Découverte</button>
+                {/* 4. Remplacer le <a> par un <button> avec onClick */}
+                <button 
+                  onClick={() => handleSelectPlan('Decouverte', 2, 25.99)}
+                  className="btn btn-outline-blue"
+                >
+                  Je commence ma Box Découverte
+                </button>
               </div>
             </div>
 
             {/* CARTE 2 : Standard (Mise en avant) */}
             <div className="pricing-card highlighted">
-           <div className="preferred-banner">LE PRÉFÉRÉ DES PARENTS</div>
+               <div className="preferred-banner">LE PRÉFÉRÉ DES PARENTS</div>
               <div className="pricing-header header-pink">
                 <h3>Standard</h3>
               </div>
@@ -65,18 +77,22 @@ const SubscriptionPage = () => {
                 <div className="price price-large">39.99€ <span className="per-month">/ mois</span></div>
                 <ul className="features-list checkout-list">
                   <li>✅ 4 Jouets</li>
-                  <li>✅Soit 9.99€ par jouets </li>
+                  <li>✅ Soit 9.99€ par jouets </li>
                   <li>✅ Livraison et retour inclus</li>
                   <li>✅ Assurance "Casse"</li>
                   <li>✅ Nettoyage baby self</li>
                   <li>✅ Annulable en 1 clic</li>
-
                 </ul>
-                <button className="btn btn-pink">Je veux l'Offre Standard</button>
+                <button 
+                  onClick={() => handleSelectPlan('Standard', 4, 39.99)}
+                  className="btn btn-pink"
+                >
+                  Je commence ma Box Standard
+                </button>
               </div>
             </div>
 
-            {/* CARTE 3 : L'Aventurier */}
+            {/* CARTE 3 : Premium */}
             <div className="pricing-card">
               <div className="pricing-header header-green">
                 <h3>Premium</h3>
@@ -87,15 +103,18 @@ const SubscriptionPage = () => {
                   <li>6 Jouets</li>
                   <li>Soit 9.33€ par jouets</li>
                   <li>Accès prioritaire aux nouveautés</li>
-                  <li>Livraison  Prioritaire</li>
+                  <li>Livraison Prioritaire</li>
                   <li>Livraison et retour inclus</li>
                   <li>Assurance "Casse"</li>
                   <li>Nettoyage baby self</li>
                   <li>Annulable en 1 clic</li>
-
-
                 </ul>
-                <button className="btn btn-outline-green">Choisir l'offre Premium</button>
+                <button 
+                   onClick={() => handleSelectPlan('Premium', 6, 55.99)}
+                   className="btn btn-outline-green"
+                >
+                  Je commence ma Box Premium
+                </button>
               </div>
             </div>
           </div>
@@ -119,7 +138,12 @@ const SubscriptionPage = () => {
                 <span className="label">Option "Maxi Box"</span>
                 <span className="price">+9€ <small>/ jouet sup.</small></span>
               </div>
-              <button className="btn btn-yellow btn-large">Demander mon offre sur mesure</button>
+              <button 
+                onClick={() => handleSelectPlan('SurMesure', 9, 55.99)} 
+                className="btn btn-yellow btn-large"
+              >
+                Composer ma Box Sur Mesure
+              </button>
             </div>
           </div>
         </div>

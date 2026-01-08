@@ -19,7 +19,7 @@ export default function FunctioningPage() {
           <div className="hero-text">
             <h1><span className='shape-white'> Des jouets illimités,</span><br/> zéro encombrement. <br />Le bonheur livré chez vous.</h1>
             <p className="subtitle">Rejoignez la ludothèque nouvelle génération. Économique, écologique et magique pour vos enfants.</p>
-            <button className="btn btn-primary">Je découvre les formules ↗</button>
+            <a href="/abonnements" className="btn btn-primary" >Je découvre les formules ↗</a>
             <div className="hero-benefits-list">
               <span>✓ Sans engagement</span>
               <span>✓ Jouets désinfectés</span>
@@ -60,14 +60,14 @@ export default function FunctioningPage() {
             <div className="steps-connector desktop-only"></div>
             
             <div className="step-item">
-              <div className="step-number-shape shape-blue">1. Je m'abonne</div>
-              <h3>Je choisis ma formule</h3>
-              <p>Sélectionnez l'abonnement qui correspond à votre rythme et votre budget, sans engagement.</p>
-            </div>
-            <div className="step-item">
-              <div className="step-number-shape shape-yellow">2. Je choisis mes jouets</div>
+              <div className="step-number-shape shape-blue">1. Je choisis mes jouets</div>
               <h3>Je crée ma box</h3>
               <p>Parcourez notre catalogue en ligne et remplissez votre box avec vos coups de cœur.</p>
+            </div>
+            <div className="step-item">
+              <div className="step-number-shape shape-yellow">2. Je m'abonne</div>
+              <h3>Je choisis ma formule</h3>
+              <p>Sélectionnez l'abonnement qui correspond à votre rythme et votre budget, sans engagement.</p>
             </div>
             <div className="step-item">
               <div className="step-number-shape shape-green">3. On reçoit et on joue !</div>
@@ -75,7 +75,7 @@ export default function FunctioningPage() {
               <p>Recevez votre box en point relais. Place à la découverte et au jeu !</p>
             </div>
             <div className="step-item">
-              <div className="step-number-shape shape-pink">4. On échange quand on veut</div>
+              <div className="step-number-shape shape-pink">4. On échange</div>
               <h3>Lassé ? On change !</h3>
               <p>Renvoyez gratuitement les jouets et recommencez le cycle pour de nouvelles aventures.</p>
             </div>
@@ -87,7 +87,7 @@ export default function FunctioningPage() {
       <section className="footer-cta-section">
         <div className="container">
           <h2>Prêts à transformer leur salle de jeu (et votre quotidien) ?</h2>
-          <button className="btn btn-yellow btn-large">Je commence l'aventure maintenant</button>
+          <a href="/abonnements" className="btn btn-pink btn-large">Je commence l'aventure maintenant</a>
         </div>
       </section>
     </div>
