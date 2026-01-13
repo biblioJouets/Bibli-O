@@ -1,0 +1,264 @@
+/* src/app/admin/orders/adminOrders.css */
+
+/* Structure Générale */
+.admin-container {
+    max-width: 1440px;
+    margin-top: 50px;
+    padding: 100px 20px;
+    min-height: 100vh;
+    
+}
+
+.loading-state {
+    padding: 50px;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    color: #000;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2E1D21;
+    margin: 0;
+}
+
+.order-count {
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Grille des cartes */
+.orders-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Carte de Commande */
+.order-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, transform 0.2s;
+    overflow: hidden;
+}
+
+.order-card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* En-tête de la carte */
+.card-header {
+    padding: 20px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.order-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.order-id {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111;
+}
+
+.order-date {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.order-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-price {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Badges de Statut (Couleurs) */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-yellow { background-color: #fef3c7; color: #92400e; }
+.status-blue   { background-color: #dbeafe; color: #1e40af; }
+.status-green  { background-color: #d1fae5; color: #065f46; }
+.status-purple { background-color: #ede9fe; color: #5b21b6; }
+.status-red    { background-color: #fee2e2; color: #991b1b; }
+
+/* Actions (Boutons et Select) */
+.actions-ipt {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-print {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.btn-print:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.status-select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111;
+    outline: none;
+}
+
+.status-select:focus {
+    border-color: #2E1D21;
+}
+
+/* Corps de la carte (Colonnes) */
+.card-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+/* Responsive Grid pour les grands écrans */
+@media (min-width: 768px) {
+    .card-body {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+.info-col h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.highlight {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 2px;
+}
+
+.sub-text {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Box Livraison */
+.delivery-box {
+    background-color: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.mr-point {
+    margin-top: 5px;
+    color: #E91E63; /* Rose Mondial Relay */
+}
+
+.domicile-tag {
+    margin-top: 5px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Liste Produits */
+.products-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.products-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.products-list li:last-child {
+    border-bottom: none;
+}
+
+.qty-badge {
+    background-color: #e0f2fe;
+    color: #605079;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+}

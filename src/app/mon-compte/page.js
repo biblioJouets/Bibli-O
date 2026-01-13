@@ -1,28 +1,35 @@
+/* src/app/mon-compte/page.js */
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
+// Import du fichier CSS dédié
+import '@/styles/monCompte.css';
 
 export default function MonComptePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  console.log("Statut Session:", status);
+  console.log("Données Session:", session);
+  
+  // Onglet actif par défaut
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' ou 'infos'
   
-  // États pour les données
+  // États des données
   const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
     phone: '',
     email: ''
   });
-  const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
-
-  //states Adresses
+  
+  // États Adresse
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     street: '',
@@ -31,374 +38,295 @@ export default function MonComptePage() {
     country: 'France'
   });
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
   // Redirection si non connecté
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/connexion');
   }, [status, router]);
 
-  // Chargement des données
+  // Chargement initial
   useEffect(() => {
     if (session?.user?.id) {
-      fetchData(session.user.id);
+      // Charger le profil (mockup ou fetch réel si vous avez l'endpoint user)
+      setProfile({
+        firstName: session.user.name?.split(' ')[0] || '',
+        lastName: session.user.name?.split(' ')[1] || '',
+        email: session.user.email || '',
+        phone: '' // À récupérer via API si dispo
+      });
+
+      // Charger les commandes
+      fetchOrders(session.user.id);
     }
   }, [session]);
 
- const fetchData = async (userId) => {
+  const fetchOrders = async (userId) => {
     try {
-      setLoading(true); // On affiche le chargement
-      
-      // 1. Récupérer les infos user
-      const resUser = await fetch(`/api/users/${userId}`);
-      const userData = await resUser.json();
-
-      if (resUser.ok) {
-        // 👇 FIX : On vérifie si les données sont dans 'userData' ou 'userData.data'
-        // Cela gère les deux cas possibles de ton API
-        const userProfile = userData.data || userData;
-        
-        console.log("Données reçues :", userProfile); // Pour débugger si besoin
-        setProfile(userProfile);
-      }
-
-      // 2. Récupérer l'historique des commandes
-      const resOrders = await fetch(`/api/orders/user/${userId}`); 
-      if (resOrders.ok) {
-        const ordersData = await resOrders.json();
-        // Pareil pour les commandes, parfois c'est dans .data
-        setOrders(Array.isArray(ordersData) ? ordersData : ordersData.data || []);
-      }
-    } catch (err) {
-      console.error("Erreur chargement données:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-const handleAddAddress = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`/api/users/${session.user.id}/addresses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAddress)
-      });
-
+      const res = await fetch(`/api/orders/user/${userId}`);
       if (res.ok) {
-        // Si succès, on recharge les données pour voir la nouvelle adresse
-        fetchData(session.user.id); 
-        setShowAddressForm(false); // On ferme le formulaire
-        setNewAddress({ street: '', postalCode: '', city: '', country: 'France' }); // Reset
-        setMessage('✅ Adresse ajoutée !');
-      } else {
-        setMessage('❌ Erreur lors de l\'ajout.');
+        const data = await res.json();
+        setOrders(data);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Erreur chargement commandes", error);
+    } finally {
+      setLoadingOrders(false);
     }
   };
-  const handleUpdateProfile = async (e) => {
+
+  // --- LOGIQUE COMMANDES ---
+
+  const formatOrderId = (order) => {
+    if (!order.createdAt) return `#${order.id}`;
+    const date = new Date(order.createdAt);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    // Format : CMDjjmmaahhmm-ID
+    return `CMD${day}${month}${year}${hours}${minutes}-${order.id}`;
+  };
+
+  const getStatusLabel = (status) => {
+    const statusMap = {
+      PENDING: { label: 'En attente de préparation', className: 'status-pending' },
+      PREPARING: { label: 'En cours de préparation', className: 'status-preparing' },
+      SHIPPED: { label: 'Expédiée', className: 'status-shipped' },
+      ACTIVE: { label: 'Box reçue (Location en cours)', className: 'status-active' },
+      RETURNING: { label: 'Retour en cours', className: 'status-returning' },
+      RETURNED: { label: 'Bien retournée', className: 'status-returned' },
+      CANCELLED: { label: 'Annulée', className: 'status-cancelled' },
+    };
+    return statusMap[status] || { label: status, className: 'status-default' };
+  };
+
+  // --- HANDLERS PROFIL ---
+
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsSaving(true);
     setMessage('');
-
-    try {
-      const res = await fetch(`/api/users/${session.user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
-      });
-
-      if (res.ok) {
-        setMessage('✅ Profil mis à jour avec succès !');
-      } else {
-        setMessage('❌ Erreur lors de la mise à jour.');
-      }
-    } catch (error) {
-      setMessage('❌ Erreur technique.');
-    } finally {
-      setIsSaving(false);
-    }
+    // Simulation API update
+    setTimeout(() => {
+        setIsSaving(false);
+        setMessage('Profil mis à jour avec succès !');
+    }, 1000);
   };
 
-  // Helper pour les couleurs de statut
-  const getStatusBadge = (status) => {
-    const styles = {
-      PENDING: "bg-yellow-100 text-yellow-800",
-      PREPARING: "bg-blue-100 text-blue-800",
-      SHIPPED: "bg-purple-100 text-purple-800",
-      ACTIVE: "bg-green-100 text-green-800", // En location
-      RETURNING: "bg-orange-100 text-orange-800",
-      COMPLETED: "bg-gray-100 text-gray-800",
-    };
-    return styles[status] || "bg-gray-100";
+  const handleAddressSubmit = (e) => {
+    e.preventDefault();
+    // Logique d'enregistrement d'adresse ici
+    setShowAddressForm(false);
   };
 
-  if (loading) return <div className="p-10 text-center">Chargement...</div>;
+  if (status === 'loading') return <div className="loader-container"><div className="loader">Chargement...</div></div>;
 
   return (
-    <div className="container mt-10 mx-auto px-4 py-10 max-w-5xl">
-      <h1 className="text-3xl font-bold mb-8 text-[#2E1D21]">Mon Espace Client</h1>
-
-      {/* Navigation Onglets */}
-      <div className="flex border-b border-gray-200 mb-8">
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`pb-4 px-6 font-semibold ${activeTab === 'orders' ? 'border-b-4 border-[#FF8C94] text-[#2E1D21]' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          📦 Mes Commandes
-        </button>
-        <button
-          onClick={() => setActiveTab('infos')}
-          className={`pb-4 px-6 font-semibold ${activeTab === 'infos' ? 'border-b-4 border-[#6EC1E4] text-[#2E1D21]' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          👤 Mes Informations
-        </button>
-      </div>
-
-      {/* CONTENU : Onglet Commandes */}
-      {activeTab === 'orders' && (
-        <div className="space-y-6">
-          {orders.length === 0 ? (
-            <div className="text-center py-10 bg-gray-50 rounded-lg">
-              <p className="text-lg text-gray-600 mb-4">Vous n'avez pas encore effectué de location.</p>
-              <Link href="/bibliotheque" className="btn btn-primary">Découvrir les jouets</Link>
+    <div className="account-page">
+      <div className="account-container">
+        
+        {/* En-tête avec Logout */}
+        <div className="account-header-top">
+            <h1>Mon Compte</h1>
+            <div className="user-welcome">
+                <span>{session?.user?.email}</span>
+                
+                
             </div>
-          ) : (
-            orders.map((order) => (
-              <div key={order.id} className="bg-white border rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${getStatusBadge(order.status)}`}>
-                      {order.status}
-                    </span>
-                    <p className="text-sm text-gray-500 mt-2">Commande #{order.id} du {new Date(order.createdAt).toLocaleDateString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-xl">{order.totalAmount}€</p>
-                    
-                    {/* Lien Suivi Mondial Relay (si dispo) */}
-                    {order.trackingUrl && (
-                      <a href={order.trackingUrl} target="_blank" className="text-sm text-blue-600 hover:underline block mt-1">
-                        📍 Suivre mon colis
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Produits de la commande */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold text-sm mb-2">Jouets loués :</h4>
-                  <ul className="space-y-2">
-                    {order.OrderProducts.map((op) => (
-                      <li key={op.ProductId} className="flex items-center text-sm text-gray-700">
-                        <span className="mr-2">🧸</span> {op.Products.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Zone Retour (Si actif) */}
-                {(order.status === 'ACTIVE' || order.status === 'SHIPPED') && (
-                  <div className="mt-6 bg-[#FFFAF4] p-4 rounded-md border border-orange-100 flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-[#2E1D21]">Retour prévu le : {order.rentalEndDate ? new Date(order.rentalEndDate).toLocaleDateString() : 'Date à venir'}</p>
-                      <p className="text-sm text-gray-600">L'étiquette retour est dans votre colis.</p>
-                    </div>
-                    {order.returnLabelUrl && (
-                      <a href={order.returnLabelUrl} target="_blank" className="btn btn-outline-blue text-sm">
-                        📄 Télécharger l'étiquette (PDF)
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
         </div>
-      )}
 
-      {/* CONTENU : Onglet Infos */}
-      {activeTab === 'infos' && (
-        <div className="space-y-6">
-          
-          {/* --- 1. EN-TÊTE PROFIL (Avatar + Résumé) --- */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-6">
-            <div className="h-20 w-20 rounded-full bg-[var(--col-gold)] flex items-center justify-center text-black text-2xl font-bold shadow-md">
-              {profile.firstName?.[0] || '?'}{profile.lastName?.[0] || '?'}
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-[#2E1D21]">
-                {profile.firstName} {profile.lastName}
-              </h2>
-              <p className="text-gray-500 flex items-center gap-2 text-sm mt-1">
-                {/* On gère le cas où createdAt n'est pas encore chargé */}
-                📅 Membre depuis le {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('fr-FR') : '...'}
-              </p>
-              <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                Compte Vérifié
-              </span>
-            </div>
+        {/* Navigation Onglets */}
+        <div className="account-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            📦 Mes Commandes
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'infos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('infos')}
+          >
+            👤 Mes Informations
+          </button>
+        </div>
+
+        {/* Contenu - Onglet COMMANDES */}
+        {activeTab === 'orders' && (
+          <div className="tab-content fade-in">
+            {loadingOrders ? (
+                <p>Chargement de vos commandes...</p>
+            ) : orders.length === 0 ? (
+                <div className="empty-state">
+                    <p>Vous n'avez pas encore de box active.</p>
+                    <Link href="/abonnements" className="btn-primary">Je découvre les formules</Link>
+                </div>
+            ) : (
+                <div className="orders-list">
+                    {orders.map((order) => {
+                        const statusInfo = getStatusLabel(order.status);
+                        return (
+                            <div key={order.id} className="order-card">
+                                <div className="order-header">
+                                    <div className="order-ref-group">
+                                        <span className="order-ref">{formatOrderId(order)}</span>
+                                        <span className="order-date">du {new Date(order.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <span className={`status-badge ${statusInfo.className}`}>
+                                        {statusInfo.label}
+                                    </span>
+                                </div>
+
+                                <div className="order-body">
+                                    {/* Galerie images produits */}
+                                    <div className="order-products">
+                                        {order.OrderProducts?.map((op) => (
+                                            <div key={op.Products.id} className="product-thumb">
+                                                <Image 
+                                                    src={op.Products.images?.[0] || '/assets/toys/jouet1.jpg'} 
+                                                    alt={op.Products.name} 
+                                                    width={60} 
+                                                    height={60} 
+                                                    className="thumb-img"
+                                                />
+                                                {op.quantity > 1 && <span className="qty-pill">x{op.quantity}</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="order-summary">
+                                        <p><strong>Total :</strong> {order.totalAmount} € / mois</p>
+<p>
+  <strong>Livraison :</strong> {
+    (order.mondialRelayPointId && order.mondialRelayPointId !== 'DOMICILE') 
+    ? `Point Relais (${order.mondialRelayPointId})` 
+    : 'Domicile'
+  }
+</p>                                    </div>
+                                </div>
+
+                                <div className="order-footer">
+                                     {/* Boutons d'actions conditionnels */}
+                                     {order.trackingUrl && (
+                                         <a href={order.trackingUrl} target="_blank" className="btn-action btn-track">
+                                            🚚 Suivre mon colis
+                                         </a>
+                                     )}
+                                     <button className="btn-action btn-secondary" disabled>📄 Facture</button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* --- 2. INFORMATIONS PERSONNELLES --- */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold flex items-center gap-2 text-[#2E1D21]">
-                  ✏️ Mes coordonnées
-                </h3>
-              </div>
-              
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Prénom</label>
-                    <input 
-                      type="text" 
-                      name="firstName"
-                      value={profile.firstName || ''}
-                      onChange={(e) => setProfile({...profile, firstName: e.target.value})}
-                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nom</label>
-                    <input 
-                      type="text" 
-                      name="lastName"
-                      value={profile.lastName || ''}
-                      onChange={(e) => setProfile({...profile, lastName: e.target.value})}
-                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email (Non modifiable)</label>
-                  <div className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed">
-                    ✉️ {profile.email}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Téléphone</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-400">📞</span>
-                    <input 
-                      type="tel" 
-                      name="phone"
-                      value={profile.phone || ''}
-                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                      className="w-full pl-10 p-2 border border-gray-200 rounded-lg focus:border-[#6EC1E4] focus:ring-1 focus:ring-[#6EC1E4] outline-none transition"
-                    />
-                  </div>
-                </div>
-
-                {message && (
-                  <div className={`p-2 rounded text-center text-sm ${message.includes('succès') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {message}
-                  </div>
-                )}
-
-                <button type="submit" disabled={isSaving} className="w-full mt-4 btn btn-primary py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-all">
-                  {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-                </button>
-              </form>
-            </div>
-
-            {/* --- 3. CARNET D'ADRESSES & SÉCURITÉ --- */}
-            <div className="space-y-6">
-              
-              {/* Bloc Adresses */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-[#2E1D21]">
-                  📍 Mes adresses
-                </h3>
-                
-                {/* LISTE DES ADRESSES EXISTANTES */}
-                {profile.Addresses && profile.Addresses.length > 0 ? (
-                  <div className="space-y-3 mb-4">
-                    {profile.Addresses.map((addr) => (
-                      <div key={addr.id} className="p-3 border border-gray-200 rounded-lg text-sm bg-gray-50 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-[#2E1D21]">{addr.street}</p>
-                          <p>{addr.postalCode} {addr.city}</p>
-                          <p className="text-gray-500 text-xs mt-1">{addr.country}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  !showAddressForm && (
-                    <div className="text-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-4">
-                      <p className="text-sm text-gray-500">Aucune adresse enregistrée</p>
+        {/* Contenu - Onglet INFORMATIONS */}
+        {activeTab === 'infos' && (
+          <div className="tab-content fade-in">
+            <form onSubmit={handleProfileUpdate} className="profile-form">
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label>Prénom</label>
+                        <input 
+                            type="text" 
+                            value={profile.firstName}
+                            onChange={(e) => setProfile({...profile, firstName: e.target.value})}
+                        />
                     </div>
-                  )
-                )}
+                    <div className="form-group">
+                        <label>Nom</label>
+                        <input 
+                            type="text" 
+                            value={profile.lastName}
+                            onChange={(e) => setProfile({...profile, lastName: e.target.value})}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input 
+                            type="email" 
+                            value={profile.email}
+                            disabled
+                            className="input-disabled"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Téléphone</label>
+                        <input 
+                            type="tel" 
+                            value={profile.phone}
+                            onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                        />
+                    </div>
+                </div>
+
+                {message && <div className="success-message">{message}</div>}
+
+                <div className="form-actions">
+                    <button type="submit" disabled={isSaving} className="btn-primary">
+                        {isSaving ? 'Enregistrement...' : 'Enregistrer mes modifications'}
+                    </button>
+                </div>
+            </form>
+
+            <hr className="divider" />
+
+            {/* Section Adresse */}
+            <div className="address-section">
+                <h3>Mes Adresses de livraison</h3>
                 
-                {/* FORMULAIRE D'AJOUT (Masqué par défaut) */}
                 {showAddressForm ? (
-                  <form onSubmit={handleAddAddress} className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <h4 className="font-bold text-sm mb-3">Nouvelle adresse</h4>
-                    <div className="space-y-3">
-                      <input 
-                        type="text" 
-                        placeholder="Numéro et rue" 
-                        required
-                        className="w-full p-2 border rounded text-sm"
-                        value={newAddress.street}
-                        onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
-                      />
-                      <div className="grid grid-cols-2 gap-2">
-                        <input 
-                          type="text" 
-                          placeholder="Code Postal" 
-                          required
-                          className="w-full p-2 border rounded text-sm"
-                          value={newAddress.postalCode}
-                          onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="Ville" 
-                          required
-                          className="w-full p-2 border rounded text-sm"
-                          value={newAddress.city}
-                          onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2 mt-2">
-                        <button 
-                          type="button"
-                          onClick={() => setShowAddressForm(false)}
-                          className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-200 rounded"
-                        >
-                          Annuler
-                        </button>
-                        <button 
-                          type="submit"
-                          className="px-3 py-1 text-sm bg-[#6EC1E4] text-white rounded hover:bg-[#5aaac9]"
-                        >
-                          Valider
-                        </button>
-                      </div>
-                    </div>
-                  </form>
+                    <form onSubmit={handleAddressSubmit} className="address-form-box">
+                        <div className="form-grid">
+                            <div className="form-group full-width">
+                                <label>Rue</label>
+                                <input 
+                                    type="text" 
+                                    value={newAddress.street}
+                                    onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Code Postal</label>
+                                <input 
+                                    type="text" 
+                                    value={newAddress.postalCode}
+                                    onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Ville</label>
+                                <input 
+                                    type="text" 
+                                    value={newAddress.city}
+                                    onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-actions right">
+                            <button type="button" onClick={() => setShowAddressForm(false)} className="btn-text">
+                                Annuler
+                            </button>
+                            <button type="submit" className="btn-primary small">
+                                Valider l'adresse
+                            </button>
+                        </div>
+                    </form>
                 ) : (
-                  <button 
-                    onClick={() => setShowAddressForm(true)}
-                    className="w-full mt-2 text-sm text-[#6EC1E4] font-bold hover:underline flex items-center justify-center gap-1"
-                  >
-                    + Ajouter une nouvelle adresse
-                  </button>
+                    <button onClick={() => setShowAddressForm(true)} className="btn-link-add">
+                        + Ajouter une nouvelle adresse
+                    </button>
                 )}
-              </div>
-            
-
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 }

@@ -2,8 +2,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/core/database";
-import bcrypt from "bcryptjs";
-
+import { compare } from "bcryptjs";
 // Détection : Est-ce qu'on doit sécuriser les cookies ?
 // On regarde si l'URL de production commence par https
 const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith("https");
@@ -29,7 +28,7 @@ export const authOptions = {
           return null;
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await compare(credentials.password, user.password);
 
         if (!isValid) {
           return null;
