@@ -7,7 +7,7 @@ function Cgu() {
     <div className="cgu-container">
       <h1>Conditions Générales d’Utilisation (CGU)</h1>
       <p className="preamble">Bibli’o Jouets</p>
-      <p className="last-updated">Dernière mise à jour : 09/10/2025</p>
+      <p className="last-updated">Dernière mise à jour : 19/12/2025</p>
 
       {/* Article 1: Objet */}
       <section aria-labelledby="cgu-objet">
@@ -252,8 +252,9 @@ function Cgu() {
           base de données) sont la propriété exclusive de Bibli’o Jouets.
         </p>
         <p>
-          Toute reproduction, diffusion ou utilisation sans autorisation
-          préalable est interdite.
+           Toute reproduction, diffusion ou utilisation sans autorisation préalable est interdite. 
+Certains visuels et photographies présents sur le Site ont été générés ou retouchés à l'aide de technologies d'Intelligence Artificielle. Bibli'o Jouets s'efforce de garantir que ces représentations sont fidèles aux produits réels, mais elles n'ont qu'une valeur illustrative et non contractuelle. 
+
         </p>
       </section>
 
@@ -271,9 +272,9 @@ function Cgu() {
           vigueur.
         </p>
         <p>
-          L’Utilisateur dispose d’un droit d’accès, de rectification, de
-          suppression et d’opposition qu’il peut exercer à tout moment par
-          e-mail :{" "}
+          
+Bibli'o Jouets collecte et traite les données personnelles de l'Utilisateur pour la gestion des abonnements, paiements et communications. Ces données sont conservées pour une durée de 3 ans à compter de la fin de la relation commerciale, à l'exception des documents comptables conservés 10 ans. L'Utilisateur dispose d'un droit d'accès, de rectification, de suppression et d'opposition via : 
+{" "}
           <a href="mailto:contact@bibliojouets.fr">
             contact@bibliojouets.fr
           </a>
@@ -313,15 +314,16 @@ function Cgu() {
         <section aria-labelledby="cgu-liv-domicile">
           <h3 id="cgu-liv-domicile">14.2. Livraison à domicile</h3>
           <p>
-            Une livraison locale est possible dans certaines zones
-            géographiques définies par Bibli’o Jouets. Des frais de livraison
-            peuvent être appliqués selon la distance ou le volume des jouets.
+            
+Une livraison locale est possible dans certaines zones géographiques définies par Bibli’o Jouets.
           </p>
           <p>
-            Le Client doit être présent lors du créneau de livraison convenu. En
-            cas d’absence non signalée, les frais de re-livraison pourront
-            être facturés.
+            Des frais de livraison peuvent être appliqués selon la distance ou le volume des jouets.
+
+ Le Client doit être présent lors du créneau de livraison convenu. En cas d’absence non signalée, les frais de re-livraison pourront être facturés.
           </p>
+          <p>
+En cas d'absence non signalée lors du créneau de livraison convenu, des frais de re-livraison forfaitaires pourront être appliqués. Le montant de ces frais est précisé lors de la validation de la commande.</p>
         </section>
 
         <section aria-labelledby="cgu-liv-retour">
@@ -360,7 +362,7 @@ function Cgu() {
             contact@bibliojouets.fr
           </a>
           <br />
-          Saussan, France
+          1 av de l’aurore, 34570 Saussan, France 
         </address>
       </section>
 
@@ -373,6 +375,10 @@ function Cgu() {
         <p>
           Elles peuvent être modifiées à tout moment, la version en ligne au
           jour de l’utilisation du Site fait foi.
+        </p>
+        <p>
+            Mise à jour le 19/12/25
+
         </p>
       </footer>
     </div>

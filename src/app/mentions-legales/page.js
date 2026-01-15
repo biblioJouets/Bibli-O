@@ -9,10 +9,10 @@ function MentionsLegales() {
       {/* Section Éditeur */}
       <section aria-labelledby="editor-heading">
         <h2 id="editor-heading">Éditeur du site</h2>
-        <p>Le présent site est édité par Plébani Lucas pour le compte de :</p>
+        <p>Le présent site est édité par :</p>
         <dl className="info-list">
-          <dt>Raison sociale</dt>
-          <dd>Bibli’o Jouets, Société par Actions Simplifiée Unipersonnelle (SASU)</dd>
+          <dt>PLEBANI Lucas</dt>
+          <dd>pour le compte de Bibli'o Jouet, société par Actions Simplifiée Unipersonnelle (SASU)</dd>
           
           <dt>Siège social</dt>
           <dd>
@@ -36,7 +36,7 @@ function MentionsLegales() {
           <dd><a href="mailto:contact@bibliojouets.com">contact@bibliojouets.com</a></dd>
           
           <dt>Téléphone</dt>
-          <dd><a href="tel:+33766070809">07 66 07 08 09</a></dd>
+          <dd><a href="tel:+33636258718">06 36 25 87 18</a></dd>
           
           <dt>Noms de domaine</dt>
           <dd>
@@ -68,8 +68,10 @@ function MentionsLegales() {
       {/* Section Propriété Intellectuelle */}
       <section aria-labelledby="pi-heading">
         <h2 id="pi-heading">Propriété Intellectuelle</h2>
-        <p>L’ensemble du contenu présent sur ce site (textes, images, logos, illustrations, vidéos, éléments graphiques, structure du site, etc.) est la propriété exclusive de Bibli’o Jouets, sauf mention contraire.</p>
-        <p>Toute reproduction, distribution, modification, adaptation ou utilisation, totale ou partielle, du contenu sans autorisation écrite préalable est strictement interdite.</p>
+       <p>L’ensemble du contenu présent sur ce site (textes, images, logos, illustrations, vidéos, éléments graphiques, structure du site, etc.) est la propriété exclusive de Bibli’o Jouets, sauf mention contraire.
+ Toute reproduction, distribution, modification, adaptation ou utilisation, totale ou partielle, du contenu sans autorisation écrite préalable est strictement interdite. 
+Certains visuels présents sur le site ont été générés ou retouchés par Intelligence Artificielle (IA). Ils sont utilisés à titre illustratif et ne sont pas contractuels.
+</p>
       </section>
 
       {/* Section Responsabilité */}
@@ -86,11 +88,10 @@ function MentionsLegales() {
       {/* Section RGPD */}
       <section aria-labelledby="rgpd-heading">
         <h2 id="rgpd-heading">Données personnelles (RGPD)</h2>
-        <p>Les informations collectées via le site sont traitées conformément au Règlement Général sur la Protection des Données (RGPD).</p>
-        <p>
-          Pour plus de détails sur la collecte, l’utilisation et la conservation de vos données, ainsi que sur vos droits (accès, rectification, suppression, opposition), 
-          {/* Si vous utilisez react-router, remplacez <a> par <Link> */}
-          veuillez consulter notre <a href="/politique-de-confidentialite">Politique de confidentialité</a>.
+       <p>
+        Les informations collectées via le site sont traitées conformément au Règlement Général sur la Protection des Données (RGPD).
+ Pour plus de détails sur la collecte, l’utilisation et la conservation de vos données, ainsi que sur vos droits (accès, rectification, suppression, opposition), veuillez consulter notre Politique de confidentialité. 
+Les données personnelles des Clients sont conservées pendant toute la durée de l’abonnement, puis pendant une durée de 3 ans à des fins de prospection commerciale. Par dérogation, les documents et pièces justificatives relatifs aux transactions (factures) sont conservés pendant 10 ans au titre des obligations comptables et légales.
         </p>
       </section>
 
@@ -103,9 +104,9 @@ function MentionsLegales() {
           Email : <a href="mailto:contact@bibliojouets.com">contact@bibliojouets.com</a><br />
           Adresse : 1 avenue de l’Aurore, 34570 Saussan, France
         </address>
-        <p className="litiges">
-          En cas de litige, et conformément à l’article L.612-1 du Code de la consommation, 
-          le consommateur a le droit de recourir gratuitement à un médiateur de la consommation.
+        <p >
+          En cas de litige, et conformément à l’article L.612-1 du Code de la consommation, le consommateur a le droit de recourir gratuitement à un médiateur de la consommation. 
+Le médiateur de la consommation désigné est le CM2C. Il peut être saisi via son site internet : <a href="https://www.cm2c.net/" target="_blank" rel="noopener noreferrer">https://www.cm2c.net/</a> ou par voie postale : CM2C, 49 rue de Ponthieu, 75008 Paris.
         </p>
       </section>
     </div>
