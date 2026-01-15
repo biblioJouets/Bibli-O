@@ -1,0 +1,98 @@
+/* src/app/politique-confidentialite/privacy.css */
+
+.privacy-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 20px 100px; /* Padding haut/côtés/bas */
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+.privacy-header {
+  text-align: center;
+  margin-top: 100px;
+  margin-bottom: 50px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 30px;
+}
+
+.privacy-header h1 {
+  font-size: 2.5rem;
+  color: #2E1D21; /* Ta couleur principale */
+  margin-bottom: 10px;
+}
+
+.last-update {
+  font-style: italic;
+  color: #666;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #2E1D21;
+  margin-bottom: 15px;
+  border-left: 4px solid #E91E63; /* Ta couleur accent */
+  padding-left: 10px;
+}
+
+ul {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+/* Style spécifique pour la boîte de contact */
+.company-details, .contact-box {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.contact-box a, .company-details a {
+  color: #E91E63;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-box a:hover {
+  text-decoration: underline;
+}
+
+/* Tableau de conservation */
+.privacy-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.privacy-table th, .privacy-table td {
+  padding: 12px 15px;
+  border: 1px solid #000000;
+  text-align: left;
+}
+
+.privacy-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #2E1D21;
+}
+
+
+
+.privacy-footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 2px solid #eee;
+  font-size: 0.9rem;
+  color: #555;
+}

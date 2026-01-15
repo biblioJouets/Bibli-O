@@ -36,6 +36,7 @@ export default function Footer() {
               <li><Link href="/conditions-generales-utilisation">Conditions générales d'utilisation</Link></li>
               <li><Link href="/conditions-generales-de-vente">Conditions générales de ventes</Link></li>
               <li><Link href="/mentions-legales">Mentions légales</Link></li>
+              <li><Link href="/politique-confidentialite">Politique de confidentialité</Link></li>
             </ul>
           </div>
 
