@@ -1,5 +1,6 @@
 // src/app/sitemap.js
-import { productService } from "@/lib/modules/products/product.service"; // CORRECTION ICI
+export const dynamic = 'force-dynamic';
+import { productService } from "@/lib/modules/products/product.service";
 
 export default async function sitemap() {
   const baseUrl = "https://www.bibliojouets.fr";
@@ -29,7 +30,6 @@ export default async function sitemap() {
   // 2. Récupérer les produits dynamiques depuis la BDD
   let productRoutes = [];
   try {
-    // CORRECTION ICI : on utilise productService.getAll()
     const products = await productService.getAll(); 
     
     productRoutes = products.map((product) => ({
