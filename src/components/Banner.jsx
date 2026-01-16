@@ -16,7 +16,7 @@ export default function Banner() {
             alt="Enfants jouant - version mobile"
             fill
             priority 
-            quality={90}
+            quality={100}
             sizes="100vw" 
             style={{ objectFit: "cover" }}
         />
@@ -24,13 +24,15 @@ export default function Banner() {
 
       <div className="banner-bg desktop-only">
         <Image 
-            src="/assets/imageEnfant.png" 
+            src="/assets/imageEnfant.webp" 
             alt="Enfants jouant avec un jeu de construction en bois"
             fill
             priority
-            quality={90}
+            quality={100}
             sizes="100vw"
             style={{ objectFit: "cover" }}
+            unoptimized={true}
+
         />
       </div>
 

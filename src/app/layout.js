@@ -21,8 +21,17 @@ const quicksand = Quicksand({
 });
 
 export const metadata = {
+  
+  metadataBase: new URL('https://www.bibliojouets.fr'),
+  alternates: {
+    canonical: '/',
+  },
   icons: {
-    icon: '/favicon.ico',
+    icon: [ 
+      {url: '/favicon.ico', sizes: 'any' },
+      {url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/apple-icon.png',
   },
   
   title: {
@@ -32,7 +41,7 @@ export const metadata = {
   
   description: "Découvrez Bibliojouets (Bibli'O), votre service de location de jouets éducatifs par abonnement. Une solution ludique, économique et écologique pour toute la famille.",
   
-  keywords: ["bibliojouets", "biblio jouets", "bibli o jouets", "ludothèque", "jeux de société", "location jeux", "abonnement jouets", "famille"],
+  keywords: ["bibliojouets", "biblio jouets", "bibli o jouets", "ludothèque", "location de jouets", "location jeux", "abonnement jouets", "famille"],
   
   openGraph: {
     title: "Bibli'O jouets - Location par abonnement", 
@@ -42,10 +51,9 @@ export const metadata = {
     locale: 'fr_FR',
     type: 'website',
   },
-    metadataBase: new URL('https://www.bibliojouets.fr'),
 };
 export const viewport = {
-  themeColor: '#ffffffff', 
+  themeColor: '#FF8C94', 
   width: 'device-width',
   initialScale: 1,
 };

@@ -3,9 +3,15 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      // On interdit l'accès aux pages inutiles pour le SEO (comme on a dit)
-      disallow: ['/mon-compte/', '/panier/'],
+      disallow: [
+        '/admin/', 
+        '/api/', 
+        '/panier/', 
+        '/mon-compte/', 
+        '/confirmation-commande/',
+        '/paiement/'
+      ],
     },
-    sitemap: 'https://bibliojouets.fr/sitemap.xml',
+    sitemap: 'https://www.bibliojouets.fr/sitemap.xml',
   }
 }
