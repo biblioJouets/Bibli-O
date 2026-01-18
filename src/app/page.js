@@ -68,8 +68,8 @@ function Homepage() {
                         <Redo className="arrow arrow-top" aria-hidden="true" />
 
                         <FunctionalityCard className="secondCard"
-                            title="Choisissez votre Plan"
-                            description="Sélectionnez votre abonnement avec le nombre de jouets qui vous convient, avec ou sans engagement."
+                            title="Choisissez votre abonnement"
+                            description="Sélectionnez votre abonnement avec le nombre de jouets qui vous convient sans engagement."
                             number="2️⃣"
                         />
                         
@@ -77,7 +77,7 @@ function Homepage() {
                         
                         <FunctionalityCard className="thirdCard"
                             title="Livré, Jouez, échangez"
-                            description="Votre sélection de jouets est livrée propre et prête à jouer. Échangez si vous le souhaitez*."
+                            description="Votre sélection de jouets est livrée propre et prête à jouer. Échangez quand vous voulez."
                             number="3️⃣"
                         />
                     </div>

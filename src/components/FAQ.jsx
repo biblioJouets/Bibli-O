@@ -26,8 +26,7 @@ const FAQ = () => {
     {
       icon: <Heart size={20} />,
       question: "Comment fonctionne l'abonnement Bibli'O Jouets ?",
-      answer: "C'est un jeu d'enfant ! Vous choisissez la formule d'abonnement qui convient à votre famille et sans engagement. vous sélectionnez les jouets que vous souhaitez emprunter pour le mois. Nous vous les préparons avec amour (nettoyés, désinfectés !). Les jouets sont expédiés à votre domicile où en point relais. Une fois le mois écoulé, vous nous retournez les jouets via le bordereau de retour qui vous sera envoyés, et vous en choisissez de nouveaux ! Simple, économique et écologique !"
-    },
+answer: "C'est un jeu d'enfant ! Vous sélectionnez d'abord les jouets qui feront le bonheur de votre enfant, puis vous validez la formule d'abonnement sans engagement qui vous convient. Nous préparons votre commande avec amour (nettoyage et désinfection !). La livraison s'effectue en point relais (ou à domicile pour les communes éligibles). Vous profitez des jouets aussi longtemps que vous le souhaitez (un mois ou plus !). Lorsque vous avez envie de changement, retournez-nous simplement le colis grâce au bordereau inclus (ou à télécharger sur votre espace client), et c'est reparti !"    },
     {
       icon: <RefreshCw size={20} />,
       question: "Les jouets sont-ils vraiment propres et sûrs pour mes enfants ?",
