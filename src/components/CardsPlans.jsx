@@ -11,9 +11,9 @@ import "@/styles/CardsPlansButtons.css";
 
 //Création des lists des cards 
 
-const decouverteList = ["2 jouets par mois","Livraison offerte"];
-const standardList = ["4 jouets par mois","Livraison offerte"];
-const premiumList = ["6 jouets par mois","Livraison offerte"];
+const decouverteList = ["2 jouets par mois","Soit 12.99€ par jouets","Livraison et retour inclus","Assurance \"Casse\"",">Nettoyage baby self","Annulable en un clic" ];
+const standardList = ["4 jouets par mois","Soit 9.99€ par jouets","Livraison et retour inclus","Assurance \"Casse\"","Nettoyage baby self","Annulable en un clic"];
+const premiumList = ["6 jouets par mois","Soit 9.33€ par jouets","Accès prioritaire aux nouveautés","Livraison Prioritaire","Livraison et retour inclus","Assurance \"Casse\"","Nettoyage baby self","Annulable en un clic"];
 
 
 function CardsPlans(){

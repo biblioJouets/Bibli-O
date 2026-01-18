@@ -1,8 +1,3 @@
-/* --- IMPORT FONTS --- */
-/* Import de la police Quicksand pour un look arrondi et doux */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
-
-/* --- VARIABLES CSS (DA) --- */
 :root {
   /* Couleurs Principales */
   --col-blue: #6EC1E4;
@@ -31,20 +26,24 @@
 /* --- STYLES GÉNERAUX / RESET BASIQUE --- */
 .subscription-page {
   color: var(--col-text);
-  margin-top: 80px;
+  margin-top: 100px;
   background-color: var(--col-bg-light);
   overflow-x: hidden; 
 }
+.pricing-section{
 
-h1, h2, h3 {
+  padding-top: 80px;
+
+}
+.subscription-page h1, .subscription-page h2, .subscription-page h3 {
   font-weight: 800 !important;
   margin-bottom: 1rem;
 }
 
-h1 { font-size: 2.5rem; line-height: 1.2; }
-h2 { font-size: 2rem !important; text-align: center !important; margin-bottom: 2.5rem !important; background-color: none !important;}
-h3 { font-size: 1.3rem; }
-p { line-height: 1.6; }
+.subscription-page h1 { font-size: 2.5rem; line-height: 1.2; }
+.subscription-page h2 { font-size: 2rem !important; text-align: center !important; margin-bottom: 2.5rem !important; background-color: none !important;}
+.subscription-page h3 { font-size: 1.3rem; }
+.subscription-page p { line-height: 1.6; }
 
 .container {
   max-width: var(--container-width);
@@ -52,9 +51,7 @@ p { line-height: 1.6; }
   
 }
 
-section {
-  padding: 80px 0;
-}
+
 
 /* --- BOUTONS --- */
 .btn {
@@ -213,7 +210,9 @@ padding-bottom: 0;
 /* =========================================
    SECTION POURQUOI CHOISIR
 ========================================= */
-.why-section { background-color: var(--col-bg-light); }
+.why-section { background-color: var(--col-bg-light);
+  padding: 80px 0;
+}
 
 .benefits-grid {
   display: grid;
@@ -285,7 +284,8 @@ padding-bottom: 0;
 /* =========================================
    SECTION PRICING (FORMULES)
 ========================================= */
-.pricing-section { background-color: var(  --col-bg-warm); }
+.pricing-section { background-color: var(  --col-bg-warm); 
+padding-bottom: 80px;}
 
 .pricing-grid {
   display: flex;
@@ -388,7 +388,8 @@ padding-bottom: 0;
    SECTION OFFRE SUR MESURE (CUSTOM)
 ========================================= */
 .custom-offer-card {
-  margin-top: 60px; /* Espace avec les cartes du dessus */
+  margin-top: 80px; 
+  padding-bottom : 80px;
   background-color: var(--col-bg-light); /* Fond clair ou blanc */
   border: 3px dashed var(--col-yellow); /* Bordure en pointillés pour l'effet "Bonus" */
   border-radius: var(--border-radius-lg);
@@ -493,6 +494,7 @@ padding-bottom: 0;
 .social-faq-section {
   background-color:#FFF7EB;
     position: relative;
+  padding: 80px 0;
 }
 
 /* Formes décoratives d'arrière-plan */
@@ -610,8 +612,8 @@ padding-bottom: 0;
 /* --- TABLETTE PORTRAIT (< 992px) --- */
 @media (max-width: 992px) {
   /* GLOBAL */
-  h1 { font-size: 2.2rem; }
-  h2 { font-size: 1.75rem !important; }
+  .subscription-page h1 { font-size: 2.2rem; }
+  .subscription-page h2 { font-size: 1.75rem !important; }
 
   /* HERO */
   .hero-section { padding-top: 120px; padding-bottom: 0; }

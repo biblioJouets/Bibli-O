@@ -59,8 +59,8 @@ function Homepage() {
                     
                     <div className="functionalityCardsContainer">
                         <FunctionalityCard className="firstCard"
-                            title="Choisissez votre Plan"
-                            description="Sélectionnez votre abonnement avec le nombre de jouets qui vous convient, avec ou sans engagement."
+                            title="Choisissez vos jouets"
+                            description="Choisissez parmi notre large sélection de jouets éducatifs adaptés à l'âge et aux intérêts de vos enfants."
                             number="1️⃣"
                         />
                         
@@ -68,8 +68,8 @@ function Homepage() {
                         <Redo className="arrow arrow-top" aria-hidden="true" />
 
                         <FunctionalityCard className="secondCard"
-                            title="Choisissez vos jouets"
-                            description="Choisissez parmi notre large sélection de jouets éducatifs adaptés à l'âge et aux intérêts de vos enfants."
+                            title="Choisissez votre Plan"
+                            description="Sélectionnez votre abonnement avec le nombre de jouets qui vous convient, avec ou sans engagement."
                             number="2️⃣"
                         />
                         
@@ -77,7 +77,7 @@ function Homepage() {
                         
                         <FunctionalityCard className="thirdCard"
                             title="Livré, Jouez, échangez"
-                            description="Votre sélection de jouets est livrée propre et prête à jouer chez vous ou en point relais. Échangez si vous le souhaitez*."
+                            description="Votre sélection de jouets est livrée propre et prête à jouer. Échangez si vous le souhaitez*."
                             number="3️⃣"
                         />
                     </div>

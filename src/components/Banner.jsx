@@ -44,8 +44,7 @@ export default function Banner() {
 
       <div className="banner-content">
         <h1 className="banner-title">
-          Louez des jouets adaptés à votre enfant, livrés à domicile
-        </h1>
+Des jouets adaptés à votre enfant, directement à portée de main.        </h1>
         <p className="banner-subtitle">
           Une bibliothèque de jouets sur abonnement pour permettre aux enfants de découvrir régulièrement de nouveaux jeux...
         </p>

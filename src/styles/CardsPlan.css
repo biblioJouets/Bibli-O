@@ -209,3 +209,10 @@
         font-size: 18px;
     }
 }
+
+@media (max-width: 480px) {
+    .CardPlan {
+        padding: 40px 50px;
+    }
+    
+}
