@@ -3,91 +3,76 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request) {
   const response = NextResponse.next();
-  const origin = request.headers.get("origin");
   const path = request.nextUrl.pathname;
 
-
+  // 1. GESTION DES FICHIERS STATIQUES & NEXT (On laisse passer)
   if (
-    path.startsWith("/uploads") || 
     path.startsWith("/_next") || 
-    path.startsWith("/favicon.ico")
+    path.startsWith("/favicon.ico") ||
+    path.startsWith("/assets") // Vos images publiques
   ) {
     return NextResponse.next();
   }
 
-  // --- 1. GESTION CORS ---
+  // 2. SÉCURITÉ CORS (Conservation de votre config)
+  const origin = request.headers.get("origin");
   const allowedOrigins = [
     "https://www.bibliojouets.fr",
     "https://bibliojouets.fr",
     "https://bibliojouets.com",
     "https://www.bibliojouets.com",
   ];
-
-  // Autoriser localhost en développement
   if (process.env.NODE_ENV === "development") {
     allowedOrigins.push("http://localhost:3000");
-    allowedOrigins.push("http://127.0.0.1:3000");
   }
 
-  // Définir CORS si l'origine est autorisée
   if (origin && allowedOrigins.includes(origin)) {
     response.headers.set("Access-Control-Allow-Origin", origin);
   }
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  response.headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  response.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
-  response.headers.set("Access-Control-Max-Age", "86400");
-
-  // Gérer les requêtes preflight OPTIONS
   if (request.method === "OPTIONS") {
     return new NextResponse(null, { status: 204, headers: response.headers });
   }
 
-  // --- 2. SÉCURITÉ & AUTHENTIFICATION ---
-  // On récupère le token MAINTENANT (avant de faire les vérifications)
+  // 3. AUTHENTIFICATION
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET 
   });
 
-  // PROTECTION UPLOAD : Seul l'Admin peut uploader
-  if (path.startsWith("/api/upload")) {
-      if (token?.role !== "ADMIN") {
-         return NextResponse.json({ message: "Non autorisé - Admin requis" }, { status: 401 });
-      }
-      // Si c'est un admin, on laisse passer vers la route d'upload
-      return response; 
+  // --- PROTECTION STRICTE DES UPLOADS ---
+  // Seul l'admin peut uploader. La lecture reste publique pour les images (compromis acceptable pour l'instant)
+  if (path.startsWith("/api/upload") && token?.role !== "ADMIN") {
+     return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
   }
 
+  // --- PROTECTION DES ROUTES ADMIN (Pages & API) ---
+  // On protège /admin (front) ET /api/orders, /api/products en écriture, etc.
   const isAdminRoute = path.startsWith("/admin");
-  const isUserRoute = path.startsWith("/mon-compte") || path.startsWith("/panier");
+  const isAdminApi = path.startsWith("/api/admin") || // Si vous avez des routes api/admin
+                     (path.startsWith("/api/orders") && request.method === "GET" && !path.includes("/user/")) || // Lister toutes les commandes
+                     (path.startsWith("/api/products") && ["POST", "PUT", "DELETE"].includes(request.method)); // Modifier les produits
 
-  // Cas A : Non connecté essayant d'accéder à une page privée
-  if ((isAdminRoute || isUserRoute) && !token) {
+  if ((isAdminRoute || isAdminApi) && token?.role !== "ADMIN") {
+    if (path.startsWith("/api/")) {
+        return NextResponse.json({ error: "Accès refusé : Admin requis" }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // --- PROTECTION ROUTES UTILISATEUR ---
+  const isUserRoute = path.startsWith("/mon-compte") || path.startsWith("/panier");
+  if (isUserRoute && !token) {
     const url = new URL("/connexion", request.url);
     url.searchParams.set("callbackUrl", path);
     return NextResponse.redirect(url);
   }
 
-  // Cas B : Connecté mais pas Admin essayant d'accéder à /admin
-  if (isAdminRoute && token?.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
   return response;
 }
 
-// Configuration du matcher (Routes surveillées)
 export const config = {
-  matcher: [
-    // IMPORTANT : J'ai retiré 'api/upload' de la liste d'exclusion ci-dessous
-    // Sinon le middleware ne s'active jamais pour l'upload !
-    '/((?!_next/static|_next/image|favicon.ico|uploads).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

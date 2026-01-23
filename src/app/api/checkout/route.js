@@ -2,25 +2,22 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
+import prisma from "@/lib/core/database";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-    
-    // 1. Sécurité : Qui commande ?
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Non connecté" }, { status: 401 });
-    }
+    if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
     const body = await req.json();
-    const { cartItems, shippingData } = body; 
+    const { cartItems, shippingData } = body;
     
     // Calcul du nombre de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
+    const userCart = await prisma.cart.findUnique({ where: { userId: parseInt(session.user.id) }});
     // 2. Déterminer les lignes de facture (Line Items)
     let line_items = [];
 
@@ -39,27 +36,24 @@ export async function POST(req) {
     }
 
     // 3. Créer la session Stripe
-    const stripeSession = await stripe.checkout.sessions.create({
+const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: line_items,
       mode: "subscription", 
       customer_email: session.user.email,
-      
       success_url: `${baseUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/paiement`,
-
-      // 4. METADONNÉES CRUCIALES (Passées au Webhook)
+      
       metadata: {
         userId: session.user.id,
+        cartId: userCart.id, // ID DU PANIER FIGÉ
         shippingName: shippingData.shippingName || "",
         shippingAddress: shippingData.shippingAddress || "",
         shippingCity: shippingData.shippingCity || "",
         shippingZip: shippingData.shippingZip || "",
         shippingPhone: shippingData.shippingPhone || "",
-        // On force la conversion en string ou chaine vide pour éviter les bugs Stripe
         mondialRelayPointId: shippingData.mondialRelayPointId ? String(shippingData.mondialRelayPointId) : ""
       },
-      
       billing_address_collection: 'required',
     });
 

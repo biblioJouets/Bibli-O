@@ -104,57 +104,85 @@ export const sendReturnLabel = async (orderInfo) => {
 // ============================================================
 //  2. LOGIQUE COMMANDE (Service)
 // ============================================================
-
 export const createOrder = async (userId, cartData, totalAmount, shippingData) => {
-  // 1. Création BDD
-  const newOrder = await prisma.orders.create({
-    data: {
-      userId: userId,
-      totalAmount: totalAmount,
-      status: 'PENDING',
-      mondialRelayPointId: shippingData.mondialRelayPointId,
-      shippingName: shippingData.shippingName,
-      shippingAddress: shippingData.shippingAddress,
-      shippingZip: shippingData.shippingZip,
-      shippingCity: shippingData.shippingCity,
-      shippingPhone: shippingData.shippingPhone,
-      OrderProducts: {
-        create: cartData.items.map(item => ({
-          ProductId: item.productId,
-          quantity: item.quantity 
-        }))
+  
+  // ÉTAPE 1 : TRANSACTION BDD (Rapide et Atomique)
+  // On récupère le résultat de la transaction dans une variable
+  const result = await prisma.$transaction(async (tx) => {
+    
+    // 1. Vérification ultime du stock AVANT de valider
+    for (const item of cartData.items) {
+      const product = await tx.products.findUnique({ where: { id: item.productId } });
+      
+      // Sécurité : On vérifie si le produit existe et s'il y a du stock
+      if (!product || product.stock < item.quantity) {
+        throw new Error(`Stock insuffisant pour le produit : ${product?.name || 'Inconnu'}`);
       }
     }
+
+    // 2. Création de la commande
+    // Note : On utilise 'tx' partout ici, pas 'prisma'
+    const newOrder = await tx.orders.create({
+      data: {
+        userId: userId,
+        totalAmount: totalAmount,
+        status: 'PAID',
+        mondialRelayPointId: shippingData.mondialRelayPointId,
+        shippingName: shippingData.shippingName,
+        shippingAddress: shippingData.shippingAddress,
+        shippingZip: shippingData.shippingZip,
+        shippingCity: shippingData.shippingCity,
+        shippingPhone: shippingData.shippingPhone,
+        OrderProducts: {
+          create: cartData.items.map(item => ({
+            ProductId: item.productId,
+            quantity: item.quantity 
+          }))
+        }
+      }
+    });
+
+    // 3. Décrémentation Stock
+    for (const item of cartData.items) {
+      await tx.products.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity } }
+      });
+    }
+
+    // 4. On récupère l'user AVEC 'tx' pour être cohérent dans la transaction
+    const user = await tx.users.findUnique({ where: { id: userId } });
+
+    // On retourne ce dont on a besoin pour la suite (hors transaction)
+    return { newOrder, user };
   });
 
-  // 2. Décrémentation Stock
-  for (const item of cartData.items) {
-    await prisma.products.update({
-      where: { id: item.productId },
-      data: { stock: { decrement: item.quantity } }
-    });
+try {
+    const { newOrder, user } = result;
+    const products = cartData.items.map(item => item.product);
+
+    const orderInfoForMail = {
+      id: newOrder.id,
+      totalAmount: newOrder.totalAmount,
+      user: { email: user.email, firstName: user.firstName },
+      products: products,
+      shippingData: shippingData 
+    };
+
+    // On ne bloque pas le retour de la fonction si l'email échoue
+    await Promise.all([
+      sendOrderConfirmation(orderInfoForMail), 
+      notifyAdminNewOrder(orderInfoForMail)    
+    ]);
+  } catch (emailError) {
+    // On loggue l'erreur mais on ne throw pas pour ne pas faire croire au Webhook que c'est un échec
+    console.error("⚠️ La commande est créée mais l'email a échoué :", emailError);
   }
 
-  // 3. Infos pour emails
-  const user = await prisma.users.findUnique({ where: { id: userId } });
-  const products = cartData.items.map(item => item.product);
-
-  const orderInfoForMail = {
-    id: newOrder.id,
-    totalAmount: newOrder.totalAmount,
-    user: { email: user.email, firstName: user.firstName },
-    products: products,
-    shippingData: shippingData 
-  };
-
-  // 4. Envois Emails (Client + Admin)
-  await Promise.all([
-    sendOrderConfirmation(orderInfoForMail), 
-    notifyAdminNewOrder(orderInfoForMail)    
-  ]);
-
-  return newOrder;
+  return result.newOrder;
 };
+
+
 
 export const getUserOrders = async (userId) => {
     try {
