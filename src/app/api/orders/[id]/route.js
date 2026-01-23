@@ -1,13 +1,11 @@
-/* Fichier : src/app/api/orders/[id]/route.js */
 import { NextResponse } from 'next/server';
-import prisma from "@/lib/core/database"; // On utilise Prisma directement ici pour être sûr
+import prisma from '@/lib/core/database';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-// Cette route sert à récupérer UNE SEULE commande via son ID (ex: /api/orders/100)
 export async function GET(request, props) {
   try {
-    // 1. Gestion des paramètres (Next.js 15/16)
+    // 1. FIX NEXT.JS 16 : On attend les paramètres
     const params = await props.params;
     const orderId = parseInt(params.id);
 
@@ -21,13 +19,14 @@ export async function GET(request, props) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    // 3. Récupération de la commande UNIQUE
+    // 3. Récupération de la commande
+    // On garde tes "include" détaillés car ton front en a besoin (images, noms...)
     const order = await prisma.orders.findUnique({
       where: { id: orderId },
       include: {
         OrderProducts: {
           include: {
-            Product: true // On inclut les détails des produits
+            Product: true 
           }
         }
       }
@@ -37,9 +36,14 @@ export async function GET(request, props) {
       return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
     }
 
-    // 4. Vérification : Est-ce bien la commande de cet utilisateur ?
-    // (Sauf si c'est un ADMIN, on pourrait ajouter cette condition plus tard)
-    if (order.userId.toString() !== session.user.id.toString()) {
+    // 4. LE BLINDAGE SÉCURITÉ (IDOR + ADMIN) 🛡️
+    // On vérifie : Est-ce le propriétaire OU est-ce un Admin ?
+    
+    // Note : On utilise toString() pour comparer les IDs proprement (Int vs String)
+    const isOwner = order.userId.toString() === session.user.id.toString();
+    const isAdmin = session.user.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
        return NextResponse.json({ error: "Accès interdit à cette commande" }, { status: 403 });
     }
     
