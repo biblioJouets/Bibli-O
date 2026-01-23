@@ -1,3 +1,4 @@
+// src/app/connexion/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,7 +24,7 @@ export default function ConnexionPage() {
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -32,15 +33,19 @@ export default function ConnexionPage() {
       const res = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false, // On gère la redirection manuellement pour éviter le rechargement
+        redirect: false, 
       });
 
       if (res?.error) {
-        setError("Email ou mot de passe incorrect.");
+        // CORRECTION : On vérifie si c'est le Rate Limit
+        if (res.error.includes("Trop de tentatives")) {
+           setError("⛔ Trop de tentatives. Veuillez patienter 1 minute avant de réessayer.");
+        } else {
+           setError("Email ou mot de passe incorrect.");
+        }
         setLoading(false);
       } else {
-        // Redirection forcée vers l'accueil ou l'admin
-        router.refresh(); // Rafraîchit la session
+        router.refresh(); 
         router.push('/'); 
       }
     } catch (err) {
@@ -48,6 +53,7 @@ export default function ConnexionPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="auth-container">

@@ -3,8 +3,9 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/core/database";
 import { compare } from "bcryptjs";
-// Détection : Est-ce qu'on doit sécuriser les cookies ?
-// On regarde si l'URL de production commence par https
+import { checkRateLimit } from '@/lib/core/security/rateLimit';
+
+
 const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith("https");
 
 export const authOptions = {
@@ -15,7 +16,13 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Mot de passe", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
+        const identifier = credentials?.email || 'unknown';
+        const rateLimit = checkRateLimit(identifier, 5);
+
+        if (!rateLimit.allowed) {
+         throw new Error("Trop de tentatives. Réessayez dans 1 minute.");
+      }
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
