@@ -12,10 +12,6 @@ export async function POST(req) {
   const headersList = await headers(); 
   const sig = headersList.get("stripe-signature");
 
-  // Logs de debug (à retirer en prod si tu veux nettoyer)
-  console.log("🔑 CLÉ SECRÈTE UTILISÉE :", process.env.STRIPE_SECRET_KEY?.substring(0, 8) + "...");
-  console.log("🔑 WEBHOOK SECRET UTILISÉ :", process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 8) + "...");
-
   let event;
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant");
@@ -29,8 +25,6 @@ export async function POST(req) {
     const session = event.data.object;
     // 👇 On récupère cartSnapshot (et non plus productIds)
     const { userId, cartId, cartSnapshot, shippingName, shippingAddress, shippingCity, shippingZip, mondialRelayPointId, shippingPhone } = session.metadata;
-
-    console.log(`💰 Paiement validé User ${userId}. Récupération du snapshot produits...`);
 
     try {
       if (!cartSnapshot) {
@@ -74,8 +68,6 @@ export async function POST(req) {
       // 2. Créer la commande
       const newOrder = await createOrder(parseInt(userId), virtualCartData, totalAmount, shippingData);
       
-      console.log(`✅ Commande #${newOrder.id} créée avec succès (Snapshot utilisé).`);
-
       // 3. Vider le panier
       if (cartId) {
         await prisma.cartItem.deleteMany({ where: { cartId: parseInt(cartId) } });

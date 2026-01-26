@@ -50,9 +50,7 @@ export const sendOrderConfirmation = async (orderInfo) => {
     emailParams.PRODUCTS = productsList;
 
     await sendBrevoTemplate(orderInfo.user.email, 8, emailParams);
-    console.log(`[BREVO] Email confirmation envoyé pour commande ${customOrderId}`);
   } catch (error) {
-    console.error("[BREVO] Erreur sendOrderConfirmation:", error);
   }
 };
 
@@ -78,9 +76,7 @@ export const notifyAdminNewOrder = async (orderInfo) => {
       };
   
       await sendBrevoTemplate(ADMIN_EMAIL, ADMIN_TEMPLATE_ID, emailParams);
-      console.log(`👮 [BREVO] Alerte Admin envoyée à ${ADMIN_EMAIL}`);
     } catch (error) {
-      console.error("[BREVO] Erreur notifyAdminNewOrder:", error);
     }
   };
 
