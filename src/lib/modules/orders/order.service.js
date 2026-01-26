@@ -47,8 +47,6 @@ export const sendOrderConfirmation = async (orderInfo) => {
       products: productsList // Note: Brevo attend souvent "products" ou "PRODUCTS" selon ta boucle
     };
 
-    // Attention : Vérifie si ton template Brevo attend "products" ou "PRODUCTS" dans la boucle for
-    // Dans ton template HTML ci-dessous c'est "params.PRODUCTS", donc on mappe :
     emailParams.PRODUCTS = productsList;
 
     await sendBrevoTemplate(orderInfo.user.email, 8, emailParams);
@@ -58,10 +56,10 @@ export const sendOrderConfirmation = async (orderInfo) => {
   }
 };
 
-// 👇 NOUVELLE FONCTION : Alerte Admin
+//   FONCTION : Alerte Admin
 export const notifyAdminNewOrder = async (orderInfo) => {
     try {
-      const ADMIN_TEMPLATE_ID = 8; // ID Template Admin (ou 8 pour tester)
+      const ADMIN_TEMPLATE_ID = 8; 
       const ADMIN_EMAIL = "contact@bibliojouets.com"; 
   
       const productsList = orderInfo.products.map(p => ({ NAME: p.name }));
@@ -126,7 +124,7 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
       data: {
         userId: userId,
         totalAmount: totalAmount,
-        status: 'PAID',
+        status: 'PREPARING',
         mondialRelayPointId: shippingData.mondialRelayPointId,
         shippingName: shippingData.shippingName,
         shippingAddress: shippingData.shippingAddress,

@@ -13,30 +13,31 @@ export async function POST(req) {
     if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
     const body = await req.json();
-    const { cartItems, shippingData } = body;
+    const { cartItems, shippingData } = body; 
     
-    // Calcul du nombre de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-    const userCart = await prisma.cart.findUnique({ where: { userId: parseInt(session.user.id) }});
-    // 2. Déterminer les lignes de facture (Line Items)
-    let line_items = [];
+    
+    // --- 📸 CORRECTION SNAPSHOT : ON GARDE LA QUANTITÉ ---
+    // On crée un tableau d'objets minifiés pour économiser les caractères Stripe
+    // Ex: [{id: 1, q: 2}, {id: 5, q: 1}]
+    const cartSnapshot = cartItems.map(item => ({ 
+      id: item.productId, 
+      q: item.quantity 
+    }));
 
-    // Logique de choix de l'abonnement
-    if (count <= 2) {
-      line_items.push({ price: process.env.STRIPE_PRICE_DECOUVERTE, quantity: 1 });
-    } else if (count <= 4) {
-      line_items.push({ price: process.env.STRIPE_PRICE_STANDARD, quantity: 1 });
-    } else if (count <= 6) {
-      line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
-    } else {
-      // MAXI BOX (7 à 9 jouets)
+    // 2. Déterminer les lignes de facture (Logique inchangée)
+    let line_items = [];
+    if (count <= 2) line_items.push({ price: process.env.STRIPE_PRICE_DECOUVERTE, quantity: 1 });
+    else if (count <= 4) line_items.push({ price: process.env.STRIPE_PRICE_STANDARD, quantity: 1 });
+    else if (count <= 6) line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
+    else {
       line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
       const extraToys = count - 6;
       line_items.push({ price: process.env.STRIPE_PRICE_EXTRA_TOY, quantity: extraToys });
     }
 
     // 3. Créer la session Stripe
-const stripeSession = await stripe.checkout.sessions.create({
+    const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: line_items,
       mode: "subscription", 
@@ -46,7 +47,10 @@ const stripeSession = await stripe.checkout.sessions.create({
       
       metadata: {
         userId: session.user.id,
-        cartId: userCart.id, // ID DU PANIER FIGÉ
+        // 👇 ON ENVOIE LE NOUVEAU FORMAT AVEC QUANTITÉS
+        cartSnapshot: JSON.stringify(cartSnapshot), 
+        
+        cartId: body.cartId || "", 
         shippingName: shippingData.shippingName || "",
         shippingAddress: shippingData.shippingAddress || "",
         shippingCity: shippingData.shippingCity || "",

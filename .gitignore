@@ -37,6 +37,7 @@ yarn-error.log*
 .env.local
 .env.*.production.local
 .env.production
+.env.production.old
 .env.development
 docker-compose.override.yml
 # vercel

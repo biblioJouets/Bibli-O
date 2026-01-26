@@ -12,41 +12,74 @@ export async function POST(req) {
   const headersList = await headers(); 
   const sig = headersList.get("stripe-signature");
 
+  // Logs de debug (à retirer en prod si tu veux nettoyer)
+  console.log("🔑 CLÉ SECRÈTE UTILISÉE :", process.env.STRIPE_SECRET_KEY?.substring(0, 8) + "...");
+  console.log("🔑 WEBHOOK SECRET UTILISÉ :", process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 8) + "...");
+
   let event;
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant");
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch (err) {
-    console.error(`⚠️  Webhook Error: ${err.message}`);
+    console.error(`⚠️ Webhook Error: ${err.message}`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
-  // GESTION DE L'ÉVÉNEMENT
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const { userId, cartId, shippingName, shippingAddress, shippingCity, shippingZip, mondialRelayPointId, shippingPhone } = session.metadata;
-    console.log(`Paiement validé pour le User ID: ${userId}`);
+    // 👇 On récupère cartSnapshot (et non plus productIds)
+    const { userId, cartId, cartSnapshot, shippingName, shippingAddress, shippingCity, shippingZip, mondialRelayPointId, shippingPhone } = session.metadata;
+
+    console.log(`💰 Paiement validé User ${userId}. Récupération du snapshot produits...`);
+
     try {
-// 1. Récupérer LE panier spécifique (via cartId) pour éviter les ambiguïtés      
-    const userCart = await prisma.cart.findUnique({
-        where: { id: parseInt(cartId) },
-        include: { items: { include: { product: true } } }
+      if (!cartSnapshot) {
+        throw new Error("Aucun snapshot panier trouvé dans les métadonnées Stripe");
+      }
+      
+      // On récupère [{id: 1, q: 2}, {id: 5, q: 1}]
+      const snapshotItems = JSON.parse(cartSnapshot); 
+      const ids = snapshotItems.map(item => item.id);
+
+      // On va chercher les infos fraîches en BDD
+      const dbProducts = await prisma.products.findMany({
+        where: { id: { in: ids } }
       });
 
-      if (!userCart || userCart.items.length === 0) {
-        console.error("❌ Panier vide ou introuvable pour ce paiement.");
-        return NextResponse.json({ received: true });
+      // On reconstruit le panier virtuel en croisant BDD et Snapshot
+      const virtualCartItems = snapshotItems.map(snapItem => {
+        const productInfo = dbProducts.find(p => p.id === snapItem.id);
+        if (!productInfo) return null; // Sécurité si un produit a été supprimé de la BDD entre temps
+
+        return {
+          productId: snapItem.id,
+          quantity: snapItem.q, // 👈 ICI : On utilise la vraie quantité payée
+          product: productInfo 
+        };
+      }).filter(item => item !== null); // On filtre les nuls éventuels
+
+      const virtualCartData = { items: virtualCartItems };
+
+      // Vérification cohérence
+      if (virtualCartData.items.length === 0) {
+        throw new Error("Produits introuvables en BDD (IDs invalides)");
       }
+
       const totalAmount = session.amount_total / 100;
       const shippingData = {
         shippingName, shippingAddress, shippingZip, shippingCity, shippingPhone,
         mondialRelayPointId: mondialRelayPointId && mondialRelayPointId !== "null" ? mondialRelayPointId : null
       };
 
-      // 2. Créer la commande via le service (C'est lui qui enregistre en BDD)
-      const newOrder = await createOrder(parseInt(userId), userCart, totalAmount, shippingData);      
-      console.log(`Commande #${newOrder.id} créée.`);
+      // 2. Créer la commande
+      const newOrder = await createOrder(parseInt(userId), virtualCartData, totalAmount, shippingData);
+      
+      console.log(`✅ Commande #${newOrder.id} créée avec succès (Snapshot utilisé).`);
+
       // 3. Vider le panier
-      await prisma.cartItem.deleteMany({ where: { cartId: userCart.id } });
+      if (cartId) {
+        await prisma.cartItem.deleteMany({ where: { cartId: parseInt(cartId) } });
+      }
 
     } catch (error) {
       console.error("❌ Erreur CRITIQUE Webhook:", error);
@@ -55,5 +88,4 @@ export async function POST(req) {
   }
 
   return NextResponse.json({ received: true });
-
 }
