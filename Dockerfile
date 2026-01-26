@@ -49,9 +49,7 @@ RUN chown -R nextjs:nodejs /app/.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# CORRECTION ICI : On donne le dossier prisma à l'utilisateur nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-# Note : Parfois nécessaire selon la config standalone
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # PASSAGE EN MODE NON-ROOT (Sécurité Maximale)
@@ -62,3 +60,8 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
+
+
+# Vérifie toutes les 30s si la page d'accueil répond
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1

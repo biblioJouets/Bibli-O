@@ -1,3 +1,4 @@
+// src/app/api/users/[id]/route.js
 import { NextResponse } from 'next/server';
 import { userService } from '@/lib/modules/users/user.service';
 import { getServerSession } from "next-auth";
@@ -43,6 +44,7 @@ export async function GET(request, { params }) {
 }
 
 // --- PUT : Modifier un profil ---
+// --- PUT : Modifier un profil ---
 export async function PUT(request, { params }) {
   try {
     const resolvedParams = await params;
@@ -55,7 +57,7 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const session = await getServerSession(authOptions);
 
-    // SÉCURITÉ
+    // SÉCURITÉ IDOR
     const isAdmin = session?.user?.role === 'ADMIN';
     const isOwner = session && parseInt(session.user.id) === id;
 
@@ -63,11 +65,35 @@ export async function PUT(request, { params }) {
        return NextResponse.json({ success: false, message: "Non autorisé" }, { status: 403 });
     }
     
-    const updatedUser = await userService.update(id, body);
+    // 🛡️ SÉCURITÉ "MASS ASSIGNMENT" (NOUVEAU)
+    // On définit strictement ce qu'un utilisateur peut modifier
+    let dataToUpdate = {};
+
+    // 1. Si c'est un ADMIN, il a le droit de tout changer (y compris le rôle)
+    if (isAdmin) {
+        dataToUpdate = { ...body };
+    } 
+    // 2. Si c'est l'utilisateur lui-même, on restreint les champs
+    else {
+        // Liste blanche des champs modifiables par l'utilisateur
+        if (body.firstName) dataToUpdate.firstName = body.firstName;
+        if (body.lastName) dataToUpdate.lastName = body.lastName;
+        if (body.phone) dataToUpdate.phone = body.phone;
+        if (body.email) dataToUpdate.email = body.email;
+        // On NE prend PAS 'role', 'password', 'id', etc.
+    }
+
+    // Si aucune donnée valide n'est fournie
+    if (Object.keys(dataToUpdate).length === 0) {
+        return NextResponse.json({ success: false, message: "Aucune donnée modifiable fournie" }, { status: 400 });
+    }
+    
+    const updatedUser = await userService.update(id, dataToUpdate);
     
     return NextResponse.json({ success: true, data: updatedUser });
 
   } catch (error) {
+    console.error("Erreur PUT user:", error); // Log utile pour le debug
     return NextResponse.json({ success: false, message: "Erreur mise à jour" }, { status: 500 });
   }
 }
