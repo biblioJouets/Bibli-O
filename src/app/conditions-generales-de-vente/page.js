@@ -167,12 +167,12 @@ function Cgv() {
         <h2 id="cgv-offres">Article 16 - Offres Commerciales</h2>
         <p>Dans le cadre de son lancement, Bibli’o Jouets propose une offre promotionnelle soumise aux conditions suivantes :</p>
         <ul>
-          <li><strong>Détail de l’Offre :</strong> Pour toute nouvelle souscription à un abonnement (formules Découverte, Standard ou Premium), le Client bénéficie d'un mois d'abonnement offert pour un engagement minimal de deux mois.</li>
-          <li><strong>Modalités de Paiement :</strong> Le Client règle le premier mois d'abonnement au tarif de la formule choisie lors de la commande. Le second mois est offert par Bibli’o Jouets.</li>
+          <li><strong>Détail de l’Offre :</strong> Pour toute nouvelle souscription à un abonnement (Toute formule), le Client bénéficie d’un mois d’abonnement offert pour un engagement minimal de deux mois.</li>
+          <li><strong>Modalités de Paiement :</strong> Le Client règle le premier mois d’abonnement au tarif de la formule choisie lors de la commande. Le second mois est offert par Bibli’o Jouets.</li>
           <li><strong>Utilisation et Échange des Jouets :</strong> Dans le cadre de cette offre de lancement, le Client conserve les jouets reçus dans son premier colis pendant une durée continue de deux mois. Le premier échange de jouets pourra être effectué à l'issue de ces deux mois. Par la suite, les échanges pourront s'effectuer mensuellement selon les modalités classiques de l'abonnement.</li>
-          <li><strong>Flexibilité et Résiliation :</strong> L'abonnement est flexible. Le Client a la possibilité d'ajuster sa formule ou de résilier son abonnement à l'issue du premier mois payé, moyennant le respect des conditions de retour des jouets définies à l'Article 10.</li>
+          <li><strong>Flexibilité et Résiliation :</strong> L’abonnement est flexible. Le Client a la possibilité d’ajuster sa formule ou de résilier son abonnement à l'issue du premier mois payé, moyennant le respect des conditions de retour des jouets définies à l'Article 10.</li>
           <li><strong>Hygiène et Service :</strong> Cette offre inclut l'intégralité des services de qualité Bibli’o Jouets, notamment la désinfection rigoureuse des jouets et la fourniture des piles.</li>
-          <li><strong>Validité :</strong> Offre valable du 01/01/2026 au 31/01/2026.</li>
+          <li><strong>Validité :</strong> Offre valable du 01/01/2026 au 31/03/2026.</li>
         </ul>
       </section>
 
