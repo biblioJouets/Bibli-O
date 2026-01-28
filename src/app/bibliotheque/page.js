@@ -15,7 +15,6 @@ export default function LibraryPage() {
   const [selectedAge, setSelectedAge] = useState('');
   const [sortOption, setSortOption] = useState('newest');
 
-  // 1. Récupération des données
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -30,41 +29,86 @@ export default function LibraryPage() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  //Logique de Filtrage et Tri
+  // --- 1. FONCTION UTILITAIRE : Convertir l'âge en nombre de mois ---
+  // Cela nous permet de dire que "2 ans" (24 mois) > "18 mois"
+  const getAgeInMonths = (ageString) => {
+    if (!ageString) return 0; // Par défaut
+    const cleanStr = ageString.toString().toLowerCase().trim();
+
+    if (cleanStr.includes('naissance')) return 0;
+    
+    // Extraction du nombre
+    const number = parseInt(cleanStr.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(number)) return 0;
+
+    // Conversion
+    if (cleanStr.includes('an')) return number * 12; // Années -> Mois
+    return number; // Mois -> Mois
+  };
+
+
+  // --- 2. EXTRACTION DES DONNÉES POUR LES LISTES DÉROULANTES ---
+  
+  const categories = [...new Set(products
+    .map(p => p.category ? p.category.trim() : null)
+    .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  // Pour la liste déroulante, on garde le tri croissant (Naissance -> Grand)
+  const availableAges = [...new Set(products
+    .map(p => p.ageRange ? p.ageRange.trim() : null)
+    .filter(Boolean)
+  )].sort((a, b) => getAgeInMonths(a) - getAgeInMonths(b));
+
+
+  // --- 3. LOGIQUE DE FILTRAGE ET TRI ---
+
   const filteredProducts = products
     .filter(product => {
-      // Recherche Texte
+      // A. Recherche
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      // Filtre Catégorie
-      const matchesCategory = selectedCategory ? product.category === selectedCategory : true;
+      // B. Catégorie
+      const productCat = product.category ? product.category.trim() : '';
+      const matchesCategory = selectedCategory ? productCat === selectedCategory : true;
       
-      // Filtre Âge
-      const matchesAge = selectedAge 
-        ? product.ageRange && product.ageRange.includes(selectedAge.replace(' ans', '').trim())
-        : true;
+      // C. Âge (La modification est ici !)
+      // Si un âge est sélectionné, on garde tout ce qui est INFÉRIEUR ou ÉGAL
+      let matchesAge = true;
+      if (selectedAge) {
+        const selectedMonths = getAgeInMonths(selectedAge);
+        const productMonths = getAgeInMonths(product.ageRange);
+        // Exemple : Si je choisis "18 mois" (18), je veux voir "12 mois" (12) car 12 <= 18
+        matchesAge = productMonths <= selectedMonths;
+      }
 
       return matchesSearch && matchesCategory && matchesAge;
     })
     .sort((a, b) => {
-      // Logique de Tri Mises à jour
+      // D. La subtilité de Tri demandée
+      // Si un filtre âge est actif, on veut d'abord voir les jouets les plus proches de cet âge (Décroissant)
+      if (selectedAge) {
+        const ageA = getAgeInMonths(a.ageRange);
+        const ageB = getAgeInMonths(b.ageRange);
+        
+        // Si les âges sont différents, on trie par âge décroissant (4 ans avant 3 ans)
+        if (ageA !== ageB) {
+          return ageB - ageA; 
+        }
+        // Si les âges sont identiques, on applique le tri secondaire choisi par l'utilisateur (ex: alphabétique)
+      }
+
+      // Tri standard (si pas de filtre âge ou en second critère)
       if (sortOption === 'alpha_asc') return a.name.localeCompare(b.name);
       if (sortOption === 'alpha_desc') return b.name.localeCompare(a.name);
       if (sortOption === 'rating') return b.rating - a.rating;
   
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
-
-  // Extraction dynamique des catégories et âges présents en base
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-  
-
-  const availableAges = [...new Set(products.map(p => p.ageRange).filter(Boolean))].sort();
 
   return (
     <div className="bibliotheque-container">
@@ -80,7 +124,7 @@ export default function LibraryPage() {
           <Search className="search-icon" size={20} />
           <input 
             type="text" 
-            placeholder="Rechercher un jeu, une marque..." 
+            placeholder="Rechercher..." 
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -107,7 +151,7 @@ export default function LibraryPage() {
           >
             <option value="">Tous les âges</option>
             {availableAges.map(age => (
-              <option key={age} value={age}>{age}</option>
+              <option key={age} value={age}>{age}</option> 
             ))}
           </select>
 
@@ -134,13 +178,12 @@ export default function LibraryPage() {
             ))
           ) : (
             <div className="empty-state">
-              <h3>Oups, aucun jouet ne correspond à votre recherche 🧐</h3>
-              <p>Essayez de modifier vos filtres.</p>
+              <h3>Aucun résultat pour ces critères 🧐</h3>
               <button 
-                onClick={() => {setSearchTerm(''); setSelectedCategory(''); setSelectedAge(''); setSortOption('newest');}}
+                onClick={() => {setSearchTerm(''); setSelectedCategory(''); setSelectedAge('');}}
                 style={{marginTop: '1rem', color: '#6EC1E4', background:'none', border:'none', cursor:'pointer', fontWeight:'bold'}}
               >
-                Réinitialiser les filtres
+                Tout effacer
               </button>
             </div>
           )}
