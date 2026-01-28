@@ -3,6 +3,7 @@
 //import components
 
 import ButtonBlue from "@/components/ButtonBlue";
+import PromotionBanner from '@/components/PromoBanner';
 
 // import NewToys from "../components/NewToys";
 import Banner from "@/components/Banner";
@@ -14,6 +15,8 @@ import CardContentMission from "@/components/CardsContentMission";
 import FAQ from "@/components/FAQ"
 import Newsletter from "@/components/Newsletter";
 import FunctionalityCard from "@/components/FunctionalityCard";
+
+
 //import style
 import '@/styles/homepage.css';
 //import icon 
@@ -48,10 +51,10 @@ function Homepage() {
 
             {/* On garde une div ici pour le conteneur global, c'est OK */}
             <div className="Container">
-                
                 {/* Le H1 est à l'intérieur, c'est parfait */}
                 <Banner />
-           
+                < PromotionBanner />
+
                 {/* NOTE SEO : Remplacement de div par section pour délimiter le sujet */}
                 <section className="functionalityCardsSection" aria-labelledby="fonctionnement-title">
                     {/* NOTE A11Y : Ajout d'un ID pour lier le titre à la section */}
@@ -87,7 +90,7 @@ function Homepage() {
                         href="/abonnements"
                     />
                 </section>
-                    
+                  
                 {/* NOTE SEO : Nouvelle section sémantique */}
                 <section className="commitmentsSection" aria-labelledby="engagements-title">
                     <h2 className="homePageSubTitle" id="engagements-title">Pourquoi louer plutôt qu'acheter ?</h2>

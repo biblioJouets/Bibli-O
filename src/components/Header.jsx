@@ -44,7 +44,7 @@ export default function HeaderBiblioJouets() {
   const toggleBurger = () => setBurgerOpen(!isBurgerOpen);
   const closeBurger = () => setBurgerOpen(false);
 
-  return (
+  return ( 
     <nav className={`header-nav ${isScrolled ? 'scrolled' : ''}`}>
       <div className="logo-container">
         <Link href="/" className="logo-link">

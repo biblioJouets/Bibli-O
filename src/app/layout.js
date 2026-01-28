@@ -13,7 +13,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CartProvider } from "@/context/CartContext";
 import { Quicksand } from "next/font/google";
-
+  
 const quicksand = Quicksand({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -74,13 +74,14 @@ const session = await getServerSession(authOptions);
   return (
 <html lang="fr" className={`${quicksand.variable} ${quicksand.className}`}>
       <body>
+         
         {/* Accessibilité : skip link */}
         <a href="#main-content" className="skip-link">
           Aller au contenu principal
         </a>
 
       <SessionProviderClient session={session}>
-        <CartProvider>
+        <CartProvider> 
           <HeaderBiblioJouets />
           <main>{children}</main>
           <Footer />
