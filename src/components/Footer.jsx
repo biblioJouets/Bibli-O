@@ -97,7 +97,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        © 2025 Bibli'O Jouets | Tous droits réservés
+        © 2025 Bibli'o Jouets | Tous droits réservés
       </div>
     </footer>
   );
