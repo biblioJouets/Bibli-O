@@ -12,23 +12,31 @@ const FAQItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="faq-item">
-      <button className={`faq-question ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(!isOpen)}>
+    <div className={`faq-item ${isOpen ? 'active' : ''}`}>
+      <button 
+        className="faq-question" 
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
         {question}
         <span className="faq-toggle">{isOpen ? '−' : '+'}</span>
       </button>
-      {isOpen && <div className="faq-answer"><p>{answer}</p></div>}
+      
+      <div className="faq-answer-wrapper">
+        <div className="faq-answer">
+           <p>{answer}</p>
+        </div>
+      </div>
     </div>
   );
 };
 
 const SubscriptionPage = () => {
   const router = useRouter()
-  // Données factices pour les témoignages et la FAQ (à remplacer par les vraies données)
   const faqs = [
     { q: "Et si un jouet est cassé...?", a: "Pas de panique ! L'usure normale est incluse. Pour la casse plus importante, l'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien." },
-    { q: "Comment sont nettoyés les jouets ?", a: "Nous prenons l'hygiène très au sérieux. Chaque jouet est minutieusement nettoyé et désinfecté avec des produits écologiques avant d'être remis en circulation." },
-    { q: "Quand un jouet a fait son temps ?", a: "Quand votre enfant ne joue plus avec, vous le remettez dans sa boîte et vous nous le renvoyez pour en choisir un nouveau !" },
+    { q: "Comment sont nettoyés les jouets ?", a: "Nous prenons l'hygiène très au sérieux. Chaque jouet est minutieusement nettoyé et désinfecté et contrôlé avec des produits baby self avant d'être remis en circulation." },
+    { q: "Quand un jouet a fait son temps ?", a: "Quand votre enfant ne joue plus avec, dans votre espace client vous sélectionnez le jouet que vous souhaitez renvoyer et vous choississez votre futur jouet" },
     { q: "Comment sont sélectionnés les jouets ?", a: "Notre équipe d'experts sélectionne des jouets éducatifs, durables et amusants, souvent inspirés des méthodes Montessori." },
   ];
 const handleSelectPlan = (planName, toyLimit, price) => {

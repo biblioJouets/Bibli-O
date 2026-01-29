@@ -551,31 +551,73 @@ padding-bottom: 0;
 .testimonial-right .user-avatar { margin-right: 0; margin-left: 15px; }
 
 
-/* FAQ (Accordéon) */
-.faq-list { display: flex; flex-direction: column; gap: 15px; }
+/* =========================================
+   FAQ SECTION
+========================================= */
+.faq-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px; 
+}
+
 .faq-item {
   background: white;
   border-radius: var(--border-radius-md);
-  overflow: hidden;
+  overflow: hidden; /* Important pour masquer le contenu qui dépasse quand fermé */
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
   z-index: 5;
 }
+
+.faq-item.active {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Petit effet de relief quand ouvert */
+}
+
 .faq-question {
   width: 100%;
   text-align: left;
   padding: 20px;
-  z-index: 20;
-  background: none; border: none;
-  font-family: inherit; font-weight: 700; font-size: 1.1rem; color: var(--col-text);
-  display: flex; justify-content: space-between; align-items: center;
+  background: none; 
+  border: none;
+  font-family: inherit; 
+  font-weight: 700; 
+  font-size: 1.1rem; 
+  color: var(--col-text);
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
   cursor: pointer;
+  outline: none;
 }
-.faq-toggle { font-size: 1.5rem; color: var(--col-blue); }
+
+.faq-toggle { 
+  font-size: 1.5rem; 
+  color: var(--col-blue); 
+  min-width: 24px;
+  text-align: center;
+}
+
+
+.faq-answer-wrapper {
+  display: grid;
+  grid-template-rows: 0fr; 
+  transition: grid-template-rows 0.3s ease-out; 
+}
+
+.faq-item.active .faq-answer-wrapper {
+  grid-template-rows: 1fr;
+}
+
 .faq-answer {
-  padding: 0 20px 20px; color: #555;
+  overflow: hidden;
+  color: #555;
 }
 
-
+.faq-answer p {
+  padding: 0 20px 20px 20px;
+  margin: 0;
+  line-height: 1.5;
+}
 /* =========================================
    SECTION FOOTER CTA
 ========================================= */

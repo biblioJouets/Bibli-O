@@ -6,7 +6,7 @@ import '@/styles/promoBanner.css';
 const PromoBanner = () => {
   const baseMessages = [
     "🎁 Offre : 1 mois acheté = 1 mois OFFERT !",
-    "🐻 Code : BIBLIOFREEMONTH",
+    // "🐻 Code : BIBLIOFREEMONTH",
     "🚚 Livraison dans toute la France", 
     "✨ Sans engagement : la liberté de jouer !",
   ];
