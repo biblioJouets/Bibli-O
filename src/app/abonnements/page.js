@@ -2,14 +2,14 @@
 'use client';
 
 import '@/styles/abonnements.css';
-import Image from 'next/image'
-import React, { useState } from 'react';
+import Image from 'next/image';
+import React, { useState, useRef } from 'react'; // useRef est bien là
 import { useRouter } from 'next/navigation';
-
 
 // Composant pour un élément de la FAQ (Accordéon)
 const FAQItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const contentRef = useRef(null); // Référence pour mesurer la hauteur
 
   return (
     <div className={`faq-item ${isOpen ? 'active' : ''}`}>
@@ -22,7 +22,15 @@ const FAQItem = ({ question, answer }) => {
         <span className="faq-toggle">{isOpen ? '−' : '+'}</span>
       </button>
       
-      <div className="faq-answer-wrapper">
+      <div 
+        className="faq-answer-wrapper" 
+        ref={contentRef}
+        style={{
+        
+          maxHeight: isOpen ? `${contentRef.current?.scrollHeight}px` : "0px",
+          opacity: isOpen ? 1 : 0
+        }}
+      >
         <div className="faq-answer">
            <p>{answer}</p>
         </div>
