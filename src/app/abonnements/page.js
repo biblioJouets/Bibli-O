@@ -2,36 +2,35 @@
 'use client';
 
 import '@/styles/abonnements.css';
-import Image from 'next/image';
-import React, { useState, useRef } from 'react'; // useRef est bien là
+import Image from 'next/image'
+import React, { useState, useRef } from 'react'; 
 import { useRouter } from 'next/navigation';
 
-// Composant pour un élément de la FAQ (Accordéon)
 const FAQItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const contentRef = useRef(null); // Référence pour mesurer la hauteur
+  const contentRef = useRef(null);
 
-  return (
-    <div className={`faq-item ${isOpen ? 'active' : ''}`}>
+ return (
+    <div className={`abo-faq-item ${isOpen ? 'active' : ''}`}>
       <button 
-        className="faq-question" 
+        className="abo-faq-question" 
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         {question}
-        <span className="faq-toggle">{isOpen ? '−' : '+'}</span>
+        <span className="abo-faq-toggle">{isOpen ? '−' : '+'}</span>
       </button>
       
       <div 
-        className="faq-answer-wrapper" 
+        className="abo-faq-answer-wrapper" 
         ref={contentRef}
         style={{
-        
+          // Calcul JS précis + Isolation CSS = Zéro bug
           maxHeight: isOpen ? `${contentRef.current?.scrollHeight}px` : "0px",
           opacity: isOpen ? 1 : 0
         }}
       >
-        <div className="faq-answer">
+        <div className="abo-faq-answer">
            <p>{answer}</p>
         </div>
       </div>
@@ -250,7 +249,8 @@ return (
           {/* Colonne droite : FAQ */}
           <div className="faq-col">
             <h2>Vos questions fréquentes</h2>
-            <div className="faq-list">
+            
+            <div className="abo-faq-list">
               {faqs.map((faq, index) => (
                 <FAQItem key={index} question={faq.q} answer={faq.a} />
               ))}
@@ -259,7 +259,6 @@ return (
         </div>
       </section>
 
-   
     </div>
   );
 };

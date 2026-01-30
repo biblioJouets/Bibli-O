@@ -552,15 +552,15 @@ padding-bottom: 0;
 
 
 /* =========================================
-   FAQ SECTION
+   FAQ SECTION (Classes Uniques "ABO")
 ========================================= */
-.faq-list { 
+.abo-faq-list { 
   display: flex; 
   flex-direction: column; 
   gap: 15px; 
 }
 
-.faq-item {
+.abo-faq-item {
   background: white;
   border-radius: var(--border-radius-md);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -568,11 +568,11 @@ padding-bottom: 0;
   z-index: 5;
 }
 
-.faq-list .faq-item.active {
+.abo-faq-item.active {
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-.faq-question {
+.abo-faq-question {
   width: 100%;
   text-align: left;
   padding: 20px;
@@ -589,7 +589,7 @@ padding-bottom: 0;
   outline: none;
 }
 
-.faq-toggle { 
+.abo-faq-toggle { 
   font-size: 1.5rem; 
   color: var(--col-blue); 
   min-width: 24px;
@@ -597,35 +597,28 @@ padding-bottom: 0;
   transition: transform 0.3s ease;
 }
 
-.faq-item.active .faq-toggle {
+.abo-faq-item.active .abo-faq-toggle {
   transform: rotate(45deg); 
   color: var(--col-pink);
 }
 
-/* --- MODIFICATION ICI --- */
-
-.faq-answer-wrapper {
-  /* On garde l'overflow hidden pour cacher le texte quand la hauteur est à 0 */
+/* Wrapper avec noms de classes uniques */
+.abo-faq-answer-wrapper {
   overflow: hidden;
-  
-  /* On garde la transition pour que le changement de style JS soit fluide */
+  /* La transition est là, mais c'est le JS qui pilote les valeurs */
   transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
   
-  /* Valeurs par défaut (avant que le JS ne charge) */
+  /* Valeurs par défaut initiales */
   max-height: 0;
   opacity: 0;
 }
 
-/* J'AI SUPPRIMÉ LE BLOC ".faq-list .faq-item.active .faq-answer-wrapper" 
-   CAR LE JAVASCRIPT GÈRE MAINTENANT L'OUVERTURE */
-
-/* LE CONTENU INTERNE */
-.faq-answer {
+.abo-faq-answer {
   background-color: white; 
   color: #555;
 }
 
-.faq-answer p {
+.abo-faq-answer p {
   padding: 10px 20px 20px 20px;
   margin: 0;
   line-height: 1.5;
