@@ -26,6 +26,7 @@ const WASHIMAGE = "assets/icons/wash.png";
 const LEAFIMAGE = "assets/icons/leaf.png";
 const ZENIMAGE = "assets/icons/zen.png";
 const EUROIMAGE = "assets/icons/euro.png";
+const APPROBATIONIMAGE = "assets/icons/approbation.png";
 function Homepage() {
 
   const jsonLd = {
@@ -116,6 +117,11 @@ function Homepage() {
                             title="Économie"
                             description="Optez pour une solution économique en louant des jouets de qualité à moindre coût."
                             icon={EUROIMAGE}
+                        />
+                        <CommitmentCard
+                            title="Casse et usure"
+                            description="casse et usure tout es compris dans la formule d'abonnement, pas de stress ni de surprise."
+                            icon={APPROBATIONIMAGE}
                         />
                     </div>
                 </section>
