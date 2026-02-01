@@ -712,6 +712,14 @@ padding-bottom: 0;
   .testimonial-item { max-width: 100%; }
 }
 
+@media (max-width: 900px) {
+  .subscription-page {
+    margin-top: 0;
+  }
+  
+ 
+}
+
 /* --- MOBILE (< 768px) --- */
 @media (max-width: 768px) {
   /* HERO SHAPES */
@@ -741,42 +749,39 @@ padding-bottom: 0;
   .custom-offer-action { align-items: center; width: 100%; min-width: auto; }
 }
 
-/* --- PETIT MOBILE (iPhone SE, Androids étroits < 480px) --- */
-/* C'est ici qu'on gère le 320px */
+
 @media (max-width: 480px) {
-  
-  /* TYPOGRAPHIE */
-  h1 { font-size: 1.8rem; } /* Titre plus petit */
+  .shape-white {
+    font-size: 1.8rem;
+  }
+  .subscription-page h1 { font-size: 1.8rem; } 
   .hero-text .subtitle { font-size: 1rem; }
   
   /* HERO */
   .hero-image img { max-width: 100%; }
   
   /* BOUTONS */
-  .btn { width: 100%; text-align: center; box-sizing: border-box; } /* Boutons pleine largeur pour le clic facile */
+  .btn { width: 100%; text-align: center; box-sizing: border-box; } 
   
   /* GRIDS */
-  .benefits-grid { grid-template-columns: 1fr; } /* 1 colonne */
-  .step-item { flex: 1 1 100%; } /* 1 étape par ligne */
+  .benefits-grid { grid-template-columns: 1fr; }
+  .step-item { flex: 1 1 100%; }
   
-  /* PRICING CARD & BADGE */
   .pricing-card { 
     max-width: 90%; 
     border-radius: 20px;
   }
 
-  /* Ajustement du badge pour qu'il ne dépasse pas de l'écran */
   .preferred-banner {
-    font-size: 0.75rem; /* Texte plus petit */
+    font-size: 0.75rem; 
     padding: 8px 15px;
     letter-spacing: 1px;
-    width: 80%; /* Largeur max */
+    width: 80%; 
     text-align: center;
-    white-space: normal; /* Autorise le texte à passer à la ligne si vraiment trop petit */
+    white-space: normal;
     line-height: 1.2;
   }
   
-  /* OFFRE SUR MESURE */
   .custom-offer-card { 
     margin: 0 auto;
     padding: 20px 25px; 
@@ -786,13 +791,10 @@ padding-bottom: 0;
   
   .custom-price-box .price { font-size: 1.8rem; }
   
-  /* FAQ */
   .faq-question { font-size: 1rem; padding: 15px; }
   
-  /* SOCIAL PROOF */
   .testimonial-bubble { font-size: 0.9rem; }
   .user-avatar { width: 40px; height: 40px; }
   
-  /* FOOTER */
   .footer-cta-section { padding: 50px 20px; }
 }
