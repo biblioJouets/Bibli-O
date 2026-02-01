@@ -266,36 +266,29 @@
    ======================================== */
 @media (max-width: 900px) {
   .header-nav {
-    /* IMPORTANT : On garde un petit padding sur les côtés pour ne pas coller aux bords */
     padding: 0 20px; 
-    box-sizing: border-box; /* Empêche le padding d'agrandir la largeur au-delà de 100% */
+    box-sizing: border-box; 
   }
 
   .logo-img {
-    width: 6rem; /* Réduit un peu la taille par défaut sur tablette/mobile */
+    width: 6rem; 
   }
 
-  /* Afficher le burger button */
   .burger-button {
     display: flex;
-    /* On retire la marge droite en % qui peut causer des décalages, 
-       le padding du header suffit */
     margin-right: 0; 
   }
 
-  /* Masquer le burger button quand le menu est ouvert */
   .nav-menu.open ~ .burger-button {
     opacity: 0;
     pointer-events: none;
     transform: scale(0.8);
   }
 
-  /* Cacher les actions desktop */
   .header-actions {
     display: none;
   }
 
-  /* Menu mobile en overlay */
   .nav-menu {
     position: fixed;
     top: 0;
@@ -320,7 +313,6 @@
     transform: translateX(0);
   }
 
-  /* Le reste du CSS du menu mobile (bouton fermer, liens, etc.) reste identique */
   .nav-menu.open .close-menu-button {
     display: flex;
     position: fixed;
@@ -420,29 +412,27 @@
   .header-nav {
     justify-content: space-between; 
     gap: 10px; 
-    padding: 0 15px; /* Un peu moins de padding sur les côtés */
-    height: 80px; /* On réduit un peu la hauteur globale */
+    padding: 0 15px; 
+    height: 80px; 
   }
 
 
 
   .nav-menu {
-    width: 60%; /* Le menu prend tout l'écran sur tout petit mobile */
+    width: 60%; 
     max-width: 60%;
   }
 }
 
 /* ========================================
-    < 380px (Galaxy Fold, vieux iPhones)
+    < 380px 
    ======================================== */
 @media (max-width: 380px) {
   .header-nav {
      padding: 0 10px;
   }
   
-  .logo-img {
-    height: 30px; /* Logo encore plus petit */
-  }
+  
   
   .burger-button {
     transform: scale(0.9); /* Bouton burger un peu plus petit */

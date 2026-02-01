@@ -47,8 +47,6 @@
   height: 500px;
   border-radius: 20px;
   overflow: hidden;
-  background-color: #f9f9f9;
-  border: 1px solid #eee;
 }
 
 .main-image {
@@ -63,6 +61,7 @@
 }
 
 .thumbnails {
+  margin-top: 20px;
   display: flex;
   gap: 1rem;
   overflow-x: auto;
@@ -70,8 +69,8 @@
 }
 
 .thumb-btn {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 12px;
   border: 2px solid transparent;
   cursor: pointer;
@@ -83,7 +82,6 @@
 .thumb-btn.active {
   border-color: #6EC1E4;
   opacity: 1;
-  transform: scale(1.05);
 }
 
 .thumb-img {
@@ -247,19 +245,131 @@
   color: #2E1D21;
 }
 
-/* --- Responsive --- */
 @media (max-width: 900px) {
+  .product-page-container {
+    margin-top: 6rem; /* On réduit la marge du header */
+    padding: 2rem 1rem;
+  }
+
   .product-main {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 1.5rem;
+    grid-template-columns: 1fr; /* Une seule colonne */
+    gap: 3rem;
+    padding: 2rem;
   }
   
   .main-image-wrapper {
-    height: 350px;
+    height: 400px; /* Hauteur adaptée tablette */
   }
   
   .product-title {
     font-size: 2rem;
+  }
+}
+
+/* --- MOBILE (< 480px) --- */
+@media (max-width: 480px) {
+  .product-page-container {
+    margin-top: 5rem;
+    padding: 1rem; 
+  }
+
+  .product-main {
+    padding: 1.5rem; 
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+  }
+
+  .breadcrumb {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Images */
+  .main-image-wrapper {
+    height: 280px; 
+    border-radius: 15px;
+  }
+  
+  .main-image {
+    object-fit: contain; 
+  }
+
+  .out-of-stock-overlay {
+    width: 90%;
+    font-size: 1rem !important;
+    padding: 1rem !important;
+  }
+
+  .thumbnails {
+    justify-content: flex-start; 
+    padding-bottom: 10px;
+  }
+
+  .thumb-btn {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0; 
+  }
+
+  .brand-badge {
+    font-size: 0.8rem;
+  }
+
+  .product-title {
+    font-size: 1.6rem; 
+    line-height: 1.2;
+  }
+
+  .price-block {
+    font-size: 1.3rem;
+  } 
+  
+  .price-period {
+    font-size: 0.9rem;
+    display: block; 
+    margin-top: 5px;
+  }
+
+  .description {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .tags-container {
+    gap: 8px;
+  }
+  
+  .tag {
+    font-size: 0.8rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .add-to-cart-btn, .manual-btn {
+    width: 100%; 
+    justify-content: center;
+    font-size: 1rem;
+    padding: 0.5rem 0rem;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr; 
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .spec-item {
+    border-bottom: 1px dashed #eee; 
+    padding-bottom: 10px;
+  }
+  
+  .spec-item:last-child {
+    border-bottom: none;
   }
 }

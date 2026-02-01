@@ -8,7 +8,6 @@ import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle, Check 
 import '@/styles/productDetail.css';
 
 export default function ProductDetailClient({ product }) {
-  // Gestion de la galerie d'images
   const images = product.images && product.images.length > 0 
     ? product.images 
     : ['/assets/toys/jouet1.jpg'];
@@ -33,18 +32,19 @@ export default function ProductDetailClient({ product }) {
 
       <div className="product-main">
         
-        {/* --- COLONNE GAUCHE : GALERIE + POINTS FORTS --- */}
+        {/* --- COLONNE GAUCHE --- */}
         <div className="left-column">
           <div className="gallery-container">
-            <div className="main-image-wrapper" style={{ opacity: isOutOfStock ? 0.5 : 1 }}>
+            <div className="main-image-wrapper" style={{ opacity: isOutOfStock ? 0.6 : 1 }}>
               {isOutOfStock && (
-                  <div style={{
+                  <div className="out-of-stock-overlay" style={{
                       position: 'absolute', top: '50%', left: '50%',
                       transform: 'translate(-50%, -50%)',
                       zIndex: 10,
                       background: 'rgba(0,0,0,0.7)', color: 'white',
                       padding: '1rem 2rem', borderRadius: '10px',
-                      fontWeight: 'bold', fontSize: '1.5rem'
+                      fontWeight: 'bold', fontSize: '1.5rem',
+                      textAlign: 'center', whiteSpace: 'nowrap'
                   }}>
                       MOMENTANÉMENT LOUÉ
                   </div>
@@ -82,10 +82,10 @@ export default function ProductDetailClient({ product }) {
             )}
           </div>
 
-          {/* --- SECTION "LES + DU PRODUIT" (Sous l'image) --- */}
+          {/* --- LES + DU PRODUIT (Style inline nettoyé pour responsive) --- */}
           {product.highlights && product.highlights.length > 0 && (
-            <div className="product-highlights-section" style={{marginTop: '3rem'}}>
-              <h3 style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#88D4AB', marginBottom: '1rem'}}>
+            <div className="product-highlights-section" style={{ marginTop: '2rem' }}>
+              <h3 style={{fontSize: '1.2rem', fontWeight: 'bold', color: '#88D4AB', marginBottom: '1rem'}}>
                 Les + du produit
               </h3>
               <ul style={{listStyle: 'none', padding: 0}}>
@@ -100,7 +100,7 @@ export default function ProductDetailClient({ product }) {
           )}
         </div>
 
-        {/* --- COLONNE DROITE : INFOS --- */}
+        {/* --- COLONNE DROITE --- */}
         <div className="product-info">
           <div className="brand-badge">{product.brand || 'Bibli\'O'}</div>
           <h1 className="product-title">{product.name}</h1>
@@ -108,18 +108,18 @@ export default function ProductDetailClient({ product }) {
 
           <div className="price-block">
             {isOutOfStock ? (
-                <span style={{ color: '#999', fontSize: '1.2rem' }}>Ce jouet est actuellement chez une autre famille 🏠</span>
+                <span style={{ color: '#999', fontSize: '1.1rem', fontWeight: 'normal' }}>
+                   Ce jouet est actuellement chez une autre famille 🏠
+                </span>
             ) : (
                 <>0€ <span className="price-period">avec votre abonnement au lieu de </span> {product.price}€</>
             )}
           </div>
 
-          {/* DESCRIPTION AVEC SAUTS DE LIGNE */}
           <div className="description" style={{ whiteSpace: 'pre-wrap' }}>
             {product.description}
           </div>
 
-          {/* Tags */}
           {product.tags && product.tags.length > 0 && (
             <div className="tags-container">
               {product.tags.map((tag, idx) => (
@@ -128,7 +128,6 @@ export default function ProductDetailClient({ product }) {
             </div>
           )}
 
-          {/* Boutons d'action */}
           <div className="actions">
             {isOutOfStock ? (
                 <button 
@@ -154,7 +153,6 @@ export default function ProductDetailClient({ product }) {
             )}
           </div>
 
-          {/* Fiche Technique */}
           <div className="specs-grid">
             <div className="spec-item">
               <Ruler className="spec-icon" size={24} />

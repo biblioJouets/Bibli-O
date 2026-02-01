@@ -244,3 +244,9 @@
   grid-column: 1 / -1;
   color: #777;
 }
+@media (max-width: 450px) {
+  .search-input {
+    width: 80%;
+  }
+
+}
