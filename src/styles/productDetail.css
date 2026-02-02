@@ -245,6 +245,16 @@
   color: #2E1D21;
 }
 
+@media (max-width: 1100px) {
+  .product-main {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 2.5rem;
+  }
+  
+
+}
+
 @media (max-width: 900px) {
   .product-page-container {
     margin-top: 6rem; /* On réduit la marge du header */
@@ -264,8 +274,20 @@
   .product-title {
     font-size: 2rem;
   }
+  .product-info {
+    padding : 0 auto;
+  }
 }
 
+@media (max-width: 700px) {
+  .main-image-wrapper {
+    height: 350px; /* Hauteur adaptée petit tablette */
+  }
+  .thumb-btn {
+    width: 60px;
+    height: 60px;
+  }
+}
 /* --- MOBILE (< 480px) --- */
 @media (max-width: 480px) {
   .product-page-container {
@@ -309,9 +331,8 @@
   }
 
   .thumb-btn {
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0; 
+    width: 40px;
+    height: 40px;
   }
 
   .brand-badge {
@@ -371,5 +392,16 @@
   
   .spec-item:last-child {
     border-bottom: none;
+  }
+}
+
+@media (max-width: 370px) {
+    .thumb-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .thumbnails {
+    margin-top : 0 ;
   }
 }
