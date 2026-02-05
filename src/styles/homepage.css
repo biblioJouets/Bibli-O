@@ -5,9 +5,9 @@
    
 }
 .homePageSubTitle{ 
-        font-size: 2.5rem; 
+    font-size: 2.5rem; 
     color: #FFFFFF ;
- font-weight: 800; 
+    font-weight: 800; 
     text-transform: uppercase; 
     position: relative;
     display: inline-block; 
@@ -15,6 +15,7 @@
     padding: 0.5em 1em;
     z-index: 1; 
     transition: transform 0.2s ease-out; 
+
 }
 
 .homePageSubTitle:before {
@@ -31,9 +32,26 @@ content: '';
     box-shadow: 0 10px 26px rgba(94, 204, 238, 0.9);
 
 }
+.sectionSub{
+    margin-top: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
 
-
-
+.SubChoiceSection{
+    max-width: 1400px;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+}
+.subHomePage{ 
+  display: flex;
+  justify-content: center;
+  padding-top: 4rem;
+  padding-bottom: 5rem;
+}
 .homePageSubTitle.biblio-jouets:hover {
     transform: translate(-3px, -3px);
 }
@@ -47,7 +65,7 @@ content: '';
 
 
 
-.CardsPlansSections{
+.bg-green-homepage{
     padding-top: 80px;
     display: flex;
     justify-content: center;

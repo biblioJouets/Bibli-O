@@ -30,11 +30,7 @@
   background-color: var(--col-bg-light);
   overflow-x: hidden; 
 }
-.pricing-section{
 
-  padding-top: 80px;
-
-}
 .subscription-page h1, .subscription-page h2, .subscription-page h3 {
   font-weight: 800 !important;
   margin-bottom: 1rem;
@@ -71,11 +67,8 @@
 }
 
 .btn-primary { background-color: var(--col-pink); color: white; }
-.btn-pink { background-color: var(--col-pink); color: white; }
-.btn-yellow { background-color: var(--col-yellow); color: var(--col-text); }
 
-.btn-outline-blue { border: 2px solid var(--col-blue); color: var(--col-blue); background: transparent; }
-.btn-outline-green { border: 2px solid var(--col-green); color: var(--col-green); background: transparent; }
+
 
 .btn-large { padding: 16px 40px; font-size: 1.2rem; }
 
@@ -208,6 +201,20 @@ padding-bottom: 0;
 }
 
 /* =========================================
+   SECTION card choix des formules
+========================================= */
+.subpage{ 
+  display: flex;
+  justify-content: center;
+  padding-bottom: 4rem;
+}
+.pricing-section{
+  background-color: #FEF7F0;
+  padding-top: 80px;
+  padding-bottom : 4rem;
+
+}
+/* =========================================
    SECTION POURQUOI CHOISIR
 ========================================= */
 .why-section { background-color: var(--col-bg-light);
@@ -279,211 +286,6 @@ padding-bottom: 0;
 .step-item .shape-yellow { background-color: var(--col-yellow-mi-pastel); }
 .step-item .shape-green { background-color: var(--col-pastel-green); }
 .step-item .shape-pink { background-color: var(--col-pastel-pink); }
-
-
-/* =========================================
-   SECTION PRICING (FORMULES)
-========================================= */
-.pricing-section { background-color: var(--col-bg-warm); padding-bottom: 80px; }
-
-.pricing-grid {
-  display: flex;
-  justify-content: center;
-  align-items: stretch; /* Pour que les cartes aient la même hauteur */
-  gap: 20px;
-  padding-top: 20px; /* Espace pour la bannière "Préféré" */
-}
-
-.pricing-card {
-  background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  flex: 1;
-  max-width: 350px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: transform 0.3s ease;
-  border-radius: 25px;
-  position: relative
-}
-
-/* Carte mise en avant */
-.pricing-card.highlighted {
-  transform: scale(1.05);
-  z-index: 2;
-  border: 2px solid var(--col-yellow);
-}
-
-
-.preferred-banner {
-  position: absolute;
-  top: -18px; 
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--col-yellow);
-  color: var(--col-text);
-  font-weight: 700;
-  letter-spacing: 2px; 
-  white-space: nowrap;
-  padding: 10px 24px;
-  border-radius: 30px; 
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
-}
-
-.pricing-header {
-  padding: 25px;
-  text-align: center;
-  border-top-left-radius: 25px; 
-  border-top-right-radius: 25px;
-}
-.header-blue { background-color: var(--col-pastel-blue); }
-.header-pink { background-color: var(--col-pastel-pink); }
-.header-green { background-color: var(--col-pastel-green); }
-
-.pricing-body {
-  padding: 30px;
-  text-align: center;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.price {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--col-text);
-  margin-bottom: 25px;
-}
-.price-large { font-size: 3rem; color: var(--col-pink); }
-.per-month { font-size: 1rem; font-weight: 400; color: #777; }
-
-.features-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 30px 0;
-  text-align: left;
-  display: inline-block;
-  flex-grow: 1;
-}
-
-.features-list li {
-  margin-bottom: 12px;
-  position: relative;
-  padding-left: 25px;
-}
-
-.features-list li::before {
-  content: '•'; position: absolute; left: 0; color: #ccc; font-size: 1.5em; line-height: 1; top: -2px;
-}
-
-/* Puces "Check" pour la carte mise en avant */
-.checkout-list li { padding-left: 0; }
-.checkout-list li::before { content: none; }
-
-
-.pricing-body a { width: 100%; margin-top: auto; /* Pousse le bouton vers le bas */ }
-
-/* =========================================
-   SECTION OFFRE SUR MESURE (CUSTOM)
-========================================= */
-.custom-offer-card {
-  margin-top: 80px; 
-  padding-bottom : 80px;
-  background-color: var(--col-bg-light); /* Fond clair ou blanc */
-  border: 3px dashed var(--col-yellow); /* Bordure en pointillés pour l'effet "Bonus" */
-  border-radius: var(--border-radius-lg);
-  padding: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Petit effet de fond décoratif (optionnel) */
-.custom-offer-card::before {
-  content: '';
-  position: absolute;
-  top: -50px; left: -50px; width: 150px; height: 150px;
-  background-color: var(--col-pastel-yellow);
-  border-radius: 50%;
-  z-index: 0;
-}
-
-.custom-offer-content {
-  flex: 1;
-  padding-right: 40px;
-  position: relative;
-  z-index: 1;
-}
-
-.custom-offer-content h3 {
-  color: var(--col-text);
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-}
-
-.custom-badge {
-  display: inline-block;
-  background-color: var(--col-pastel-yellow);
-  color: #dfa800; /* Un jaune plus foncé pour le texte */
-  font-weight: 800;
-  font-size: 0.8rem;
-  padding: 5px 12px;
-  border-radius: 20px;
-  margin-bottom: 15px;
-  letter-spacing: 1px;
-}
-
-.custom-offer-details {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-  display: flex;
-  gap: 20px;
-}
-
-.custom-offer-details li {
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Partie Droite : Prix et Bouton */
-.custom-offer-action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end; /* Aligner à droite */
-  gap: 20px;
-  position: relative;
-  z-index: 1;
-  min-width: 250px; /* S'assurer que ça ne s'écrase pas */
-}
-
-.custom-price-box {
-  text-align: right;
-}
-
-.custom-price-box .label {
-  display: block;
-  font-size: 0.9rem;
-  color: #777;
-  margin-bottom: 5px;
-}
-
-.custom-price-box .price {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--col-text);
-}
-
-.custom-price-box .price small {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #777;
-}
 
 
 
@@ -640,19 +442,7 @@ padding-bottom: 0;
    RESPONSIVE / MEDIA QUERIES
 ========================================= */
 
-/* --- TABLETTE ET PETIT PC (< 1024px) --- */
-@media (max-width: 1024px) {
-  
-  .pricing-grid {
-    gap: 30px; 
-    /* On permet le scroll horizontal si besoin ou le wrap */
-    flex-wrap: wrap; 
-  }
-  
-  .pricing-card { 
-    min-width: 300px; /* On s'assure que les cartes ne sont pas trop fines */
-  }
-}
+
 
 /* --- TABLETTE PORTRAIT (< 992px) --- */
 @media (max-width: 992px) {
@@ -700,13 +490,7 @@ padding-bottom: 0;
   .step-item { flex: 1 1 40%; }
   .steps-connector.desktop-only { display: none; }
 
-  /* PRICING */
-  .pricing-grid { flex-direction: column; align-items: center; }
-  .pricing-card { width: 100%; max-width: 450px; margin-bottom: 20px;}
   
-  /* On désactive l'agrandissement de la carte "Highlight" sur mobile pour l'alignement */
-  .pricing-card.highlighted { transform: none; margin-top: 20px; } 
-
   /* SOCIAL / FAQ */
   .social-faq-grid { grid-template-columns: 1fr; gap: 60px; }
   .testimonial-item { max-width: 100%; }
@@ -722,11 +506,7 @@ padding-bottom: 0;
 
 /* --- MOBILE (< 768px) --- */
 @media (max-width: 768px) {
-  /* HERO SHAPES */
-  /* On réduit drastiquement les formes décoratives qui gênent sur mobile */
-/* .hero-bg-shapes .shape-pink { width: 450px; height: 300px; top: 150px; right: -50px;}  */
-  
-  /* WAVE SVG */
+ 
   .wave-container svg { height: 40px; } /* Vague plus petite */
 
   /* OFFRE SUR MESURE */
@@ -767,10 +547,7 @@ padding-bottom: 0;
   .benefits-grid { grid-template-columns: 1fr; }
   .step-item { flex: 1 1 100%; }
   
-  .pricing-card { 
-    max-width: 90%; 
-    border-radius: 20px;
-  }
+  
 
   .preferred-banner {
     font-size: 0.75rem; 

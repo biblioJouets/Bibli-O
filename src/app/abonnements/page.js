@@ -5,6 +5,14 @@ import '@/styles/abonnements.css';
 import Image from 'next/image'
 import React, { useState, useRef } from 'react'; 
 import { useRouter } from 'next/navigation';
+import CommitmentCard from '@/components/CommitmentCard';
+
+import SubChoice from '@/components/SubChoice';
+
+const WASHIMAGE = "assets/icons/wash.png";
+const CARIMAGE = "assets/icons/car.png";
+const CLICKIMAGE = "assets/icons/click.png";
+const DELIVERYIMAGE ="assets/icons/delivery.png";
 
 const FAQItem = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,125 +54,48 @@ const SubscriptionPage = () => {
     { q: "Quand un jouet a fait son temps ?", a: "Quand votre enfant ne joue plus avec, dans votre espace client vous sélectionnez le jouet que vous souhaitez renvoyer et vous choississez votre futur jouet" },
     { q: "Comment sont sélectionnés les jouets ?", a: "Notre équipe d'experts sélectionne des jouets éducatifs, durables et amusants, souvent inspirés des méthodes Montessori." },
   ];
-const handleSelectPlan = (planName, toyLimit, price) => {
-localStorage.setItem('selectedPlan', JSON.stringify({ name: planName, limit: toyLimit, price: price }));
-router.push('/bibliotheque');
-};
+
+
 return (
   <div className="subscription-page">
       {/* --- SECTION PRICING (FORMULES) --- */}
       <section className="pricing-section">
         <div className="container">
           <h2>Nos formules flexibles, sans engagement</h2>
-          <div className="pricing-grid">
-            
-            {/* CARTE 1 : Découverte */}
-            <div className="pricing-card">
-              <div className="pricing-header header-blue">
-                <h3>Découverte</h3>
-              </div>
-              <div className="pricing-body">
-                <div className="price">25.99€ <span className="per-month">/ mois</span></div>
-                <ul className="features-list">
-                  <li>2 Jouets</li>
-                  <li>Soit 12.99€ par jouets </li>
-                  <li>Livraison et retour inclus</li>
-                  <li>Assurance "Casse"</li>
-                  <li>Nettoyage baby self</li>
-                  <li>Annulable en 1 clic</li>
-                </ul>
-                {/* 4. Remplacer le <a> par un <button> avec onClick */}
-                <button 
-                  onClick={() => handleSelectPlan('Decouverte', 2, 25.99)}
-                  className="btn btn-outline-blue"
-                >
-                  Je commence ma Box Découverte
-                </button>
-              </div>
-            </div>
+                    <SubChoice />
 
-            {/* CARTE 2 : Standard (Mise en avant) */}
-            <div className="pricing-card highlighted">
-               <div className="preferred-banner">LE PRÉFÉRÉ DES PARENTS</div>
-              <div className="pricing-header header-pink">
-                <h3>Standard</h3>
-              </div>
-              <div className="pricing-body">
-                <div className="price price-large">39.99€ <span className="per-month">/ mois</span></div>
-                <ul className="features-list checkout-list">
-                  <li>✅ 4 Jouets</li>
-                  <li>✅ Soit 9.99€ par jouets </li>
-                  <li>✅ Livraison et retour inclus</li>
-                  <li>✅ Assurance "Casse"</li>
-                  <li>✅ Nettoyage baby self</li>
-                  <li>✅ Annulable en 1 clic</li>
-                </ul>
-                <button 
-                  onClick={() => handleSelectPlan('Standard', 4, 39.99)}
-                  className="btn btn-pink"
-                >
-                  Je commence ma Box Standard
-                </button>
-              </div>
-            </div>
 
-            {/* CARTE 3 : Premium */}
-            <div className="pricing-card">
-              <div className="pricing-header header-green">
-                <h3>Premium</h3>
-              </div>
-              <div className="pricing-body">
-                <div className="price">55.99€ <span className="per-month">/ mois</span></div>
-                <ul className="features-list">
-                  <li>6 Jouets</li>
-                  <li>Soit 9.33€ par jouets</li>
-                  <li>Accès prioritaire aux nouveautés</li>
-                  <li>Livraison Prioritaire</li>
-                  <li>Livraison et retour inclus</li>
-                  <li>Assurance "Casse"</li>
-                  <li>Nettoyage baby self</li>
-                  <li>Annulable en 1 clic</li>
-                </ul>
-                <button 
-                   onClick={() => handleSelectPlan('Premium', 6, 55.99)}
-                   className="btn btn-outline-green"
-                >
-                  Je commence ma Box Premium
-                </button>
-              </div>
-            </div>
-          </div>
-          {/* --- NOUVELLE SECTION : OFFRE SUR MESURE --- */}
-          <div className="custom-offer-card">
-            <div className="custom-offer-content">
-              <div className="custom-badge">FAMILLES NOMBREUSES & PROS</div>
-              <h3>Envie de plus de folie ?</h3>
-              <p>
-                L'offre Premium ne suffit pas ? Ajoutez jusqu'à <strong>3 jouets supplémentaires</strong> à votre box pour seulement <strong>9€ / jouet</strong>.
-              </p>
-              <ul className="custom-offer-details">
-                <li> Base Premium (6 jouets)</li>
-                <li> Jusqu'à 9 jouets au total</li>
-                <li> Idéal fratries & Ass. Mat.</li>
-              </ul>
-            </div>
-            
-            <div className="custom-offer-action">
-              <div className="custom-price-box">
-                <span className="label">Option "Maxi Box"</span>
-                <span className="price">+9€ <small>/ jouet sup.</small></span>
-              </div>
-              <button 
-                onClick={() => handleSelectPlan('SurMesure', 9, 55.99)} 
-                className="btn btn-yellow btn-large"
-              >
-                Composer ma Box Sur Mesure
-              </button>
-            </div>
-          </div>
-        </div>
+       </div>
+       <div className="commitmentCards subpage">
+         <CommitmentCard
+                            icon={DELIVERYIMAGE}
+                            title="Livraison et retour inclus"
+                            description="Livraison et retour inclus dans toutes nos formules, pour une expérience sans souci."
+                        />
+                        <CommitmentCard
+                            title="Assurance &quot;Casse&quot;"
+                            icon={CARIMAGE}
+                            description="L'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien."
+                        />
+                        <CommitmentCard
+                            className="hygiene"
+                            icon={WASHIMAGE}
+                            title=" Nettoyage baby self"
+                            description="Nettoyage baby self de tous nos jouets pour garantir sécurité et propreté à chaque échange."
+                            // iconClassName="icon-large"    
+                        />
+                        <CommitmentCard
+                            icon={CLICKIMAGE}
+                            title="Annulable en 1 clic"
+                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
+                        />
+                        </div>
       </section>
       
+
+
+
+
       {/* --- SECTION POURQUOI CHOISIR --- */}
       <section className="why-section">
         <div className="container">

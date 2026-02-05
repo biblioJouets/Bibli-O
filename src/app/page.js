@@ -15,13 +15,16 @@ import CardContentMission from "@/components/CardsContentMission";
 import FAQ from "@/components/FAQ"
 import Newsletter from "@/components/Newsletter";
 import FunctionalityCard from "@/components/FunctionalityCard";
-
+import SubChoice from "@/components/SubChoice";
 
 //import style
 import '@/styles/homepage.css';
 //import icon 
 import { Redo } from 'lucide-react';
 
+const CARIMAGE = "assets/icons/car.png";
+const CLICKIMAGE = "assets/icons/click.png";
+const DELIVERYIMAGE ="assets/icons/delivery.png";
 const WASHIMAGE = "assets/icons/wash.png";
 const LEAFIMAGE = "assets/icons/leaf.png";
 const ZENIMAGE = "assets/icons/zen.png";
@@ -136,16 +139,47 @@ function Homepage() {
                      <CatalogOverview />
                 </section>
 
-                {/* Section Protocole */}
-                <section>
-                    <Protocol />
+                 <section className="sub-choice-section" aria-labelledby="sub-choice-title">
+                    <div className="sectionSub"> 
+            <h2 className="homePageSubTitle " id="plans-title">Nos formules d'abonnement</h2>
+</div>
+                    <div className="SubChoiceSection">
+             
+                <SubChoice />
+ </div>
+        <div className="commitmentCards subHomePage">
+         <CommitmentCard
+                            className="hygiene"
+                            icon={DELIVERYIMAGE}
+                            title="Livraison et retour inclus"
+                            description="Livraison et retour inclus dans toutes nos formules, pour une expérience sans souci."
+                        />
+                        <CommitmentCard
+                            title="Assurance &quot;Casse&quot;"
+                            icon={CARIMAGE}
+                            description="L'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien."
+                        />
+                        <CommitmentCard
+                            className="hygiene"
+                            icon={WASHIMAGE}
+                            title=" Nettoyage baby self"
+                            description="Nettoyage baby self de tous nos jouets pour garantir sécurité et propreté à chaque échange."
+                            
+                        />
+                        <CommitmentCard
+                            icon={CLICKIMAGE}
+                            title="Annulable en 1 clic"
+                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
+                        />
+                        </div>
                 </section>
+                 <section className="bg-green-homepage">
+                  <Protocol />
+                </section>
+               
                 
                 {/* Section Plans */}
-                <section className="CardsPlansSections" aria-labelledby="plans-title">
-                    <h2 className="homePageSubTitle" id="plans-title">Nos abonnements Mensuels</h2>
-                    <CardsPlans />
-                </section>
+               
                         
                 {/* Section FAQ et Newsletter */}
                 <section>
