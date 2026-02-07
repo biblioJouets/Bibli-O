@@ -181,6 +181,7 @@ export default function PaiementPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartItems: cart.items,
+          cartId: cart.id,
           shippingData: finalShippingData
         })
       });
