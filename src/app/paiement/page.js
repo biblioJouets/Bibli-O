@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react"; // J'ai ajouté AlertCircle
+import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react"; 
 
 export default function PaiementPage() {
   const { cart, loading } = useCart();
@@ -49,22 +49,30 @@ export default function PaiementPage() {
 
     // Si le code postal est bon, on vérifie si la ville est dans la liste autorisée
     const allowedCities = AUTHORIZED_HOME_DELIVERY[zip].map(c => normalizeText(c));
-    // On cherche si une des villes autorisées est contenue dans ce que l'utilisateur a écrit
     return allowedCities.some(allowed => city.includes(allowed));
   };
   
   const canSubmit = isEligibleForHome();
 
-
-  // --- CALCUL DU PRIX ---
+  // --- 2. CALCUL DU PRIX (MISE À JOUR) ---
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
   const getSubscriptionPrice = (count) => {
-    if (count <= 2) return 25.99;
-    if (count <= 4) return 39.99;
-    if (count <= 6) return 55.99;
-    if (count <= 9) return 55.99 + ((count - 6) * 9);
-    return 0;
+    const pricingMap = {
+        1: 20,
+        2: 25,
+        3: 35,
+        4: 38,
+        5: 45,
+        6: 51,
+        7: 56,
+        8: 60,
+        9: 63
+    };
+    // Retourne le prix ou 0 si hors grille (ex: > 9 jouets)
+    return pricingMap[count] || 0;
   };
+
   const subscriptionPrice = getSubscriptionPrice(itemCount);
 
   // --- CHARGEMENT SCRIPTS (Mondial Relay) ---
@@ -138,12 +146,12 @@ export default function PaiementPage() {
   const handleOrder = async (e) => {
     e.preventDefault();
 
+    // Sécurité : Si le prix est 0 (ex: 10 jouets ou bug), on bloque
     if (subscriptionPrice === 0) {
-        alert("Pour plus de 9 jouets, contactez-nous.");
+        alert("Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure.");
         return;
     }
 
-    // Blocage si livraison domicile non éligible
     if (deliveryMode === 'DOMICILE' && !canSubmit) {
         alert("La livraison à domicile n'est pas disponible pour votre adresse. Veuillez choisir Mondial Relay.");
         return;
@@ -181,7 +189,7 @@ export default function PaiementPage() {
       if (data.url) {
         window.location.href = data.url; 
       } else {
-        alert("Erreur init paiement.");
+        alert("Erreur init paiement : " + (data.error || "Inconnue"));
         setIsSubmitting(false);
       }
     } catch (error) {
@@ -329,7 +337,6 @@ export default function PaiementPage() {
               Mon Panier
             </h3>
             
-            {/* ... (Reste de l'affichage du panier identique) ... */}
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px", maxHeight: "200px", overflowY: "auto" }}>
               {cart.items?.map(item => (
                 <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.9rem", color: "#666" }}>
@@ -343,7 +350,7 @@ export default function PaiementPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", fontSize: "1rem" }}>
               <span>
-                {itemCount <= 6 ? `Formule (${itemCount} jouets)` : `Maxi Box (${itemCount} jouets)`}
+                {itemCount <= 9 ? `Box ${itemCount} jouet${itemCount > 1 ? 's' : ''}` : `Maxi Box (${itemCount} jouets)`}
               </span>
               <strong>{Number(subscriptionPrice).toFixed(2)}€ <span style={{fontSize: "0.7em", fontWeight: "normal"}}>/mois</span></strong>
             </div>

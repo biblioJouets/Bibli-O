@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
-import prisma from "@/lib/core/database";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -15,25 +14,47 @@ export async function POST(req) {
     const body = await req.json();
     const { cartItems, shippingData } = body; 
     
+    // Calcul du nombre total de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     
-    // --- 📸 CORRECTION SNAPSHOT : ON GARDE LA QUANTITÉ ---
-    // On crée un tableau d'objets minifiés pour économiser les caractères Stripe
-    // Ex: [{id: 1, q: 2}, {id: 5, q: 1}]
+    // Snapshot du panier
     const cartSnapshot = cartItems.map(item => ({ 
       id: item.productId, 
       q: item.quantity 
     }));
 
-    // 2. Déterminer les lignes de facture (Logique inchangée)
+    
+    // Mapping direct entre quantité et variable d'environnement
+    const pricingMap = {
+        1: process.env.STRIPE_PRICE_1_TOY,
+        2: process.env.STRIPE_PRICE_2_TOYS,
+        3: process.env.STRIPE_PRICE_3_TOYS,
+        4: process.env.STRIPE_PRICE_4_TOYS,
+        5: process.env.STRIPE_PRICE_5_TOYS,
+        6: process.env.STRIPE_PRICE_6_TOYS,
+        7: process.env.STRIPE_PRICE_7_TOYS,
+        8: process.env.STRIPE_PRICE_8_TOYS,
+        9: process.env.STRIPE_PRICE_9_TOYS
+    };
+
     let line_items = [];
-    if (count <= 2) line_items.push({ price: process.env.STRIPE_PRICE_DECOUVERTE, quantity: 1 });
-    else if (count <= 4) line_items.push({ price: process.env.STRIPE_PRICE_STANDARD, quantity: 1 });
-    else if (count <= 6) line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
-    else {
-      line_items.push({ price: process.env.STRIPE_PRICE_PREMIUM, quantity: 1 });
-      const extraToys = count - 6;
-      line_items.push({ price: process.env.STRIPE_PRICE_EXTRA_TOY, quantity: extraToys });
+    const priceId = pricingMap[count];
+
+    if (priceId) {
+        // Cas standard : entre 1 et 9 jouets
+        line_items.push({ 
+            price: priceId, 
+            quantity: 1 
+        });
+    } else if (count > 9) {
+        // Cas > 9 jouets : Logique "Sur mesure" ou blocage
+        // Option A : On bloque et on demande de contacter
+        return NextResponse.json({ error: "Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure." }, { status: 400 });
+        
+        // Option B (Si tu veux permettre >9 en ajoutant des extras, c'est plus complexe, dis-le moi si besoin)
+    } else {
+        // Cas 0 jouet
+        return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
     }
 
     // 3. Créer la session Stripe

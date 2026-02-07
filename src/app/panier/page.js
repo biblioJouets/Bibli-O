@@ -3,50 +3,59 @@
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react"; // Ajout de Gift si manquant
+import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading } = useCart();
 
-  // Calcul valeur théorique
+  // Calcul valeur théorique (Prix boutique des jouets)
   const cartValue = cart.items?.reduce((total, item) => {
     return total + (item.product.price * item.quantity);
   }, 0) || 0;
 
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
-  // --- LOGIQUE SUGGESTION ABONNEMENT (MISE À JOUR) ---
+  // --- 🎯 NOUVELLE LOGIQUE TARIFAIRE ---
   const getSuggestedPlan = (count) => {
-    // Cas standards
-    if (count <= 2) return { name: "Découverte", price: "25.99€", contactLink: null };
-    if (count <= 4) return { name: "Standard", price: "39.99€", contactLink: null };
-    if (count <= 6) return { name: "Premium", price: "55.99€", contactLink: null };
-    
-    // NOUVEAU : Option "Maxi Box" (7 à 9 jouets)
-    if (count <= 9) {
-        const extraToys = count - 6;
-        let totalPrice = 55.99 + (extraToys * 9);
-          totalPrice = totalPrice.toFixed(2);
+    // Grille tarifaire exacte fournie
+    const pricingMap = {
+        1: 20,
+        2: 25,
+        3: 35,
+        4: 38,
+        5: 45,
+        6: 51,
+        7: 56,
+        8: 60,
+        9: 63
+    };
+
+    // Si le panier est vide
+    if (!count || count === 0) return { name: "Aucune formule", price: "0€", contactLink: null };
+
+    // Si le nombre est dans la grille (1 à 9)
+    if (pricingMap[count]) {
         return { 
-            name: "Maxi Box", 
-            price: `${totalPrice}€`, 
+            name: `Box ${count} Jouet${count > 1 ? 's' : ''}`, 
+            price: `${pricingMap[count]}€`, 
             contactLink: null,
-            details: `Base Premium + ${extraToys} jouet(s) sup.`
+            details: null
         };
     }
 
     // Au-delà de 9 jouets -> Sur devis
     return { 
-        name: "Sur devis", 
-        price: null, 
-        contactLink: "/contact"
+        name: "Maxi Box (+9 jouets)", 
+        price: "Sur devis", 
+        contactLink: "/contact",
+        details: "Besoin d'une offre sur mesure ?"
     };
   };
 
   const suggestedPlan = getSuggestedPlan(itemCount);
 
-  // Affichage panier vide
+  // --- AFFICHAGE PANIER VIDE ---
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
       <div style={{ 
@@ -69,6 +78,7 @@ export default function PanierPage() {
     );
   }
 
+  // --- AFFICHAGE PANIER REMPLI ---
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "120px 20px 60px 20px" }}>
       
@@ -83,7 +93,7 @@ export default function PanierPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "40px", alignItems: "start" }} className="cart-layout">
         
-        {/* --- LISTE DES JOUETS --- */}
+        {/* --- COLONNE GAUCHE : LISTE DES JOUETS --- */}
         <div style={{ display: "grid", gap: "20px" }}>
           {cart.items.map((item) => (
             <div key={item.id} style={{ 
@@ -164,7 +174,7 @@ export default function PanierPage() {
           ))}
         </div>
 
-        {/* --- RÉSUMÉ & ABONNEMENT --- */}
+        {/* --- COLONNE DROITE : RÉSUMÉ & ABONNEMENT --- */}
         <div style={{ 
           background: "white", 
           padding: "30px", 
@@ -195,7 +205,7 @@ export default function PanierPage() {
             <span style={{ color: "#88D4AB", fontWeight: "bold" }}>OFFERTE</span>
           </div>
 
-          {/* FORMULE DYNAMIQUE */}
+          {/* FORMULE DYNAMIQUE MISE À JOUR */}
           <div style={{ background: "#FFF7EB", padding: "20px", borderRadius: "15px", marginBottom: "25px" }}>
             <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>Formule calculée :</p>
             
@@ -222,16 +232,12 @@ export default function PanierPage() {
                 )}
             </div>
             
-            {/* Affichage des détails si Maxi Box */}
+            {/* Détails supplémentaires (Ex: pour le sur-mesure) */}
             {suggestedPlan.details && (
                 <p style={{ fontSize: "0.8rem", color: "#FF8C94", marginTop: "5px", fontWeight: "bold" }}>
                     {suggestedPlan.details}
                 </p>
             )}
-
-            <p style={{ fontSize: "0.8rem", color: "#999", marginTop: "5px" }}>
-                {itemCount} jouets sélectionnés
-            </p>
           </div>
 
           <div style={{ textAlign: "center" }}>
@@ -240,9 +246,9 @@ export default function PanierPage() {
             </p>
             <div style={{ width: "100%" }}>
                 {suggestedPlan.contactLink ? (
-                     <ButtonBlue text="Demander un devis" href="/contact" />
+                      <ButtonBlue text="Demander un devis" href="/contact" />
                 ) : (
-                     <ButtonBlue text="Valider ma sélection" href="/paiement" />
+                      <ButtonBlue text="Valider ma sélection" href="/paiement" />
                 )}
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { getSuggestedPlan } from '@/lib/core/utils/subscription';
 
 const CartContext = createContext();
 
@@ -71,9 +72,10 @@ export function CartProvider({ children }) {
   }, 0) || 0;
 
   const cartCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
-
+const planInfo = getSuggestedPlan(cartCount);
+const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartTotal, cartCount, loading }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name }}>
       {children}
     </CartContext.Provider>
   );
