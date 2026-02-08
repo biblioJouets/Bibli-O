@@ -14,6 +14,18 @@ export async function POST(req) {
     const body = await req.json();
     const { cartItems, shippingData } = body; 
     
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+        return NextResponse.json({ error: "Panier invalide" }, { status: 400 });
+    }
+
+    // Vérifier qu'il n'y a pas de quantités négatives ou décimales
+    const hasInvalidItems = cartItems.some(item => 
+        !Number.isInteger(item.quantity) || item.quantity <= 0
+    );
+
+    if (hasInvalidItems) {
+        return NextResponse.json({ error: "Quantités invalides détectées." }, { status: 400 });
+    }
     // Calcul du nombre total de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     
@@ -23,7 +35,27 @@ export async function POST(req) {
       q: item.quantity 
     }));
 
+
+    //validation de l'adresse pour livraison domicile
+    const AUTHORIZED_ZONES = {
+        "34690": ["FABREGUES", "FABRÈGUES"],
+        "34570": ["PIGNAN", "SAUSSAN"]
+    };
+
+    // Si le client demande livraison DOMICILE (mondialRelayPointId === "DOMICILE")
+    if (shippingData.mondialRelayPointId === "DOMICILE") {
+        const zip = shippingData.shippingZip?.trim();
+        const city = shippingData.shippingCity?.toUpperCase().trim();
+        
+        const allowedCities = AUTHORIZED_ZONES[zip] || [];
     
+        const isAllowed = allowedCities.some(allowed => city?.includes(allowed));
+
+        if (!isAllowed) {
+             return NextResponse.json({ error: "Adresse non éligible à la livraison domicile." }, { status: 400 });
+        }
+    }
+
     // Mapping direct entre quantité et variable d'environnement
     const pricingMap = {
         1: process.env.STRIPE_PRICE_1_TOY,
