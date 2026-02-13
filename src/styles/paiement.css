@@ -1,0 +1,403 @@
+/* src/styles/paiement.css */
+
+/* --- CONTENEUR GLOBAL --- */
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 120px 20px;
+  font-family: inherit;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #2E1D21;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* La grille principale (Desktop) */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* --- CARTES BLANCHES --- */
+.card-section, .summary-card {
+  background: white;
+  padding: 30px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+  border: 1px solid #f0f0f0;
+}
+
+.summary-card {
+  background: #FFF7EB;
+  border: 2px solid #FFF7EB;
+  position: sticky;
+  top: 100px;
+}
+
+.section-title, .summary-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2E1D21;
+}
+
+.summary-title {
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 15px;
+}
+
+/* --- INFO BOX --- */
+.info-box {
+  background: #EAF7FC;
+  color: #0077b6;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+  border-left: 5px solid #0077b6;
+  line-height: 1.5;
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+/* --- BOUTONS LIVRAISON --- */
+.delivery-buttons-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.delivery-btn {
+  flex: 1;
+  padding: 18px;
+  border-radius: 15px;
+  border: 2px solid #e5e5e5;
+  background: white;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.delivery-btn:hover {
+  border-color: #2E1D21;
+  color: #2E1D21;
+}
+
+.delivery-btn.active {
+  border-color: #2E1D21;
+  background: #FFF7EB;
+  color: #2E1D21;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.badge-recommend {
+  font-size: 0.7rem;
+  background: #88D4AB;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 800;
+}
+
+/* --- FORMULAIRE --- */
+.form-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #fdfdfd;
+  outline: none;
+  transition: border 0.2s;
+  color: #2E1D21;
+}
+
+.input-field:focus {
+  border-color: #6EC1E4;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(110, 193, 228, 0.1);
+}
+
+.input-error {
+  border-color: #ff6b6b !important;
+  background-color: #fff5f5 !important;
+}
+
+.error-msg {
+  color: #e63946;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: -10px;
+}
+
+/* Helpers de grille */
+.full-width { grid-column: 1 / -1; }
+
+.row-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.row-grid-1-2 {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+.row-grid-1-2-relay {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.helper-text-relay {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* --- WIDGET MONDIAL RELAY (CORRECTION BUG RESPONSIVE) --- */
+.relay-section-wrapper {
+  margin-top: 25px;
+  border-top: 2px dashed #eee;
+  padding-top: 20px;
+}
+
+.relay-title {
+  margin-bottom: 15px;
+  font-weight: 700;
+  color: #2E1D21;
+}
+
+/* C'est ici que la magie opère pour empêcher le débordement */
+.mondial-relay-widget-container {
+  width: 100%;
+  min-height: 400px;
+  background: #f9f9f9;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  
+  /* Permet de scroller DANS la boîte si la carte est trop large, sans casser la page */
+  overflow-y: hidden;
+}
+.mondial-relay-widget-container iframe, 
+.mondial-relay-widget-container > div {
+    max-width: 100% !important;
+}
+.relay-selected-box {
+  margin-top: 20px;
+  padding: 20px;
+  background: #EAF7FC;
+  border: 2px solid #6EC1E4;
+  border-radius: 15px;
+  color: #0077b6;
+  line-height: 1.6;
+}
+
+/* --- RÉCAPITULATIF --- */
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 25px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #555;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.divider {
+  border-top: 2px dashed #ccc;
+  margin: 25px 0;
+  opacity: 0.5;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  color: #2E1D21;
+}
+
+.price-row strong { font-weight: 800; }
+.month-suffix { font-size: 0.7em; font-weight: 500; color: #777; }
+
+.price-row-small {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.free-text {
+  color: #88D4AB;
+  font-weight: 800;
+  background: #DAEEE6;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.relay-summary {
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+  color: #555;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.icon-text-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2E1D21;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2E1D21;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 30px;
+  background: #2E1D21;
+  color: white;
+  padding: 18px;
+  border-radius: 50px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(46, 29, 33, 0.2);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(46, 29, 33, 0.3);
+}
+
+.submit-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.secure-text {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Centrage pour le panier vide */
+.cart-empty-msg {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* --- RESPONSIVE MOBILE (Pour iPhone 12 Pro et autres) --- */
+
+@media (max-width: 950px) {
+  .page-container {
+    padding: 80px 15px 40px 15px; /* Marges réduites */
+  }
+
+  .checkout-grid {
+    grid-template-columns: 1fr; /* Une seule colonne : tout s'empile */
+    gap: 30px;
+  }
+
+  .summary-card {
+    position: static; /* Le récap ne flotte plus */
+    order: 2; /* Le récap se met en bas */
+  }
+}
+
+@media (max-width: 600px) {
+  /* Boutons de livraison l'un sous l'autre */
+  .delivery-buttons-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+.input-field{
+    width: 90%;
+}
+  /* Tous les champs inputs en pleine largeur */
+  .row-grid-2, 
+  .row-grid-1-2, 
+  .row-grid-1-2-relay {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  /* Ajustement de l'alignement pour le code postal relais */
+  .row-grid-1-2-relay {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .card-section {
+    padding: 20px; 
+  }
+
+  /* Ajustement de la hauteur du widget sur petit écran */
+ 
+}
