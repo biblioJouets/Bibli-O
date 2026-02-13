@@ -31,29 +31,22 @@ export const sendBrevoTemplate = async (toEmail, templateId, params = {}, attach
   }
 
   try {
+    // AJOUT DEBUG : On vérifie juste avant l'envoi
+    console.log(`[DEBUG] Tentative envoi avec clé : ${process.env.BREVO_API_KEY ? 'PRÉSENTE (Commence par ' + process.env.BREVO_API_KEY.substring(0,5) + '...)' : 'ABSENTE ❌'}`);
+
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    // Note : En v3, la réponse peut être dans data.body ou data direct selon le client HTTP
-    // On gère les deux cas pour être sûr
     const messageId = data.messageId || data.body?.messageId;
-    
-    console.log(`[BREVO] Email envoyé à ${toEmail} (Template: ${templateId}). ID: ${messageId}`);
-    return { success: true, messageId: messageId };
+    console.log(`[BREVO] Succès. ID: ${messageId}`);
+    return { success: true, messageId };
+
   } catch (error) {
-    console.error('🔴 [BREVO] ÉCHEC CRITIQUE :');
+    console.error('🔴 [BREVO] ERREUR SYSTÈME :');
+    console.error('👉 Message:', error.message); // C'est souvent ici que se cache la vérité (ex: "getaddrinfo ENOTFOUND")
+    console.error('👉 Stack:', error.stack);
     
-    // Cas 1 : Erreur renvoyée par l'API Brevo (ex: Clé invalide, Quota dépassé)
-    if (error.response) {
-       console.error('👉 Status Code:', error.response.statusCode);
-       console.error('👉 Body:', JSON.stringify(error.response.body, null, 2));
-    } 
-    // Cas 2 : Erreur Réseau / Système (ex: Pas d'internet, DNS, Timeout)
-    else {
-       console.error('👉 Message:', error.message);
-       console.error('👉 Stack:', error.stack);
-       // Parfois l'erreur est dans "cause"
-       if (error.cause) console.error('👉 Cause:', error.cause);
-    }
-    
+    // On loggue l'objet entier au cas où
+    console.error('👉 Objet Erreur complet:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+
     return { success: false, error: error.message };
   }
 };
