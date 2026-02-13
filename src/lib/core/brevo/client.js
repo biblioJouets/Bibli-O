@@ -1,3 +1,4 @@
+// src/lib/core/brevo/client.js
 import * as Brevo from '@getbrevo/brevo';
 
 // 1. Configuration de l'instance API (Version 3)
@@ -62,3 +63,13 @@ export const testBrevoConnection = async () => {
         return false;
     }
 }
+
+export const sendResetEmail = async (email, resetUrl) => {
+  const TEMPLATE_ID = 10; 
+
+  const params = {
+    RESET_LINK: resetUrl, // Doit correspondre à {{ params.RESET_LINK }} dans ton template Brevo
+  };
+
+  return await sendBrevoTemplate(email, TEMPLATE_ID, params);
+};
