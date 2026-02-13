@@ -106,7 +106,7 @@ export default function PaiementPage() {
     window.$("#Zone_Widget").html(""); 
     window.$("#Zone_Widget").MR_ParcelShopPicker({
       Target: "#Zone_Widget",
-      Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID || "BDTEST13", 
+      Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID, 
       Country: "FR",
       PostCode: shipping.zipCode || "34000", 
       ColLivMod: "24R",
