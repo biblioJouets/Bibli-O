@@ -39,10 +39,22 @@ export const sendBrevoTemplate = async (toEmail, templateId, params = {}, attach
     console.log(`[BREVO] Email envoyé à ${toEmail} (Template: ${templateId}). ID: ${messageId}`);
     return { success: true, messageId: messageId };
   } catch (error) {
-    // Amélioration du log d'erreur pour le débogage
-    const errorBody = error.response ? error.response.body : error;
-    console.error('[BREVO] Erreur d\'envoi:', JSON.stringify(errorBody, null, 2));
-    return { success: false, error: errorBody };
+    console.error('🔴 [BREVO] ÉCHEC CRITIQUE :');
+    
+    // Cas 1 : Erreur renvoyée par l'API Brevo (ex: Clé invalide, Quota dépassé)
+    if (error.response) {
+       console.error('👉 Status Code:', error.response.statusCode);
+       console.error('👉 Body:', JSON.stringify(error.response.body, null, 2));
+    } 
+    // Cas 2 : Erreur Réseau / Système (ex: Pas d'internet, DNS, Timeout)
+    else {
+       console.error('👉 Message:', error.message);
+       console.error('👉 Stack:', error.stack);
+       // Parfois l'erreur est dans "cause"
+       if (error.cause) console.error('👉 Cause:', error.cause);
+    }
+    
+    return { success: false, error: error.message };
   }
 };
 
