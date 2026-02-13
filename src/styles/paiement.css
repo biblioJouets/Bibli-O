@@ -35,7 +35,7 @@
 }
 
 .summary-card {
-  background: #FFF7EB;
+  background: white;
   border: 2px solid #FFF7EB;
   position: sticky;
   top: 100px;
@@ -130,7 +130,6 @@
 }
 
 .input-field {
-  width: 100%;
   padding: 14px;
   border: 1px solid #ddd;
   border-radius: 12px;
