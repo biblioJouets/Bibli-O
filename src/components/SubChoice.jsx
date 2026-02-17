@@ -50,7 +50,7 @@ function SubChoice(props) {
         <div className="selection-card">
           <div className="price-info">
             <span className="current-price">{pricing[selectedToys]}€ / mois</span>
-            <span className="toy-count">{selectedToys} jouets</span>
+            <span className="toy-count">{selectedToys} jouet{selectedToys > 1 ? 's' : ''}</span>
           </div>
 
           <div className="bubbles-container">

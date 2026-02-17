@@ -27,7 +27,6 @@
 .subscription-page {
   color: var(--col-text);
   margin-top: 100px;
-  background-color: var(--col-bg-light);
   overflow-x: hidden; 
 }
 

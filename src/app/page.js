@@ -123,7 +123,7 @@ function Homepage() {
                         />
                         <CommitmentCard
                             title="Casse et usure"
-                            description="casse et usure tout es compris dans la formule d'abonnement, pas de stress ni de surprise."
+                            description="Casse et usure, tout es compris dans la formule d'abonnement, pas de stress ni de surprise."
                             icon={APPROBATIONIMAGE}
                         />
                     </div>
