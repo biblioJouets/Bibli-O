@@ -44,7 +44,7 @@ model Address {
   zipCode String  @db.VarChar(20)
   city    String  @db.VarChar(100)
   country String  @default("France") @db.VarChar(100)
-
+  isDefault  Boolean  @default(false)
   userId Int
   User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

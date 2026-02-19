@@ -1,4 +1,3 @@
-/* src/components/account/ProfileTab.jsx */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +10,6 @@ export default function ProfileTab() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState(null);
   
-  // États pour l'ajout d'adresse
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({ street: '', postalCode: '', city: '', country: 'France' });
 
@@ -21,16 +19,26 @@ export default function ProfileTab() {
 
   const fetchUserProfile = async () => {
     try {
-      const res = await fetch(`/api/users/${session.user.id}`);
+      // 🛡️ CORRECTION CRITIQUE : cache: 'no-store' empêche Next.js de bloquer l'affichage des nouvelles adresses
+      const res = await fetch(`/api/users/${session.user.id}`, { cache: 'no-store' });
       if (res.ok) {
-        const data = await res.json();
-        setProfile({
-          firstName: data.firstName || '',
-          lastName: data.lastName || '',
-          phone: data.phone || '',
-          email: data.email || ''
-        });
-        setAddresses(data.Address || []);
+        const response = await res.json();
+        const userData = response.data;
+
+        if (userData) {
+          setProfile({
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            phone: userData.phone || '',
+            // L'email vient de la BDD, sinon on prend celui de la session de connexion
+            email: userData.email || session?.user?.email || '' 
+          });
+          
+          let fetchedAddresses = userData.Addresses || userData.addresses || userData.Address || [];
+          // On trie pour afficher l'adresse par défaut en premier
+          fetchedAddresses.sort((a, b) => (b.isDefault === true ? 1 : -1));
+          setAddresses(fetchedAddresses);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -65,7 +73,7 @@ export default function ProfileTab() {
         body: JSON.stringify(newAddress),
       });
       if (res.ok) {
-        fetchUserProfile(); // Recharger les données
+        await fetchUserProfile(); // Le cache: 'no-store' garantit qu'on verra la nouvelle adresse
         setShowAddressForm(false);
         setNewAddress({ street: '', postalCode: '', city: '', country: 'France' });
       }
@@ -80,7 +88,21 @@ export default function ProfileTab() {
       const res = await fetch(`/api/users/${session.user.id}/addresses?addressId=${addressId}`, {
         method: 'DELETE',
       });
-      if (res.ok) fetchUserProfile();
+      if (res.ok) await fetchUserProfile();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // NOUVEAU : Fonction pour définir par défaut
+  const handleSetDefaultAddress = async (addressId) => {
+    try {
+      const res = await fetch(`/api/users/${session.user.id}/addresses`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addressId }),
+      });
+      if (res.ok) await fetchUserProfile();
     } catch (err) {
       console.error(err);
     }
@@ -90,11 +112,7 @@ export default function ProfileTab() {
     <div className="tab-content">
       <h2 className="section-title">Mes Informations</h2>
       
-      {message && (
-        <div className={`message-box ${message.type}`}>
-          {message.text}
-        </div>
-      )}
+      {message && <div className={`message-box ${message.type}`}>{message.text}</div>}
 
       <form onSubmit={handleProfileUpdate} className="profile-form">
         <div className="form-group">
@@ -104,28 +122,16 @@ export default function ProfileTab() {
         <div className="form-row">
           <div className="form-group">
             <label>Prénom</label>
-            <input 
-              type="text" 
-              value={profile.firstName} 
-              onChange={(e) => setProfile({...profile, firstName: e.target.value})} 
-            />
+            <input type="text" value={profile.firstName} onChange={(e) => setProfile({...profile, firstName: e.target.value})} />
           </div>
           <div className="form-group">
             <label>Nom</label>
-            <input 
-              type="text" 
-              value={profile.lastName} 
-              onChange={(e) => setProfile({...profile, lastName: e.target.value})} 
-            />
+            <input type="text" value={profile.lastName} onChange={(e) => setProfile({...profile, lastName: e.target.value})} />
           </div>
         </div>
         <div className="form-group">
           <label>Téléphone</label>
-          <input 
-            type="tel" 
-            value={profile.phone} 
-            onChange={(e) => setProfile({...profile, phone: e.target.value})} 
-          />
+          <input type="tel" value={profile.phone} onChange={(e) => setProfile({...profile, phone: e.target.value})} />
         </div>
         <button type="submit" disabled={isSaving} className="btn-primary">
           {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -137,54 +143,44 @@ export default function ProfileTab() {
         
         <div className="address-list">
           {addresses.map(addr => (
-            <div key={addr.id} className="address-card">
+            // NOUVEAU : On ajoute une classe si l'adresse est par défaut
+            <div key={addr.id} className={`address-card ${addr.isDefault ? 'default-address' : ''}`}>
+              {addr.isDefault && <span className="badge-default">Par défaut</span>}
               <p>{addr.street}</p>
-              <p>{addr.postalCode} {addr.city}</p>
-              <button onClick={() => handleDeleteAddress(addr.id)} className="btn-delete-addr">
-                Supprimer
-              </button>
+              <p>{addr.zipCode} {addr.city}</p>
+              
+              <div className="address-actions">
+                {!addr.isDefault && (
+                  <button onClick={() => handleSetDefaultAddress(addr.id)} className="btn-set-default">
+                    Définir par défaut
+                  </button>
+                )}
+                <button onClick={() => handleDeleteAddress(addr.id)} className="btn-delete-addr">
+                  Supprimer
+                </button>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Formulaire ajout adresse */}
         <div className="add-address-wrapper">
             {showAddressForm ? (
                 <form onSubmit={handleAddAddress} className="address-form-inline">
                     <h4>Nouvelle adresse</h4>
                     <div className="form-group">
-                        <input 
-                            placeholder="Rue..." 
-                            required
-                            value={newAddress.street}
-                            onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
-                        />
+                        <input placeholder="Rue..." required value={newAddress.street} onChange={(e) => setNewAddress({...newAddress, street: e.target.value})} />
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <input 
-                                placeholder="Code Postal" 
-                                required
-                                value={newAddress.postalCode}
-                                onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
-                            />
+                            <input placeholder="Code Postal" required value={newAddress.postalCode} onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})} />
                         </div>
                         <div className="form-group">
-                            <input 
-                                placeholder="Ville" 
-                                required
-                                value={newAddress.city}
-                                onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
-                            />
+                            <input placeholder="Ville" required value={newAddress.city} onChange={(e) => setNewAddress({...newAddress, city: e.target.value})} />
                         </div>
                     </div>
                     <div className="form-actions right">
-                        <button type="button" onClick={() => setShowAddressForm(false)} className="btn-text">
-                            Annuler
-                        </button>
-                        <button type="submit" className="btn-primary small">
-                            Valider
-                        </button>
+                        <button type="button" onClick={() => setShowAddressForm(false)} className="btn-text">Annuler</button>
+                        <button type="submit" className="btn-primary small">Valider</button>
                     </div>
                 </form>
             ) : (

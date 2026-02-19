@@ -308,11 +308,49 @@
   border-top: 2px dashed #eee;
   padding-top: 30px;
 }
+.badge-default {
+  position: absolute;
+  top: -12px;
+  right: 15px;
+  background-color: #88D4AB;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
+.address-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  align-items: center;
+}
+
+.btn-set-default {
+  background: none;
+  border: none;
+  color: #6EC1E4;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.btn-delete-addr {
+  margin-top: 0; 
+}
 .subsection-title {
   font-size: 1.4rem;
   margin-bottom: 20px;
   color: #2E1D21;
+}
+.address-card.default-address {
+  border: 2px solid #88D4AB;
+  background-color: #DAEEE6;
 }
 
 .address-list {
