@@ -1,3 +1,4 @@
+/* src/app/paiement/page.js */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,6 +25,42 @@ export default function PaiementPage() {
     phone: ""
   });
 
+  // --- NOUVEAU : RÉCUPÉRATION DES DONNÉES UTILISATEUR POUR PRÉ-REMPLIR LE FORMULAIRE ---
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (session?.user?.id) {
+        try {
+          const res = await fetch(`/api/users/${session.user.id}`);
+          if (res.ok) {
+            const response = await res.json();
+            const userData = response.data;
+            
+            if (userData) {
+              // Récupération des adresses et recherche de celle par défaut
+              const addresses = userData.Addresses || userData.addresses || userData.Address || [];
+              const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+
+              // Mise à jour de l'état avec les données récupérées
+              setShipping({
+                firstName: userData.firstName || "",
+                lastName: userData.lastName || "",
+                phone: userData.phone || "",
+                address: defaultAddress ? defaultAddress.street : "",
+                city: defaultAddress ? defaultAddress.city : "",
+                zipCode: defaultAddress ? defaultAddress.zipCode : "",
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération des données utilisateur", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [session]); // Ce useEffect se déclenche quand la session est chargée
+  // ----------------------------------------------------------------------------------
+
   // Zones éligibles domicile
   const AUTHORIZED_HOME_DELIVERY = {
     "34690": ["FABREGUES", "FABRÈGUES"],
@@ -31,6 +68,7 @@ export default function PaiementPage() {
   };
 
   const normalizeText = (text) => {
+    if (!text) return "";
     return text.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); 
   };
 
@@ -45,7 +83,7 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
-  // Calcul prix (avec vos 9 tranches)
+  // Calcul prix
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const getSubscriptionPrice = (count) => {
     const pricingMap = {
@@ -106,7 +144,7 @@ export default function PaiementPage() {
     window.$("#Zone_Widget").html(""); 
     window.$("#Zone_Widget").MR_ParcelShopPicker({
       Target: "#Zone_Widget",
-      Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID, 
+      Brand: process.env.NEXT_PUBLIC_MONDIAL_RELAY_BRAND_ID || "BDTEST13", 
       Country: "FR",
       PostCode: shipping.zipCode || "34000", 
       ColLivMod: "24R",
