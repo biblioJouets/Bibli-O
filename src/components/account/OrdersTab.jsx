@@ -11,6 +11,15 @@ export default function OrdersTab() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const statusTranslations = {
+    PENDING: "En attente",
+    PAID: "Payé",
+    SHIPPED: "Expédié / Livré",
+    PREPARING: "En préparation",
+    DELIVERED: "Livré",
+    RETURNED: "Retourné",
+    CANCELLED: "Annulé"
+  };
   useEffect(() => {
     if (session?.user?.id) fetchOrders();
   }, [session]);
@@ -56,7 +65,7 @@ export default function OrdersTab() {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </span>
                 <span className={`order-status ${order.status.toLowerCase()}`}>
-                  {order.status}
+                {statusTranslations[order.status] || order.status}
                 </span>
               </div>
               <div className="order-body">

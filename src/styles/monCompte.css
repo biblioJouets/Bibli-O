@@ -150,17 +150,22 @@
 }
 
 .order-status {
-  padding: 4px 12px;
+  padding: 6px 14px; /* Un peu plus d'espace pour que ce soit joli */
   border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Couleurs statuts */
 .order-status.paid, .order-status.payé { background: #DAEEE6; color: #3b8c6e; }
+.order-status.returned, .order-status.retourné { background: #EAF7FC; color: #3344e0; }
+.order-status.shipped, .order-status.expédié { background: #dcfce7; color: #166534; }
+.order-status.preparing, .order-status.en_cours { background: #fef3c7; color: #d97706; }
 .order-status.pending, .order-status.en_attente { background: #FFF7EB; color: #d97706; }
 .order-status.cancelled { background: #fee2e2; color: #991b1b; }
+.order-status.delivered, .order-status.livré { background: #dcfce7; color: #166534; } /* J'ai rajouté "Livré" au cas où */
 
 .order-body {
   padding: 20px;
