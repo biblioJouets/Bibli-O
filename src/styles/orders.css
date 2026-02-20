@@ -1,0 +1,191 @@
+/* src/styles/orders.css */
+
+/* --- Layout Principal --- */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  color: #2E1D21; /* Noir chaud */
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2E1D21;
+  margin-bottom: 1rem;
+}
+
+.loader-message, .empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #2E1D21;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- Order Card (Carte globale) --- */
+.order-card {
+  background-color: #FFF7EB; /* Ton neutre chaud */
+  border-radius: 25px; /* Coins très arrondis */
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(46, 29, 33, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border: 1px solid #FAE9CF;
+}
+
+.order-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-bottom: 2px dashed #FAE9CF;
+  padding-bottom: 1rem;
+}
+
+.order-meta, .order-actions-global {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-date {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.order-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background-color: #DAEEE6;
+}
+
+.order-total {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.order-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* --- Order Item Row (Ligne Jouet) --- */
+.order-item-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #FFFAF4; /* Différentiation subtile du fond */
+  padding: 1rem;
+  border-radius: 20px;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item-image-wrapper {
+  flex-shrink: 0;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-thumbnail {
+  object-fit: contain;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item-name {
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.item-price, .item-date {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4a3338;
+}
+
+.item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* --- Boutons (Pill-shape) --- */
+.btn-pill {
+  border-radius: 50px; /* Coins pilule */
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  text-align: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  color: #2E1D21;
+}
+
+.btn-pill:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.95);
+}
+
+.btn-primary {
+  background-color: #6EC1E4;
+  color: #2E1D21;
+}
+
+/* Couleurs spécifiques demandées */
+.btn-details {
+  background-color: #ffe264; /* Jaune */
+}
+
+.btn-exchange {
+  background-color: #6EC1E4; /* Bleu */
+}
+
+.btn-adopt {
+  background-color: #FF8C94; /* Rose */
+}
+
+.btn-extend {
+  background-color: #88D4AB; /* Vert */
+}
+
+/* --- Desktop / Tablette (Responsive Mobile First) --- */
+@media (min-width: 768px) {
+  .order-header {
+    flex-direction: row;
+  }
+  
+  .order-item-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .item-actions {
+    justify-content: flex-end;
+  }
+}
