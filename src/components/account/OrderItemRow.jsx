@@ -1,7 +1,7 @@
 /* src/components/account/OrderItemRow.jsx */
 //Gère l'affichage individuel et les actions par jouet.
 import Image from 'next/image';
-
+import { useState } from 'react';
 export default function OrderItemRow({ item, orderDate, isPriority }) {
   // Extraction sécurisée des données du produit
   const productData = item.product || item.Products || {};
@@ -15,8 +15,30 @@ export default function OrderItemRow({ item, orderDate, isPriority }) {
     date.setDate(date.getDate() + 30);
     return date.toLocaleDateString('fr-FR');
   };
+//fech de l'API pour les actions (échange, adoption, prolongation)
 
   const returnDate = calculateReturnDate(orderDate);
+const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleAction = async (actionType) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`/api/user/items/${item.id}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: actionType })
+      });
+
+      if (response.ok) {
+        // Optionnel : Déclencher un toast de succès ou rafraîchir les données (router.refresh())
+        console.log(`Action ${actionType} réussie !`);
+      }
+    } catch (error) {
+      console.error("Erreur de communication :", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="order-item-row">
