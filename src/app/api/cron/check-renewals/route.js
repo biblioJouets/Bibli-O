@@ -1,6 +1,5 @@
 //src/app/api/cron/check-renewals/route.js
-// Ce fichier représente la route d'API que ton VPS (CRON) appellera tous les jours pour vérifier les renouvellements à venir.
-// Il va analyser les commandes actives, détecter les dates anniversaires, et déclencher les actions nécessaires (envoi d'emails, passage en prolongation tacite, etc.)
+
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/core/database';
 
@@ -9,63 +8,50 @@ export async function GET(request) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 1. On récupère les abonnements Actifs qui ont une date anniversaire
-    const activeOrders = await prisma.orders.findMany({
+    // 1. On récupère les JOUETS dont la commande est active et qui ont une date anniversaire
+    const activeItems = await prisma.orderProducts.findMany({
       where: {
-        status: 'ACTIVE',
         nextBillingDate: { not: null },
+        Orders: { status: 'ACTIVE' }
       },
-      include: { Users: true } 
+      include: {
+        Orders: { include: { Users: true } },
+        Products: true
+      }
     });
 
     let stats = { j7: 0, j2: 0, j0_tacit: 0 };
-    let debugInfo = []; // <--- NOTRE ESPION DE DEBUG
+    let debugInfo = [];
 
-    for (const order of activeOrders) {
-      const billingDate = new Date(order.nextBillingDate);
+    for (const item of activeItems) {
+      const billingDate = new Date(item.nextBillingDate);
       billingDate.setHours(0, 0, 0, 0);
 
-      // Calcul plus fiable avec Math.round()
-      const diffTime = billingDate.getTime() - today.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round((billingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-      // On enregistre ce que voit l'ordinateur
       debugInfo.push({
-        orderId: order.id,
-        userEmail: order.Users?.email || "Pas d'utilisateur lié",
-        rawNextBillingDate: order.nextBillingDate,
-        calculatedDiffDays: diffDays,
-        intention: order.renewalIntention
+        orderId: item.OrderId,
+        productName: item.Products.name,
+        diffDays: diffDays,
+        intention: item.renewalIntention
       });
 
-      // --- SCÉNARIO J-7 ---
-      if (diffDays === 7 && !order.renewalIntention) {
-        console.log(`[J-7] Détecté pour Commande ${order.id}`);
+      // La logique reste exactement la même, mais s'applique à 'item' (le jouet)
+      if (diffDays === 7 && !item.renewalIntention) {
+        // Envoi email J-7 ("N'oubliez pas de rendre ou prolonger : [item.Products.name]")
         stats.j7++;
       }
-
-      // --- SCÉNARIO J-2 ---
-      else if (diffDays === 2 && !order.renewalIntention) {
-        stats.j2++;
-      }
-
-      // --- SCÉNARIO J-0 : PROLONGATION TACITE ---
-      else if (diffDays === 0 && !order.renewalIntention) {
-        await prisma.orders.update({
-          where: { id: order.id },
+      else if (diffDays === 0 && !item.renewalIntention) {
+        // Prolongation tacite DU JOUET
+        await prisma.orderProducts.update({
+          where: { OrderId_ProductId: { OrderId: item.OrderId, ProductId: item.ProductId } },
           data: { renewalIntention: 'PROLONGATION_TACITE' }
         });
         stats.j0_tacit++;
       }
     }
 
-    // On retourne le résultat avec l'espion
-    return NextResponse.json({ 
-      success: true, 
-      message: "Analyse quotidienne terminée",
-      stats,
-      debug: debugInfo // <--- L'affichage de l'espion
-    }, { status: 200 });
+    return NextResponse.json({ success: true, stats, debug: debugInfo }, { status: 200 });
 
   } catch (error) {
     console.error("Erreur CRON Renewals:", error);

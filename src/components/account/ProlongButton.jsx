@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-export default function ProlongButton({ orderId, currentIntention }) {
+export default function ProlongButton({ orderId, productId, currentIntention }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(currentIntention === 'PROLONGATION' || currentIntention === 'PROLONGATION_TACITE');
   const [showModal, setShowModal] = useState(false); // État de la modale
@@ -12,7 +12,11 @@ export default function ProlongButton({ orderId, currentIntention }) {
     setIsLoading(true);
     setShowModal(false); // On ferme la modale au lancement
     try {
-      const response = await fetch(`/api/orders/${orderId}/prolong`, { method: 'POST' });
+      const response = await fetch(`/api/orders/prolong-item`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, productId })
+      });
       if (response.ok) {
         setIsSuccess(true);
       }

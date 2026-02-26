@@ -1,57 +1,38 @@
 /* src/components/account/OrderItemRow.jsx */
-//Gère l'affichage individuel et les actions par jouet.
 import Image from 'next/image';
-import { useState } from 'react';
 import ProlongButton from './ProlongButton';
 
-export default function OrderItemRow({ item, orderDate, isPriority, orderId, currentIntention, showProlongButton }) {
+export default function OrderItemRow({ item, orderStatus }) {
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
   const productName = productData?.name || "Jouet Mystère";
   const productPrice = Number(productData?.price || 0).toFixed(2);
 
-  const calculateReturnDate = (dateString) => {
-    const date = new Date(dateString);
-    date.setDate(date.getDate() + 30);
-    return date.toLocaleDateString('fr-FR');
-  };
-//fech de l'API pour les actions (échange, adoption, prolongation)
+  // On utilise la date de fin DU JOUET
+  const returnDate = item.rentalEndDate 
+    ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR') 
+    : "Non définie";
 
-  const returnDate = calculateReturnDate(orderDate);
-const [isProcessing, setIsProcessing] = useState(false);
+  // --- LOGIQUE TEMPORELLE (J-7) AU NIVEAU DU JOUET ---
+  let showProlongButton = false;
+  if (orderStatus === 'ACTIVE' && item.nextBillingDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    const billingDate = new Date(item.nextBillingDate);
+    billingDate.setHours(0, 0, 0, 0);
+    const diffTime = billingDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-  const handleAction = async (actionType) => {
-    setIsProcessing(true);
-    try {
-      const response = await fetch(`/api/user/items/${item.id}/action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: actionType })
-      });
-
-      if (response.ok) {
-        // Optionnel : Déclencher un toast de succès ou rafraîchir les données (router.refresh())
-        console.log(`Action ${actionType} réussie !`);
-      }
-    } catch (error) {
-      console.error("Erreur de communication :", error);
-    } finally {
-      setIsProcessing(false);
+    if (diffDays <= 7 && diffDays >= 0) {
+      showProlongButton = true;
     }
-  };
+  }
 
   return (
     <div className="order-item-row">
       <div className="item-info">
         <div className="item-image-wrapper">
-          <Image
-            src={imageUrl}
-            alt={`Image de ${productName}`}
-            width={80}
-            height={80}
-            className="item-thumbnail"
-            priority={isPriority}
-          />
+          <Image src={imageUrl} alt={productName} width={80} height={80} className="item-thumbnail" />
         </div>
         <div className="item-details">
           <h4 className="item-name">{productName}</h4>
@@ -64,9 +45,13 @@ const [isProcessing, setIsProcessing] = useState(false);
         <button className="btn-pill btn-exchange" type="button">Échanger</button>
         <button className="btn-pill btn-adopt" type="button">Adopter</button>
         {showProlongButton ? (
-          <ProlongButton orderId={orderId} currentIntention={currentIntention} />
+          <ProlongButton 
+            orderId={item.OrderId} 
+            productId={item.ProductId} 
+            currentIntention={item.renewalIntention} 
+          />
         ) : (
-          <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled title="Disponible 7 jours avant la fin">
+          <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled>
             Prolonger
           </button>
         )}

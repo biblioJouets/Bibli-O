@@ -4,34 +4,14 @@ import OrderItemRow from './OrderItemRow';
 
 export default function OrderCard({ order }) {
   const statusTranslations = {
-    PENDING: "En attente",
-    PAID: "Payé",
-    SHIPPED: "Expédié",
-    PREPARING: "En préparation",
-    DELIVERED: "Livré",
-    ACTIVE: "En cours (Location)",
-    RETURNED: "Retourné",
-    CANCELLED: "Annulé"
+    PENDING: "En attente", PAID: "Payé", SHIPPED: "Expédié",
+    PREPARING: "En préparation", DELIVERED: "Livré", ACTIVE: "En cours (Location)",
+    RETURNED: "Retourné", CANCELLED: "Annulé"
   };
 
   const items = order.items || order.OrderItems || order.OrderProducts || [];
   const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
   const formattedPrice = Number(order.totalAmount || 0).toFixed(2);
-
-  // --- LOGIQUE TEMPORELLE (J-7) ---
-  let showProlongButton = false;
-  if (order.status === 'ACTIVE' && order.nextBillingDate) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    const billingDate = new Date(order.nextBillingDate);
-    billingDate.setHours(0, 0, 0, 0);
-    const diffTime = billingDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 7 && diffDays >= 0) {
-      showProlongButton = true;
-    }
-  }
 
   return (
     <div className="order-card p-6 rounded-[25px] bg-[#FFFAF4] shadow-sm mb-6 flex flex-col gap-4">
@@ -42,7 +22,6 @@ export default function OrderCard({ order }) {
             {statusTranslations[order.status] || order.status}
           </span>
         </div>
-        
         <div className="order-actions-global flex items-center gap-4">
           <span className="text-lg font-bold text-[#6EC1E4]">{formattedPrice} €</span>
           <Link href={`/confirmation-commande?id=${order.id}`} className="px-5 py-2 rounded-full border border-[#2E1D21] text-[#2E1D21] hover:bg-[#2E1D21] hover:text-white transition-colors text-sm font-medium">
@@ -54,14 +33,9 @@ export default function OrderCard({ order }) {
       <div className="order-items-container flex flex-col gap-4 mt-2">
         {items.map((item, index) => (
           <OrderItemRow 
-            key={item.id || index} 
+            key={item.ProductId || index} 
             item={item} 
-            orderDate={order.createdAt}
-            isPriority={index === 0} 
-            // On passe les infos de prolongation à l'enfant
-            orderId={order.id}
-            currentIntention={order.renewalIntention}
-            showProlongButton={showProlongButton}
+            orderStatus={order.status}
           />
         ))}
       </div>
