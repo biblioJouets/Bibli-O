@@ -2,14 +2,14 @@
 //Gère l'affichage individuel et les actions par jouet.
 import Image from 'next/image';
 import { useState } from 'react';
-export default function OrderItemRow({ item, orderDate, isPriority }) {
-  // Extraction sécurisée des données du produit
+import ProlongButton from './ProlongButton';
+
+export default function OrderItemRow({ item, orderDate, isPriority, orderId, currentIntention, showProlongButton }) {
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
   const productName = productData?.name || "Jouet Mystère";
   const productPrice = Number(productData?.price || 0).toFixed(2);
 
-  // Calcul physiologique de la date de retour (Date de commande + 30 jours)
   const calculateReturnDate = (dateString) => {
     const date = new Date(dateString);
     date.setDate(date.getDate() + 30);
@@ -63,7 +63,13 @@ const [isProcessing, setIsProcessing] = useState(false);
       <div className="item-actions">
         <button className="btn-pill btn-exchange" type="button">Échanger</button>
         <button className="btn-pill btn-adopt" type="button">Adopter</button>
-        <button className="btn-pill btn-extend" type="button">Prolonger</button>
+        {showProlongButton ? (
+          <ProlongButton orderId={orderId} currentIntention={currentIntention} />
+        ) : (
+          <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled title="Disponible 7 jours avant la fin">
+            Prolonger
+          </button>
+        )}
       </div>
     </div>
   );
