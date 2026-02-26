@@ -1,8 +1,9 @@
 //
 generator client {
-  provider = "prisma-client-js"
-binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -38,15 +39,15 @@ model Users {
 }
 
 model Address {
-  id      Int     @id @default(autoincrement())
-  name    String? @db.VarChar(100)
-  street  String  @db.VarChar(255)
-  zipCode String  @db.VarChar(20)
-  city    String  @db.VarChar(100)
-  country String  @default("France") @db.VarChar(100)
-  isDefault  Boolean  @default(false)
-  userId Int
-  User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  name      String? @db.VarChar(100)
+  street    String  @db.VarChar(255)
+  zipCode   String  @db.VarChar(20)
+  city      String  @db.VarChar(100)
+  country   String  @default("France") @db.VarChar(100)
+  isDefault Boolean @default(false)
+  userId    Int
+  User      Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Cart {
@@ -73,7 +74,6 @@ model CartItem {
   @@unique([cartId, productId])
 }
 
-// Modèle Commande mis à jour pour la V1.4
 model Orders {
   id          Int   @id @default(autoincrement())
   totalAmount Float
@@ -83,22 +83,25 @@ model Orders {
   // --- LOGISTIQUE ALLER ---
   trackingNumber String? @db.VarChar(100) // Suivi expédition
   trackingUrl    String? // URL directe de suivi (optionnel mais pratique)
-  
+
   // Info Livraison (Mondial Relay ou Domicile)
-  mondialRelayPointId String? @db.VarChar(20) // ID du locker/point relais (ex: FR-12345)
-  shippingName        String? @db.VarChar(255)
-  shippingAddress     String? @db.VarChar(255) // Adresse du point relais ou domicile
-  shippingZip         String? @db.VarChar(20)
-  shippingCity        String? @db.VarChar(100)
-  shippingPhone       String? @db.VarChar(20)
+  mondialRelayPointId  String?   @db.VarChar(20) // ID du locker/point relais (ex: FR-12345)
+  shippingName         String?   @db.VarChar(255)
+  shippingAddress      String?   @db.VarChar(255) // Adresse du point relais ou domicile
+  shippingZip          String?   @db.VarChar(20)
+  shippingCity         String?   @db.VarChar(100)
+  shippingPhone        String?   @db.VarChar(20)
   // --- LOGISTIQUE RETOUR & LOCATION ---
   returnTrackingNumber String?   @db.VarChar(100) // Suivi retour client
-  returnLabelUrl       String?  //pdf espace client
+  returnLabelUrl       String? //pdf espace client
   rentalStartDate      DateTime? @db.Timestamptz(6) // Début de la location (réception colis)
   rentalEndDate        DateTime? @db.Timestamptz(6) // Fin prévue (Date butoir retour)
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  //prolongation de jouets
+  nextBillingDate      DateTime? @db.Timestamptz(6) // Jour-J (Date anniversaire)
+  renewalIntention     String?   @db.VarChar(50) // "PROLONGATION", "RESILIATION"
+  stripeSubscriptionId String?   @db.VarChar(255) // ID Stripe pour écouter le Webhook
+  createdAt            DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @db.Timestamptz(6)
 
   userId        Int?
   Users         Users?          @relation(fields: [userId], references: [id])
@@ -108,11 +111,11 @@ model Orders {
 enum OrderStatus {
   PENDING
   PREPARING
-  SHIPPED     // Expédié
-  ACTIVE      // Reçu par le client (Location en cours)
-  RETURNING   // Client a renvoyé le colis
-  RETURNED    // Reçu par Bibli'O
-  COMPLETED   // Vérifié OK
+  SHIPPED // Expédié
+  ACTIVE // Reçu par le client (Location en cours)
+  RETURNING // Client a renvoyé le colis
+  RETURNED // Reçu par Bibli'O
+  COMPLETED // Vérifié OK
   CANCELLED
 }
 
@@ -137,10 +140,10 @@ model Products {
   price       Float
   stock       Int      @default(0)
   highlights  String[]
-  
-  brand    String? @db.VarChar(100)
-  ageRange String? @db.VarChar(50)
-  category String? @db.VarChar(100)
+
+  brand    String?  @db.VarChar(100)
+  ageRange String?  @db.VarChar(50)
+  category String?  @db.VarChar(100)
   tags     String[]
 
   images    String[]

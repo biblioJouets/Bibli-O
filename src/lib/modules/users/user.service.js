@@ -6,8 +6,12 @@ export const userService = {
   // Créer un utilisateur
   async create(userData) {
     const { 
-      email, password, firstName, lastName, phone, address, ...rest 
+      email, password, confirmPassword,firstName, lastName, phone, address, ...rest 
     } = userData;
+
+    if (password !== confirmPassword) {
+      throw new Error("Les mots de passe ne correspondent pas.");
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

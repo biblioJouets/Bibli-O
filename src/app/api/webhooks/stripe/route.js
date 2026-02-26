@@ -14,7 +14,9 @@ export async function POST(req) {
   const sig = headersList.get("stripe-signature");
 
   let event;
-
+  
+  // 1. VÉRIFICATION DE SÉCURITÉ ET CONSTRUCTION DE L'ÉVÉNEMENT
+  // On s'assure d'abord que la requête vient bien de Stripe
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant dans .env");
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
@@ -23,7 +25,42 @@ export async function POST(req) {
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
-  // On écoute checkout.session.completed
+  // 2. ROUTAGE DES ÉVÉNEMENTS STRIPE
+
+  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation) ---
+  if (event.type === 'invoice.paid') {
+      const invoice = event.data.object;
+      const stripeSubId = invoice.subscription;
+
+      if (stripeSubId) {
+        // On cherche l'abonnement dans notre base
+        const order = await prisma.orders.findFirst({
+          where: { stripeSubscriptionId: stripeSubId }
+        });
+
+        if (order) {
+          // On ajoute 30 jours aux dates actuelles
+          const newBillingDate = new Date(order.nextBillingDate || new Date());
+          newBillingDate.setDate(newBillingDate.getDate() + 30);
+
+          const newRentalEnd = new Date(order.rentalEndDate || new Date());
+          newRentalEnd.setDate(newRentalEnd.getDate() + 30);
+
+          await prisma.orders.update({
+            where: { id: order.id },
+            data: {
+              nextBillingDate: newBillingDate,
+              rentalEndDate: newRentalEnd,
+              renewalIntention: null // On remet à zéro pour le mois suivant
+            }
+          });
+          
+          console.log(`✅ [Webhook] Abonnement prolongé pour la commande ${order.id}`);
+        }
+      }
+    }
+
+  // --- SCÉNARIO B : Nouvelle commande finalisée ---
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     console.log("🔔 Webhook reçu pour session:", session.id);
@@ -85,7 +122,7 @@ export async function POST(req) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData);
       console.log("✅ Commande créée ! ID:", newOrder.id);
       
-      // 5. VIDER LE PANIER (C'est ici que ça se joue !)
+      // 5. VIDER LE PANIER
       if (cartIdInt) {
         console.log("🗑️ Suppression du panier ID:", cartIdInt);
         await prisma.cartItem.deleteMany({ where: { cartId: cartIdInt } });
