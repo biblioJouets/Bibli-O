@@ -27,38 +27,52 @@ export async function POST(req) {
 
   // 2. ROUTAGE DES ÉVÉNEMENTS STRIPE
 
-  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation) ---
+// --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation) ---
   if (event.type === 'invoice.paid') {
-      const invoice = event.data.object;
-      const stripeSubId = invoice.subscription;
+    const invoice = event.data.object;
+    const stripeSubId = invoice.subscription;
 
-      if (stripeSubId) {
-        // On cherche l'abonnement dans notre base
-        const order = await prisma.orders.findFirst({
-          where: { stripeSubscriptionId: stripeSubId }
-        });
+    if (stripeSubId) {
+      // 1. On cherche la commande globale via l'ID Stripe, en incluant ses JOUETS
+      const order = await prisma.orders.findFirst({
+        where: { stripeSubscriptionId: stripeSubId },
+        include: { OrderProducts: true }
+      });
 
-        if (order) {
-          // On ajoute 30 jours aux dates actuelles
-          const newBillingDate = new Date(order.nextBillingDate || new Date());
+      if (order) {
+        // 2. On isole UNIQUEMENT les jouets qui ont une intention de prolongation
+        const productsToRenew = order.OrderProducts.filter(p => 
+          p.renewalIntention === 'PROLONGATION' || 
+          p.renewalIntention === 'PROLONGATION_TACITE'
+        );
+
+        // 3. On boucle sur ces jouets pour mettre à jour leurs dates indépendantes
+        for (const product of productsToRenew) {
+          const newBillingDate = new Date(product.nextBillingDate || new Date());
           newBillingDate.setDate(newBillingDate.getDate() + 30);
 
-          const newRentalEnd = new Date(order.rentalEndDate || new Date());
+          const newRentalEnd = new Date(product.rentalEndDate || new Date());
           newRentalEnd.setDate(newRentalEnd.getDate() + 30);
 
-          await prisma.orders.update({
-            where: { id: order.id },
+          await prisma.orderProducts.update({
+            where: {
+              OrderId_ProductId: {
+                OrderId: product.OrderId,
+                ProductId: product.ProductId
+              }
+            },
             data: {
               nextBillingDate: newBillingDate,
               rentalEndDate: newRentalEnd,
-              renewalIntention: null // On remet à zéro pour le mois suivant
+              renewalIntention: null // On remet à zéro pour le cycle du mois prochain !
             }
           });
-          
-          console.log(`✅ [Webhook] Abonnement prolongé pour la commande ${order.id}`);
         }
+        
+        console.log(`✅ [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s) de la commande ${order.id}`);
       }
     }
+  }
 
   // --- SCÉNARIO B : Nouvelle commande finalisée ---
   if (event.type === "checkout.session.completed") {

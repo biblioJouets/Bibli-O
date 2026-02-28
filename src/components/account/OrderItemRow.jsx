@@ -8,6 +8,33 @@ export default function OrderItemRow({ item, orderStatus }) {
   const productName = productData?.name || "Jouet Mystère";
   const productPrice = Number(productData?.price || 0).toFixed(2);
 
+// --- LOGIQUE DE RETOUR D'UN JOUET ---
+  const handleReturnToy = async () => {
+    if (confirm("Voulez-vous vraiment enregistrer le retour de ce jouet ? Votre abonnement sera ajusté.")) {
+      setIsProcessing(true);
+      try {
+        const response = await fetch('/api/orders/return-item', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            orderId: item.OrderId, 
+            productId: item.ProductId 
+          })
+        });
+        
+        if (response.ok) {
+          alert("Demande de retour enregistrée, facturation mise à jour.");
+          // Ici, tu pourrais faire un router.refresh() pour mettre à jour l'affichage
+        } else {
+          alert("Erreur lors de la demande de retour.");
+        }
+      } catch (error) {
+        console.error("Erreur réseau", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
   // On utilise la date de fin DU JOUET
   const returnDate = item.rentalEndDate 
     ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR') 
@@ -42,7 +69,14 @@ export default function OrderItemRow({ item, orderStatus }) {
       </div>
 
       <div className="item-actions">
-        <button className="btn-pill btn-exchange" type="button">Échanger</button>
+        <button 
+  className="btn-pill btn-exchange" 
+  type="button"
+  onClick={handleReturnToy}
+  disabled={isProcessing}
+>
+  {isProcessing ? 'En cours...' : 'Rendre'}
+</button>
         <button className="btn-pill btn-adopt" type="button">Adopter</button>
         {showProlongButton ? (
           <ProlongButton 
