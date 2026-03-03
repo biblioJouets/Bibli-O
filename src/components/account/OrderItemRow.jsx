@@ -1,8 +1,10 @@
 /* src/components/account/OrderItemRow.jsx */
 import Image from 'next/image';
+import { useState } from 'react';
 import ProlongButton from './ProlongButton';
 
 export default function OrderItemRow({ item, orderStatus }) {
+  const [isProcessing, setIsProcessing] = useState(false);
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
   const productName = productData?.name || "Jouet Mystère";
