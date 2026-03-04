@@ -42,18 +42,26 @@ export default function OrderItemRow({ item, orderStatus }) {
     ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR') 
     : "Non définie";
 
-  // --- LOGIQUE TEMPORELLE (J-7) AU NIVEAU DU JOUET ---
+// --- LOGIQUE TEMPORELLE (J-7) AU NIVEAU DU JOUET ---
   let showProlongButton = false;
-  if (orderStatus === 'ACTIVE' && item.nextBillingDate) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    const billingDate = new Date(item.nextBillingDate);
-    billingDate.setHours(0, 0, 0, 0);
-    const diffTime = billingDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 7 && diffDays >= 0) {
+  
+  if (orderStatus === 'ACTIVE') {
+    if (item.renewalIntention === 'PAIEMENT_ECHOUE') {
+      // Priorité absolue : Si le paiement a échoué, on affiche TOUJOURS le bouton d'alerte
       showProlongButton = true;
+    } else if (item.nextBillingDate) {
+      // Sinon, on applique la règle classique des 7 jours
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
+      const billingDate = new Date(item.nextBillingDate);
+      billingDate.setHours(0, 0, 0, 0);
+      const diffTime = billingDate.getTime() - today.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      // On affiche le bouton de J-7 jusqu'à la date de facturation (et même un peu après s'il y a un retard)
+      if (diffDays <= 7) {
+        showProlongButton = true;
+      }
     }
   }
 
