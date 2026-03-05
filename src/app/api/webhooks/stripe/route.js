@@ -30,9 +30,10 @@ export async function POST(req) {
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
 
-    const stripeSubId = invoice.subscription || 
+    let stripeSubId = invoice.subscription || 
       invoice.parent?.subscription_details?.subscription ||
       invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
+
 
     console.log(` [Debug Webhook] Facture payée reçue. ID Abonnement Stripe: ${stripeSubId}`);
     
@@ -47,7 +48,8 @@ export async function POST(req) {
       if (order) {
         const productsToRenew = order.OrderProducts.filter(p => 
           p.renewalIntention === 'PROLONGATION' || 
-          p.renewalIntention === 'PROLONGATION_TACITE'
+          p.renewalIntention === 'PROLONGATION_TACITE' ||
+          p.renewalIntention === 'PAIEMENT_ECHOUE'
         );
 
         for (const product of productsToRenew) {
