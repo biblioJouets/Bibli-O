@@ -26,11 +26,18 @@ async function sendBrevoEmail(toEmail, toName, templateId, params) {
     
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ Erreur Brevo:", errorData);
+      console.error(" Erreur Brevo:", errorData);
     }
   } catch (error) {
-    console.error("❌ Exception Brevo:", error);
+    console.error(" Exception Brevo:", error);
   }
+}
+
+function formatToyNames(names) {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  const last = names.pop();
+  return names.join(", ") + " et " + last;
 }
 
 // -------------------------------------------------------------------
@@ -62,23 +69,42 @@ export async function GET(request) {
 
     // 3. Boucle d'analyse
     for (const order of orders) {
-      // On récupère l'utilisateur pour avoir son email et son nom
       const dbUser = await prisma.users.findUnique({ where: { id: order.userId } });
       if (!dbUser) continue;
 
-      const userEmail = dbUser.email;
-      // On récupère le prénom depuis l'adresse de livraison ou le profil
-      const prenom = order.shippingName ? order.shippingName.split(' ')[0] : (dbUser.name?.split(' ')[0] || "Client(e)");
 
+      //recherche nom du client 
+const userEmail = dbUser.email;
+      
+      // --- LOGIQUE ULTRA-ROBUSTE POUR LE PRÉNOM ---
+      let prenom = "Client(e)";
+
+      if (order.shippingName) {
+        // S'il y a une adresse de livraison, on prend le premier mot (le prénom)
+        prenom = order.shippingName.split(' ')[0];
+      } else if (dbUser.firstName) {
+        // Sinon, on prend le prénom officiel du compte utilisateur
+        prenom = dbUser.firstName;
+      }
+
+      // Nettoyage (on enlève les espaces) et mise en majuscule de la 1ère lettre
+      if (prenom && prenom.trim() !== "") {
+        prenom = prenom.trim();
+        prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+      } else {
+        prenom = "Client(e)";
+      }
+
+      const toysJ7 = [];
+      const toysJ2 = [];
+
+      // On analyse chaque jouet de la commande
       for (const item of order.OrderProducts) {
         results.checked++;
         
         if (!item.nextBillingDate) continue;
-
-        // On ignore si le client a déjà demandé un retour ou si son paiement a échoué
         if (item.renewalIntention === 'RETOUR' || item.renewalIntention === 'PAIEMENT_ECHOUE') continue;
 
-        // Calcul de la différence en jours
         const billingDate = new Date(item.nextBillingDate);
         billingDate.setHours(0, 0, 0, 0);
         
@@ -87,34 +113,40 @@ export async function GET(request) {
 
         const jouetName = item.Products.name;
 
-        // --- 📧 ALERTE J-7 (Template ID: 12) ---
-        if (diffDays === 7) {
-          await sendBrevoEmail(userEmail, prenom, 12, {
-            prenom: prenom,
-            jouet: jouetName,
-            lienCompte: `${appUrl}/mon-compte`
-          });
-          results.remindersJ7++;
-          console.log(` [CRON] Relance J-7 envoyée pour ${jouetName} à ${userEmail}`);
-        }
+        // On trie les jouets dans les bons paniers
+        if (diffDays === 7) toysJ7.push(jouetName);
+        if (diffDays === 2) toysJ2.push(jouetName);
+      }
 
-        // --- 📧 RELANCE J-2 (Template ID: 15) ---
-        if (diffDays === 2) {
-          await sendBrevoEmail(userEmail, prenom, 15, {
-            prenom: prenom,
-            jouet: jouetName,
-            lienCompte: `${appUrl}/mon-compte`
-          });
-          results.remindersJ2++;
-          console.log(` [CRON] Relance J-2 envoyée pour ${jouetName} à ${userEmail}`);
-        }
+      // ---  ENVOI ALERTE J-7  ---
+      if (toysJ7.length > 0) {
+        const jouetsString = formatToyNames([...toysJ7]);
+        await sendBrevoEmail(userEmail, prenom, 12, {
+          prenom: prenom,
+          jouet: jouetsString,
+          lienCompte: `${appUrl}/mon-compte`
+        });
+        results.remindersJ7++;
+        console.log(` [CRON] Relance J-7 envoyée pour [${jouetsString}] à ${userEmail}`);
+      }
+
+      // ---  ENVOI  RELANCE J-2 ---
+      if (toysJ2.length > 0) {
+        const jouetsString = formatToyNames([...toysJ2]);
+        await sendBrevoEmail(userEmail, prenom, 15, {
+          prenom: prenom,
+          jouet: jouetsString,
+          lienCompte: `${appUrl}/mon-compte`
+        });
+        results.remindersJ2++;
+        console.log(` [CRON] Relance J-2 envoyée pour [${jouetsString}] à ${userEmail}`);
       }
     }
 
     return NextResponse.json({ success: true, results });
 
   } catch (error) {
-    console.error("[CRON] Error:", error);
+    console.error(" CRON Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
