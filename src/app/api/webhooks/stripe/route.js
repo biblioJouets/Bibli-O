@@ -186,6 +186,7 @@ export async function POST(req) {
 
       const virtualCartData = { items: virtualCartItems };
       const totalAmount = session.amount_total / 100;
+      const stripeSubscriptionId = session.subscription;
       
       const shippingData = {
         shippingName, shippingAddress, shippingZip, shippingCity, shippingPhone,
@@ -193,7 +194,7 @@ export async function POST(req) {
       };
       
       console.log(" Création de la commande...");
-      const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData);
+      const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log("✅ Commande créée ! ID:", newOrder.id);
       
       if (cartIdInt) {

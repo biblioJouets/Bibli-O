@@ -98,24 +98,23 @@ export const sendReturnLabel = async (orderInfo) => {
 // ============================================================
 //  2. LOGIQUE COMMANDE (Service)
 // ============================================================
-export const createOrder = async (userId, cartData, totalAmount, shippingData) => {
+export const createOrder = async (userId, cartData, totalAmount, shippingData, stripeSubscriptionId) => {
   
-  // ÉTAPE 1 : TRANSACTION BDD (Rapide et Atomique)
-  // On récupère le résultat de la transaction dans une variable
   const result = await prisma.$transaction(async (tx) => {
     
     // 1. Vérification ultime du stock AVANT de valider
     for (const item of cartData.items) {
       const product = await tx.products.findUnique({ where: { id: item.productId } });
-      
-      // Sécurité : On vérifie si le produit existe et s'il y a du stock
       if (!product || product.stock < item.quantity) {
         throw new Error(`Stock insuffisant pour le produit : ${product?.name || 'Inconnu'}`);
       }
     }
 
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setDate(nextMonth.getDate() + 30);
+
     // 2. Création de la commande
-    // Note : On utilise 'tx' partout ici, pas 'prisma'
     const newOrder = await tx.orders.create({
       data: {
         userId: userId,
@@ -127,10 +126,13 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData) =
         shippingZip: shippingData.shippingZip,
         shippingCity: shippingData.shippingCity,
         shippingPhone: shippingData.shippingPhone,
+        stripeSubscriptionId: stripeSubscriptionId,
         OrderProducts: {
           create: cartData.items.map(item => ({
             ProductId: item.productId,
-            quantity: item.quantity 
+            quantity: item.quantity,
+            nextBillingDate: nextMonth, 
+            rentalEndDate: nextMonth
           }))
         }
       }
