@@ -8,14 +8,57 @@ import { createOrder } from "@/lib/modules/orders/order.service";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// -------------------------------------------------------------------
+// FONCTIONS UTILITAIRES : EMAILING BREVO
+// -------------------------------------------------------------------
+async function sendBrevoEmail(toEmail, toName, templateId, params) {
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: { 
+          name: process.env.BREVO_SENDER_NAME || "Bibli'o Jouets", 
+          email: process.env.BREVO_SENDER_EMAIL 
+        },
+        to: [{ email: toEmail, name: toName }],
+        templateId: templateId,
+        params: params
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Erreur Brevo:", errorData);
+    }
+  } catch (error) {
+    console.error("❌ Exception Brevo:", error);
+  }
+}
+
+function formatToyNames(names) {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  const last = names.pop();
+  return names.join(", ") + " et " + last;
+}
+
+// -------------------------------------------------------------------
+// ROUTE PRINCIPALE DU WEBHOOK
+// -------------------------------------------------------------------
 export async function POST(req) {
   const body = await req.text();
   const headersList = await headers(); 
   const sig = headersList.get("stripe-signature");
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   let event;
   
-  // 1. VÉRIFICATION DE SÉCURITÉ ET CONSTRUCTION DE L'ÉVÉNEMENT
+  // 1. VÉRIFICATION DE SÉCURITÉ
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant dans .env");
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
@@ -26,24 +69,27 @@ export async function POST(req) {
 
   // 2. ROUTAGE DES ÉVÉNEMENTS STRIPE
 
-  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation) ---
+  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation Réussie) ---
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
 
-    let stripeSubId = invoice.subscription || 
+    const stripeSubId = invoice.subscription || 
       invoice.parent?.subscription_details?.subscription ||
       invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
 
 
+    
     console.log(` [Debug Webhook] Facture payée reçue. ID Abonnement Stripe: ${stripeSubId}`);
     
     if (stripeSubId) {
+      // 💡 AJOUT : On inclut les Utilisateurs et les informations des Produits !
       const order = await prisma.orders.findFirst({
         where: { stripeSubscriptionId: stripeSubId },
-        include: { OrderProducts: true }
+        include: { 
+          OrderProducts: { include: { Products: true } },
+          Users: true 
+        }
       });
-      
-      console.log(` [Debug Webhook] Commande trouvée en BDD ? ${order ? 'OUI (ID: ' + order.id + ')' : 'NON'}`);
       
       if (order) {
         const productsToRenew = order.OrderProducts.filter(p => 
@@ -52,32 +98,63 @@ export async function POST(req) {
           p.renewalIntention === 'PAIEMENT_ECHOUE'
         );
 
+        const toyNames = [];
+        let dateFormatted = "";
+
         for (const product of productsToRenew) {
           const newBillingDate = new Date(product.nextBillingDate || new Date());
           newBillingDate.setDate(newBillingDate.getDate() + 30);
+          
+          // Formatage de la date pour l'e-mail (ex: 06/04/2026)
+          dateFormatted = newBillingDate.toLocaleDateString('fr-FR');
 
           const newRentalEnd = new Date(product.rentalEndDate || new Date());
           newRentalEnd.setDate(newRentalEnd.getDate() + 30);
 
           await prisma.orderProducts.update({
-            where: {
-              OrderId_ProductId: { OrderId: product.OrderId, ProductId: product.ProductId }
-            },
-            data: {
-              nextBillingDate: newBillingDate,
-              rentalEndDate: newRentalEnd,
-              renewalIntention: null
-            }
+            where: { OrderId_ProductId: { OrderId: product.OrderId, ProductId: product.ProductId } },
+            data: { nextBillingDate: newBillingDate, rentalEndDate: newRentalEnd, renewalIntention: null }
           });
+
+          toyNames.push(product.Products.name);
         }
         
-        console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s) de la commande ${order.id}`);
+        console.log(`✅ [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s)`);
+
+        // 📧 ENVOI DE L'EMAIL DE SUCCÈS (Template ID: 13)
+        if (toyNames.length > 0 && order.Users) {
+          let prenom = "Client(e)";
+          if (order.shippingName) {
+            prenom = order.shippingName.split(' ')[0];
+          } else if (order.Users.firstName) {
+            prenom = order.Users.firstName;
+          }
+          
+          if (prenom && prenom.trim() !== "") {
+            prenom = prenom.trim();
+            prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+          } else {
+            prenom = "Client(e)";
+          }
+
+          const jouetsString = formatToyNames(toyNames);
+          const lienFactureStripe = invoice.hosted_invoice_url || `${appUrl}/mon-compte`;
+
+          await sendBrevoEmail(order.Users.email, prenom, 13, {
+            prenom: prenom, 
+            jouet: jouetsString,
+            nouvelleDate: dateFormatted,
+            lienFacture: lienFactureStripe
+          });
+          console.log(`📧 [Brevo] Email de confirmation envoyé à ${order.Users.email}`);
+        }
       }
     }
   }
 
   // --- SCÉNARIO B : Nouvelle commande finalisée ---
   if (event.type === "checkout.session.completed") {
+    // ... [Le code de ton Scénario B reste inchangé] ...
     const session = event.data.object;
     console.log(" Webhook reçu pour session:", session.id);
 
@@ -117,7 +194,7 @@ export async function POST(req) {
       
       console.log(" Création de la commande...");
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData);
-      console.log(" Commande créée ! ID:", newOrder.id);
+      console.log("✅ Commande créée ! ID:", newOrder.id);
       
       if (cartIdInt) {
         console.log(" Suppression du panier ID:", cartIdInt);
@@ -127,7 +204,7 @@ export async function POST(req) {
       }
 
     } catch (error) {
-      console.error(" Erreur Webhook:", error);
+      console.error("❌ Erreur Webhook:", error);
       return NextResponse.json({ error: "Erreur traitement commande" }, { status: 500 });
     }
   }
@@ -136,7 +213,6 @@ export async function POST(req) {
   if (event.type === 'invoice.payment_failed') {
     const invoice = event.data.object;
     
-    // 1. Recherche intelligente de l'abonnement
     const stripeSubId = 
       invoice.subscription || 
       invoice.parent?.subscription_details?.subscription ||
@@ -146,12 +222,14 @@ export async function POST(req) {
     console.log(` [Debug Échec] Facture impayée reçue. ID Abonnement : ${stripeSubId}`);
 
     if (stripeSubId) {
+      // 💡 AJOUT : On inclut les Utilisateurs et les informations des Produits !
       const order = await prisma.orders.findFirst({
         where: { stripeSubscriptionId: stripeSubId },
-        include: { OrderProducts: true }
+        include: { 
+          OrderProducts: { include: { Products: true } },
+          Users: true 
+        }
       });
-
-      console.log(` [Debug Échec] Commande trouvée en BDD ? ${order ? 'OUI (ID: ' + order.id + ')' : 'NON'}`);
 
       if (order) {
         const productsToRenew = order.OrderProducts.filter(p => 
@@ -159,16 +237,43 @@ export async function POST(req) {
           p.renewalIntention === 'PROLONGATION_TACITE'
         );
 
+        const toyNames = [];
+
         for (const product of productsToRenew) {
           await prisma.orderProducts.update({
-            where: {
-              OrderId_ProductId: { OrderId: product.OrderId, ProductId: product.ProductId }
-            },
+            where: { OrderId_ProductId: { OrderId: product.OrderId, ProductId: product.ProductId } },
             data: { renewalIntention: 'PAIEMENT_ECHOUE' }
           });
+          toyNames.push(product.Products.name);
         }
         
-        console.log(` [Webhook] Échec de paiement enregistré pour ${productsToRenew.length} jouet(s) de la commande ${order.id}`);
+        console.log(`❌ [Webhook] Échec de paiement enregistré pour ${productsToRenew.length} jouet(s)`);
+
+        // 📧 ENVOI DE L'EMAIL D'ÉCHEC (Template ID: 14)
+        if (toyNames.length > 0 && order.Users) {
+          let prenom = "Client(e)";
+          if (order.shippingName) {
+            prenom = order.shippingName.split(' ')[0];
+          } else if (order.Users.firstName) {
+            prenom = order.Users.firstName;
+          }
+          
+          if (prenom && prenom.trim() !== "") {
+            prenom = prenom.trim();
+            prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+          } else {
+            prenom = "Client(e)";
+          }
+
+          const jouetsString = formatToyNames(toyNames);
+
+          await sendBrevoEmail(order.Users.email, prenom, 14, {
+            prenom: prenom,
+            jouet: jouetsString,
+            lienCompte: `${appUrl}/mon-compte`
+          });
+          console.log(`📧 [Brevo] Email d'action requise envoyé à ${order.Users.email}`);
+        }
       }
     }
   }
