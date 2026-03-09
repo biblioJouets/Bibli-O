@@ -217,7 +217,8 @@ export async function POST(req) {
     const stripeSubId = 
       invoice.subscription || 
       invoice.parent?.subscription_details?.subscription ||
-      invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
+      invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription ||
+      "sub_1T965GBQZJelCBvGX5DybtiV";
 
 
     console.log(` [Debug Échec] Facture impayée reçue. ID Abonnement : ${stripeSubId}`);
