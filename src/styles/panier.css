@@ -1,0 +1,415 @@
+/* =========================================
+   PANIER - BIBLI'O JOUETS (panier.css)
+   ========================================= */
+
+/* --- Conteneur global --- */
+.cart-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 20px 60px 20px;
+}
+
+/* --- Panier Vide --- */
+.cart-empty-container {
+  text-align: center;
+  padding: 100px 20px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-empty-icon-wrapper {
+  background-color: #DAEEE6;
+  padding: 2rem;
+  border-radius: 50%;
+  margin-bottom: 2rem;
+}
+
+.cart-empty-title {
+  font-size: 2rem;
+  color: #2E1D21;
+  margin-bottom: 1rem;
+}
+
+.cart-empty-text {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* --- En-tête du panier --- */
+.cart-header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.cart-header-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #2E1D21;
+  font-weight: 800;
+}
+
+.cart-header-subtitle {
+  color: #666;
+}
+
+/* --- Layout Principal --- */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* --- Liste des Jouets (Colonne Gauche) --- */
+.cart-items-list {
+  display: grid;
+  gap: 20px;
+}
+
+.cart-item-card {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.cart-item-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #88D4AB;
+  color: white;
+  font-size: 0.7rem;
+  padding: 5px 10px;
+  border-bottom-right-radius: 10px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.cart-item-image-wrapper {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  position: relative;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.cart-item-image {
+  object-fit: cover;
+}
+
+.cart-item-details {
+  flex: 1;
+  padding: 0 25px;
+}
+
+.cart-item-title {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  color: #2E1D21;
+}
+
+.cart-item-ref {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.cart-item-price-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cart-item-price-old {
+  text-decoration: line-through;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.cart-item-price-free {
+  color: #6EC1E4;
+  font-weight: bold;
+  background-color: #EAF7FC;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.cart-item-delete-btn {
+  background: none;
+  border: none;
+  color: #FF8C94;
+  cursor: pointer;
+  padding: 5px;
+  transition: opacity 0.2s ease;
+}
+
+.cart-item-delete-btn:hover {
+  opacity: 0.7;
+}
+
+.cart-item-qty-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFF7EB;
+  border-radius: 30px;
+  padding: 5px;
+}
+
+.cart-item-qty-btn {
+  border: none;
+  background-color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s ease;
+}
+
+.cart-item-qty-btn:active {
+  transform: scale(0.95);
+}
+
+.cart-item-qty-text {
+  font-weight: bold;
+  width: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #2E1D21;
+}
+
+/* --- Résumé & Abonnement (Colonne Droite) --- */
+.cart-summary-card {
+  background-color: white;
+  padding: 30px;
+  border-radius: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  border: 2px solid #FFF7EB;
+  position: sticky;
+  top: 100px;
+}
+
+.cart-summary-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #FFF7EB;
+  padding-bottom: 15px;
+  color: #2E1D21;
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #666;
+  align-items: center;
+}
+
+.cart-summary-row-bold {
+  font-weight: bold;
+  color: #2E1D21;
+}
+
+.cart-summary-price-old {
+  text-decoration: line-through;
+}
+
+.cart-summary-delivery-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2E1D21;
+}
+
+.cart-summary-delivery-value {
+  color: #88D4AB;
+  font-weight: bold;
+}
+
+.cart-summary-margin-bottom {
+  margin-bottom: 25px;
+}
+
+/* --- Formule Calculée --- */
+.cart-plan-box {
+  background-color: #FFF7EB;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+}
+
+.cart-plan-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.cart-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cart-plan-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #FF8C94;
+}
+
+.cart-plan-link {
+  color: #6EC1E4;
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.cart-plan-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2E1D21;
+}
+
+.cart-plan-price-month {
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.cart-plan-details {
+  font-size: 0.8rem;
+  color: #FF8C94;
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+/* --- Zone de validation --- */
+.cart-checkout-section {
+  text-align: center;
+}
+
+.cart-checkout-text {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.cart-checkout-btn-wrapper {
+  width: 100%;
+}
+
+.cart-reassurance-wrapper {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cart-reassurance-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #88D4AB;
+}
+
+/* =========================================
+   MEDIA QUERIES (RESPONSIVE)
+   ========================================= */
+
+/* Tablettes et petits écrans d'ordinateur */
+@media (max-width: 900px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .cart-summary-card {
+    position: static;
+  }
+}
+
+/* Smartphones standards */
+@media (max-width: 600px) {
+  .cart-page-container {
+    padding: 100px 15px 40px 15px;
+  }
+  
+  .cart-item-card {
+    flex-direction: column;
+    padding: 20px 15px;
+    align-items: flex-start;
+  }
+
+  .cart-item-image-wrapper {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 15px;
+  }
+
+  .cart-item-details {
+    padding: 0;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .cart-item-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cart-header-title {
+    font-size: 2rem;
+  }
+}
+
+/* Très petits smartphones (jusqu'à 320px) */
+@media (max-width: 360px) {
+  .cart-page-container {
+    padding: 80px 10px 30px 10px;
+  }
+
+  .cart-header-title {
+    font-size: 1.7rem;
+  }
+
+  .cart-item-image-wrapper {
+    height: 160px;
+  }
+
+  .cart-summary-card {
+    padding: 20px 15px;
+  }
+
+  .cart-plan-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
+import '@/styles/panier.css'; // <-- Pense à vérifier le chemin d'accès
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading } = useCart();
@@ -58,21 +59,12 @@ export default function PanierPage() {
   // --- AFFICHAGE PANIER VIDE ---
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
-      <div style={{ 
-        textAlign: "center", 
-        padding: "100px 20px",
-        minHeight: "60vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ background: "#DAEEE6", padding: "2rem", borderRadius: "50%", marginBottom: "2rem" }}>
+      <div className="cart-empty-container">
+        <div className="cart-empty-icon-wrapper">
              <Gift size={64} color="#88D4AB" />
         </div>
-        <h2 style={{ fontSize: "2rem", color: "#2E1D21", marginBottom: "1rem" }}>Votre coffre à jouets est vide 🛒</h2>
-        <p style={{ color: "#666", fontSize: "1.1rem" }}>Commencez par ajouter des jeux pour composer votre box idéale !</p>
-        <br />
+        <h2 className="cart-empty-title">Votre coffre à jouets est vide 🛒</h2>
+        <p className="cart-empty-text">Commencez par ajouter des jeux pour composer votre box idéale !</p>
         <ButtonBlue text="Parcourir la bibliothèque" href="/bibliotheque" />
       </div>
     );
@@ -80,91 +72,71 @@ export default function PanierPage() {
 
   // --- AFFICHAGE PANIER REMPLI ---
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "120px 20px 60px 20px" }}>
+    <div className="cart-page-container">
       
-      <header style={{ marginBottom: "3rem", textAlign: "center" }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem", color: "#2E1D21", fontWeight: "800" }}>
+      <header className="cart-header">
+        <h1 className="cart-header-title">
           Ma Sélection
         </h1>
-        <p style={{ color: "#666" }}>
+        <p className="cart-header-subtitle">
           Vous avez sélectionné <strong>{itemCount} jouet{itemCount > 1 ? 's' : ''}</strong> pour votre prochaine box.
         </p>
       </header>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "40px", alignItems: "start" }} className="cart-layout">
+      <div className="cart-layout">
         
         {/* --- COLONNE GAUCHE : LISTE DES JOUETS --- */}
-        <div style={{ display: "grid", gap: "20px" }}>
+        <div className="cart-items-list">
           {cart.items.map((item) => (
-            <div key={item.id} style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              background: "white", 
-              padding: "20px", 
-              borderRadius: "20px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
-              border: "1px solid #f0f0f0",
-              position: "relative",
-              overflow: "hidden"
-            }}>
+            <div key={item.id} className="cart-item-card">
               
-              <div style={{
-                position: "absolute",
-                top: "0",
-                left: "0",
-                background: "#88D4AB",
-                color: "white",
-                fontSize: "0.7rem",
-                padding: "5px 10px",
-                borderBottomRightRadius: "10px",
-                fontWeight: "bold"
-              }}>
+              <div className="cart-item-badge">
                 INCLUS
               </div>
 
-              <div style={{ flexShrink: 0, width: "120px", height: "120px", position: "relative", background: "#f9f9f9", borderRadius: "15px", overflow: "hidden" }}>
+              <div className="cart-item-image-wrapper">
                 <Image 
                   src={item.product.images && item.product.images[0] ? item.product.images[0] : "/assets/toys/jouet1.jpg"} 
                   alt={item.product.name}
                   fill
-                  style={{ objectFit: "cover" }}
+                  className="cart-item-image"
                 />
               </div>
 
-              <div style={{ flex: 1, padding: "0 25px" }}>
-                <h3 style={{ margin: "0 0 8px 0", fontSize: "1.3rem", color: "#2E1D21" }}>{item.product.name}</h3>
-                <p style={{ color: "#999", fontSize: "0.9rem", marginBottom: "10px" }}>Réf: {item.product.reference}</p>
+              <div className="cart-item-details">
+                <h3 className="cart-item-title">{item.product.name}</h3>
+                <p className="cart-item-ref">Réf: {item.product.reference}</p>
                 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ textDecoration: "line-through", color: "#ccc", fontSize: "0.9rem" }}>
+                <div className="cart-item-price-wrapper">
+                    <span className="cart-item-price-old">
                         Valeur : {item.product.price}€
                     </span>
-                    <span style={{ color: "#6EC1E4", fontWeight: "bold", background: "#EAF7FC", padding: "4px 12px", borderRadius: "20px", fontSize: "0.9rem"}}>
+                    <span className="cart-item-price-free">
                         0€ avec abonnement
                     </span>
                 </div>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "end", gap: "15px" }}>
+              <div className="cart-item-actions">
                 <button 
                   onClick={() => removeFromCart(item.id)}
-                  style={{ background: "none", border: "none", color: "#FF8C94", cursor: "pointer", padding: "5px" }}
+                  className="cart-item-delete-btn"
                   aria-label="Supprimer"
                 >
                   <Trash2 size={20} />
                 </button>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "#FFF7EB", borderRadius: "30px", padding: "5px" }}>
+                <div className="cart-item-qty-wrapper">
                   <button 
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    style={{ border: "none", background: "white", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}
+                    className="cart-item-qty-btn"
                   >
                     <Minus size={14} color="#2E1D21" />
                   </button>
-                  <span style={{ fontWeight: "bold", width: "20px", textAlign: "center", fontSize: "0.9rem" }}>{item.quantity}</span>
+                  <span className="cart-item-qty-text">{item.quantity}</span>
                   <button 
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    style={{ border: "none", background: "white", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}
+                    className="cart-item-qty-btn"
                   >
                     <Plus size={14} color="#2E1D21" />
                   </button>
@@ -175,76 +147,61 @@ export default function PanierPage() {
         </div>
 
         {/* --- COLONNE DROITE : RÉSUMÉ & ABONNEMENT --- */}
-        <div style={{ 
-          background: "white", 
-          padding: "30px", 
-          borderRadius: "25px", 
-          boxShadow: "0 10px 40px rgba(0,0,0,0.05)",
-          border: "2px solid #FFF7EB",
-          position: "sticky",
-          top: "100px"
-        }}>
-          <h3 style={{ fontSize: "1.5rem", marginBottom: "1.5rem", borderBottom: "2px solid #FFF7EB", paddingBottom: "15px" }}>
+        <div className="cart-summary-card">
+          <h3 className="cart-summary-title">
             Ma future Box
           </h3>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", color: "#666" }}>
+          <div className="cart-summary-row">
             <span>Nombre de jouets</span>
-            <strong>{itemCount}</strong>
+            <strong className="cart-summary-row-bold">{itemCount}</strong>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", color: "#666" }}>
+          <div className="cart-summary-row">
             <span>Valeur réelle des jouets</span>
-            <span style={{ textDecoration: "line-through" }}>{cartValue.toFixed(2)}€</span>
+            <span className="cart-summary-price-old">{cartValue.toFixed(2)}€</span>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "25px", color: "#2E1D21", alignItems: "center" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="cart-summary-row cart-summary-margin-bottom">
+            <span className="cart-summary-delivery-label">
                 <Truck size={18} color="#88D4AB" /> Livraison
             </span>
-            <span style={{ color: "#88D4AB", fontWeight: "bold" }}>OFFERTE</span>
+            <span className="cart-summary-delivery-value">OFFERTE</span>
           </div>
 
           {/* FORMULE DYNAMIQUE MISE À JOUR */}
-          <div style={{ background: "#FFF7EB", padding: "20px", borderRadius: "15px", marginBottom: "25px" }}>
-            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>Formule calculée :</p>
+          <div className="cart-plan-box">
+            <p className="cart-plan-label">Formule calculée :</p>
             
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#FF8C94" }}>{suggestedPlan.name}</span>
+            <div className="cart-plan-header">
+                <span className="cart-plan-name">{suggestedPlan.name}</span>
                 
-                {/* Condition : Afficher le prix OU le lien Contact */}
                 {suggestedPlan.contactLink ? (
                     <Link 
                         href={suggestedPlan.contactLink}
-                        style={{ 
-                            color: "#6EC1E4", 
-                            fontWeight: "bold", 
-                            textDecoration: "underline",
-                            fontSize: "1rem" 
-                        }}
+                        className="cart-plan-link"
                     >
                         Nous contacter
                     </Link>
                 ) : (
-                    <span style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#2E1D21" }}>
-                        {suggestedPlan.price}<span style={{fontSize: "0.8rem", fontWeight: "normal"}}>/mois</span>
+                    <span className="cart-plan-price">
+                        {suggestedPlan.price}<span className="cart-plan-price-month">/mois</span>
                     </span>
                 )}
             </div>
             
-            {/* Détails supplémentaires (Ex: pour le sur-mesure) */}
             {suggestedPlan.details && (
-                <p style={{ fontSize: "0.8rem", color: "#FF8C94", marginTop: "5px", fontWeight: "bold" }}>
+                <p className="cart-plan-details">
                     {suggestedPlan.details}
                 </p>
             )}
           </div>
 
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "0.85rem", color: "#999", marginBottom: "15px" }}>
+          <div className="cart-checkout-section">
+            <p className="cart-checkout-text">
                 Aucun paiement n'est prélevé maintenant. Vous confirmerez votre abonnement à l'étape suivante.
             </p>
-            <div style={{ width: "100%" }}>
+            <div className="cart-checkout-btn-wrapper">
                 {suggestedPlan.contactLink ? (
                       <ButtonBlue text="Demander un devis" href="/contact" />
                 ) : (
@@ -253,25 +210,17 @@ export default function PanierPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "center" }}>
-             <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#88D4AB" }}>
+          <div className="cart-reassurance-wrapper">
+             <div className="cart-reassurance-item">
                 <CheckCircle size={14} /> Sans engagement
              </div>
-             <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "0.8rem", color: "#88D4AB" }}>
+             <div className="cart-reassurance-item">
                 <CheckCircle size={14} /> Nettoyage PRO
              </div>
           </div>
 
         </div>
       </div>
-
-      <style jsx>{`
-        @media (max-width: 900px) {
-          .cart-layout {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
