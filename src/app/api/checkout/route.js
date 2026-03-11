@@ -1,7 +1,9 @@
+//src/app/api/checkout/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
+import prisma from "@/lib/core/database"; // 👈 NOUVEAU : Import de Prisma
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -12,7 +14,7 @@ export async function POST(req) {
     if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
     const body = await req.json();
-    const { cartItems, shippingData } = body; 
+    const { cartItems, shippingData, promoCode } = body; // 👈 NOUVEAU : On récupère promoCode
     
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
         return NextResponse.json({ error: "Panier invalide" }, { status: 400 });
@@ -26,6 +28,7 @@ export async function POST(req) {
     if (hasInvalidItems) {
         return NextResponse.json({ error: "Quantités invalides détectées." }, { status: 400 });
     }
+    
     // Calcul du nombre total de jouets
     const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     
@@ -35,20 +38,16 @@ export async function POST(req) {
       q: item.quantity 
     }));
 
-
-    //validation de l'adresse pour livraison domicile
+    // validation de l'adresse pour livraison domicile
     const AUTHORIZED_ZONES = {
         "34690": ["FABREGUES", "FABRÈGUES"],
         "34570": ["PIGNAN", "SAUSSAN"]
     };
 
-    // Si le client demande livraison DOMICILE (mondialRelayPointId === "DOMICILE")
     if (shippingData.mondialRelayPointId === "DOMICILE") {
         const zip = shippingData.shippingZip?.trim();
         const city = shippingData.shippingCity?.toUpperCase().trim();
-        
         const allowedCities = AUTHORIZED_ZONES[zip] || [];
-    
         const isAllowed = allowedCities.some(allowed => city?.includes(allowed));
 
         if (!isAllowed) {
@@ -56,7 +55,26 @@ export async function POST(req) {
         }
     }
 
-    // Mapping direct entre quantité et variable d'environnement
+    // --- 🛡️ NOUVEAU : VÉRIFICATION DU CODE PROMO ---
+    let appliedPromo = null;
+    if (promoCode === 'BIBLIOMOISOFFERT') {
+        const userIdInt = parseInt(session.user.id, 10); // Sécurité pour Prisma
+        const existingUsage = await prisma.promoCodeUsage.findUnique({
+            where: { 
+                userId_promoCode: { 
+                    userId: userIdInt, 
+                    promoCode: 'BIBLIOMOISOFFERT' 
+                } 
+            },
+        });
+
+        if (existingUsage) {
+            return NextResponse.json({ error: "Vous avez déjà profité de cette offre de bienvenue !" }, { status: 403 });
+        }
+        appliedPromo = 'BIBLIOMOISOFFERT';
+    }
+    // ------------------------------------------------
+
     const pricingMap = {
         1: process.env.STRIPE_PRICE_1_TOY,
         2: process.env.STRIPE_PRICE_2_TOYS,
@@ -73,19 +91,10 @@ export async function POST(req) {
     const priceId = pricingMap[count];
 
     if (priceId) {
-        // Cas standard : entre 1 et 9 jouets
-        line_items.push({ 
-            price: priceId, 
-            quantity: 1 
-        });
+        line_items.push({ price: priceId, quantity: 1 });
     } else if (count > 9) {
-        // Cas > 9 jouets : Logique "Sur mesure" ou blocage
-        // Option A : On bloque et on demande de contacter
         return NextResponse.json({ error: "Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure." }, { status: 400 });
-        
-        // Option B (Si tu veux permettre >9 en ajoutant des extras, c'est plus complexe, dis-le moi si besoin)
     } else {
-        // Cas 0 jouet
         return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
     }
 
@@ -95,14 +104,21 @@ export async function POST(req) {
       line_items: line_items,
       mode: "subscription", 
       customer_email: session.user.email,
+      allow_promotion_codes: true, 
+    
+        custom_text: appliedPromo === 'BIBLIOMOISOFFERT' ? {
+        submit: {
+          message: "🎁 **Code BIBLIOMOISOFFERT validé !** Réglez votre 1er mois aujourd'hui, votre 2ème mois sera automatiquement à 0,00 €."
+        }
+      } : undefined,
+    
       success_url: `${baseUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/paiement`,
       
       metadata: {
         userId: session.user.id,
-        // 👇 ON ENVOIE LE NOUVEAU FORMAT AVEC QUANTITÉS
+        applied_promo: appliedPromo || "", 
         cartSnapshot: JSON.stringify(cartSnapshot), 
-        
         cartId: body.cartId || "", 
         shippingName: shippingData.shippingName || "",
         shippingAddress: shippingData.shippingAddress || "",

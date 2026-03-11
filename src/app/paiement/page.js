@@ -4,13 +4,17 @@
 import { useState, useEffect } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react"; 
 import '@/styles/paiement.css';
 
 export default function PaiementPage() {
   const { cart, loading } = useCart();
   const { data: session } = useSession();
+
+  const searchParams = useSearchParams();
+  const promoCode = searchParams.get('promo');
+
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,8 +62,7 @@ export default function PaiementPage() {
     };
 
     fetchUserData();
-  }, [session]); // Ce useEffect se déclenche quand la session est chargée
-  // ----------------------------------------------------------------------------------
+  }, [session]); 
 
   // Zones éligibles domicile
   const AUTHORIZED_HOME_DELIVERY = {
@@ -199,7 +202,8 @@ export default function PaiementPage() {
         body: JSON.stringify({
           cartItems: cart.items,
           cartId: cart.id,
-          shippingData: finalShippingData
+          shippingData: finalShippingData,
+          promoCode: promoCode || null
         })
       });
 
@@ -384,6 +388,17 @@ export default function PaiementPage() {
             
             <p className="secure-text">Paiement sécurisé. En validant, vous acceptez les CGV.</p>
           </div>
+          {promoCode === 'BIBLIOMOISOFFERT' && (
+  <div className="bg-[#DAEEE6] border-2 border-[#88D4AB] rounded-[25px] p-4 mb-6 flex items-center gap-3">
+    <span className="text-2xl">🎁</span>
+    <div>
+      <p className="text-[#2E1D21] font-bold">Offre de bienvenue activée !</p>
+      <p className="text-sm text-[#2E1D21]">
+        Vous réglez votre première box aujourd'hui, et votre prochain mois sera à 0€.
+      </p>
+    </div>
+  </div>
+)}
         </div>
       </div>
     </div>

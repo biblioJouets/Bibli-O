@@ -1,14 +1,16 @@
 'use client';
-
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
-import '@/styles/panier.css'; // <-- Pense à vérifier le chemin d'accès
+import '@/styles/panier.css'; 
+
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading } = useCart();
+  const [promoCode, setPromoCode] = useState("");
 
   // Calcul valeur théorique (Prix boutique des jouets)
   const cartValue = cart.items?.reduce((total, item) => {
@@ -17,7 +19,7 @@ export default function PanierPage() {
 
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
-  // --- 🎯 NOUVELLE LOGIQUE TARIFAIRE ---
+  // ---  NOUVELLE LOGIQUE TARIFAIRE ---
   const getSuggestedPlan = (count) => {
     // Grille tarifaire exacte fournie
     const pricingMap = {
@@ -55,7 +57,8 @@ export default function PanierPage() {
   };
 
   const suggestedPlan = getSuggestedPlan(itemCount);
-
+  const isPromoValid = promoCode === 'BIBLIOMOISOFFERT';
+  
   // --- AFFICHAGE PANIER VIDE ---
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
@@ -201,11 +204,30 @@ export default function PanierPage() {
             <p className="cart-checkout-text">
                 Aucun paiement n'est prélevé maintenant. Vous confirmerez votre abonnement à l'étape suivante.
             </p>
+
+            {/* Section Promo Code  */}
+            {!suggestedPlan.contactLink && (
+              <div className="mb-4 text-left w-full mt-2">
+                <input
+                  type="text"
+                  placeholder="Code promo (ex: BIBLIOMOISOFFERT)"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="w-full bg-[#FFFAF4] border-2 border-[#DFF1F9] rounded-[25px] px-4 py-3 text-[#2E1D21] focus:outline-none focus:border-[#6EC1E4] transition-colors"
+                />
+                {isPromoValid && (
+                  <p className="text-[#88D4AB] text-sm mt-2 font-medium px-2">
+                    Super ! 1er mois payé, 2ème mois à 0€ !
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="cart-checkout-btn-wrapper">
                 {suggestedPlan.contactLink ? (
                       <ButtonBlue text="Demander un devis" href="/contact" />
                 ) : (
-                      <ButtonBlue text="Valider ma sélection" href="/paiement" />
+                      <ButtonBlue text="Valider ma sélection" href={`/paiement${isPromoValid ? '?promo=BIBLIOMOISOFFERT' : ''}`} />
                 )}
             </div>
           </div>
