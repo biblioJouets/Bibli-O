@@ -388,13 +388,20 @@ export default function PaiementPage() {
             
             <p className="secure-text">Paiement sécurisé. En validant, vous acceptez les CGV.</p>
           </div>
-          {promoCode === 'BIBLIOMOISOFFERT' && (
+
+      {promoCode && (
   <div className="bg-[#DAEEE6] border-2 border-[#88D4AB] rounded-[25px] p-4 mb-6 flex items-center gap-3">
     <span className="text-2xl">🎁</span>
     <div>
-      <p className="text-[#2E1D21] font-bold">Offre de bienvenue activée !</p>
+      <p className="text-[#2E1D21] font-bold">
+        {promoCode === 'BIBLIOMOISOFFERT' 
+          ? 'Offre de bienvenue activée !'
+          : `Code promo bien activé : ${promoCode} !`}
+      </p>
       <p className="text-sm text-[#2E1D21]">
-        Vous réglez votre première box aujourd'hui, et votre prochain mois sera à 0€.
+         {promoCode === 'BIBLIOMOISOFFERT' 
+          ? 'Vous réglez votre première box aujourd\'hui, et votre prochain mois sera à 0€.'
+          : 'La réduction s\'appliquera automatiquement et de manière sécurisée à la page suivante.'}
       </p>
     </div>
   </div>

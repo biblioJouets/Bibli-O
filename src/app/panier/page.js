@@ -10,8 +10,8 @@ import '@/styles/panier.css';
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading } = useCart();
-  const [promoCode, setPromoCode] = useState("");
 
+  
   // Calcul valeur théorique (Prix boutique des jouets)
   const cartValue = cart.items?.reduce((total, item) => {
     return total + (item.product.price * item.quantity);
@@ -56,9 +56,45 @@ export default function PanierPage() {
     };
   };
 
+    // ---   CODE PROMO ---  
   const suggestedPlan = getSuggestedPlan(itemCount);
-  const isPromoValid = promoCode === 'BIBLIOMOISOFFERT';
-  
+  const [promoCode, setPromoCode] = useState("");  
+  const cleanCode = promoCode.trim().toUpperCase();
+  const isPromoValid = cleanCode.length > 0;
+
+  const [promoStatus, setPromoStatus] = useState("idle"); // 'idle', 'loading', 'success', 'error'
+  const [promoMessage, setPromoMessage] = useState("");
+
+  const handleVerifyPromo = async (e) => {
+    if (e) e.preventDefault();
+    if (!promoCode.trim()) return;
+
+    setPromoStatus("loading");
+    setPromoMessage("");
+
+    try {
+        const res = await fetch("/api/verify-promo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ promoCode: promoCode.trim() })
+        });
+        const data = await res.json();
+
+        if (data.valid) {
+            setPromoStatus("success");
+            setPromoMessage(data.message);
+        } else {
+            setPromoStatus("error");
+            setPromoMessage(data.message || "Code invalide.");
+        }
+    } catch (err) {
+        setPromoStatus("error");
+        setPromoMessage("Erreur de vérification.");
+    }
+  };
+  // ------------------------------------------------
+
+
   // --- AFFICHAGE PANIER VIDE ---
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
@@ -206,30 +242,54 @@ export default function PanierPage() {
             </p>
 
             {/* Section Promo Code  */}
-            {!suggestedPlan.contactLink && (
-              <div className="mb-4 text-left w-full mt-2">
-                <input
-                  type="text"
-                  placeholder="Code promo (ex: BIBLIOMOISOFFERT)"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  className="w-full bg-[#FFFAF4] border-2 border-[#DFF1F9] rounded-[25px] px-4 py-3 text-[#2E1D21] focus:outline-none focus:border-[#6EC1E4] transition-colors"
-                />
-                {isPromoValid && (
-                  <p className="text-[#88D4AB] text-sm mt-2 font-medium px-2">
-                    Super ! 1er mois payé, 2ème mois à 0€ !
-                  </p>
-                )}
-              </div>
-            )}
+  {/* 🛡️ CHAMP CODE PROMO INTERACTIF */}
+{!suggestedPlan.contactLink && (
+  <div className="mb-4 text-left w-full mt-2">
+    <form onSubmit={handleVerifyPromo} className="flex gap-2 w-full">
+      <input
+        type="text"
+        placeholder="Code promo (ex: BIBLIO10)"
+        value={promoCode}
+        onChange={(e) => {
+          setPromoCode(e.target.value.toUpperCase());
+          setPromoStatus("idle"); // Efface le message dès qu'on retape
+        }}
+        className={`flex-1 bg-[#FFFAF4] border-2 rounded-[25px] px-4 py-3 text-[#2E1D21] focus:outline-none transition-colors ${
+          promoStatus === 'error' ? 'border-[#FF8C94] animate-shake' : 
+          promoStatus === 'success' ? 'border-[#88D4AB]' : 
+          'border-[#DFF1F9] focus:border-[#6EC1E4]'
+        }`}
+      />
+      <button 
+        type="submit" 
+        disabled={promoStatus === 'loading' || !promoCode} 
+        className="bg-[#DFF1F9] text-[#6EC1E4] hover:bg-[#6EC1E4] hover:text-white font-bold rounded-[25px] px-5 py-3 transition-colors disabled:opacity-50"
+      >
+         {promoStatus === 'loading' ? '...' : 'Appliquer'}
+      </button>
+    </form>
+    
+    {/* Messages de retour visuel */}
+    {promoStatus === 'success' && (
+      <p className="text-[#88D4AB] text-sm mt-2 font-medium px-2">{promoMessage}</p>
+    )}
+    {promoStatus === 'error' && (
+      <p className="text-[#FF8C94] text-sm mt-2 font-medium px-2">{promoMessage}</p>
+    )}
+  </div>
+)}
 
-            <div className="cart-checkout-btn-wrapper">
-                {suggestedPlan.contactLink ? (
-                      <ButtonBlue text="Demander un devis" href="/contact" />
-                ) : (
-                      <ButtonBlue text="Valider ma sélection" href={`/paiement${isPromoValid ? '?promo=BIBLIOMOISOFFERT' : ''}`} />
-                )}
-            </div>
+{/* BOUTON DE VALIDATION DU PANIER */}
+<div className="cart-checkout-btn-wrapper">
+    {suggestedPlan.contactLink ? (
+          <ButtonBlue text="Demander un devis" href="/contact" />
+    ) : (
+          <ButtonBlue 
+            text="Valider ma sélection" 
+            href={`/paiement${promoStatus === 'success' ? `?promo=${promoCode.trim().toUpperCase()}` : ''}`} 
+          />
+    )}
+</div>  
           </div>
 
           <div className="cart-reassurance-wrapper">

@@ -55,23 +55,46 @@ export async function POST(req) {
         }
     }
 
-    // --- 🛡️ NOUVEAU : VÉRIFICATION DU CODE PROMO ---
+    // ---   CODE PROMO ---
     let appliedPromo = null;
-    if (promoCode === 'BIBLIOMOISOFFERT') {
-        const userIdInt = parseInt(session.user.id, 10); // Sécurité pour Prisma
-        const existingUsage = await prisma.promoCodeUsage.findUnique({
-            where: { 
-                userId_promoCode: { 
-                    userId: userIdInt, 
-                    promoCode: 'BIBLIOMOISOFFERT' 
-                } 
-            },
-        });
+    let stripeDiscount = undefined; 
 
-        if (existingUsage) {
-            return NextResponse.json({ error: "Vous avez déjà profité de cette offre de bienvenue !" }, { status: 403 });
+    if (promoCode) {
+        const cleanCode = promoCode.trim().toUpperCase();
+
+        if (cleanCode === 'BIBLIOMOISOFFERT') {
+            // LOGIQUE 1 : L'offre "1 acheté = 1 offert" (Gérée par Prisma & Webhook)
+            const userIdInt = parseInt(session.user.id, 10);
+            const existingUsage = await prisma.promoCodeUsage.findUnique({
+                where: { userId_promoCode: { userId: userIdInt, promoCode: cleanCode } },
+            });
+
+            if (existingUsage) {
+                return NextResponse.json({ error: "Vous avez déjà profité de cette offre de bienvenue !" }, { status: 403 });
+            }
+            appliedPromo = cleanCode;
+
+        } else {
+            // LOGIQUE 2 : Codes UGC dynamiques (Gérés par Stripe Dashboard)
+            try {
+                // On interroge Stripe pour savoir si ce code existe et est actif
+                const promoCodes = await stripe.promotionCodes.list({
+                    code: cleanCode,
+                    active: true, // Vérifie qu'il n'est pas expiré
+                    limit: 1
+                });
+
+                if (promoCodes.data.length > 0) {
+                    // Code Stripe valide trouvé ! On récupère son ID pour l'injecter
+                    stripeDiscount = [{ promotion_code: promoCodes.data[0].id }];
+                    appliedPromo = cleanCode;
+                } else {
+                    return NextResponse.json({ error: `Le code ${cleanCode} est invalide ou expiré.` }, { status: 400 });
+                }
+            } catch (err) {
+                return NextResponse.json({ error: "Erreur lors de la vérification du code." }, { status: 500 });
+            }
         }
-        appliedPromo = 'BIBLIOMOISOFFERT';
     }
     // ------------------------------------------------
 
@@ -104,7 +127,8 @@ export async function POST(req) {
       line_items: line_items,
       mode: "subscription", 
       customer_email: session.user.email,
-      allow_promotion_codes: true, 
+      discounts: stripeDiscount,
+      allow_promotion_codes: stripeDiscount ? undefined : true,
     
         custom_text: appliedPromo === 'BIBLIOMOISOFFERT' ? {
         submit: {
@@ -117,7 +141,7 @@ export async function POST(req) {
       
       metadata: {
         userId: session.user.id,
-        applied_promo: appliedPromo || "", 
+        applied_promo: appliedPromo === 'BIBLIOMOISOFFERT' ? appliedPromo : "", 
         cartSnapshot: JSON.stringify(cartSnapshot), 
         cartId: body.cartId || "", 
         shippingName: shippingData.shippingName || "",
