@@ -248,7 +248,7 @@ export default function PanierPage() {
     <form onSubmit={handleVerifyPromo} className="flex gap-2 w-full">
       <input
         type="text"
-        placeholder="Code promo (ex: BIBLIO10)"
+        placeholder="Code promo :"
         value={promoCode}
         onChange={(e) => {
           setPromoCode(e.target.value.toUpperCase());
