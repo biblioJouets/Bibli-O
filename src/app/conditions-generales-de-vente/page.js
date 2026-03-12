@@ -169,17 +169,49 @@ function Cgv() {
         <ul>
           <li><strong>Détail de l’Offre :</strong> Pour toute nouvelle souscription à un abonnement (Toute formule), le Client bénéficie d’un mois d’abonnement offert pour un engagement minimal de deux mois.</li>
           <li><strong>Modalités de Paiement :</strong> Le Client règle le premier mois d’abonnement au tarif de la formule choisie lors de la commande. Le second mois est offert par Bibli’o Jouets.</li>
-          <li><strong>Utilisation et Échange des Jouets :</strong> Dans le cadre de cette offre de lancement, le Client conserve les jouets reçus dans son premier colis pendant une durée continue de deux mois. Le premier échange de jouets pourra être effectué à l'issue de ces deux mois. Par la suite, les échanges pourront s'effectuer mensuellement selon les modalités classiques de l'abonnement.</li>
+          <li><strong>Utilisation et Échange des Jouets :</strong> Dans le cadre de cette offre de lancement, le Client conserve les jouets reçus dans son premier colis pendant une durée continue de un mois. Le premier échange de jouets pourra être effectué à l'issue de ce mois. Par la suite, les échanges pourront s'effectuer mensuellement selon les modalités classiques de l'abonnement.</li>
           <li><strong>Flexibilité et Résiliation :</strong> L’abonnement est flexible. Le Client a la possibilité d’ajuster sa formule ou de résilier son abonnement à l'issue du premier mois payé, moyennant le respect des conditions de retour des jouets définies à l'Article 10.</li>
           <li><strong>Hygiène et Service :</strong> Cette offre inclut l'intégralité des services de qualité Bibli’o Jouets, notamment la désinfection rigoureuse des jouets et la fourniture des piles.</li>
           <li><strong>Validité :</strong> Offre valable du 01/01/2026 au 31/03/2026.</li>
         </ul>
       </section>
 
+      {/* Article 17: Offres Commerciales 2 */}
+      <section aria-labelledby="cgv-offres" className="offer-section">
+        <h2 id="cgv-offres">Article 17 - Offres Commerciales</h2>
+        <p>Bibli'o Jouets propose à la vente des cartes cadeaux utilisables exclusivement sur le site www.bibliojouets.com pour la souscription d'abonnements ou de locations ponctuelles.</p>
+        <ul>
+          <li><strong>Validité:</strong>Les cartes cadeaux sont valables pour une durée de 12 mois à compter de leur date d'achat.</li>
+          <li><strong>Conditions d'utilisation :</strong>Elles ne sont ni remboursables, même partiellement, ni échangeables contre des espèces</li>
+          <li><strong>Perte ou vol :</strong>Bibli'o Jouets décline toute responsabilité en cas de perte, de vol ou de détérioration de la carte cadeau et ne procédera à aucun remplacement. *</li>
+        </ul>
+      <p><strong> *Rétractation :</strong> Conformément à la loi, le droit de rétractation de 14 jours s'applique uniquement à l'acheteur initial de la carte, à condition que celle-ci n'ait pas été utilisée avant la fin de ce délai. 
+Bibli'o Jouets peut émettre des codes promotionnels ponctuellement. Sauf mention contraire, ces codes sont personnels, non cumulables avec d'autres offres en cours (notamment l'offre de lancement 1+1), valables une seule fois par foyer et limités à la durée et au périmètre (nombre de jouets) indiqués lors de l'émission du code.
+ </p>
+      </section>
+
+            {/* Article 18: Organisation de Jeux-Concours*/}
+      <section aria-labelledby="cgv-jeux-concours" className="concours-section">
+                <h2 id="cgv-jeux-concours">Article 18 - Organisation de Jeux-Concours</h2>
+
+      <p><strong>18.1. Objet :</strong>La société Bibli'o Jouets peut être amenée à organiser des jeux-concours sur ses réseaux sociaux (Instagram, Facebook, TikTok). Ces jeux sont gratuits et sans obligation d'achat.
+</p>
+      <p><strong>18.2. Modalités de participation :</strong> Les conditions de participation (dates, lots, modalités de désignation des gagnants) sont précisées sur le post de publication dudit concours. La participation implique l'acceptation pleine et entière du présent règlement et des conditions générales de location de Bibli'o Jouets.</p>
+      <p><strong>18.3. Désignation des gagnants :</strong>Sauf mention contraire, les gagnants sont désignés par tirage au sort via une application tierce certifiée (type Comment Picker). Bibli'o Jouets se réserve le droit de vérifier que le gagnant remplit toutes les conditions de participation avant la remise du lot.</p>
+      <p><strong>18.4. Nature des lots :</strong>Les lots consistant en des prestations de location (ex: 2 mois offerts) sont soumis aux mêmes règles que les locations classiques :</p>
+      <ul>
+        <li>Les jouets et articles restent la propriété exclusive de Bibli'o Jouets.</li>
+        <li>Le gagnant s'engage à restituer le matériel au terme de la durée de dotation prévue.</li>
+        <li>En cas de dégradation majeure ou de non-restitution, Bibli'o Jouets se réserve le droit d'engager des poursuites conformément à l'Article 10.</li>
+      </ul>
+      <p><strong>18.5. Responsabilité :</strong>Ces concours ne sont en aucun cas parrainés, administrés ou associés aux plateformes Meta (Facebook, Instagram) ou TikTok. La responsabilité de Bibli'o Jouets est limitée à la valeur du lot mis en jeu.</p>
+
+    </section>
+
       {/* Pied de page du document */}
       <footer className="cgv-footer">
-        <p>Ces CGV sont valables à compter du 19 décembre 2025. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
-        <p><em>Mis à jour le 04/01/2026</em></p>
+        <p>Ces CGV sont valables à compter du 11 mars 2026. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
+        <p><em>Mis à jour le 11 mars 2026</em></p>
       </footer>
     </div>
   );
