@@ -82,7 +82,7 @@ export const notifyAdminNewOrder = async (orderInfo) => {
 
 export const sendReturnLabel = async (orderInfo) => {
   try {
-    const TEMPLATE_ID_RETOUR = 8; // À changer par le bon ID de template retour
+    const TEMPLATE_ID_RETOUR = 8;
     const emailParams = {
       PRENOM: orderInfo.user.firstName || "Client",
       COMMANDE_ID: orderInfo.id,

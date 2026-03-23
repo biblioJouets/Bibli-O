@@ -1,0 +1,144 @@
+/* Container global */
+.reviews-wrapper {
+  padding: 60px 0;
+  background-color: #FFF7EB;
+  overflow: hidden; /* Empêche le débordement horizontal sur toute la page */
+}
+
+.reviews-title {
+  text-align: center;
+  color: #2E1D21;
+  margin-bottom: 40px;
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+/* Mécanique du Slider Infini */
+.reviews-slider-container {
+  width: 100%;
+  position: relative;
+  /* Optionnel : Ajoute un fondu blanc sur les bords pour adoucir l'entrée/sortie */
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.reviews-track {
+  display: flex;
+  gap: 30px;
+  width: max-content;
+  /* L'animation dure 30s. Si ça va trop vite, augmente à 40s ou 50s */
+  animation: scroll-infinite 40s linear infinite;
+  padding: 20px;
+}
+
+/* EXTRÊMEMENT IMPORTANT : Pause au survol pour pouvoir lire et cliquer */
+.reviews-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Décale exactement de la moitié de la piste (qui contient les avis dupliqués) */
+    transform: translateX(-50%);
+  }
+}
+
+/* Design de la nouvelle carte "organique" */
+.review-card {
+  width: 350px;
+  background-color: #FFFFFF;
+  border-radius: 25px;
+  padding: 30px 25px;
+  position: relative;
+  flex-shrink: 0;
+  /* Ombre portée douce aux couleurs de ta charte */
+  box-shadow: 0 10px 25px rgba(110, 193, 228, 0.15);
+  border: 2px solid #DFF1F9; /* Bordure bleu pastel subtile */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(110, 193, 228, 0.25);
+}
+
+/* L'énorme guillemet décorative en fond */
+.review-card::before {
+  content: '”';
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  font-size: 100px;
+  color: #FFD9DC; /* Rose pastel doux */
+  font-family: serif;
+  opacity: 0.6;
+  line-height: 1;
+  z-index: 0;
+}
+
+/* On s'assure que le contenu passe au-dessus de la guillemet */
+.review-header, .review-text {
+  position: relative;
+  z-index: 1;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.review-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* Un léger contour jaune pour pimper l'avatar */
+  border: 3px solid #ffe264; 
+}
+
+.review-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2E1D21;
+}
+
+.review-stars {
+  color: #ffe264;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+.review-text {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #2E1D21;
+  font-style: italic; /* L'italique donne un côté "témoignage humain" */
+}
+
+.review-toggle {
+  background: none;
+  border: none;
+  color: #FF8C94;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 5px;
+  font-size: 0.95rem;
+  font-style: normal;
+  transition: opacity 0.2s ease;
+}
+
+.review-toggle:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}

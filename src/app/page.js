@@ -1,4 +1,4 @@
-"use client";
+
 
 //import components
 
@@ -9,13 +9,13 @@ import PromotionBanner from '@/components/PromoBanner';
 import Banner from "@/components/Banner";
 import CatalogOverview from "@/components/CatalogOverview";
 import CommitmentCard from "@/components/CommitmentCard";
-import CardsPlans from "@/components/CardsPlans";
 import Protocol from "@/components/protocol";
 import CardContentMission from "@/components/CardsContentMission";
 import FAQ from "@/components/FAQ"
 import Newsletter from "@/components/Newsletter";
 import FunctionalityCard from "@/components/FunctionalityCard";
 import SubChoice from "@/components/SubChoice";
+import GoogleReviews from '@/components/GoogleReviews';
 
 //import style
 import '@/styles/homepage.css';
@@ -30,8 +30,36 @@ const LEAFIMAGE = "assets/icons/leaf.png";
 const ZENIMAGE = "assets/icons/zen.png";
 const EUROIMAGE = "assets/icons/euro.png";
 const APPROBATIONIMAGE = "assets/icons/approbation.png";
-function Homepage() {
 
+async function getGoogleReviews() {
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+    const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID;
+
+    if (!apiKey || !placeId) return [];
+
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&language=fr&key=${apiKey}`;
+
+    try {
+        const response = await fetch(url, { next: { revalidate: 86400 } });
+        if (!response.ok) return [];
+        
+        const data = await response.json();
+        if (!data.result || !data.result.reviews) return [];
+
+        return data.result.reviews.map((review) => ({
+            name: review.author_name,
+            photo: review.profile_photo_url,
+            rating: review.rating,
+            text: review.text,
+        }));
+    } catch (error) {
+        console.error('Erreur de récupération des avis Google:', error);
+        return [];
+    }
+}
+export default async function Homepage() {
+
+    const reviews = await getGoogleReviews();
   const jsonLd = {
         "@context": "https://schema.org",
         "@type": "Organization", 
@@ -46,6 +74,8 @@ function Homepage() {
             "https://www.tiktok.com/@bibliojouets"
         ]
     };
+
+    
     return (
         <>
   <script
@@ -178,8 +208,10 @@ function Homepage() {
                 </section>
                
                 
-                {/* Section Plans */}
-               
+                {/* Section avis */}
+                <section className="reviewsSection" aria-labelledby="reviews-title">
+                    <GoogleReviews reviews={reviews} />
+                </section>
                         
                 {/* Section FAQ et Newsletter */}
                 <section>
@@ -195,4 +227,3 @@ function Homepage() {
     );
 }
 
-export default Homepage;
