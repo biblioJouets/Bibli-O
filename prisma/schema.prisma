@@ -147,6 +147,9 @@ model Products {
   brand    String?  @db.VarChar(100)
   ageRange String?  @db.VarChar(50)
   category String?  @db.VarChar(100)
+
+  material String?  @db.VarChar(100)
+
   tags     String[]
 
   images    String[]

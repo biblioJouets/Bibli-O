@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
 
     const emptyProduct = {
         reference: "BJ", name: "", description: "", price: "", stock: 1,
-        brand: "", ageRange: "", category: "", tags: [], images: [],
+        brand: "", ageRange: "", category: "", material: "",tags: [], images: [],
         highlights: [], reviews: [],
         manualUrl: "", weight: "", length: "", width: "", height: "",
         pieceCount: "", condition: "NEW", isFeatured: false, rating: 0
@@ -357,7 +357,14 @@ export default function AdminProductsPage() {
                                         <input list="categories-list" value={currentProduct.category || ''} onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})} />
                                         <datalist id="categories-list">{existingCategories.map(cat => <option key={cat} value={cat} />)}</datalist>
                                     </div>
-
+                                    <div className="form-group">
+                                        <label>Matière (ex: Bois, Plastique)</label>
+                                        <input 
+                                            type="text" 
+                                            value={currentProduct.material || ''} 
+                                            onChange={e => setCurrentProduct({...currentProduct, material: e.target.value})} 
+                                        />
+                                    </div>
                                     <div className="form-group"><label>Prix (Valeur) € *</label><input type="number" step="0.01" required value={currentProduct.price} onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} /></div>
                                     <div className="form-group"><label>Stock</label><input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} /></div>
 

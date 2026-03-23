@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from "@/context/CartContext";
-import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle, Check, Star } from 'lucide-react';
+import { ShoppingCart, FileText, Ruler, Weight, Puzzle, Package, XCircle, Check, Star, Shapes } from 'lucide-react';
 import '@/styles/productDetail.css';
 
 export default function ProductDetailClient({ product }) {
@@ -141,7 +141,18 @@ export default function ProductDetailClient({ product }) {
             <div className="spec-item"><Weight className="spec-icon" size={24} /><div><span className="spec-label">Poids</span><span className="spec-value">{product.weight ? `${product.weight} kg` : 'N/A'}</span></div></div>
             <div className="spec-item"><Puzzle className="spec-icon" size={24} /><div><span className="spec-label">Pièces</span><span className="spec-value">{product.pieceCount || '?'} pièces</span></div></div>
             <div className="spec-item"><Package className="spec-icon" size={24} /><div><span className="spec-label">État</span><span className="spec-value">{product.condition === 'NEW' ? 'Neuf' : product.condition === 'GOOD' ? 'Très bon état' : product.condition === 'FAIR' ? 'Bon état' : product.condition}</span></div></div>
+          
+          {product.material && (
+              <div className="spec-item">
+                <Shapes className="spec-icon" size={24} />
+                <div>
+                  <span className="spec-label">Matière</span>
+                  <span className="spec-value">{product.material}</span>
+                </div>
+              </div>
+            )}
           </div>
+          
         </div>
       </div>
 

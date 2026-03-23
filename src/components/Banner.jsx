@@ -43,8 +43,7 @@ export default function Banner() {
       <div className="shape bottom-right blue"></div>
 
       <div className="banner-content">
-        <h1 className="banner-title">
-Des jouets adaptés à votre enfant, directement à portée de main.        </h1>
+        <h1 className="banner-title">Bon pour votre salon, votre budget et leur planète</h1>
         <p className="banner-subtitle">
           Une bibliothèque de jouets sur abonnement pour permettre aux enfants de découvrir régulièrement de nouveaux jeux...
         </p>
