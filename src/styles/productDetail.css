@@ -405,3 +405,80 @@
     margin-top : 0 ;
   }
 }
+
+
+/* --- Notation sous la marque --- */
+.product-rating-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.product-rating-detail .review-count {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* --- Section Avis en bas de page --- */
+.product-reviews-section {
+  margin-top: 60px;
+  padding-top: 40px;
+  background-color: #ffffff;
+  border-radius: 25px;
+  padding: 3rem;
+}
+
+.product-reviews-section h2 {
+  font-size: 1.8rem;
+  color: #2E1D21;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.toy-review-card {
+  background-color: #FFF7EB; /* Ton fond neutre chaud */
+  border-radius: 25px; /* Tes fameux radius ronds */
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(46, 29, 33, 0.05);
+  border: 2px solid transparent;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.toy-review-card:hover {
+  transform: translateY(-5px);
+  border-color: #DFF1F9; /* Hover doux en bleu pastel */
+}
+
+.toy-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.toy-review-author {
+  font-weight: 700;
+  color: #2E1D21;
+  font-size: 1.1rem;
+}
+
+.toy-review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.toy-review-comment {
+  color: #2E1D21;
+  line-height: 1.6;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin: 0;
+}

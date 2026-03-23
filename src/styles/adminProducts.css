@@ -20,6 +20,16 @@
     color: #2E1D21;
 }
 
+.review-input-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+    background: #FFF7EB; /* Fond neutre chaud */
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px dashed #FF8C94;
+}
 /* --- RECHERCHE --- */
 .search-wrapper {
     position: relative;

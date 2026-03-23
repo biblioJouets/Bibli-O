@@ -6,44 +6,40 @@ import Image from 'next/image';
 import { 
     Plus, Search, Edit3, Trash2, Eye, 
     CheckCircle, XCircle, X, UploadCloud, 
-    FileText, ListPlus, MinusCircle, GripVertical
+    FileText, ListPlus, MinusCircle, Star
 } from 'lucide-react';
 import '@/styles/adminProducts.css';
 
 export default function AdminProductsPage() {
     const { data: session } = useSession();
 
-    // --- ÉTATS ---
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // États Modale
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState('create'); 
     const [currentProduct, setCurrentProduct] = useState({});
     
-    // États Chargement Upload
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingPdf, setIsUploadingPdf] = useState(false);
-
-    // État Drag & Drop
     const [draggedImageIndex, setDraggedImageIndex] = useState(null);
-
-    // Modèle vide
-    const emptyProduct = {
-        reference: "BJ", name: "", description: "", price: "", stock: 1,
-        brand: "", ageRange: "", category: "", tags: [], images: [],
-        highlights: [], // Nouveau champ
-        manualUrl: "", weight: "", length: "", width: "", height: "",
-        pieceCount: "", condition: "NEW", isFeatured: false
-    };
 
     // État temporaire pour l'ajout d'un "Plus produit"
     const [newHighlight, setNewHighlight] = useState("");
+    
+    // État temporaire pour l'ajout d'un "Avis Client"
+    const [newReview, setNewReview] = useState({ rating: 5, authorName: "", comment: "" });
 
-    // --- CHARGEMENT ---
+    const emptyProduct = {
+        reference: "BJ", name: "", description: "", price: "", stock: 1,
+        brand: "", ageRange: "", category: "", tags: [], images: [],
+        highlights: [], reviews: [],
+        manualUrl: "", weight: "", length: "", width: "", height: "",
+        pieceCount: "", condition: "NEW", isFeatured: false, rating: 0
+    };
+
     useEffect(() => {
         fetchProducts();
     }, [session]);
@@ -61,7 +57,6 @@ export default function AdminProductsPage() {
         }
     };
 
-    // --- SUGGESTIONS (Datalists) ---
     const existingCategories = useMemo(() => 
         [...new Set(products.map(p => p.category).filter(Boolean))].sort(), 
     [products]);
@@ -70,34 +65,21 @@ export default function AdminProductsPage() {
         [...new Set(products.map(p => p.ageRange).filter(Boolean))].sort(), 
     [products]);
 
-    // --- GESTION IMAGES (UPLOAD & DRAG-DROP) ---
-    
-    // 1. Upload Multiple
+    // --- LOGIQUE IMAGES & PDF (Conservée à l'identique) ---
     const handleImageUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
-
         setIsUploadingImage(true);
         const newImages = [];
-
         try {
             await Promise.all(files.map(async (file) => {
                 const formData = new FormData();
                 formData.append('file', file);
-                
                 const res = await fetch('/api/upload', { method: 'POST', body: formData });
                 const data = await res.json();
-                
-                if (data.success) {
-                    newImages.push(data.url);
-                }
+                if (data.success) newImages.push(data.url);
             }));
-
-            setCurrentProduct(prev => ({
-                ...prev,
-                images: [...(prev.images || []), ...newImages]
-            }));
-
+            setCurrentProduct(prev => ({...prev, images: [...(prev.images || []), ...newImages]}));
         } catch (err) {
             alert("Erreur lors de l'upload des images");
         } finally {
@@ -106,50 +88,31 @@ export default function AdminProductsPage() {
         }
     };
 
-    // 2. Drag & Drop Logique
-    const handleDragStart = (index) => {
-        setDraggedImageIndex(index);
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault(); // Nécessaire pour autoriser le drop
-    };
-
+    const handleDragStart = (index) => setDraggedImageIndex(index);
+    const handleDragOver = (e) => e.preventDefault();
     const handleDrop = (index) => {
         if (draggedImageIndex === null || draggedImageIndex === index) return;
-
         const updatedImages = [...(currentProduct.images || [])];
         const itemToMove = updatedImages[draggedImageIndex];
-        
-        // Supprimer de l'ancienne position
         updatedImages.splice(draggedImageIndex, 1);
-        // Insérer à la nouvelle position
         updatedImages.splice(index, 0, itemToMove);
-
         setCurrentProduct({ ...currentProduct, images: updatedImages });
         setDraggedImageIndex(null);
     };
-
     const removeImage = (index) => {
-        const images = currentProduct.images.filter((_, i) => i !== index);
-        setCurrentProduct({ ...currentProduct, images });
+        setCurrentProduct({ ...currentProduct, images: currentProduct.images.filter((_, i) => i !== index) });
     };
 
-    // --- GESTION NOTICE PDF ---
     const handlePdfUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         setIsUploadingPdf(true);
         const formData = new FormData();
         formData.append('file', file);
-
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: formData });
             const data = await res.json();
-            if (data.success) {
-                setCurrentProduct({ ...currentProduct, manualUrl: data.url });
-            }
+            if (data.success) setCurrentProduct({ ...currentProduct, manualUrl: data.url });
         } catch (err) {
             alert("Erreur upload PDF");
         } finally {
@@ -158,19 +121,35 @@ export default function AdminProductsPage() {
         }
     };
 
-    // --- GESTION "LES + DU PRODUIT" ---
+    // --- GESTION "LES +" ---
     const addHighlight = () => {
         if (!newHighlight.trim()) return;
-        setCurrentProduct(prev => ({
-            ...prev,
-            highlights: [...(prev.highlights || []), newHighlight.trim()]
-        }));
+        setCurrentProduct(prev => ({...prev, highlights: [...(prev.highlights || []), newHighlight.trim()]}));
         setNewHighlight("");
     };
-
     const removeHighlight = (index) => {
-        const newHighlights = currentProduct.highlights.filter((_, i) => i !== index);
-        setCurrentProduct({ ...currentProduct, highlights: newHighlights });
+        setCurrentProduct({ ...currentProduct, highlights: currentProduct.highlights.filter((_, i) => i !== index) });
+    };
+
+    // --- GESTION DES AVIS CLIENTS ---
+    const addReview = () => {
+        // Règle de sécurité : Étoiles obligatoires (entre 1 et 5)
+        if (newReview.rating < 1 || newReview.rating > 5) {
+            alert("Veuillez sélectionner une note entre 1 et 5 étoiles.");
+            return;
+        }
+        
+        setCurrentProduct(prev => ({
+            ...prev,
+            reviews: [...(prev.reviews || []), { ...newReview }]
+        }));
+        
+        // On réinitialise l'input
+        setNewReview({ rating: 5, authorName: "", comment: "" });
+    };
+    
+    const removeReview = (index) => {
+        setCurrentProduct({ ...currentProduct, reviews: currentProduct.reviews.filter((_, i) => i !== index) });
     };
 
     // --- SAUVEGARDE ---
@@ -180,7 +159,13 @@ export default function AdminProductsPage() {
         const url = modalMode === 'create' ? '/api/products' : `/api/products/${currentProduct.id}`;
 
         try {
-            const { id, reviews, createdAt, updatedAt, cartItems, OrderProducts, ...cleanData } = currentProduct;
+            const { id, createdAt, updatedAt, cartItems, OrderProducts, reviews, ...cleanData } = currentProduct;
+
+            // Calcul automatique de la moyenne des étoiles pour la BDD
+            const finalReviews = reviews || [];
+            const averageRating = finalReviews.length > 0 
+                ? finalReviews.reduce((sum, r) => sum + parseInt(r.rating), 0) / finalReviews.length 
+                : 0;
 
             const payload = {
                 ...cleanData,
@@ -191,7 +176,18 @@ export default function AdminProductsPage() {
                 width: parseFloat(cleanData.width) || 0,
                 height: parseFloat(cleanData.height) || 0,
                 pieceCount: parseInt(cleanData.pieceCount) || 0,
-                highlights: cleanData.highlights || [] 
+                highlights: cleanData.highlights || [],
+                rating: parseFloat(averageRating.toFixed(1)), // On sauvegarde la moyenne
+                
+                // Magie de Prisma : création imbriquée
+                reviews: {
+                    deleteMany: {}, // Efface les anciens pour éviter les doublons lors de la modification
+                    create: finalReviews.map(r => ({
+                        rating: parseInt(r.rating),
+                        comment: r.comment || null,
+                        authorName: r.authorName || "Abonné(e)"
+                    }))
+                }
             };
 
             const res = await fetch(url, {
@@ -221,7 +217,7 @@ export default function AdminProductsPage() {
         setModalMode(mode);
         setCurrentProduct(mode === 'create' 
             ? { ...emptyProduct } 
-            : { ...product, images: product.images || [], highlights: product.highlights || [] }
+            : { ...product, images: product.images || [], highlights: product.highlights || [], reviews: product.reviews || [] }
         );
         setIsModalOpen(true);
     };
@@ -244,15 +240,6 @@ export default function AdminProductsPage() {
         }
         fetchProducts();
         setSelectedIds([]);
-    };
-
-    const getFrenchCondition = (condition) => {
-        switch (condition) {
-            case 'NEW': return 'NEUF';
-            case 'GOOD': return 'TRÈS BON';
-            case 'FAIR': return 'BON';
-            default: return condition;
-        }
     };
 
     const filteredProducts = products.filter(p => 
@@ -280,7 +267,6 @@ export default function AdminProductsPage() {
                 />
             </div>
 
-            {/* --- TABLEAU (Sans colonne Action, Avec colonne Dispo) --- */}
             <div className="table-container">
                 <table className="product-table">
                     <thead>
@@ -290,9 +276,8 @@ export default function AdminProductsPage() {
                             <th>Image</th>
                             <th>Nom</th>
                             <th>Marque</th>
-                            <th>État</th>
                             <th>Stock</th>
-                            <th>Dispo</th>
+                            <th>Avis</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -311,13 +296,9 @@ export default function AdminProductsPage() {
                                 </td>
                                 <td style={{fontWeight:'600'}}>{product.name}</td>
                                 <td>{product.brand}</td>
-                                <td><span className="badge badge-condition">{getFrenchCondition(product.condition)}</span></td>
                                 <td>{product.stock}</td>
-                                <td>
-                                    {product.stock > 0 
-                                        ? <span className="badge badge-instock">Oui</span> 
-                                        : <span className="badge badge-outstock">Non</span>
-                                    }
+                                <td style={{color: '#ffe264', fontWeight: 'bold'}}>
+                                    ★ {product.rating || 0} <span style={{color: '#999', fontSize: '0.8rem'}}>({product.reviews?.length || 0})</span>
                                 </td>
                             </tr>
                         ))}
@@ -325,12 +306,9 @@ export default function AdminProductsPage() {
                 </table>
             </div>
             
-            {/* --- BARRE D'OUTILS (MENU RAPIDE) --- */}
             {selectedIds.length > 0 && (
                 <div className="action-toolbar">
                     <span className="toolbar-info">{selectedIds.length} sélectionné(s)</span>
-                    
-                    {/* Actions unitaires (si 1 seul sélectionné) */}
                     {selectedIds.length === 1 && (
                         <>
                             <button className="toolbar-btn" onClick={() => handleOpenModal('view', products.find(p => p.id === selectedIds[0]))}>
@@ -341,8 +319,6 @@ export default function AdminProductsPage() {
                             </button>
                         </>
                     )}
-
-                    {/* Actions de masse */}
                     <button className="toolbar-btn" onClick={() => handleAvailability(true)}>
                         <CheckCircle size={20} color="#88D4AB" /> Dispo
                     </button>
@@ -355,7 +331,6 @@ export default function AdminProductsPage() {
                 </div>
             )}
 
-            {/* --- MODALE --- */}
             {isModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -371,61 +346,25 @@ export default function AdminProductsPage() {
                         <form onSubmit={handleSave}>
                             <fieldset disabled={modalMode === 'view'} style={{border:'none', padding:0}}>
                                 <div className="form-grid">
-                                    {/* IDENTIFICATION */}
-                                    <div className="form-group">
-                                        <label>Référence *</label>
-                                        <input required value={currentProduct.reference} onChange={e => setCurrentProduct({...currentProduct, reference: e.target.value})} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Nom du jouet *</label>
-                                        <input required value={currentProduct.name} onChange={e => setCurrentProduct({...currentProduct, name: e.target.value})} />
-                                    </div>
+                                    <div className="form-group"><label>Référence *</label><input required value={currentProduct.reference} onChange={e => setCurrentProduct({...currentProduct, reference: e.target.value})} /></div>
+                                    <div className="form-group"><label>Nom du jouet *</label><input required value={currentProduct.name} onChange={e => setCurrentProduct({...currentProduct, name: e.target.value})} /></div>
+                                    
+                                    <div className="form-group full-width"><label>Description</label><textarea rows="5" value={currentProduct.description || ''} onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})} /></div>
 
-                                    {/* DESCRIPTION */}
-                                    <div className="form-group full-width">
-                                        <label>Description</label>
-                                        <textarea 
-                                            rows="5" 
-                                            value={currentProduct.description || ''} 
-                                            onChange={e => setCurrentProduct({...currentProduct, description: e.target.value})} 
-                                        />
-                                    </div>
-
-                                    {/* MARQUE & CATEGORIE */}
-                                    <div className="form-group">
-                                        <label>Marque</label>
-                                        <input value={currentProduct.brand} onChange={e => setCurrentProduct({...currentProduct, brand: e.target.value})} />
-                                    </div>
+                                    <div className="form-group"><label>Marque</label><input value={currentProduct.brand} onChange={e => setCurrentProduct({...currentProduct, brand: e.target.value})} /></div>
                                     <div className="form-group">
                                         <label>Catégorie</label>
                                         <input list="categories-list" value={currentProduct.category || ''} onChange={e => setCurrentProduct({...currentProduct, category: e.target.value})} />
-                                        <datalist id="categories-list">
-                                            {existingCategories.map(cat => <option key={cat} value={cat} />)}
-                                        </datalist>
+                                        <datalist id="categories-list">{existingCategories.map(cat => <option key={cat} value={cat} />)}</datalist>
                                     </div>
 
-                                    {/* PRIX & STOCK */}
-                                    <div className="form-group">
-                                        <label>Prix (Valeur) € *</label>
-                                        <input 
-                                            type="number" step="0.01" required 
-                                            value={currentProduct.price} 
-                                            onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} 
-                                            placeholder="Ex: 29.99"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Stock</label>
-                                        <input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} />
-                                    </div>
+                                    <div className="form-group"><label>Prix (Valeur) € *</label><input type="number" step="0.01" required value={currentProduct.price} onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} /></div>
+                                    <div className="form-group"><label>Stock</label><input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} /></div>
 
-                                    {/* AGE & ETAT */}
                                     <div className="form-group">
                                         <label>Âge</label>
                                         <input list="ages-list" value={currentProduct.ageRange || ''} onChange={e => setCurrentProduct({...currentProduct, ageRange: e.target.value})} />
-                                        <datalist id="ages-list">
-                                            {existingAges.map(age => <option key={age} value={age} />)}
-                                        </datalist>
+                                        <datalist id="ages-list">{existingAges.map(age => <option key={age} value={age} />)}</datalist>
                                     </div>
                                     <div className="form-group">
                                         <label>État</label>
@@ -436,45 +375,20 @@ export default function AdminProductsPage() {
                                         </select>
                                     </div>
 
-                                    {/* --- GESTION IMAGES AVEC DRAG & DROP --- */}
+                                    {/* --- GESTION IMAGES --- */}
                                     <div className="form-group full-width image-upload-section">
-                                        <label>Galerie Photos (Glisser pour réorganiser)</label>
-                                        
+                                        <label>Galerie Photos</label>
                                         {modalMode !== 'view' && (
                                             <div className="image-upload-controls">
-                                                <input 
-                                                    type="text" placeholder="Coller une URL externe..." style={{flex:1}}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && e.target.value) {
-                                                            e.preventDefault();
-                                                            setCurrentProduct(prev => ({...prev, images: [...(prev.images||[]), e.target.value]}));
-                                                            e.target.value = '';
-                                                        }
-                                                    }}
-                                                />
-                                                <label className="btn-upload-trigger">
-                                                    <UploadCloud size={18}/> Upload
-                                                    <input type="file" multiple accept="image/*" style={{display:'none'}} onChange={handleImageUpload} disabled={isUploadingImage}/>
-                                                </label>
+                                                <input type="text" placeholder="Coller une URL externe..." style={{flex:1}} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.value) { e.preventDefault(); setCurrentProduct(prev => ({...prev, images: [...(prev.images||[]), e.target.value]})); e.target.value = ''; } }} />
+                                                <label className="btn-upload-trigger"><UploadCloud size={18}/> Upload<input type="file" multiple accept="image/*" style={{display:'none'}} onChange={handleImageUpload} disabled={isUploadingImage}/></label>
                                             </div>
                                         )}
-
                                         <div className="image-grid">
                                             {currentProduct.images?.map((img, i) => (
-                                                <div 
-                                                    key={i} 
-                                                    className={`image-card ${draggedImageIndex === i ? 'dragging' : ''}`}
-                                                    draggable={modalMode !== 'view'}
-                                                    onDragStart={() => handleDragStart(i)}
-                                                    onDragOver={handleDragOver}
-                                                    onDrop={() => handleDrop(i)}
-                                                >
-                                                <Image src={img} alt="preview" fill unoptimized />                                                    <span className="image-position-badge">{i + 1}</span>
-                                                    {modalMode !== 'view' && (
-                                                        <button type="button" onClick={() => removeImage(i)} className="btn-remove-image">
-                                                            <X size={14}/>
-                                                        </button>
-                                                    )}
+                                                <div key={i} className={`image-card ${draggedImageIndex === i ? 'dragging' : ''}`} draggable={modalMode !== 'view'} onDragStart={() => handleDragStart(i)} onDragOver={handleDragOver} onDrop={() => handleDrop(i)}>
+                                                    <Image src={img} alt="preview" fill unoptimized /><span className="image-position-badge">{i + 1}</span>
+                                                    {modalMode !== 'view' && <button type="button" onClick={() => removeImage(i)} className="btn-remove-image"><X size={14}/></button>}
                                                 </div>
                                             ))}
                                         </div>
@@ -485,25 +399,63 @@ export default function AdminProductsPage() {
                                         <label>Les + du produit</label>
                                         {modalMode !== 'view' && (
                                             <div className="highlight-input-group">
-                                                <input 
-                                                    type="text" placeholder="Ajouter un point fort..." 
-                                                    value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())}
-                                                />
-                                                <button type="button" onClick={addHighlight} className="Button Blue" style={{padding:'5px 15px', margin:0}}>
-                                                    <ListPlus size={18}/>
-                                                </button>
+                                                <input type="text" placeholder="Ajouter un point fort..." value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())} />
+                                                <button type="button" onClick={addHighlight} className="Button Blue" style={{padding:'5px 15px', margin:0}}><ListPlus size={18}/></button>
                                             </div>
                                         )}
                                         <ul className="highlight-list">
                                             {currentProduct.highlights?.map((point, i) => (
-                                                <li key={i} className="highlight-item">
-                                                    <span style={{color:'#88D4AB'}}>•</span>
-                                                    <span>{point}</span>
+                                                <li key={i} className="highlight-item"><span style={{color:'#88D4AB'}}>•</span><span>{point}</span>
+                                                    {modalMode !== 'view' && <button type="button" onClick={() => removeHighlight(i)} style={{border:'none', background:'none', color:'#FF8C94', cursor:'pointer'}}><MinusCircle size={18}/></button>}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* --- GESTION DES AVIS CLIENTS --- */}
+                                    <div className="form-group full-width">
+                                        <label>Avis Clients (Affichés sur la fiche produit)</label>
+                                        {modalMode !== 'view' && (
+                                            <div className="review-input-group">
+                                                <div className="star-selector" style={{display: 'flex', gap: '2px', cursor: 'pointer'}}>
+                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                        <Star 
+                                                            key={star} 
+                                                            onClick={() => setNewReview({...newReview, rating: star})}
+                                                            fill={newReview.rating >= star ? "#ffe264" : "none"} 
+                                                            color={newReview.rating >= star ? "#ffe264" : "#ccc"} 
+                                                            size={24}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Prénom (ex: Laura)" 
+                                                    value={newReview.authorName} 
+                                                    onChange={e => setNewReview({...newReview, authorName: e.target.value})} 
+                                                    style={{width: '150px'}}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Texte de l'avis (optionnel)" 
+                                                    value={newReview.comment} 
+                                                    onChange={e => setNewReview({...newReview, comment: e.target.value})} 
+                                                    style={{flex: 1}}
+                                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addReview())}
+                                                />
+                                                <button type="button" onClick={addReview} className="Button Blue" style={{padding:'5px 15px', margin:0}}><Plus size={18}/></button>
+                                            </div>
+                                        )}
+                                        <ul className="highlight-list">
+                                            {currentProduct.reviews?.map((rev, i) => (
+                                                <li key={i} className="review-item" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9', padding: '10px', borderRadius: '8px', marginBottom: '8px', border: '1px solid #eee'}}>
+                                                    <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+                                                        <span style={{color: '#ffe264', fontWeight: 'bold'}}>★ {rev.rating}/5</span>
+                                                        <span style={{fontWeight: 'bold', color: '#2E1D21'}}>{rev.authorName || "Anonyme"}</span>
+                                                        {rev.comment && <span style={{fontStyle: 'italic', color: '#666'}}>« {rev.comment} »</span>}
+                                                    </div>
                                                     {modalMode !== 'view' && (
-                                                        <button type="button" onClick={() => removeHighlight(i)} style={{border:'none', background:'none', color:'#FF8C94', cursor:'pointer'}}>
-                                                            <MinusCircle size={18}/>
-                                                        </button>
+                                                        <button type="button" onClick={() => removeReview(i)} style={{border:'none', background:'none', color:'#FF8C94', cursor:'pointer'}}><MinusCircle size={18}/></button>
                                                     )}
                                                 </li>
                                             ))}
@@ -511,16 +463,8 @@ export default function AdminProductsPage() {
                                     </div>
 
                                     {/* --- TECHNIQUE & NOTICE --- */}
-                                    <div className="form-group">
-                                        <label>Poids (kg)</label>
-                                        <input type="number" step="0.1" value={currentProduct.weight} onChange={e => setCurrentProduct({...currentProduct, weight: e.target.value})} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Nb Pièces</label>
-                                        <input type="number" value={currentProduct.pieceCount} onChange={e => setCurrentProduct({...currentProduct, pieceCount: e.target.value})} />
-                                    </div>
-
-                                    {/* --- DIMENSIONS RESTAURÉES --- */}
+                                    <div className="form-group"><label>Poids (kg)</label><input type="number" step="0.1" value={currentProduct.weight} onChange={e => setCurrentProduct({...currentProduct, weight: e.target.value})} /></div>
+                                    <div className="form-group"><label>Nb Pièces</label><input type="number" value={currentProduct.pieceCount} onChange={e => setCurrentProduct({...currentProduct, pieceCount: e.target.value})} /></div>
                                     <div className="form-group">
                                         <label>Dimensions (cm)</label>
                                         <div style={{display:'flex', gap:'5px'}}>
@@ -530,22 +474,17 @@ export default function AdminProductsPage() {
                                         </div>
                                     </div>
                                     
-                                    {/* NOTICE PDF (URL + UPLOAD) */}
                                     <div className="form-group">
                                         <label>Notice PDF</label>
                                         <div style={{display:'flex', gap:'10px'}}>
                                             <input type="text" placeholder="https://..." value={currentProduct.manualUrl || ''} onChange={e => setCurrentProduct({...currentProduct, manualUrl: e.target.value})} style={{flex:1}} />
                                             {modalMode !== 'view' && (
                                                 <label className="Button Blue" style={{padding:'8px 15px', margin:0, cursor:'pointer', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
-                                                    <FileText size={16}/>
-                                                    <input type="file" accept="application/pdf" style={{display:'none'}} onChange={handlePdfUpload} disabled={isUploadingPdf}/>
-                                                    {isUploadingPdf ? '...' : 'Upload'}
+                                                    <FileText size={16}/><input type="file" accept="application/pdf" style={{display:'none'}} onChange={handlePdfUpload} disabled={isUploadingPdf}/>{isUploadingPdf ? '...' : 'Upload'}
                                                 </label>
                                             )}
                                         </div>
-                                        {currentProduct.manualUrl && <a href={currentProduct.manualUrl} target="_blank" style={{fontSize:'0.8rem', color:'#6EC1E4', marginTop:'5px', display:'block'}}>Voir la notice actuelle</a>}
                                     </div>
-
                                 </div>
                             </fieldset>
 

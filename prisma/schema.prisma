@@ -175,14 +175,14 @@ model Reviews {
   id      Int     @id @default(autoincrement())
   rating  Int
   comment String? @db.Text
+  authorName String?  @db.VarChar(255) @default("Abonné(e)")
+  userId     Int?     // Modification : Devient optionnel (Int?)
+  User       Users?   @relation(fields: [userId], references: [id], onDelete: Cascade) // Optionnel
 
-  userId Int
-  User   Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId  Int
+  Product    Products @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  productId Int
-  Product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
 }
 
 enum ProductCondition {
