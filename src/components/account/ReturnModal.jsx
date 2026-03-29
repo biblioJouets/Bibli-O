@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 
-export default function ReturnModal({ orderId, onClose, onSuccess }) {
+export default function ReturnModal({ orderId, productId, onClose, onSuccess }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +24,7 @@ export default function ReturnModal({ orderId, onClose, onSuccess }) {
       const response = await fetch('/api/orders/return-item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, productId }),
       });
 
       const data = await response.json();

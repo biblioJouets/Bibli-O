@@ -180,6 +180,84 @@ try {
 
 
 
+// ============================================================
+//  3. RETOUR D'UN JOUET
+// ============================================================
+export const processReturn = async (orderId, productId, userId) => {
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // 1. Guard ownership & récupération
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+    include: {
+      Users: true,
+      OrderProducts: {
+        include: { Products: true },
+      },
+    },
+  });
+
+  if (!order || order.userId !== parseInt(userId)) {
+    const err = new Error("Action interdite");
+    err.status = 403;
+    throw err;
+  }
+
+  // 2. Guard statut
+  if (!['ACTIVE', 'SHIPPED'].includes(order.status)) {
+    const err = new Error("Cette commande ne peut pas être retournée.");
+    err.status = 400;
+    throw err;
+  }
+
+  // 3. Guard — le jouet appartient bien à cette commande
+  const orderProduct = order.OrderProducts.find((op) => op.ProductId === productId);
+  if (!orderProduct) {
+    const err = new Error("Jouet introuvable dans cette commande.");
+    err.status = 404;
+    throw err;
+  }
+
+  // 4. Stripe — cancel_at_period_end sur l'abonnement si présent
+  if (order.stripeSubscriptionId) {
+    await stripe.subscriptions.update(order.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+  }
+
+  // 5. DB — mettre à jour uniquement ce jouet
+  await prisma.orderProducts.update({
+    where: { OrderId_ProductId: { OrderId: orderId, ProductId: productId } },
+    data: { renewalIntention: 'RETOUR_DEMANDE', nextBillingDate: null },
+  });
+
+  // 6. DB — passer la commande en RETURNING
+  const updatedOrder = await prisma.orders.update({
+    where: { id: orderId },
+    data: { status: 'RETURNING' },
+  });
+
+  // 7. Email Brevo
+  const user = order.Users;
+  if (user?.email) {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const customOrderId = `CMD${pad(now.getDate())}${pad(now.getMonth() + 1)}${String(now.getFullYear()).slice(-2)}${pad(now.getHours())}${pad(now.getMinutes())}-${orderId}`;
+    const listeJouets = order.OrderProducts.map((op) => op.Products.name).join(' / ');
+    const lienCompte = `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com'}/mon-compte`;
+
+    await sendBrevoTemplate(
+      user.email,
+      16,
+      { prenom: user.firstName || "Client(e)", orderId: customOrderId, jouets: listeJouets, lienCompte },
+      updatedOrder.returnLabelUrl || undefined
+    ).catch((err) => console.error("[BREVO] Erreur email retour:", err));
+  }
+
+  return { returnLabelUrl: updatedOrder.returnLabelUrl || null };
+};
+
 export const getUserOrders = async (userId) => {
     try {
       return await prisma.orders.findMany({

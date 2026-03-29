@@ -79,6 +79,7 @@ export default function OrderItemRow({ item, orderStatus }) {
         {showReturnModal && (
           <ReturnModal
             orderId={item.OrderId}
+            productId={item.ProductId}
             onClose={() => setShowReturnModal(false)}
             onSuccess={() => {
               setIsReturning(true);
