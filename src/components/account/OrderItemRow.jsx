@@ -2,41 +2,18 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import ProlongButton from './ProlongButton';
+import ReturnModal from './ReturnModal';
 
 export default function OrderItemRow({ item, orderStatus }) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [isReturning, setIsReturning] = useState(
+    item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
+  );
+
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
   const productName = productData?.name || "Jouet Mystère";
   const productPrice = Number(productData?.price || 0).toFixed(2);
-
-// --- LOGIQUE DE RETOUR D'UN JOUET ---
-  const handleReturnToy = async () => {
-    if (confirm("Voulez-vous vraiment enregistrer le retour de ce jouet ? Votre abonnement sera ajusté.")) {
-      setIsProcessing(true);
-      try {
-        const response = await fetch('/api/orders/return-item', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            orderId: item.OrderId, 
-            productId: item.ProductId 
-          })
-        });
-        
-        if (response.ok) {
-          alert("Demande de retour enregistrée, facturation mise à jour.");
-          // Ici, tu pourrais faire un router.refresh() pour mettre à jour l'affichage
-        } else {
-          alert("Erreur lors de la demande de retour.");
-        }
-      } catch (error) {
-        console.error("Erreur réseau", error);
-      } finally {
-        setIsProcessing(false);
-      }
-    }
-  };
   // On utilise la date de fin DU JOUET
   const returnDate = item.rentalEndDate 
     ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR') 
@@ -79,14 +56,37 @@ export default function OrderItemRow({ item, orderStatus }) {
       </div>
 
       <div className="item-actions">
-        <button 
-  className="btn-pill btn-exchange" 
-  type="button"
-  onClick={handleReturnToy}
-  disabled={isProcessing}
->
-  {isProcessing ? 'En cours...' : 'Rendre'}
-</button>
+        {/* Bouton Rendre — conditionnel selon le statut */}
+        {(['ACTIVE', 'SHIPPED'].includes(orderStatus)) && !isReturning && (
+          <button
+            className="border border-gray-300 text-gray-500 text-sm px-4 py-2 rounded-full hover:border-red-300 hover:text-red-500 transition-colors"
+            type="button"
+            onClick={() => setShowReturnModal(true)}
+          >
+            Rendre ce jouet
+          </button>
+        )}
+        {(orderStatus === 'RETURNING' || isReturning) && (
+          <button
+            className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
+            type="button"
+            disabled
+          >
+            Retour en cours
+          </button>
+        )}
+
+        {showReturnModal && (
+          <ReturnModal
+            orderId={item.OrderId}
+            onClose={() => setShowReturnModal(false)}
+            onSuccess={() => {
+              setIsReturning(true);
+              setShowReturnModal(false);
+            }}
+          />
+        )}
+
         <button className="btn-pill btn-adopt" type="button">Adopter</button>
         {showProlongButton ? (
           <ProlongButton 

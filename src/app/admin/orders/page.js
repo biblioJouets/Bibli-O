@@ -12,8 +12,11 @@ export default function AdminOrdersPage() {
   const STATUS_DEFINITIONS = {
     PENDING: { label: "En attente", colorClass: "status-yellow", icon: Clock },
     PREPARING: { label: "En préparation", colorClass: "status-blue", icon: Package },
-    SHIPPED: { label: "Expédié / Livré", colorClass: "status-green", icon: Truck },
+    SHIPPED: { label: "Expédié", colorClass: "status-green", icon: Truck },
+    ACTIVE: { label: "Location en cours", colorClass: "status-green", icon: CheckCircle },
+    RETURNING: { label: "Retour en cours", colorClass: "status-purple", icon: Package },
     RETURNED: { label: "Retourné", colorClass: "status-purple", icon: CheckCircle },
+    COMPLETED: { label: "Terminé", colorClass: "status-purple", icon: CheckCircle },
     CANCELLED: { label: "Annulé", colorClass: "status-red", icon: null },
   };
 
