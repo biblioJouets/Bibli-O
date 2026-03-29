@@ -81,7 +81,7 @@ model Orders {
   totalAmount Float
 
   status OrderStatus @default(PENDING)
-
+  hasExchangedThisMonth Boolean   @default(false) // Jeton d'échange limiter à 1 par mois.
   // --- LOGISTIQUE ALLER ---
   trackingNumber String? @db.VarChar(100) // Suivi expédition
   trackingUrl    String? // URL directe de suivi (optionnel mais pratique)

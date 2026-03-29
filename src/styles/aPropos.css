@@ -1,0 +1,192 @@
+/* =========================================
+   PAGE À PROPOS — Styles spécifiques
+========================================= */
+
+.about-page {
+  color: var(--col-text);
+  overflow-x: hidden;
+}
+
+/* =========================================
+   HERO
+========================================= */
+.about-hero {
+  padding-top: 160px !important;
+  padding-bottom: 80px !important;
+  text-align: center;
+}
+
+.about-hero .hero-content {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.hero-tag {
+  display: inline-block;
+  background-color: var(--col-pastel-pink);
+  color: var(--col-text);
+  font-weight: 700;
+  padding: 6px 20px;
+  border-radius: 50px;
+  margin-bottom: 1.2rem;
+  font-size: 1rem;
+}
+
+.about-hero h1 {
+  font-size: 2.8rem !important;
+  font-weight: 800;
+  max-width: 750px;
+  margin: 0 auto 1.2rem;
+  line-height: 1.2;
+}
+
+.about-hero .subtitle {
+  max-width: 620px;
+  margin: 0 auto 2rem;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #4a3a3e;
+}
+
+/* =========================================
+   NOTRE HISTOIRE
+========================================= */
+.histoire-section {
+  padding: 80px 2rem;
+  background-color: var(--col-bg-warm);
+}
+
+.histoire-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 60px;
+  align-items: center;
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+.histoire-text p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #4a3a3e;
+  margin-bottom: 1.2rem;
+}
+
+.histoire-text .homePageSubTitle {
+  font-size: 2rem !important;
+  margin-bottom: 2rem;
+}
+
+.histoire-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.histoire-image-wrapper img {
+  max-width: 100%;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  transform: rotate(-2deg);
+  transition: transform 0.3s ease;
+}
+
+.histoire-image-wrapper img:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+/* =========================================
+   CHIFFRES CLÉS
+========================================= */
+.stats-section {
+  background-color: var(--col-pastel-green);
+  padding: 60px 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.stat-card {
+  padding: 20px;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--col-text);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a3a3e;
+}
+
+/* =========================================
+   CTA BUTTONS (footer-cta-section override)
+========================================= */
+.about-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 900px) {
+  .histoire-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .histoire-image-wrapper {
+    order: -1;
+  }
+
+  .histoire-image-wrapper img {
+    transform: rotate(0deg);
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-hero h1 {
+    font-size: 1.9rem !important;
+  }
+
+  .about-hero {
+    padding-top: 100px !important;
+    padding-bottom: 60px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .histoire-section {
+    padding: 50px 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stats-grid {
+    gap: 15px;
+  }
+}
