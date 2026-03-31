@@ -1,74 +1,74 @@
-/* src/app/mon-compte/page.js */
 'use client';
 
-import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, User, LogOut } from 'lucide-react'; // J'ai ajouté des icônes pour faire plus propre si tu veux
-import '@/styles/monCompte.css';
+import Link from 'next/link';
+import { ShoppingBag, CreditCard, User } from 'lucide-react';
 
-// Import de tes nouveaux composants
-import OrdersTab from '@/components/account/OrdersTab';
-import ProfileTab from '@/components/account/ProfileTab';
+const shortcuts = [
+  { href: '/mon-compte/commandes', label: 'Mes Commandes', icon: ShoppingBag, description: 'Suivez vos locations en cours' },
+  { href: '/mon-compte/abonnement', label: 'Mon Abonnement', icon: CreditCard, description: 'Gérez votre formule' },
+  { href: '/mon-compte/profil', label: 'Mon Profil', icon: User, description: 'Informations personnelles' },
+];
 
-export default function MonComptePage() {
+export default function MonCompteDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
-  const [activeTab, setActiveTab] = useState('orders');
 
-  // Redirection si non connecté (sécurité côté client)
   if (status === 'unauthenticated') {
     router.push('/connexion');
     return null;
   }
 
-  // Affichage pendant le chargement de la session
-  if (status === 'loading') return <div className="loading-screen">Chargement...</div>;
+  if (status === 'loading') {
+    return <div className="loading-screen">Chargement...</div>;
+  }
 
   return (
-    <div className="account-page-container">
-      <div className="account-layout">
-        
-        {/* --- SIDEBAR GAUCHE (Navigation) --- */}
-        <aside className="account-sidebar">
-          <div className="user-brief">
-            <div className="avatar-placeholder">
-              {session?.user?.name ? session.user.name[0].toUpperCase() : 'U'}
-            </div>
-            <p className="user-name">Bonjour, <strong>{session?.user?.name}</strong></p>
-          </div>
+    <div>
+      <h2 className="section-title">
+        Bonjour, {session?.user?.name} 👋
+      </h2>
+      <p style={{ color: '#666', marginBottom: '32px' }}>
+        Bienvenue dans votre espace personnel. Que souhaitez-vous faire ?
+      </p>
 
-          <nav className="account-nav">
-            <button 
-              className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+        {shortcuts.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '28px 20px',
+                borderRadius: '16px',
+                border: '1px solid #eee',
+                background: '#fafafa',
+                textAlign: 'center',
+                textDecoration: 'none',
+                color: '#2E1D21',
+                transition: 'box-shadow 0.2s, background 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#DFF1F9';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(110,193,228,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#fafafa';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
-              <ShoppingBag size={20} /> Mes Commandes
-            </button>
-            
-            <button 
-              className={`nav-item ${activeTab === 'infos' ? 'active' : ''}`}
-              onClick={() => setActiveTab('infos')}
-            >
-              <User size={20} /> Mes Informations
-            </button>
-
-            <button 
-              className="nav-item logout"
-              onClick={() => signOut({ callbackUrl: '/' })}
-            >
-              <LogOut size={20} /> Me déconnecter
-            </button>
-          </nav>
-        </aside>
-
-        {/* --- CONTENU PRINCIPAL (Affichage conditionnel) --- */}
-        <main className="account-content">
-          {activeTab === 'orders' && <OrdersTab />}
-          {activeTab === 'infos' && <ProfileTab />}
-        </main>
-
+              <Icon size={32} color="#6EC1E4" aria-hidden="true" />
+              <span style={{ fontWeight: 700, fontSize: '1rem' }}>{item.label}</span>
+              <span style={{ fontSize: '0.85rem', color: '#888' }}>{item.description}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

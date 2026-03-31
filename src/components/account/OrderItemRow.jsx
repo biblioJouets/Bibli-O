@@ -67,7 +67,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
               title="Vous avez déjà effectué un échange ce mois-ci. Revenez le mois prochain !"
               type="button"
             >
-              Échanger ce jouet
+              Échange en cours
             </button>
           ) : (
             <button
@@ -75,7 +75,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
               type="button"
               onClick={() => router.push(`/bibliotheque?mode=exchange&orderId=${orderId}`)}
             >
-              Échanger ce jouet
+              Échanger
             </button>
           )
         )}
@@ -87,7 +87,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
             type="button"
             onClick={() => setShowReturnModal(true)}
           >
-            Rendre ce jouet
+            Rendre
           </button>
         )}
         {(orderStatus === 'RETURNING' || isReturning) && (

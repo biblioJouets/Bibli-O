@@ -22,6 +22,7 @@
     "@prisma/client": "^5.19.0",
     "@stripe/stripe-js": "^8.6.0",
     "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.1",
     "isomorphic-dompurify": "^2.19.0",
     "lucide-react": "^0.420.0",
     "next": "^16.1.1",
