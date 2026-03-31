@@ -1,10 +1,12 @@
 /* src/components/account/OrderItemRow.jsx */
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
 
-export default function OrderItemRow({ item, orderStatus }) {
+export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedThisMonth }) {
+  const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [isReturning, setIsReturning] = useState(
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
@@ -56,6 +58,28 @@ export default function OrderItemRow({ item, orderStatus }) {
       </div>
 
       <div className="item-actions">
+        {/* Bouton Échanger — 3 états */}
+        {orderStatus === 'ACTIVE' && (
+          hasExchangedThisMonth ? (
+            <button
+              disabled
+              className="bg-gray-200 text-gray-400 font-semibold px-6 py-2 rounded-full cursor-not-allowed text-sm"
+              title="Vous avez déjà effectué un échange ce mois-ci. Revenez le mois prochain !"
+              type="button"
+            >
+              Échanger ce jouet
+            </button>
+          ) : (
+            <button
+              className="bg-[#6EC1E4] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#5aafcf] transition-colors shadow-md text-sm"
+              type="button"
+              onClick={() => router.push(`/bibliotheque?mode=exchange&orderId=${orderId}`)}
+            >
+              Échanger ce jouet
+            </button>
+          )
+        )}
+
         {/* Bouton Rendre — conditionnel selon le statut */}
         {(['ACTIVE', 'SHIPPED'].includes(orderStatus)) && !isReturning && (
           <button

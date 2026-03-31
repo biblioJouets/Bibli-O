@@ -1,14 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import ProductCard from '@/components/productCard';
-import '@/styles/bibliotheque.css'; 
+import { useCart } from '@/context/CartContext';
+import '@/styles/bibliotheque.css';
 
 export default function LibraryPage() {
+  const searchParams = useSearchParams();
+  const exchangeMode = searchParams.get('mode') === 'exchange';
+  const exchangeOrderId = searchParams.get('orderId');
+  const { setExchangeContext } = useCart();
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
+  // Active le contexte d'échange dans le CartContext dès l'arrivée sur la page
+  useEffect(() => {
+    if (exchangeMode && exchangeOrderId) {
+      setExchangeContext({ orderId: parseInt(exchangeOrderId) });
+    } else {
+      setExchangeContext(null);
+    }
+  }, [exchangeMode, exchangeOrderId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // États pour les filtres
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -112,7 +128,26 @@ export default function LibraryPage() {
 
   return (
     <div className="bibliotheque-container">
-      
+
+      {/* Bandeau mode échange */}
+      {exchangeMode && (
+        <div className="w-full bg-[#6EC1E4] text-white px-6 py-3 flex items-center justify-between gap-4 rounded-[16px] mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🔄</span>
+            <div>
+              <p className="font-semibold text-sm leading-tight">Vous êtes en mode Échange</p>
+              <p className="text-xs opacity-90">Composez votre nouvelle sélection — votre panier sera validé à 0€.</p>
+            </div>
+          </div>
+          <a
+            href="/mon-compte"
+            className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap"
+          >
+            Annuler
+          </a>
+        </div>
+      )}
+
       <header className="catalog-header">
         <h1 className="catalog-title">Nos jouets 🧸</h1>
         <p className="catalog-subtitle">Explorez notre collection de jouets éco-responsables</p>

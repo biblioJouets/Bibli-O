@@ -96,6 +96,7 @@ model Orders {
   // --- LOGISTIQUE RETOUR & LOCATION ---
   returnTrackingNumber String?   @db.VarChar(100) // Suivi retour client
   returnLabelUrl       String? //pdf espace client
+  outboundLabelUrl     String? // Étiquette aller boîte navette (échange)
   rentalStartDate      DateTime? @db.Timestamptz(6) // Début de la location (réception colis)
   stripeSubscriptionId String?   @db.VarChar(255) // ID Stripe pour écouter le Webhook
   createdAt            DateTime  @default(now()) @db.Timestamptz(6)

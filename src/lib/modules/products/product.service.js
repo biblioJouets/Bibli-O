@@ -3,9 +3,15 @@ import prisma from '@/lib/core/database';
 export const productService = {
     // création produit
     async create(data){
+        // reviews peut arriver avec la syntaxe update (deleteMany + create) — invalide pour create()
+        const { reviews, ...productData } = data;
+        const reviewsCreate = Array.isArray(reviews?.create) ? reviews.create : [];
         return await prisma.products.create({
-            data: data
-        })
+            data: {
+                ...productData,
+                ...(reviewsCreate.length > 0 ? { reviews: { create: reviewsCreate } } : {}),
+            }
+        });
     },
     //récupération de tous les produits / récupération produit avec filtre optionnel 
     async getAll(filters = {}){

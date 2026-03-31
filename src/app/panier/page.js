@@ -1,15 +1,26 @@
 'use client';
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
-import '@/styles/panier.css'; 
+import '@/styles/panier.css';
 
 
 export default function PanierPage() {
-  const { cart, updateQuantity, removeFromCart, loading } = useCart();
+  const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext } = useCart();
+  const router = useRouter();
+
+  const exchangeMode = !!exchangeContext;
+  const exchangeOrderId = exchangeContext?.orderId ?? null;
+
+  // États pour la modale upgrade
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeInfo, setUpgradeInfo] = useState(null); // { newToyCount, newMonthlyPrice }
+  const [exchangeLoading, setExchangeLoading] = useState(false);
+  const [exchangeError, setExchangeError] = useState(null);
 
   
   // Calcul valeur théorique (Prix boutique des jouets)
@@ -18,6 +29,45 @@ export default function PanierPage() {
   }, 0) || 0;
 
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
+  // --- LOGIQUE MODE ÉCHANGE ---
+  const buildCartPayload = () =>
+    cart.items.map((item) => ({ productId: item.product.id, quantity: item.quantity }));
+
+  const handleExchangeValidation = async (confirmUpgrade = false) => {
+    setExchangeLoading(true);
+    setExchangeError(null);
+    try {
+      const body = {
+        orderId: exchangeOrderId,
+        newCartItems: buildCartPayload(),
+        confirmUpgrade,
+        ...(confirmUpgrade && upgradeInfo ? { newToyCount: upgradeInfo.newToyCount } : {}),
+      };
+      const res = await fetch('/api/orders/initiate-exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setExchangeError(data.error || "Une erreur est survenue.");
+        return;
+      }
+      if (data.requiresUpgrade) {
+        setUpgradeInfo({ newToyCount: data.newToyCount, newMonthlyPrice: data.newMonthlyPrice });
+        setShowUpgradeModal(true);
+        return;
+      }
+      // Succès — effacer le contexte d'échange
+      setExchangeContext(null);
+      router.push('/mon-compte?exchange=success');
+    } catch {
+      setExchangeError("Problème de connexion. Veuillez réessayer.");
+    } finally {
+      setExchangeLoading(false);
+    }
+  };
 
   // ---  NOUVELLE LOGIQUE TARIFAIRE ---
   const getSuggestedPlan = (count) => {
@@ -112,7 +162,61 @@ export default function PanierPage() {
   // --- AFFICHAGE PANIER REMPLI ---
   return (
     <div className="cart-page-container">
-      
+
+      {/* Bandeau mode échange */}
+      {exchangeMode && (
+        <div className="w-full bg-[#6EC1E4] text-white px-6 py-3 flex items-center justify-between gap-4 rounded-[16px] mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🔄</span>
+            <div>
+              <p className="font-semibold text-sm leading-tight">Mode Échange — Panier à 0€</p>
+              <p className="text-xs opacity-90">Votre sélection remplacera vos jouets actuels sans frais supplémentaires.</p>
+            </div>
+          </div>
+          <a href="/mon-compte" className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap">
+            Annuler
+          </a>
+        </div>
+      )}
+
+      {/* Modale upgrade abonnement */}
+      {showUpgradeModal && upgradeInfo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2E1D21]/40 backdrop-blur-sm px-4">
+          <div className="bg-[#FAFAFA] p-6 sm:p-8 rounded-[25px] shadow-xl max-w-md w-full flex flex-col gap-4">
+            <h3 className="text-xl font-bold text-[#2E1D21]">Passer à la formule supérieure ?</h3>
+            <p className="text-[#2E1D21] opacity-90 text-sm leading-relaxed">
+              Votre panier contient <strong>{upgradeInfo.newToyCount} jouets</strong>, ce qui dépasse votre abonnement actuel.
+              Pour finaliser cet échange, votre abonnement sera mis à jour.
+            </p>
+            {upgradeInfo.newMonthlyPrice && (
+              <div className="bg-white border border-[#6EC1E4] rounded-2xl p-4 text-center">
+                <p className="text-xs text-[#2E1D21]/60 mb-1">Nouveau tarif mensuel</p>
+                <p className="text-3xl font-bold text-[#6EC1E4]">{upgradeInfo.newMonthlyPrice}€<span className="text-sm font-normal">/mois</span></p>
+                <p className="text-xs text-[#2E1D21]/50 mt-1">Facturation au prorata immédiate</p>
+              </div>
+            )}
+            {exchangeError && <p className="text-red-500 text-sm text-center">{exchangeError}</p>}
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-2">
+              <button
+                onClick={() => { setShowUpgradeModal(false); setUpgradeInfo(null); }}
+                className="px-5 py-2.5 rounded-full border border-[#2E1D21]/20 text-[#2E1D21] hover:bg-[#2E1D21]/5 transition-colors text-sm font-medium"
+                type="button"
+              >
+                Non, retirer des jouets
+              </button>
+              <button
+                onClick={() => handleExchangeValidation(true)}
+                disabled={exchangeLoading}
+                className="px-6 py-2.5 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white text-sm font-medium shadow-sm transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+              >
+                {exchangeLoading ? 'Traitement...' : 'Oui, mettre à jour mon abonnement'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="cart-header">
         <h1 className="cart-header-title">
           Ma Sélection
@@ -281,12 +385,26 @@ export default function PanierPage() {
 
 {/* BOUTON DE VALIDATION DU PANIER */}
 <div className="cart-checkout-btn-wrapper">
-    {suggestedPlan.contactLink ? (
+    {exchangeMode ? (
+      <>
+        {exchangeError && !showUpgradeModal && (
+          <p className="text-red-500 text-sm text-center mb-2">{exchangeError}</p>
+        )}
+        <button
+          onClick={() => handleExchangeValidation(false)}
+          disabled={exchangeLoading || itemCount === 0}
+          className="w-full px-6 py-3 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+        >
+          {exchangeLoading ? 'Traitement...' : 'Confirmer l\'échange — 0€'}
+        </button>
+      </>
+    ) : suggestedPlan.contactLink ? (
           <ButtonBlue text="Demander un devis" href="/contact" />
     ) : (
-          <ButtonBlue 
-            text="Valider ma sélection" 
-            href={`/paiement${promoStatus === 'success' ? `?promo=${promoCode.trim().toUpperCase()}` : ''}`} 
+          <ButtonBlue
+            text="Valider ma sélection"
+            href={`/paiement${promoStatus === 'success' ? `?promo=${promoCode.trim().toUpperCase()}` : ''}`}
           />
     )}
 </div>  

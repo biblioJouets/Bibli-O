@@ -32,10 +32,12 @@ export default function OrderCard({ order }) {
 
       <div className="order-items-container flex flex-col gap-4 mt-2">
         {items.map((item, index) => (
-          <OrderItemRow 
-            key={item.ProductId || index} 
-            item={item} 
+          <OrderItemRow
+            key={item.ProductId || index}
+            item={item}
             orderStatus={order.status}
+            orderId={order.id}
+            hasExchangedThisMonth={order.hasExchangedThisMonth}
           />
         ))}
       </div>

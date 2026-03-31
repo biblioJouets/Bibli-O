@@ -258,6 +258,155 @@ export const processReturn = async (orderId, productId, userId) => {
   return { returnLabelUrl: updatedOrder.returnLabelUrl || null };
 };
 
+// ============================================================
+//  4. ÉCHANGE (BOÎTE NAVETTE)
+// ============================================================
+
+// Grille tarifaire — prix en centimes pour Stripe
+const PRICING_MAP = { 1: 2000, 2: 2500, 3: 3500, 4: 3800, 5: 4500, 6: 5100, 7: 5600, 8: 6000, 9: 6300 };
+
+export const getPriceIdForToyCount = (count) => {
+  const priceIds = {
+    1: process.env.STRIPE_PRICE_1_TOY,
+    2: process.env.STRIPE_PRICE_2_TOYS,
+    3: process.env.STRIPE_PRICE_3_TOYS,
+    4: process.env.STRIPE_PRICE_4_TOYS,
+    5: process.env.STRIPE_PRICE_5_TOYS,
+    6: process.env.STRIPE_PRICE_6_TOYS,
+    7: process.env.STRIPE_PRICE_7_TOYS,
+    8: process.env.STRIPE_PRICE_8_TOYS,
+    9: process.env.STRIPE_PRICE_9_TOYS,
+  };
+  return priceIds[count] || null;
+};
+
+export const initiateExchange = async (orderId, userId, newCartItems) => {
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // 1. Guard ownership
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+    include: {
+      Users: true,
+      OrderProducts: { include: { Products: true } },
+    },
+  });
+
+  if (!order || order.userId !== parseInt(userId)) {
+    const err = new Error("Action interdite");
+    err.status = 403;
+    throw err;
+  }
+
+  // 2. Guard statut
+  if (order.status !== 'ACTIVE') {
+    const err = new Error("L'échange n'est disponible que pour une location en cours.");
+    err.status = 400;
+    throw err;
+  }
+
+  // 3. Guard jeton mensuel
+  if (order.hasExchangedThisMonth) {
+    const err = new Error("Vous avez déjà effectué un échange ce mois-ci. Revenez le mois prochain !");
+    err.status = 400;
+    throw err;
+  }
+
+  // 4. Guard panier — signaler si upgrade nécessaire
+  const currentToyCount = order.OrderProducts.length;
+  const newToyCount = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  if (newToyCount > currentToyCount) {
+    const newPriceAmount = PRICING_MAP[newToyCount];
+    return {
+      requiresUpgrade: true,
+      currentToyCount,
+      newToyCount,
+      newMonthlyPrice: newPriceAmount ? newPriceAmount / 100 : null,
+    };
+  }
+
+  // 5. Décrémentation atomique du stock des nouveaux jouets
+  const productIds = newCartItems.map((i) => i.productId);
+  const products = await prisma.products.findMany({ where: { id: { in: productIds } } });
+
+  await prisma.$transaction(async (tx) => {
+    for (const item of newCartItems) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product || product.stock < (item.quantity || 1)) {
+        throw new Error(`Stock insuffisant pour : ${product?.name || 'jouet inconnu'}`);
+      }
+      await tx.products.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity || 1 } },
+      });
+    }
+
+    // 6. Consommer le jeton
+    await tx.orders.update({
+      where: { id: orderId },
+      data: { hasExchangedThisMonth: true },
+    });
+  });
+
+  // 7. Email Brevo confirmation échange
+  const user = order.Users;
+  if (user?.email) {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const customOrderId = `CMD${pad(now.getDate())}${pad(now.getMonth() + 1)}${String(now.getFullYear()).slice(-2)}${pad(now.getHours())}${pad(now.getMinutes())}-${orderId}`;
+    const anciensJouets = order.OrderProducts.map((op) => op.Products.name).join(' / ');
+    const nouveauxJouets = products.map((p) => p.name).join(' / ');
+    const lienCompte = `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com'}/mon-compte`;
+
+    await sendBrevoTemplate(
+      user.email,
+      17,
+      { prenom: user.firstName || "Client(e)", orderId: customOrderId, anciensJouets, nouveauxJouets, lienCompte }
+    ).catch((err) => console.error("[BREVO] Erreur email échange:", err));
+  }
+
+  return { requiresUpgrade: false, success: true };
+};
+
+export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCount) => {
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // Guards identiques à initiateExchange (ownership + statut + jeton)
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+    include: { Users: true, OrderProducts: { include: { Products: true } } },
+  });
+
+  if (!order || order.userId !== parseInt(userId)) {
+    const err = new Error("Action interdite"); err.status = 403; throw err;
+  }
+  if (order.status !== 'ACTIVE') {
+    const err = new Error("L'échange n'est disponible que pour une location en cours."); err.status = 400; throw err;
+  }
+  if (order.hasExchangedThisMonth) {
+    const err = new Error("Vous avez déjà effectué un échange ce mois-ci."); err.status = 400; throw err;
+  }
+
+  // Upgrade Stripe
+  if (order.stripeSubscriptionId) {
+    const newPriceId = getPriceIdForToyCount(newToyCount);
+    if (!newPriceId) {
+      const err = new Error("Formule indisponible pour ce nombre de jouets."); err.status = 400; throw err;
+    }
+    const subscription = await stripe.subscriptions.retrieve(order.stripeSubscriptionId);
+    const currentItemId = subscription.items.data[0]?.id;
+    await stripe.subscriptions.update(order.stripeSubscriptionId, {
+      items: [{ id: currentItemId, price: newPriceId }],
+      proration_behavior: 'create_prorations',
+    });
+  }
+
+  // Réutilise la même logique d'échange standard (stock + jeton + email)
+  return initiateExchange(orderId, userId, newCartItems);
+};
+
 export const getUserOrders = async (userId) => {
     try {
       return await prisma.orders.findMany({

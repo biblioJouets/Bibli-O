@@ -114,8 +114,14 @@ export async function POST(req) {
 
           toyNames.push(product.Products.name);
         }
-        
-        console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s)`);
+
+        // Remise à zéro du jeton d'échange mensuel
+        await prisma.orders.update({
+          where: { id: order.id },
+          data: { hasExchangedThisMonth: false },
+        });
+
+        console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s), jeton échange remis à zéro`);
 
         // 📧 ENVOI DE L'EMAIL DE SUCCÈS (Template ID: 13)
         if (toyNames.length > 0 && order.Users) {
