@@ -13,8 +13,8 @@
 /* --- LAYOUT PRINCIPAL (Sidebar + Contenu) --- */
 .account-layout {
   display: grid;
-  grid-template-columns: 280px 1fr; /* Colonne gauche fixe, reste flexible */
-  gap: 40px;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
   align-items: start;
 }
 
