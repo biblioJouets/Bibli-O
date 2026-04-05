@@ -235,6 +235,219 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Grille de cartes ── */
+.ordersGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Carte commande ── */
+.orderCard {
+  background: #ffffff;
+  border: 1px solid rgba(46, 29, 33, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.orderCard:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+}
+
+/* En-tête carte */
+.cardHeader {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(46, 29, 33, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.orderTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.orderId {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: #2E1D21;
+}
+
+.orderDate {
+  font-size: 0.8rem;
+  color: #a0888c;
+}
+
+.orderMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.orderPrice {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2E1D21;
+}
+
+/* Actions en-tête */
+.actionsTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btnPrint {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(46, 29, 33, 0.15);
+  background: #ffffff;
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2E1D21;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btnPrint:hover {
+  background-color: rgba(46, 29, 33, 0.05);
+}
+
+.statusSelect {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid rgba(46, 29, 33, 0.15);
+  border-radius: 50px;
+  background-color: #fff;
+  cursor: pointer;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2E1D21;
+  outline: none;
+}
+
+.statusSelect:focus {
+  border-color: #6EC1E4;
+}
+
+/* Corps carte */
+.cardBody {
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .cardBody { grid-template-columns: 1fr; }
+}
+
+.infoCol {}
+
+.infoColTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a0888c;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.5rem;
+}
+
+.highlight {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2E1D21;
+  margin: 0 0 0.2rem;
+}
+
+.subInfo {
+  font-size: 0.82rem;
+  color: #a0888c;
+  margin: 0 0 0.15rem;
+}
+
+.deliveryBox {
+  background: rgba(46, 29, 33, 0.02);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+}
+
+.mrPoint {
+  font-size: 0.82rem;
+  color: #E91E63;
+  margin: 0.25rem 0 0;
+}
+
+.domicileTag {
+  font-size: 0.82rem;
+  color: #a0888c;
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+.productsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.productItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(46, 29, 33, 0.05);
+  font-size: 0.85rem;
+  color: #2E1D21;
+}
+
+.productItem:last-child {
+  border-bottom: none;
+}
+
+.qtyBadge {
+  background: rgba(110, 193, 228, 0.2);
+  color: #0a4a6e;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Footer carte (actions logistiques) */
+.cardFooter {
+  padding: 0.75rem 1.25rem;
+  background: rgba(46, 29, 33, 0.02);
+  border-top: 1px solid rgba(46, 29, 33, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 /* ── Anciennes classes conservées (ancienne interface) ── */
 .admin-container {
   max-width: 1440px;
@@ -430,4 +643,131 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+/* ── Produit dans la carte : infos ACTIVE ── */
+.productItem {
+  flex-wrap: wrap;
+}
+
+.productItemName {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.productItemAdopted {
+  opacity: 0.6;
+}
+
+.adoptedBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(196, 168, 213, 0.3);
+  color: #3d1a5c;
+  padding: 1px 7px;
+  border-radius: 50px;
+}
+
+.productMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: 100%;
+  padding-left: 2rem;
+  margin-top: 0.15rem;
+}
+
+.adoptionPrice {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7a3e00;
+  background: rgba(255, 214, 165, 0.4);
+  padding: 1px 8px;
+  border-radius: 50px;
+  display: inline-block;
+}
+
+.possessionDate {
+  font-size: 0.72rem;
+  color: #a0888c;
+  font-style: italic;
+}
+
+/* ── Bouton Facture ── */
+.btnInvoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  background: rgba(255, 224, 138, 0.3);
+  border: 1px solid rgba(122, 92, 0, 0.2);
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #7a5c00;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btnInvoice:hover {
+  background: rgba(255, 224, 138, 0.5);
+}
+
+/* ── Zone bordereau de retour (drag & drop) ── */
+.returnLabelZone {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.returnLabelActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropZone {
+  border: 1.5px dashed rgba(46, 29, 33, 0.2);
+  border-radius: 10px;
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+  color: #a0888c;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: rgba(46, 29, 33, 0.01);
+  white-space: nowrap;
+}
+
+.dropZone:hover {
+  border-color: #6EC1E4;
+  color: #0a4a6e;
+  background: rgba(110, 193, 228, 0.05);
+}
+
+.dropZoneActive {
+  border-color: #6EC1E4;
+  background: rgba(110, 193, 228, 0.1);
+  color: #0a4a6e;
+}
+
+.btnUploadSmall {
+  padding: 0.3rem 0.65rem;
+  background: transparent;
+  border: 1px solid rgba(46, 29, 33, 0.15);
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a0888c;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btnUploadSmall:hover {
+  color: #2E1D21;
+  border-color: rgba(46, 29, 33, 0.3);
 }

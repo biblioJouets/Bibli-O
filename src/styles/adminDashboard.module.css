@@ -1,0 +1,149 @@
+.dashboard {
+  font-family: 'Quicksand', sans-serif;
+  color: #2E1D21;
+  max-width: 1100px;
+}
+
+.dashboardHeader {
+  margin-bottom: 2rem;
+}
+
+.dashboardTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2E1D21;
+  margin: 0 0 0.25rem;
+}
+
+.dashboardSubtitle {
+  font-size: 0.9rem;
+  color: #a0888c;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #a0888c;
+  margin: 0 0 1rem;
+}
+
+/* ── KPI Cards grandes ── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.kpiCard {
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+
+.kpiLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.5rem;
+  opacity: 0.8;
+}
+
+.kpiValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+
+.kpiSub {
+  font-size: 0.75rem;
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* Couleurs KPI grandes */
+.kpiTeal   { background: rgba(110, 193, 228, 0.18); color: #0a4a6e; }
+.kpiPurple { background: rgba(196, 168, 213, 0.25); color: #3d1a5c; }
+.kpiYellow { background: rgba(255, 224, 138, 0.35); color: #7a5c00; }
+
+/* ── KPI Cards petites ── */
+.kpiGridSmall {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+
+.kpiSmall {
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.kpiSmallLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.4rem;
+  opacity: 0.75;
+}
+
+.kpiSmallValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Couleurs KPI petites */
+.kpiBlue   { background: rgba(110, 193, 228, 0.15); color: #0a4a6e; }
+.kpiGreen  { background: rgba(168, 213, 162, 0.25); color: #1e5c1a; }
+.kpiRed    { background: rgba(255, 140, 148, 0.2);  color: #7a0010; }
+.kpiYellow { background: rgba(255, 224, 138, 0.3);  color: #7a5c00; }
+.kpiPurple { background: rgba(196, 168, 213, 0.2);  color: #3d1a5c; }
+
+/* ── Urgences logistique ── */
+.urgenceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.urgenceCard {
+  border-radius: 20px;
+  padding: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.urgenceCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.urgenceValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+
+.urgenceLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.85;
+}
+
+.urgenceRed     { background: rgba(255, 140, 148, 0.25); color: #7a0010; }
+.urgenceOrange  { background: rgba(255, 224, 138, 0.35); color: #7a5c00; }
+.urgenceNeutral { background: rgba(168, 213, 162, 0.2);  color: #1e5c1a; }

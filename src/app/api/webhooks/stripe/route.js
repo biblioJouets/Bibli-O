@@ -115,10 +115,14 @@ export async function POST(req) {
           toyNames.push(product.Products.name);
         }
 
-        // Remise à zéro du jeton d'échange mensuel
+        // Remise à zéro du jeton d'échange mensuel + sauvegarde URL facture Stripe
+        const invoiceUpdateData = { hasExchangedThisMonth: false };
+        if (invoice.hosted_invoice_url) {
+          invoiceUpdateData.stripeInvoiceUrl = invoice.hosted_invoice_url;
+        }
         await prisma.orders.update({
           where: { id: order.id },
-          data: { hasExchangedThisMonth: false },
+          data: invoiceUpdateData,
         });
 
         console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s), jeton échange remis à zéro`);
@@ -180,7 +184,13 @@ export async function POST(req) {
           return NextResponse.json({ received: true, note: 'Already adopted' });
         }
 
-        // Transaction : marquer ADOPTE + décrémenter stock
+        // Récupération de la commande source pour copier les infos de livraison
+        const sourceOrder = await prisma.orders.findUnique({
+          where: { id: parseInt(orderId) },
+          include: { Users: true },
+        });
+
+        // Transaction : marquer ADOPTE + décrémenter stock + créer commande ADOPTION
         await prisma.$transaction(async (tx) => {
           await tx.orderProducts.update({
             where: {
@@ -196,9 +206,32 @@ export async function POST(req) {
             where: { id: parseInt(productId) },
             data: { stock: { decrement: 1 } },
           });
+
+          // Créer une commande ADOPTION séparée pour le dashboard admin
+          await tx.orders.create({
+            data: {
+              userId: parseInt(userId),
+              orderType: 'ADOPTION',
+              status: 'COMPLETED',
+              totalAmount: session.amount_total / 100,
+              shippingName: sourceOrder?.shippingName ?? null,
+              shippingAddress: sourceOrder?.shippingAddress ?? null,
+              shippingZip: sourceOrder?.shippingZip ?? null,
+              shippingCity: sourceOrder?.shippingCity ?? null,
+              shippingPhone: sourceOrder?.shippingPhone ?? null,
+              mondialRelayPointId: sourceOrder?.mondialRelayPointId ?? null,
+              stripeInvoiceUrl: session.hosted_invoice_url ?? null,
+              OrderProducts: {
+                create: {
+                  ProductId: parseInt(productId),
+                  quantity: 1,
+                },
+              },
+            },
+          });
         });
 
-        console.log(`[Webhook] Adoption finalisée en BDD pour jouet #${productId}`);
+        console.log(`[Webhook] Adoption finalisée en BDD pour jouet #${productId} + commande ADOPTION créée`);
 
         // Récupération pour les emails
         const order = await prisma.orders.findUnique({

@@ -5,10 +5,9 @@ import "@/styles/homepage.css";
 import "@/styles/cardsContentMission.css"; 
 import "@/styles/header.css";
 
-import CookieBanner from "@/components/CookieBanner"; 
-import HeaderBiblioJouets from "@/components/Header";
-import Footer from "@/components/Footer";
-import SessionProviderClient from "@/components/SessionProviderClient"; 
+import CookieBanner from "@/components/CookieBanner";
+import ConditionalShell from "@/components/ConditionalShell";
+import SessionProviderClient from "@/components/SessionProviderClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CartProvider } from "@/context/CartContext";
@@ -81,13 +80,13 @@ const session = await getServerSession(authOptions);
         </a>
 
       <SessionProviderClient session={session}>
-        <CartProvider> 
-          <HeaderBiblioJouets />
-          <main>{children}</main>
-          <Footer />
+        <CartProvider>
+          <ConditionalShell>
+            <main>{children}</main>
+          </ConditionalShell>
           <CookieBanner />
         </CartProvider>
-        </SessionProviderClient>
+      </SessionProviderClient>
 
       </body>
     </html>

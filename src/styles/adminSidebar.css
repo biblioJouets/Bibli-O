@@ -1,0 +1,143 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid rgba(46, 29, 33, 0.08);
+  padding: 1.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem 1.25rem;
+  border-bottom: 1px solid rgba(46, 29, 33, 0.08);
+  margin-bottom: 0.5rem;
+}
+
+.sidebarLogo {
+  font-size: 1.4rem;
+}
+
+.sidebarTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2E1D21;
+  letter-spacing: -0.01em;
+}
+
+.navGroup {
+  margin-bottom: 0.25rem;
+}
+
+.navGroupLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a0888c;
+  padding: 0.75rem 0.5rem 0.25rem;
+  margin: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2E1D21;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 0.15rem;
+}
+
+.navItem:hover {
+  background-color: rgba(46, 29, 33, 0.05);
+}
+
+.navItemActive {
+  background-color: rgba(110, 193, 228, 0.15);
+  color: #1a7fa8;
+  font-weight: 600;
+}
+
+/* Accents couleurs des raccourcis */
+.navItemRental {
+  border-left: 3px solid #A8D5A2;
+}
+
+.navItemExchange {
+  border-left: 3px solid #FFE08A;
+}
+
+.navItemAdoption {
+  border-left: 3px solid #c4a8d5;
+}
+
+.navItemRental:hover,
+.navItemExchange:hover,
+.navItemAdoption:hover {
+  background-color: rgba(46, 29, 33, 0.04);
+}
+
+.navIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.navLabel {
+  flex: 1;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  margin-left: auto;
+}
+
+.badgeRed {
+  background-color: #e05252;
+}
+
+.badgeOrange {
+  background-color: #e08a00;
+}
+
+/* Items désactivés (placeholder) */
+.navItemDisabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.comingSoon {
+  margin-left: auto;
+  font-size: 0.6rem;
+  background-color: rgba(46, 29, 33, 0.08);
+  color: #2E1D21;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
