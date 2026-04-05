@@ -80,7 +80,8 @@ model Orders {
   id          Int   @id @default(autoincrement())
   totalAmount Float
 
-  status OrderStatus @default(PENDING)
+  status    OrderStatus @default(PENDING)
+  orderType OrderType   @default(RENTAL)
   hasExchangedThisMonth Boolean   @default(false) // Jeton d'échange limiter à 1 par mois.
   // --- LOGISTIQUE ALLER ---
   trackingNumber String? @db.VarChar(100) // Suivi expédition
@@ -99,6 +100,7 @@ model Orders {
   outboundLabelUrl     String? // Étiquette aller boîte navette (échange)
   rentalStartDate      DateTime? @db.Timestamptz(6) // Début de la location (réception colis)
   stripeSubscriptionId String?   @db.VarChar(255) // ID Stripe pour écouter le Webhook
+  stripeInvoiceUrl     String?                   // URL facture Stripe (hosted_invoice_url)
   createdAt            DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt            DateTime  @updatedAt @db.Timestamptz(6)
 
@@ -116,6 +118,12 @@ enum OrderStatus {
   RETURNED // Reçu par Bibli'O
   COMPLETED // Vérifié OK
   CANCELLED
+}
+
+enum OrderType {
+  RENTAL    // Location mensuelle classique (abonnement Stripe récurrent)
+  EXCHANGE  // Boîte Navette (échange de jouets en cours de mois)
+  ADOPTION  // Achat définitif one-shot d'un jouet actuellement loué
 }
 
 model OrderProducts {
