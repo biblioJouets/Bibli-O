@@ -127,7 +127,7 @@ model OrderProducts {
 
   rentalEndDate    DateTime? @db.Timestamptz(6) // Fin prévue (Date butoir retour)
   nextBillingDate  DateTime? @db.Timestamptz(6) // Jour-J (Date anniversaire)
-  renewalIntention String?   @db.VarChar(50) // "PROLONGATION", "RESILIATION"
+  renewalIntention String?   @db.VarChar(50) // "PROLONGATION", "PROLONGATION_TACITE", "RESILIATION", "RETOUR_DEMANDE", "PAIEMENT_ECHOUE", "ADOPTE"
 
   Orders   Orders   @relation(fields: [OrderId], references: [id], onDelete: Cascade)
   Products Products @relation(fields: [ProductId], references: [id], onDelete: Cascade)

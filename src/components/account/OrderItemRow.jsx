@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
+import AdoptModal from './AdoptModal';
 
 export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedThisMonth }) {
   const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [showAdoptModal, setShowAdoptModal] = useState(false);
   const [isReturning, setIsReturning] = useState(
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
+  const isAdopted = item.renewalIntention === 'ADOPTE';
 
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
@@ -80,24 +83,58 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
           )
         )}
 
-        {/* Bouton Rendre — conditionnel selon le statut */}
-        {(['ACTIVE', 'SHIPPED'].includes(orderStatus)) && !isReturning && (
-          <button
-            className="border border-gray-300 text-gray-500 text-sm px-4 py-2 rounded-full hover:border-red-300 hover:text-red-500 transition-colors"
-            type="button"
-            onClick={() => setShowReturnModal(true)}
+        {/* Badge "Adopté" — remplace tous les boutons d'action */}
+        {isAdopted ? (
+          <span
+            className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}
           >
-            Rendre
-          </button>
-        )}
-        {(orderStatus === 'RETURNING' || isReturning) && (
-          <button
-            className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
-            type="button"
-            disabled
-          >
-            Retour en cours
-          </button>
+            Adopté pour la vie 🧸
+          </span>
+        ) : (
+          <>
+            {/* Bouton Rendre — conditionnel selon le statut */}
+            {(['ACTIVE', 'SHIPPED'].includes(orderStatus)) && !isReturning && (
+              <button
+                className="border border-gray-300 text-gray-500 text-sm px-4 py-2 rounded-full hover:border-red-300 hover:text-red-500 transition-colors"
+                type="button"
+                onClick={() => setShowReturnModal(true)}
+              >
+                Rendre
+              </button>
+            )}
+            {(orderStatus === 'RETURNING' || isReturning) && (
+              <button
+                className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
+                type="button"
+                disabled
+              >
+                Retour en cours
+              </button>
+            )}
+
+            {!isReturning && (
+              <button
+                className="btn-pill btn-adopt"
+                type="button"
+                onClick={() => setShowAdoptModal(true)}
+              >
+                Adopter
+              </button>
+            )}
+
+            {showProlongButton ? (
+              <ProlongButton
+                orderId={item.OrderId}
+                productId={item.ProductId}
+                currentIntention={item.renewalIntention}
+              />
+            ) : (
+              <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled>
+                Prolonger
+              </button>
+            )}
+          </>
         )}
 
         {showReturnModal && (
@@ -112,17 +149,13 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
           />
         )}
 
-        <button className="btn-pill btn-adopt" type="button">Adopter</button>
-        {showProlongButton ? (
-          <ProlongButton 
-            orderId={item.OrderId} 
-            productId={item.ProductId} 
-            currentIntention={item.renewalIntention} 
+        {showAdoptModal && (
+          <AdoptModal
+            orderId={orderId}
+            productId={item.ProductId}
+            productName={productName}
+            onClose={() => setShowAdoptModal(false)}
           />
-        ) : (
-          <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled>
-            Prolonger
-          </button>
         )}
       </div>
     </div>

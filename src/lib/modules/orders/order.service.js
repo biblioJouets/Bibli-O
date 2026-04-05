@@ -407,6 +407,90 @@ export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCo
   return initiateExchange(orderId, userId, newCartItems);
 };
 
+// ============================================================
+//  5. ADOPTION D'UN JOUET (Paiement One-Shot)
+// ============================================================
+export const createAdoptionSession = async (orderId, productId, userId) => {
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // 1. Guard ownership & récupération
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+    include: {
+      Users: true,
+      OrderProducts: {
+        where: { ProductId: productId },
+        include: { Products: true },
+      },
+    },
+  });
+
+  if (!order || order.userId !== parseInt(userId)) {
+    const err = new Error("Action interdite");
+    err.status = 403;
+    throw err;
+  }
+
+  // 2. Guard statut
+  if (order.status !== 'ACTIVE') {
+    const err = new Error("L'adoption n'est disponible que pour une location en cours.");
+    err.status = 400;
+    throw err;
+  }
+
+  // 3. Guard — le jouet appartient bien à cette commande
+  const orderProduct = order.OrderProducts[0];
+  if (!orderProduct) {
+    const err = new Error("Jouet introuvable dans cette commande.");
+    err.status = 404;
+    throw err;
+  }
+
+  // 4. Guard — pas déjà adopté
+  if (orderProduct.renewalIntention === 'ADOPTE') {
+    const err = new Error("Ce jouet est déjà en cours d'adoption.");
+    err.status = 400;
+    throw err;
+  }
+
+  const product = orderProduct.Products;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com';
+
+  // 5. Création de la session Stripe Checkout (mode 'payment' = one-shot)
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment',
+    payment_method_types: ['card'],
+    customer_email: order.Users?.email,
+    line_items: [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Adoption — ${product.name}`,
+            description: `Achat définitif du jouet que vous avez en location.`,
+            images: product.images?.length
+              ? [`${appUrl}${product.images[0]}`]
+              : [],
+          },
+          unit_amount: Math.round(product.price * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      type: 'adoption',
+      orderId: String(orderId),
+      productId: String(productId),
+      userId: String(userId),
+    },
+    success_url: `${appUrl}/mon-compte?adoption=success`,
+    cancel_url: `${appUrl}/mon-compte`,
+  });
+
+  return { url: session.url };
+};
+
 export const getUserOrders = async (userId) => {
     try {
       return await prisma.orders.findMany({

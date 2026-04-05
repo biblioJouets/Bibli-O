@@ -154,14 +154,100 @@ export async function POST(req) {
     }
   }
 
-  // --- SCÉNARIO B : Nouvelle commande finalisée ---
+  // --- SCÉNARIO B : checkout.session.completed (adoption OU nouvelle commande) ---
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     console.log(" Webhook reçu pour session:", session.id);
 
+    // --- B1 : ADOPTION D'UN JOUET ---
+    if (session.metadata?.type === 'adoption') {
+      const { orderId, productId, userId } = session.metadata;
+      console.log(`[Webhook] Adoption détectée — orderId:${orderId} productId:${productId}`);
+
+      try {
+        // BOUCLIER ANTI-DOUBLON : si Stripe rejoue l'événement, on ne traite pas deux fois
+        const existingOrderProduct = await prisma.orderProducts.findUnique({
+          where: {
+            OrderId_ProductId: {
+              OrderId: parseInt(orderId),
+              ProductId: parseInt(productId),
+            },
+          },
+        });
+
+        if (existingOrderProduct?.renewalIntention === 'ADOPTE') {
+          console.log(`[Webhook] Adoption déjà traitée pour jouet #${productId} — idempotence OK`);
+          return NextResponse.json({ received: true, note: 'Already adopted' });
+        }
+
+        // Transaction : marquer ADOPTE + décrémenter stock
+        await prisma.$transaction(async (tx) => {
+          await tx.orderProducts.update({
+            where: {
+              OrderId_ProductId: {
+                OrderId: parseInt(orderId),
+                ProductId: parseInt(productId),
+              },
+            },
+            data: { renewalIntention: 'ADOPTE' },
+          });
+
+          await tx.products.update({
+            where: { id: parseInt(productId) },
+            data: { stock: { decrement: 1 } },
+          });
+        });
+
+        console.log(`[Webhook] Adoption finalisée en BDD pour jouet #${productId}`);
+
+        // Récupération pour les emails
+        const order = await prisma.orders.findUnique({
+          where: { id: parseInt(orderId) },
+          include: {
+            Users: true,
+            OrderProducts: { where: { ProductId: parseInt(productId) }, include: { Products: true } },
+          },
+        });
+
+        if (order?.Users) {
+          const user = order.Users;
+          const product = order.OrderProducts[0]?.Products;
+          const jouet = product?.name || 'votre jouet';
+          let prenom = (user.firstName || 'Client(e)').trim();
+          prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+
+          // Email client — Template 20
+          await sendBrevoEmail(user.email, prenom, 20, {
+            prenom,
+            jouet,
+            lienCompte: `${appUrl}/mon-compte`,
+          });
+          console.log(`[Brevo] Email adoption client envoyé à ${user.email}`);
+
+          // Email admin — Template 21
+          await sendBrevoEmail('contact@bibliojouets.com', 'Admin', 21, {
+            client_nom: `${user.firstName} ${user.lastName || ''}`.trim(),
+            client_email: user.email,
+            jouet_nom: product?.name || 'Jouet inconnu',
+            jouet_id: productId, // On ajoute l'ID ici
+            prix_adoption: (session.amount_total / 100).toFixed(2),
+            order_id: orderId,
+            lien_admin: `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
+          });
+          console.log(`[Brevo] Email adoption admin envoyé`);
+        }
+      } catch (err) {
+        console.error('[Webhook] Erreur traitement adoption:', err);
+        return NextResponse.json({ error: 'Erreur traitement adoption' }, { status: 500 });
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // --- B2 : NOUVELLE COMMANDE ---
     // 💡 AJOUT DE applied_promo DANS L'EXTRACTION DES MÉTADONNÉES
-    const { 
-      userId, cartId, cartSnapshot, shippingName, shippingAddress, 
+    const {
+      userId, cartId, cartSnapshot, shippingName, shippingAddress,
       shippingCity, shippingZip, mondialRelayPointId, shippingPhone,
       applied_promo // <-- NOUVEAU
     } = session.metadata;
