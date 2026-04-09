@@ -3,9 +3,21 @@ import prisma from '@/lib/core/database';
 export const productService = {
     // création produit
     async create(data){
+        const { reviews, ...productData } = data;
+        
+        const cleanData = { ...productData };
+
+        // 3. Si des avis (reviews) sont présents dans la requête, 
+        if (reviews && reviews.create) {
+            cleanData.reviews = {
+                create: reviews.create
+            };
+        }
+
+        // 4. On lance la création avec les données parfaitement formatées
         return await prisma.products.create({
-            data: data
-        })
+            data: cleanData
+        });
     },
     //récupération de tous les produits / récupération produit avec filtre optionnel 
     async getAll(filters = {}){

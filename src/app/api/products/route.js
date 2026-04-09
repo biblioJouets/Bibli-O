@@ -25,9 +25,9 @@ export async function POST(request) {
         // 2. Traitement
         const body = await request.json();
         
-        // Validation basique (optionnel si géré dans le service, mais mieux ici)
-        if (!body.name || !body.price) {
-             return NextResponse.json({ error: "Nom et Prix obligatoires" }, { status: 400 });
+        // Validation basique
+        if (!body.name || !body.price || !body.reference) {
+             return NextResponse.json({ error: "La référence, le nom et le prix sont obligatoires." }, { status: 400 });
         }
 
         const newProduct = await productService.create(body);
@@ -35,6 +35,14 @@ export async function POST(request) {
 
     } catch (error) {
         console.error("Erreur Création Produit:", error);
-        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+        
+        if (error.code === 'P2002') {
+            return NextResponse.json(
+                { error: "Cette référence existe déjà. Veuillez en choisir une autre." }, 
+                { status: 400 }
+            );
+        }
+
+        return NextResponse.json({ error: "Erreur serveur lors de la création." }, { status: 500 });
     }
 }

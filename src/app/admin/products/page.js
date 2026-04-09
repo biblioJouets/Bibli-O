@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { 
     Plus, Search, Edit3, Trash2, Eye, 
     CheckCircle, XCircle, X, UploadCloud, 
-    FileText, ListPlus, MinusCircle, Star
+    FileText, ListPlus, MinusCircle, Star, AlertCircle
 } from 'lucide-react';
 import '@/styles/adminProducts.css';
 
@@ -202,10 +202,10 @@ export default function AdminProductsPage() {
                 setSelectedIds([]);
             } else {
                 const errorData = await res.json();
-                alert("Erreur : " + (errorData.message || "Problème serveur"));
+                setFormError(errorData.error || "Une erreur inattendue est survenue.");
             }
         } catch (error) {
-            alert("Erreur technique lors de la sauvegarde.");
+            setFormError("Erreur technique lors de la sauvegarde (Serveur injoignable).");
         }
     };
 
@@ -214,6 +214,7 @@ export default function AdminProductsPage() {
     const toggleSelectOne = (id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     
     const handleOpenModal = (mode, product = emptyProduct) => {
+        setFormError(null);
         setModalMode(mode);
         setCurrentProduct(mode === 'create' 
             ? { ...emptyProduct } 
@@ -342,7 +343,11 @@ export default function AdminProductsPage() {
                             </h2>
                             <button onClick={() => setIsModalOpen(false)} className="btn-icon-only"><X size={24}/></button>
                         </div>
-
+                        {formError && (
+                            <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px 15px', margin: '0 20px 15px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <AlertCircle size={20} /> {formError}
+                            </div>
+                        )}
                         <form onSubmit={handleSave}>
                             <fieldset disabled={modalMode === 'view'} style={{border:'none', padding:0}}>
                                 <div className="form-grid">
