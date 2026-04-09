@@ -280,7 +280,7 @@ export const getPriceIdForToyCount = (count) => {
   return priceIds[count] || null;
 };
 
-export const initiateExchange = async (orderId, userId, newCartItems) => {
+export const initiateExchange = async (orderId, userId, newCartItems, shippingOverride = null) => {
   const { default: Stripe } = await import('stripe');
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -330,6 +330,8 @@ export const initiateExchange = async (orderId, userId, newCartItems) => {
   const productIds = newCartItems.map((i) => i.productId);
   const products = await prisma.products.findMany({ where: { id: { in: productIds } } });
 
+  let newExchangeOrder;
+
   await prisma.$transaction(async (tx) => {
     for (const item of newCartItems) {
       const product = products.find((p) => p.id === item.productId);
@@ -347,29 +349,111 @@ export const initiateExchange = async (orderId, userId, newCartItems) => {
       where: { id: orderId },
       data: { hasExchangedThisMonth: true },
     });
+
+    // 7. Créer la commande EXCHANGE (boîte navette) liée au client
+    // Calculer rentalEndDate = nextBillingDate de la commande source (premier produit)
+    const sourceProduct = order.OrderProducts[0];
+    const sourceRentalEnd = sourceProduct?.rentalEndDate ?? null;
+    const sourceNextBilling = sourceProduct?.nextBillingDate ?? null;
+
+    // Utiliser les infos de livraison fournies ou celles de la commande source
+    const shipping = shippingOverride ?? {
+      shippingName: order.shippingName,
+      shippingAddress: order.shippingAddress,
+      shippingZip: order.shippingZip,
+      shippingCity: order.shippingCity,
+      shippingPhone: order.shippingPhone,
+      mondialRelayPointId: order.mondialRelayPointId,
+    };
+
+    newExchangeOrder = await tx.orders.create({
+      data: {
+        userId: order.userId,
+        orderType: 'EXCHANGE',
+        status: 'PREPARING',
+        totalAmount: order.totalAmount, // Copie le montant de l'abonnement
+        shippingName: shipping.shippingName,
+        shippingAddress: shipping.shippingAddress,
+        shippingZip: shipping.shippingZip,
+        shippingCity: shipping.shippingCity,
+        shippingPhone: shipping.shippingPhone,
+        mondialRelayPointId: shipping.mondialRelayPointId ?? null,
+        stripeSubscriptionId: order.stripeSubscriptionId,
+        OrderProducts: {
+          create: newCartItems.map((item) => ({
+            ProductId: item.productId,
+            quantity: item.quantity || 1,
+            rentalEndDate: sourceRentalEnd,
+            nextBillingDate: sourceNextBilling,
+          })),
+        },
+      },
+    });
   });
 
-  // 7. Email Brevo confirmation échange
+// 8. Emails Brevo
   const user = order.Users;
-  if (user?.email) {
-    const now = new Date();
-    const pad = (n) => String(n).padStart(2, '0');
-    const customOrderId = `CMD${pad(now.getDate())}${pad(now.getMonth() + 1)}${String(now.getFullYear()).slice(-2)}${pad(now.getHours())}${pad(now.getMinutes())}-${orderId}`;
-    const anciensJouets = order.OrderProducts.map((op) => op.Products.name).join(' / ');
-    const nouveauxJouets = products.map((p) => p.name).join(' / ');
-    const lienCompte = `${process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com'}/mon-compte`;
+  
+  // 8.1 Formatage des variables logistiques
+  const jouets_retour = order.OrderProducts.map((op) => op.Products?.name).join(' / ') || 'Anciens jouets';
+  const jouets_envoi = products.map((p) => p.name).join(' / ') || 'Nouveaux jouets';
+  
+  const client_nom = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+  const prenom = user?.firstName || "Client(e)";
+  
+  // Récupération de l'adresse (shippingOverride s'il existe, sinon l'adresse de la commande)
+  const shipping = shippingOverride ?? order;
+  const client_adresse = `${shipping.shippingName || client_nom}\n${shipping.shippingAddress || ''}\n${shipping.shippingZip || ''} ${shipping.shippingCity || ''}\nFrance`;
+  
+  // 8.2 Calcul de l'évolution de l'abonnement
+  const previousCount = order.OrderProducts.length;
+  const newCount = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const evolution_abo = newCount > previousCount
+    ? `Votre formule a évolué pour accueillir ${newCount} jouet(s) !` 
+    : `Vous conservez votre formule actuelle de ${previousCount} jouet(s).`;
+  
+  const abonnement = `Formule ${newCount} jouet(s)`;
 
+  // 8.3 URLs
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com';
+  const lien_compte = `${appUrl}/mon-compte`;
+  const lien_admin = `${appUrl}/admin/orders?type=EXCHANGE`;
+
+  // 8.4 Envoi de l'Email Client
+  if (user?.email) {
     await sendBrevoTemplate(
       user.email,
-      17,
-      { prenom: user.firstName || "Client(e)", orderId: customOrderId, anciensJouets, nouveauxJouets, lienCompte }
-    ).catch((err) => console.error("[BREVO] Erreur email échange:", err));
+      17, // ID du template client
+      { 
+        prenom, 
+        jouets_envoi, 
+        jouets_retour, 
+        evolution_abo, 
+        lien_compte 
+      }
+    ).catch((err) => console.error("[BREVO] Erreur email échange client:", err));
   }
 
-  return { requiresUpgrade: false, success: true };
+  // 8.5 Envoi de l'Email Admin
+  const adminEmail = process.env.BREVO_SENDER_EMAIL || 'contact@bibliojouets.com';
+  await sendBrevoTemplate(
+    adminEmail,
+    18, // ID du template admin
+    {
+      client_nom,
+      client_email: user?.email || '',
+      abonnement,
+      client_adresse,
+      jouets_envoi,
+      jouets_retour,
+      lien_admin,
+    }
+  ).catch((err) => console.error("[BREVO] Erreur email échange admin:", err));
+
+  return { requiresUpgrade: false, success: true, exchangeOrderId: newExchangeOrder.id };
 };
 
-export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCount) => {
+export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCount, shippingOverride = null) => {
   const { default: Stripe } = await import('stripe');
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -404,7 +488,7 @@ export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCo
   }
 
   // Réutilise la même logique d'échange standard (stock + jeton + email)
-  return initiateExchange(orderId, userId, newCartItems);
+  return initiateExchange(orderId, userId, newCartItems, shippingOverride);
 };
 
 // ============================================================
@@ -484,7 +568,7 @@ export const createAdoptionSession = async (orderId, productId, userId) => {
       productId: String(productId),
       userId: String(userId),
     },
-    success_url: `${appUrl}/mon-compte?adoption=success`,
+    success_url: `${appUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/mon-compte`,
   });
 

@@ -1,5 +1,4 @@
 /* src/components/account/OrderCard.jsx */
-import Link from 'next/link';
 import OrderItemRow from './OrderItemRow';
 
 const STATUS_TRANSLATIONS = {
@@ -30,14 +29,32 @@ export default function OrderCard({ order }) {
   const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
   const formattedPrice = Number(order.totalAmount || 0).toFixed(2);
   const orderId = formatOrderId(order);
+  const isAdoption = order.orderType === 'ADOPTION';
+  const isExchange = order.orderType === 'EXCHANGE';
 
   return (
-    <div className="order-card p-6 rounded-[25px] bg-[#FFFAF4] shadow-sm mb-6 flex flex-col gap-4">
+    <div className={`order-card p-6 rounded-[25px] shadow-sm mb-6 flex flex-col gap-4 ${
+      isAdoption ? 'bg-[#F5F0FA] border border-[#c4a8d5]'
+      : isExchange ? 'bg-[#EBF7FD] border border-[#6EC1E4]'
+      : 'bg-[#FFFAF4]'
+    }`}>
       <div className="order-header flex flex-wrap justify-between items-center gap-4">
         <div className="order-meta flex flex-col gap-1 text-[#2E1D21]">
           {/* Numéro de commande formaté */}
           <span className="font-mono text-xs text-[#a0888c] tracking-wide">{orderId}</span>
-          <span className="font-semibold">Commande du {orderDate}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold">Commande du {orderDate}</span>
+            {isAdoption && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#c4a8d5] text-[#2E1D21]">
+                🧸 Achat définitif
+              </span>
+            )}
+            {isExchange && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#6EC1E4] text-white">
+                🔄 Boîte Navette
+              </span>
+            )}
+          </div>
           <span className="text-sm font-medium px-3 py-1 rounded-full w-fit bg-white border border-[#DAEEE6]">
             {STATUS_TRANSLATIONS[order.status] || order.status}
           </span>
@@ -81,6 +98,7 @@ export default function OrderCard({ order }) {
             orderStatus={order.status}
             orderId={order.id}
             hasExchangedThisMonth={order.hasExchangedThisMonth}
+            isAdoptionOrder={isAdoption}
           />
         ))}
       </div>

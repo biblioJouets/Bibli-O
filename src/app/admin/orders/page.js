@@ -28,14 +28,8 @@ export default async function AdminOrdersPage() {
 
   const [rentalOrders, exchangeOrders, returningOrders, adoptionOrders] =
     await Promise.all([
-      // Location : exclure les commandes dont tous les jouets sont adoptés
       prisma.orders.findMany({
-        where: {
-          orderType: "RENTAL",
-          NOT: {
-            OrderProducts: { every: { renewalIntention: "ADOPTE" } },
-          },
-        },
+        where: { orderType: "RENTAL" },
         include: orderInclude,
         orderBy: { createdAt: "desc" },
       }),
@@ -66,6 +60,12 @@ export default async function AdminOrdersPage() {
       }),
     ]);
 
+  // Exclure de Location les commandes dont TOUS les produits sont marqués ADOPTE
+  const filteredRentalOrders = rentalOrders.filter((o) => {
+    if (o.OrderProducts.length === 0) return true;
+    return o.OrderProducts.some((op) => op.renewalIntention !== "ADOPTE");
+  });
+
   // Sérialisation des dates pour passage au Client Component
   const serialize = (orders) =>
     orders.map((o) => ({
@@ -83,7 +83,7 @@ export default async function AdminOrdersPage() {
 
   return (
     <OrdersTabs
-      rentalOrders={serialize(rentalOrders)}
+      rentalOrders={serialize(filteredRentalOrders)}
       exchangeOrders={serialize(exchangeOrders)}
       returningOrders={serialize(returningOrders)}
       adoptionOrders={serialize(adoptionOrders)}

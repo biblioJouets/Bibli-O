@@ -6,7 +6,7 @@ import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
 import AdoptModal from './AdoptModal';
 
-export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedThisMonth }) {
+export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedThisMonth, isAdoptionOrder = false }) {
   const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAdoptModal, setShowAdoptModal] = useState(false);
@@ -55,11 +55,30 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
         </div>
         <div className="item-details">
           <h4 className="item-name">{productName}</h4>
-          <p className="item-price">Prix d’adoption : {productPrice} €</p>
-          <p className="item-date">En votre possession jusqu’au <strong>{returnDate}</strong></p>
+          {!isAdoptionOrder && (
+            <>
+              <p className="item-price">Prix d&apos;adoption : {productPrice} €</p>
+              <p className="item-date">En votre possession jusqu&apos;au <strong>{returnDate}</strong></p>
+            </>
+          )}
+          {isAdoptionOrder && (
+            <p className="item-price">Acheté pour {productPrice} €</p>
+          )}
         </div>
       </div>
 
+      {/* Pas de boutons d’action pour une commande d’achat */}
+      {isAdoptionOrder ? (
+        <div className="item-actions">
+          <span
+            className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}
+          >
+
+            🧸 À vous pour toujours
+          </span>
+        </div>
+      ) : (
       <div className="item-actions">
         {/* Bouton Échanger — 3 états */}
         {orderStatus === 'ACTIVE' && (
@@ -158,6 +177,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
           />
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -132,6 +132,16 @@ export default function AdminSidebar() {
           <span className={styles.comingSoon}>bientôt</span>
         </Link>
       </nav>
+
+       {/* BLOGS */}
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Blogs</p>
+          <Link href="/admin/blogs" className={`${styles.navItem} ${isActive("/admin/blogs") ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>📝</span>
+            Gestion Blogs
+          </Link>
+        </nav>
+        
     </aside>
   );
 }
