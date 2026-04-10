@@ -3,14 +3,20 @@ import prisma from '@/lib/core/database';
 export const productService = {
     // création produit
     async create(data){
-        // reviews peut arriver avec la syntaxe update (deleteMany + create) — invalide pour create()
         const { reviews, ...productData } = data;
-        const reviewsCreate = Array.isArray(reviews?.create) ? reviews.create : [];
+        
+        const cleanData = { ...productData };
+
+        // 3. Si des avis (reviews) sont présents dans la requête, 
+        if (reviews && reviews.create) {
+            cleanData.reviews = {
+                create: reviews.create
+            };
+        }
+
+        // 4. On lance la création avec les données parfaitement formatées
         return await prisma.products.create({
-            data: {
-                ...productData,
-                ...(reviewsCreate.length > 0 ? { reviews: { create: reviewsCreate } } : {}),
-            }
+            data: cleanData
         });
     },
     //récupération de tous les produits / récupération produit avec filtre optionnel 
