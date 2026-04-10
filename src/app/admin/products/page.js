@@ -22,6 +22,8 @@ export default function AdminProductsPage() {
     const [modalMode, setModalMode] = useState('create'); 
     const [currentProduct, setCurrentProduct] = useState({});
     
+    const [formError, setFormError] = useState(null);
+
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingPdf, setIsUploadingPdf] = useState(false);
     const [draggedImageIndex, setDraggedImageIndex] = useState(null);
