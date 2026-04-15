@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserOrders } from '@/lib/modules/orders/order.service';
+import { getUserOrders, canUserExchange } from '@/lib/modules/orders/order.service';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -29,10 +29,13 @@ export async function GET(request, props) {
        return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    // 3. Récupération des commandes
-    const orders = await getUserOrders(userId);
-    
-    return NextResponse.json(orders, { status: 200 });
+    // 3. Récupération des commandes + garde d'échange (un seul roundtrip)
+    const [orders, exchangeGuard] = await Promise.all([
+      getUserOrders(userId),
+      canUserExchange(userId),
+    ]);
+
+    return NextResponse.json({ orders, exchangeGuard }, { status: 200 });
 
   } catch (error) {
     console.error("🔴 ERREUR API:", error);

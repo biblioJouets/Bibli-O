@@ -3,6 +3,97 @@ import prisma from '@/lib/core/database';
 import { sendBrevoTemplate } from '@/lib/core/brevo/client';
 
 // ============================================================
+//  0. GARDE DE PÉRIODE DE FACTURATION
+// ============================================================
+
+/**
+ * Vérifie si un utilisateur peut effectuer un échange sur le cycle de facturation courant.
+ *
+ * Règles :
+ *  1. L'utilisateur doit avoir un abonnement Stripe actif.
+ *  2. Aucune commande EXCHANGE ne doit exister depuis le début du cycle en cours.
+ *  3. Aucune commande EXCHANGE précédente ne doit être encore en statut PREPARING ou SHIPPING.
+ *
+ * @param {number} userId
+ * @returns {{ canExchange: boolean, reason: string | null }}
+ */
+export const canUserExchange = async (userId) => {
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // 1. Récupérer l'abonnement Stripe actif lié à cet utilisateur
+  const activeOrder = await prisma.orders.findFirst({
+    where: {
+      userId: parseInt(userId),
+      status: 'ACTIVE',
+      stripeSubscriptionId: { not: null },
+    },
+    select: { stripeSubscriptionId: true },
+  });
+
+  if (!activeOrder?.stripeSubscriptionId) {
+    return { canExchange: false, reason: "Aucun abonnement actif trouvé." };
+  }
+
+  let periodStart;
+  let nextCycleDate;
+  try {
+    const subscription = await stripe.subscriptions.retrieve(activeOrder.stripeSubscriptionId);
+    // Stripe API >= 2025-01-27 (acacia) : current_period_start/end sont sur l'item, pas à la racine
+    const item0 = subscription.items?.data?.[0];
+    const ts = subscription.current_period_start        // ancien layout
+      ?? item0?.current_period_start                    // nouveau layout (acacia+)
+      ?? subscription.billing_cycle_anchor;             // fallback : ancre de cycle
+    const tsEnd = subscription.current_period_end       // ancien layout
+      ?? item0?.current_period_end;                     // nouveau layout (acacia+)
+    if (!ts || typeof ts !== 'number') {
+      return { canExchange: false, reason: "Impossible de déterminer la période de facturation. Réessayez." };
+    }
+    // Stripe retourne des timestamps Unix en secondes → conversion en ms pour Date JS
+    periodStart = new Date(ts * 1000);
+    nextCycleDate = tsEnd ? new Date(tsEnd * 1000).toLocaleDateString('fr-FR') : null;
+  } catch {
+    return { canExchange: false, reason: "Impossible de vérifier votre abonnement. Réessayez." };
+  }
+
+  // 2. Garde-fou logistique : un EXCHANGE déjà en PREPARING ou SHIPPING bloque immédiatement
+  const pendingExchange = await prisma.orders.findFirst({
+    where: {
+      userId: parseInt(userId),
+      orderType: 'EXCHANGE',
+      status: { in: ['PREPARING', 'SHIPPED'] },
+    },
+    select: { id: true },
+  });
+
+  if (pendingExchange) {
+    return {
+      canExchange: false,
+      reason: "Un échange est déjà en cours de préparation. Attendez qu'il soit expédié avant d'en initier un nouveau.",
+    };
+  }
+
+  // 3. Compter les échanges réalisés depuis le début du cycle de facturation en cours
+  const exchangesThisPeriod = await prisma.orders.count({
+    where: {
+      userId: parseInt(userId),
+      orderType: 'EXCHANGE',
+      createdAt: { gte: periodStart },
+    },
+  });
+
+  if (exchangesThisPeriod > 0) {
+    const nextLabel = nextCycleDate ? `Prochain échange disponible le ${nextCycleDate}.` : "Revenez au prochain cycle !";
+    return {
+      canExchange: false,
+      reason: `Vous avez déjà effectué un échange sur cette période de facturation. ${nextLabel}`,
+    };
+  }
+
+  return { canExchange: true, reason: null };
+};
+
+// ============================================================
 //  1. FONCTIONS D'ENVOI D'EMAIL
 // ============================================================
 
@@ -306,9 +397,10 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
     throw err;
   }
 
-  // 3. Guard jeton mensuel
-  if (order.hasExchangedThisMonth) {
-    const err = new Error("Vous avez déjà effectué un échange ce mois-ci. Revenez le mois prochain !");
+  // 3. Guard période de facturation (remplace hasExchangedThisMonth)
+  const { canExchange, reason: exchangeReason } = await canUserExchange(parseInt(userId));
+  if (!canExchange) {
+    const err = new Error(exchangeReason);
     err.status = 400;
     throw err;
   }
@@ -361,13 +453,11 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       data: { renewalIntention: 'RETOUR_DEMANDE' },
     });
 
-    // 6b. Consommer le jeton + passer l'ancienne commande en RETURNING
+    // 6b. Passer l'ancienne commande en RETURNING
+    // (plus besoin de hasExchangedThisMonth — la garde se base sur createdAt de la commande EXCHANGE)
     await tx.orders.update({
       where: { id: orderId },
-      data: {
-        hasExchangedThisMonth: true,
-        status: 'RETURNING',
-      },
+      data: { status: 'RETURNING' },
     });
 
     // 7. Créer la commande EXCHANGE (boîte navette) liée au client
@@ -489,8 +579,10 @@ export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCo
   if (order.status !== 'ACTIVE') {
     const err = new Error("L'échange n'est disponible que pour une location en cours."); err.status = 400; throw err;
   }
-  if (order.hasExchangedThisMonth) {
-    const err = new Error("Vous avez déjà effectué un échange ce mois-ci."); err.status = 400; throw err;
+  // Guard période de facturation (remplace hasExchangedThisMonth)
+  const { canExchange: canEx, reason: upgradeExchangeReason } = await canUserExchange(parseInt(userId));
+  if (!canEx) {
+    const err = new Error(upgradeExchangeReason); err.status = 400; throw err;
   }
   const hasRetourDemandeUp = order.OrderProducts.some((op) => op.renewalIntention === 'RETOUR_DEMANDE');
   if (hasRetourDemandeUp) {

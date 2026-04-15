@@ -47,6 +47,9 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
     }
   }
 
+  // Commandes clôturées : aucun bouton d'action ne doit être affiché
+  const isHistorical = ['RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
+
   return (
     <div className="order-item-row">
       <div className="item-info">
@@ -67,8 +70,8 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
         </div>
       </div>
 
-      {/* Pas de boutons d’action pour une commande d’achat */}
-      {isAdoptionOrder ? (
+      {/* Pas de boutons d’action pour une commande clôturée ou d’achat */}
+      {isHistorical ? null : isAdoptionOrder ? (
         <div className="item-actions">
           <span
             className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"

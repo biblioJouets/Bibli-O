@@ -11,6 +11,7 @@ import '@/styles/orders.css'; // Import du CSS natif
 export default function OrdersTab() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState([]);
+  const [exchangeGuard, setExchangeGuard] = useState({ canExchange: true, reason: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +20,8 @@ export default function OrdersTab() {
         const res = await fetch(`/api/orders/user/${session.user.id}`);
         if (res.ok) {
           const data = await res.json();
-          setOrders(data);
+          setOrders(data.orders);
+          setExchangeGuard(data.exchangeGuard);
         }
       } catch (err) {
         console.error("Erreur lors de la récupération des commandes :", err);
@@ -52,7 +54,12 @@ export default function OrdersTab() {
       <h2 className="section-title">Mes Commandes</h2>
       <div className="orders-list">
         {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
+          <OrderCard
+            key={order.id}
+            order={order}
+            canExchange={exchangeGuard.canExchange}
+            canExchangeReason={exchangeGuard.reason}
+          />
         ))}
       </div>
     </div>

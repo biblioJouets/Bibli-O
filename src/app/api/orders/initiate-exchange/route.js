@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { z } from 'zod';
-import { initiateExchange, upgradeAndExchange } from '@/lib/modules/orders/order.service';
+import { initiateExchange, upgradeAndExchange, canUserExchange } from '@/lib/modules/orders/order.service';
 
 const cartItemSchema = z.object({
   productId: z.number().int().positive(),
@@ -39,6 +39,12 @@ export async function POST(req) {
     }
 
     const { orderId, newCartItems, confirmUpgrade, newToyCount, shipping } = parsed.data;
+
+    // Vérification de la garde de période de facturation avant tout traitement
+    const { canExchange, reason } = await canUserExchange(session.user.id);
+    if (!canExchange) {
+      return NextResponse.json({ error: reason }, { status: 400 });
+    }
 
     let result;
     if (confirmUpgrade && newToyCount) {

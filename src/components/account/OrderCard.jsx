@@ -24,7 +24,13 @@ function formatOrderId(order) {
   return `CMD${day}${month}${year}${hours}${minutes}-${order.id}`;
 }
 
-export default function OrderCard({ order }) {
+/**
+ * @param {{ order: object, canExchange?: boolean, canExchangeReason?: string|null }} props
+ * canExchange  — résultat de canUserExchange() calculé côté serveur/page parente.
+ *               Si non fourni (undefined), la garde est considérée comme permissive
+ *               pour ne pas casser les vues qui n'ont pas encore migré.
+ */
+export default function OrderCard({ order, canExchange = true, canExchangeReason = null }) {
   const items = order.items || order.OrderItems || order.OrderProducts || [];
   const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
   const formattedPrice = Number(order.totalAmount || 0).toFixed(2);
@@ -32,11 +38,11 @@ export default function OrderCard({ order }) {
   const isAdoption = order.orderType === 'ADOPTION';
   const isExchange = order.orderType === 'EXCHANGE';
 
-  // Bouclier échange : désactivé si jeton consommé OU si un retour est déjà en cours
+  // Bouclier échange : bloqué si la garde de période dit "non" OU si un retour est déjà en cours
   const hasRetourDemande = items.some((item) => item.renewalIntention === 'RETOUR_DEMANDE');
-  const exchangeBlocked = order.hasExchangedThisMonth || hasRetourDemande;
-  const exchangeBlockReason = order.hasExchangedThisMonth
-    ? "Vous avez déjà utilisé votre échange ce mois-ci."
+  const exchangeBlocked = !canExchange || hasRetourDemande;
+  const exchangeBlockReason = !canExchange
+    ? (canExchangeReason ?? "Échange indisponible sur cette période de facturation.")
     : hasRetourDemande
     ? "Un retour est déjà en cours — échange disponible après réception."
     : null;
