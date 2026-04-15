@@ -32,6 +32,15 @@ export default function OrderCard({ order }) {
   const isAdoption = order.orderType === 'ADOPTION';
   const isExchange = order.orderType === 'EXCHANGE';
 
+  // Bouclier échange : désactivé si jeton consommé OU si un retour est déjà en cours
+  const hasRetourDemande = items.some((item) => item.renewalIntention === 'RETOUR_DEMANDE');
+  const exchangeBlocked = order.hasExchangedThisMonth || hasRetourDemande;
+  const exchangeBlockReason = order.hasExchangedThisMonth
+    ? "Vous avez déjà utilisé votre échange ce mois-ci."
+    : hasRetourDemande
+    ? "Un retour est déjà en cours — échange disponible après réception."
+    : null;
+
   return (
     <div className={`order-card p-6 rounded-[25px] shadow-sm mb-6 flex flex-col gap-4 ${
       isAdoption ? 'bg-[#F5F0FA] border border-[#c4a8d5]'
@@ -97,8 +106,9 @@ export default function OrderCard({ order }) {
             item={item}
             orderStatus={order.status}
             orderId={order.id}
-            hasExchangedThisMonth={order.hasExchangedThisMonth}
             isAdoptionOrder={isAdoption}
+            exchangeBlocked={exchangeBlocked}
+            exchangeBlockReason={exchangeBlockReason}
           />
         ))}
       </div>

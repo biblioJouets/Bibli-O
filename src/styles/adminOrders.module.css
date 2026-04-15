@@ -771,3 +771,85 @@
   color: #2E1D21;
   border-color: rgba(46, 29, 33, 0.3);
 }
+
+/* ── Audit panel retour ── */
+.auditPanel {
+  padding: 1rem 1.25rem;
+  background: rgba(255, 140, 148, 0.06);
+  border-top: 1.5px dashed rgba(224, 82, 82, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auditTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #7a0010;
+  margin: 0;
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.auditItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.6rem;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid rgba(46, 29, 33, 0.07);
+}
+
+.auditProductName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2E1D21;
+  flex: 1;
+}
+
+.auditBtnSain {
+  padding: 0.3rem 0.85rem;
+  background: #A8D5A2;
+  color: #1e5c1a;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 90px;
+  transition: opacity 0.15s;
+}
+
+.auditBtnSain:hover { opacity: 0.85; }
+
+.auditBtnCasse {
+  padding: 0.3rem 0.85rem;
+  background: #FF8C94;
+  color: #7a0010;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 90px;
+  transition: opacity 0.15s;
+}
+
+.auditBtnCasse:hover { opacity: 0.85; }
+
+.auditDone {
+  padding: 0.75rem 1.25rem;
+  background: rgba(168, 213, 162, 0.2);
+  border-top: 1px solid rgba(168, 213, 162, 0.5);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e5c1a;
+}

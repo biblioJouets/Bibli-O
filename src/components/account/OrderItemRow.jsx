@@ -6,7 +6,7 @@ import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
 import AdoptModal from './AdoptModal';
 
-export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedThisMonth, isAdoptionOrder = false }) {
+export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, exchangeBlocked = false, exchangeBlockReason = null }) {
   const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAdoptModal, setShowAdoptModal] = useState(false);
@@ -80,17 +80,21 @@ export default function OrderItemRow({ item, orderStatus, orderId, hasExchangedT
         </div>
       ) : (
       <div className="item-actions">
-        {/* Bouton Échanger — 3 états */}
+        {/* Bouton Échanger — bloqué si jeton consommé OU retour en cours */}
         {orderStatus === 'ACTIVE' && (
-          hasExchangedThisMonth ? (
-            <button
-              disabled
-              className="bg-gray-200 text-gray-400 font-semibold px-6 py-2 rounded-full cursor-not-allowed text-sm"
-              title="Vous avez déjà effectué un échange ce mois-ci. Revenez le mois prochain !"
-              type="button"
-            >
-              Échange en cours
-            </button>
+          exchangeBlocked ? (
+            <div className="flex flex-col items-start gap-1">
+              <button
+                disabled
+                className="bg-gray-200 text-gray-400 font-semibold px-6 py-2 rounded-full cursor-not-allowed text-sm"
+                type="button"
+              >
+                Échanger
+              </button>
+              {exchangeBlockReason && (
+                <span className="text-xs text-gray-400 px-1">{exchangeBlockReason}</span>
+              )}
+            </div>
           ) : (
             <button
               className="bg-[#6EC1E4] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#5aafcf] transition-colors shadow-md text-sm"

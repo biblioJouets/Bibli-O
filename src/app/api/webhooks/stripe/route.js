@@ -115,7 +115,13 @@ export async function POST(req) {
           toyNames.push(product.Products.name);
         }
 
-        // Remise à zéro du jeton d'échange mensuel + sauvegarde URL facture Stripe
+        // Remise à zéro du jeton d'échange mensuel + sauvegarde URL facture Stripe.
+        // NOTE : hasExchangedThisMonth repasse à false à chaque renouvellement, ce qui
+        // rend le jeton d'échange disponible pour le nouveau mois. Cependant, si des
+        // OrderProducts sont encore en RETOUR_DEMANDE (boîte non réceptionnée par l'admin),
+        // le frontend et le service bloquent de toute façon un nouvel échange via le guard
+        // "hasRetourDemande". Le jeton seul ne suffit pas : la réception physique de la
+        // boîte (audit admin → statut RETURNED) est la condition finale pour débloquer.
         const invoiceUpdateData = { hasExchangedThisMonth: false };
         if (invoice.hosted_invoice_url) {
           invoiceUpdateData.stripeInvoiceUrl = invoice.hosted_invoice_url;

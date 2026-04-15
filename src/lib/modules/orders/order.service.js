@@ -313,6 +313,16 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
     throw err;
   }
 
+  // 3b. Guard retour en cours — bloquer si l'ancienne boîte n'a pas encore été réceptionnée
+  const hasRetourDemande = order.OrderProducts.some(
+    (op) => op.renewalIntention === 'RETOUR_DEMANDE'
+  );
+  if (hasRetourDemande) {
+    const err = new Error("Un retour est déjà en cours pour cette commande. L'échange sera disponible une fois la boîte réceptionnée.");
+    err.status = 400;
+    throw err;
+  }
+
   // 4. Guard panier — signaler si upgrade nécessaire
   const currentToyCount = order.OrderProducts.length;
   const newToyCount = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -344,10 +354,20 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       });
     }
 
-    // 6. Consommer le jeton
+    // 6. Marquer TOUS les produits de l'ancienne commande en RETOUR_DEMANDE
+    //    (l'échange est total — toute la boîte repart)
+    await tx.orderProducts.updateMany({
+      where: { OrderId: orderId },
+      data: { renewalIntention: 'RETOUR_DEMANDE' },
+    });
+
+    // 6b. Consommer le jeton + passer l'ancienne commande en RETURNING
     await tx.orders.update({
       where: { id: orderId },
-      data: { hasExchangedThisMonth: true },
+      data: {
+        hasExchangedThisMonth: true,
+        status: 'RETURNING',
+      },
     });
 
     // 7. Créer la commande EXCHANGE (boîte navette) liée au client
@@ -471,6 +491,10 @@ export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCo
   }
   if (order.hasExchangedThisMonth) {
     const err = new Error("Vous avez déjà effectué un échange ce mois-ci."); err.status = 400; throw err;
+  }
+  const hasRetourDemandeUp = order.OrderProducts.some((op) => op.renewalIntention === 'RETOUR_DEMANDE');
+  if (hasRetourDemandeUp) {
+    const err = new Error("Un retour est déjà en cours pour cette commande."); err.status = 400; throw err;
   }
 
   // Upgrade Stripe

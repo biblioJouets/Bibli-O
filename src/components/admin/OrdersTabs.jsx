@@ -222,6 +222,94 @@ function ReturnLabelUpload({ order, onRefresh }) {
   );
 }
 
+// --- COMPOSANT : Audit physique des jouets retournés ---
+function AuditPanel({ order, onRefresh }) {
+  const [statuses, setStatuses] = useState(
+    () => Object.fromEntries(order.OrderProducts.map((op) => [op.ProductId, "SAIN"]))
+  );
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  function toggle(productId) {
+    setStatuses((prev) => ({
+      ...prev,
+      [productId]: prev[productId] === "SAIN" ? "CASSE" : "SAIN",
+    }));
+  }
+
+  async function handleSubmit() {
+    const products = Object.entries(statuses).map(([productId, status]) => ({
+      productId: parseInt(productId),
+      status,
+    }));
+    const nbCasse = products.filter((p) => p.status === "CASSE").length;
+    const ok = window.confirm(
+      `Confirmer l'audit ?\n• ${products.length - nbCasse} jouet(s) SAIN(S) → réintégrés au stock\n• ${nbCasse} jouet(s) CASSÉ(S) → marqués DAMAGED`
+    );
+    if (!ok) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/audit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products }),
+      });
+      if (res.ok) {
+        setDone(true);
+        onRefresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Erreur lors de l'audit.");
+      }
+    } catch {
+      alert("Erreur réseau.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className={styles.auditDone}>
+        ✅ Audit enregistré — commande passée en <strong>RETURNED</strong>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.auditPanel}>
+      <p className={styles.auditTitle}>🔍 Audit retour — état de chaque jouet</p>
+      <div className={styles.auditList}>
+        {order.OrderProducts.map((op) => {
+          const isCasse = statuses[op.ProductId] === "CASSE";
+          return (
+            <div key={op.ProductId} className={styles.auditItem}>
+              <span className={styles.auditProductName}>
+                {op.Products?.name ?? `Jouet #${op.ProductId}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => toggle(op.ProductId)}
+                className={isCasse ? styles.auditBtnCasse : styles.auditBtnSain}
+              >
+                {isCasse ? "💥 Cassé" : "✅ Sain"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <button
+        className={styles.btnRed}
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? "Enregistrement..." : "Valider l'audit"}
+      </button>
+    </div>
+  );
+}
+
 function OrderCard({ order, type, onStatusUpdate }) {
   const [loading, setLoading] = useState(false);
   const [tracking, setTracking] = useState(order.trackingNumber ?? "");
@@ -424,6 +512,11 @@ function OrderCard({ order, type, onStatusUpdate }) {
           </button>
         )}
       </div>
+
+      {/* Audit physique — visible uniquement en RETURNING */}
+      {order.status === "RETURNING" && (
+        <AuditPanel order={order} onRefresh={onStatusUpdate} />
+      )}
     </div>
   );
 }
