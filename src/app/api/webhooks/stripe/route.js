@@ -208,6 +208,7 @@ export async function POST(req) {
           });
 
           // Créer une commande ADOPTION séparée pour le dashboard admin
+          // Note : session.hosted_invoice_url n'existe pas sur mode:'payment' (abonnements uniquement)
           await tx.orders.create({
             data: {
               userId: parseInt(userId),
@@ -220,7 +221,6 @@ export async function POST(req) {
               shippingCity: sourceOrder?.shippingCity ?? null,
               shippingPhone: sourceOrder?.shippingPhone ?? null,
               mondialRelayPointId: sourceOrder?.mondialRelayPointId ?? null,
-              stripeInvoiceUrl: session.hosted_invoice_url ?? null,
               OrderProducts: {
                 create: {
                   ProductId: parseInt(productId),

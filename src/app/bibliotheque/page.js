@@ -9,21 +9,29 @@ import '@/styles/bibliotheque.css';
 
 export default function LibraryPage() {
   const searchParams = useSearchParams();
-  const exchangeMode = searchParams.get('mode') === 'exchange';
+  const exchangeMode    = searchParams.get('mode') === 'exchange';
   const exchangeOrderId = searchParams.get('orderId');
-  const { setExchangeContext } = useCart();
+  const refillMode      = searchParams.get('mode') === 'refill';
+  const refillOrderId   = searchParams.get('sourceOrderId');
+  const refillSlots     = parseInt(searchParams.get('slots') || '0', 10);
+  const { setExchangeContext, setRefillContext } = useCart();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Active le contexte d'échange dans le CartContext dès l'arrivée sur la page
+  // Active le contexte d'échange ou de réassort dans le CartContext dès l'arrivée sur la page
   useEffect(() => {
     if (exchangeMode && exchangeOrderId) {
       setExchangeContext({ orderId: parseInt(exchangeOrderId) });
+      setRefillContext(null);
+    } else if (refillMode && refillOrderId && refillSlots > 0) {
+      setRefillContext({ sourceOrderId: parseInt(refillOrderId), slots: refillSlots });
+      setExchangeContext(null);
     } else {
       setExchangeContext(null);
+      setRefillContext(null);
     }
-  }, [exchangeMode, exchangeOrderId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [exchangeMode, exchangeOrderId, refillMode, refillOrderId, refillSlots]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // États pour les filtres
   const [searchTerm, setSearchTerm] = useState('');

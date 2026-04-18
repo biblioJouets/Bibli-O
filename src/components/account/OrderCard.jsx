@@ -1,4 +1,6 @@
 /* src/components/account/OrderCard.jsx */
+'use client';
+import { useRouter } from 'next/navigation';
 import OrderItemRow from './OrderItemRow';
 
 const STATUS_TRANSLATIONS = {
@@ -31,12 +33,17 @@ function formatOrderId(order) {
  *               pour ne pas casser les vues qui n'ont pas encore migré.
  */
 export default function OrderCard({ order, canExchange = true, canExchangeReason = null }) {
+  const router = useRouter();
   const items = order.items || order.OrderItems || order.OrderProducts || [];
   const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
   const formattedPrice = Number(order.totalAmount || 0).toFixed(2);
   const orderId = formatOrderId(order);
   const isAdoption = order.orderType === 'ADOPTION';
   const isExchange = order.orderType === 'EXCHANGE';
+  const isRefill  = order.orderType === 'REFILL';
+
+  // Réassort : jouets adoptés non encore remplacés (ADOPTE_REMPLACE exclus)
+  const adoptedSlots = items.filter((item) => item.renewalIntention === 'ADOPTE').length;
 
   const isHistorical = ['RETURNED', 'COMPLETED', 'CANCELLED'].includes(order.status);
   const hasRetourDemande = items.some((item) => item.renewalIntention === 'RETOUR_DEMANDE');
@@ -72,6 +79,11 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
             {isExchange && (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#6EC1E4] text-white">
                 🔄 Boîte Navette
+              </span>
+            )}
+            {isRefill && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#DAEEE6] text-[#2E1D21]">
+                🎁 Réassort
               </span>
             )}
           </div>
@@ -124,6 +136,27 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
           />
         ))}
       </div>
+
+      {/* Zone Réassort — visible uniquement sur commandes ACTIVE avec des jouets adoptés */}
+      {order.status === 'ACTIVE' && adoptedSlots > 0 && (
+        <div className="mt-2 p-4 rounded-[20px] bg-[#DAEEE6] border border-[#88D4AB] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold text-[#2E1D21] text-sm">
+              🎁 Vous avez adopté {adoptedSlots} jouet{adoptedSlots > 1 ? 's' : ''}.
+            </span>
+            <span className="text-xs text-[#3a6b50]">
+              Vous avez {adoptedSlots} place{adoptedSlots > 1 ? 's' : ''} libre{adoptedSlots > 1 ? 's' : ''} dans votre box !
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push(`/bibliotheque?mode=refill&slots=${adoptedSlots}&sourceOrderId=${order.id}`)}
+            className="px-5 py-2 rounded-full bg-[#88D4AB] hover:bg-[#6abf92] text-[#2E1D21] font-semibold text-sm transition-colors shadow-sm whitespace-nowrap"
+          >
+            Remplacer ce{adoptedSlots > 1 ? 's' : ''} jouet{adoptedSlots > 1 ? 's' : ''}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,8 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(false);
   // Contexte d'échange : null si mode normal, { orderId } si mode échange
   const [exchangeContext, setExchangeContext] = useState(null);
+  // Contexte de réassort : null si mode normal, { sourceOrderId, slots } si mode refill
+  const [refillContext, setRefillContext] = useState(null);
 
   // Charger le panier au démarrage si connecté
   useEffect(() => {
@@ -77,7 +79,7 @@ export function CartProvider({ children }) {
 const planInfo = getSuggestedPlan(cartCount);
 const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext }}>
       {children}
     </CartContext.Provider>
   );

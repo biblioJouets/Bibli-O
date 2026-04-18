@@ -19,8 +19,12 @@ const normalizeText = (text) => {
 
 export default function LivraisonEchangePage() {
   const { data: session } = useSession();
-  const { cart, exchangeContext, setExchangeContext } = useCart();
+  const { cart, exchangeContext, setExchangeContext, refillContext, setRefillContext } = useCart();
   const router = useRouter();
+
+  // Détermine le mode actif : échange ou réassort
+  const isRefillMode    = !!refillContext?.sourceOrderId;
+  const isExchangeMode  = !!exchangeContext?.orderId;
 
   const [deliveryMode, setDeliveryMode] = useState("DOMICILE");
   const [selectedRelay, setSelectedRelay] = useState(null);
@@ -32,12 +36,12 @@ export default function LivraisonEchangePage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState(null);
 
-  // Redirection si pas en mode échange
+  // Redirection si ni échange ni réassort actif
   useEffect(() => {
-    if (!exchangeContext?.orderId) {
+    if (!isExchangeMode && !isRefillMode) {
       router.replace('/mon-compte');
     }
-  }, [exchangeContext, router]);
+  }, [isExchangeMode, isRefillMode, router]);
 
   // Pré-remplir depuis les données utilisateur
   useEffect(() => {
@@ -178,6 +182,31 @@ export default function LivraisonEchangePage() {
     }
   };
 
+  const callRefillAPI = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const body = {
+        sourceOrderId: refillContext.sourceOrderId,
+        newCartItems: cart.items.map(item => ({ productId: item.product.id, quantity: item.quantity })),
+        shipping: buildShippingPayload(),
+      };
+      const res = await fetch('/api/orders/initiate-refill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Une erreur est survenue."); return; }
+      setRefillContext(null);
+      router.push('/confirmation-commande?type=refill');
+    } catch {
+      setError("Problème de connexion. Veuillez réessayer.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (deliveryMode === 'DOMICILE' && !isEligibleForHome()) {
@@ -188,10 +217,14 @@ export default function LivraisonEchangePage() {
       setError("Veuillez sélectionner un Point Relais sur la carte.");
       return;
     }
-    callExchangeAPI(false);
+    if (isRefillMode) {
+      callRefillAPI();
+    } else {
+      callExchangeAPI(false);
+    }
   };
 
-  if (!exchangeContext?.orderId) return null;
+  if (!isExchangeMode && !isRefillMode) return null;
 
   return (
     <div className="page-container">
@@ -227,7 +260,7 @@ export default function LivraisonEchangePage() {
         </div>
       )}
 
-      <h1 className="page-title">Livraison de votre échange 🔄</h1>
+      <h1 className="page-title">{isRefillMode ? 'Livraison de votre réassort 🎁' : 'Livraison de votre échange 🔄'}</h1>
 
       <div className="checkout-grid">
         <div>
@@ -302,7 +335,7 @@ export default function LivraisonEchangePage() {
         {/* Colonne droite : récapitulatif + bouton */}
         <div>
           <div className="card-section">
-            <h2 className="section-title">🔄 Récapitulatif de l&apos;échange</h2>
+            <h2 className="section-title">{isRefillMode ? '🎁 Récapitulatif du réassort' : '🔄 Récapitulatif de l\'échange'}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', color: '#555' }}>
               {cart.items?.map((item, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -329,9 +362,13 @@ export default function LivraisonEchangePage() {
               form="exchange-form"
               type="submit"
               disabled={isSubmitting || (deliveryMode === 'MONDIAL_RELAY' && !selectedRelay)}
-              className="w-full mt-4 px-6 py-3 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full mt-4 px-6 py-3 rounded-full font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                isRefillMode
+                  ? 'bg-[#88D4AB] hover:bg-[#6abf92] text-[#2E1D21]'
+                  : 'bg-[#6EC1E4] hover:bg-[#5aafcf] text-white'
+              }`}
             >
-              {isSubmitting ? 'Traitement...' : 'Confirmer l\'échange — 0€'}
+              {isSubmitting ? 'Traitement...' : isRefillMode ? 'Confirmer le réassort — 0€' : 'Confirmer l\'échange — 0€'}
             </button>
           </div>
         </div>

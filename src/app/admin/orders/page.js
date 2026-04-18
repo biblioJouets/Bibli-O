@@ -26,7 +26,7 @@ export default async function AdminOrdersPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") redirect("/");
 
-  const [rentalOrders, exchangeOrders, returningOrders, adoptionOrders] =
+  const [rentalOrders, exchangeOrders, returningOrders, adoptionOrders, refillOrders] =
     await Promise.all([
       prisma.orders.findMany({
         where: { orderType: "RENTAL" },
@@ -55,6 +55,11 @@ export default async function AdminOrdersPage() {
             },
           ],
         },
+        include: orderInclude,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.orders.findMany({
+        where: { orderType: "REFILL" },
         include: orderInclude,
         orderBy: { createdAt: "desc" },
       }),
@@ -87,6 +92,7 @@ export default async function AdminOrdersPage() {
       exchangeOrders={serialize(exchangeOrders)}
       returningOrders={serialize(returningOrders)}
       adoptionOrders={serialize(adoptionOrders)}
+      refillOrders={serialize(refillOrders)}
     />
   );
 }

@@ -480,7 +480,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
         <ReturnLabelUpload order={order} onRefresh={onStatusUpdate} />
 
         {/* Zone tracking → SHIPPED */}
-        {(type === "RENTAL" || type === "EXCHANGE") && order.status === "PREPARING" && (
+        {(type === "RENTAL" || type === "EXCHANGE" || type === "REFILL") && order.status === "PREPARING" && (
           <>
             <input
               className={styles.trackingInput}
@@ -544,6 +544,7 @@ export default function OrdersTabs({
   exchangeOrders,
   returningOrders,
   adoptionOrders,
+  refillOrders = [],
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -554,6 +555,7 @@ export default function OrdersTabs({
   const getInitialTab = () => {
     if (typeParam === "EXCHANGE") return "EXCHANGE";
     if (typeParam === "ADOPTION") return "ADOPTION";
+    if (typeParam === "REFILL")   return "REFILL";
     if (statusParam === "RETURNING") return "RETURNING";
     return "RENTAL";
   };
@@ -567,8 +569,9 @@ export default function OrdersTabs({
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     const params = new URLSearchParams();
-    if (tab === "EXCHANGE") params.set("type", "EXCHANGE");
-    else if (tab === "ADOPTION") params.set("type", "ADOPTION");
+    if (tab === "EXCHANGE")  params.set("type", "EXCHANGE");
+    else if (tab === "ADOPTION")  params.set("type", "ADOPTION");
+    else if (tab === "REFILL")    params.set("type", "REFILL");
     else if (tab === "RETURNING") params.set("status", "RETURNING");
     else params.set("type", "RENTAL");
     router.replace(`/admin/orders?${params.toString()}`, { scroll: false });
@@ -581,6 +584,7 @@ export default function OrdersTabs({
     { key: "EXCHANGE",  label: "🔄 Boîte Navette", count: exchangeOrders.length },
     { key: "RETURNING", label: "↩️ Retours",        count: returningOrders.length },
     { key: "ADOPTION",  label: "💜 Adoptions",      count: adoptionOrders.length },
+    { key: "REFILL",    label: "🎁 Réassorts",      count: refillOrders.length },
   ];
 
   return (
@@ -593,6 +597,11 @@ export default function OrdersTabs({
         <div className={styles.adoptionNotice}>
           💜 Aucune action logistique requise pour les adoptions.
           Ces commandes sont des achats définitifs one-shot — elles contribuent au CA hors-abonnement.
+        </div>
+      )}
+      {activeTab === "REFILL" && (
+        <div className={styles.adoptionNotice} style={{ background: "#DAEEE6", borderColor: "#88D4AB", color: "#2E1D21" }}>
+          🎁 Réassorts gratuits — un jouet adopté est remplacé par un nouveau. Préparer et expédier comme une Boîte Navette.
         </div>
       )}
 
@@ -621,6 +630,9 @@ export default function OrdersTabs({
         )}
         {activeTab === "ADOPTION" && (
           <OrdersList orders={adoptionOrders} type="ADOPTION" onRefresh={handleRefresh} />
+        )}
+        {activeTab === "REFILL" && (
+          <OrdersList orders={refillOrders} type="REFILL" onRefresh={handleRefresh} />
         )}
       </div>
     </div>

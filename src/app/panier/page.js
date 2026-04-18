@@ -10,14 +10,25 @@ import '@/styles/panier.css';
 
 
 export default function PanierPage() {
-  const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext } = useCart();
+  const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext, refillContext, setRefillContext } = useCart();
   const router = useRouter();
 
   const exchangeMode = !!exchangeContext;
   const exchangeOrderId = exchangeContext?.orderId ?? null;
 
+  const refillMode      = !!refillContext;
+  const refillOrderId   = refillContext?.sourceOrderId ?? null;
+  const refillSlots     = refillContext?.slots ?? 0;
+
   const exchangeLoading = false;
   const exchangeError = null;
+
+  const [refillError, setRefillError] = useState(null);
+
+  // En mode réassort, on redirige vers la page de livraison (comme l'échange)
+  const handleRefillValidation = () => {
+    router.push('/livraison-echange');
+  };
 
   
   // Calcul valeur théorique (Prix boutique des jouets)
@@ -143,6 +154,28 @@ export default function PanierPage() {
           <a href="/mon-compte" className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap">
             Annuler
           </a>
+        </div>
+      )}
+
+      {/* Bandeau mode réassort */}
+      {refillMode && (
+        <div className="w-full bg-[#88D4AB] text-[#2E1D21] px-6 py-3 flex items-center justify-between gap-4 rounded-[16px] mb-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🎁</span>
+            <div>
+              <p className="font-semibold text-sm leading-tight">Mode Réassort — Gratuit</p>
+              <p className="text-xs opacity-80">
+                Choisissez jusqu&apos;à {refillSlots} jouet{refillSlots > 1 ? 's' : ''} pour remplacer vos jouets adoptés.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setRefillContext(null); router.push('/mon-compte/commandes'); }}
+            className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap bg-transparent border-none cursor-pointer"
+          >
+            Annuler
+          </button>
         </div>
       )}
 
@@ -314,9 +347,28 @@ export default function PanierPage() {
 
 {/* BOUTON DE VALIDATION DU PANIER */}
 <div className="cart-checkout-btn-wrapper">
-    {exchangeMode ? (
+    {refillMode ? (
       <>
-        {exchangeError && !showUpgradeModal && (
+        {refillError && (
+          <p className="text-red-500 text-sm text-center mb-2">{refillError}</p>
+        )}
+        <button
+          onClick={handleRefillValidation}
+          disabled={itemCount === 0 || itemCount !== refillSlots}
+          className="w-full px-6 py-3 rounded-full bg-[#88D4AB] hover:bg-[#6abf92] text-[#2E1D21] font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+        >
+          Choisir la livraison — 0€
+        </button>
+        {itemCount !== refillSlots && itemCount > 0 && (
+          <p className="text-amber-600 text-xs text-center mt-1">
+            Vous devez sélectionner exactement {refillSlots} jouet{refillSlots > 1 ? 's' : ''} ({itemCount} dans le panier).
+          </p>
+        )}
+      </>
+    ) : exchangeMode ? (
+      <>
+        {exchangeError && (
           <p className="text-red-500 text-sm text-center mb-2">{exchangeError}</p>
         )}
         <button

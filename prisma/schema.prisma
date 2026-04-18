@@ -124,6 +124,7 @@ enum OrderType {
   RENTAL    // Location mensuelle classique (abonnement Stripe récurrent)
   EXCHANGE  // Boîte Navette (échange de jouets en cours de mois)
   ADOPTION  // Achat définitif one-shot d'un jouet actuellement loué
+  REFILL    // Réassort gratuit : remplacement d'un jouet adopté par un nouveau
 }
 
 model OrderProducts {
@@ -135,7 +136,7 @@ model OrderProducts {
 
   rentalEndDate    DateTime? @db.Timestamptz(6) // Fin prévue (Date butoir retour)
   nextBillingDate  DateTime? @db.Timestamptz(6) // Jour-J (Date anniversaire)
-  renewalIntention String?   @db.VarChar(50) // "PROLONGATION", "PROLONGATION_TACITE", "RESILIATION", "RETOUR_DEMANDE", "PAIEMENT_ECHOUE", "ADOPTE"
+  renewalIntention String?   @db.VarChar(50) // "PROLONGATION", "PROLONGATION_TACITE", "RESILIATION", "RETOUR_DEMANDE", "PAIEMENT_ECHOUE", "ADOPTE", "ADOPTE_REMPLACE"
 
   Orders   Orders   @relation(fields: [OrderId], references: [id], onDelete: Cascade)
   Products Products @relation(fields: [ProductId], references: [id], onDelete: Cascade)

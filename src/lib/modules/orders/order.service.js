@@ -691,6 +691,161 @@ export const createAdoptionSession = async (orderId, productId, userId) => {
   return { url: session.url };
 };
 
+// ============================================================
+//  6. RÉASSORT (REFILL) — Remplacement gratuit d'un jouet adopté
+// ============================================================
+export const initiateRefill = async (sourceOrderId, userId, newCartItems, shippingOverride = null) => {
+
+  // 1. Guard ownership + récupération de la commande source
+  const sourceOrder = await prisma.orders.findUnique({
+    where: { id: sourceOrderId },
+    include: {
+      Users: true,
+      OrderProducts: { include: { Products: true } },
+    },
+  });
+
+  if (!sourceOrder || sourceOrder.userId !== parseInt(userId)) {
+    const err = new Error("Action interdite"); err.status = 403; throw err;
+  }
+
+  if (sourceOrder.status !== 'ACTIVE') {
+    const err = new Error("Le réassort n'est disponible que pour une location en cours."); err.status = 400; throw err;
+  }
+
+  // 2. Compter les slots disponibles (jouets ADOPTE non encore remplacés)
+  const adoptedProducts = sourceOrder.OrderProducts.filter(
+    (op) => op.renewalIntention === 'ADOPTE'
+  );
+  const slotsAvailable = adoptedProducts.length;
+  const slotsRequested = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+  if (slotsRequested === 0) {
+    const err = new Error("Le panier est vide."); err.status = 400; throw err;
+  }
+  // Le réassort est tout ou rien : tous les jouets adoptés doivent être remplacés en une seule fois
+  // afin que la boîte expédiée contienne le bon nombre de jouets.
+  if (slotsRequested !== slotsAvailable) {
+    const err = new Error(
+      slotsRequested < slotsAvailable
+        ? `Vous devez remplacer tous vos jouets adoptés (${slotsAvailable} au total). Ajoutez encore ${slotsAvailable - slotsRequested} jouet(s).`
+        : `Vous avez ${slotsAvailable} place(s) disponible(s) mais vous en demandez ${slotsRequested}. Retirez ${slotsRequested - slotsAvailable} jouet(s) du panier.`
+    );
+    err.status = 400; throw err;
+  }
+
+  // 3. Vérification du stock des nouveaux jouets
+  const productIds = newCartItems.map((i) => i.productId);
+  const products = await prisma.products.findMany({ where: { id: { in: productIds } } });
+
+  for (const item of newCartItems) {
+    const product = products.find((p) => p.id === item.productId);
+    if (!product || product.stock < (item.quantity || 1)) {
+      const err = new Error(`Stock insuffisant pour : ${product?.name || 'jouet inconnu'}`);
+      err.status = 400; throw err;
+    }
+  }
+
+  // 4. Transaction atomique
+  let newRefillOrder;
+
+  await prisma.$transaction(async (tx) => {
+    // 4a. Décrémentation du stock des nouveaux jouets
+    for (const item of newCartItems) {
+      await tx.products.update({
+        where: { id: item.productId },
+        data: { stock: { decrement: item.quantity || 1 } },
+      });
+    }
+
+    // 4b. Marquer exactement slotsRequested jouets ADOPTE → ADOPTE_REMPLACE
+    //     (on prend les premiers dans l'ordre pour être déterministe)
+    const toReplace = adoptedProducts.slice(0, slotsRequested);
+    for (const op of toReplace) {
+      await tx.orderProducts.update({
+        where: { OrderId_ProductId: { OrderId: op.OrderId, ProductId: op.ProductId } },
+        data: { renewalIntention: 'ADOPTE_REMPLACE' },
+      });
+    }
+
+    // 4c. Copier nextBillingDate depuis le premier produit source pour rester dans le cycle Stripe
+    const sourceRentalEnd   = sourceOrder.OrderProducts[0]?.rentalEndDate  ?? null;
+    const sourceNextBilling = sourceOrder.OrderProducts[0]?.nextBillingDate ?? null;
+
+    const shipping = shippingOverride ?? {
+      shippingName:        sourceOrder.shippingName,
+      shippingAddress:     sourceOrder.shippingAddress,
+      shippingZip:         sourceOrder.shippingZip,
+      shippingCity:        sourceOrder.shippingCity,
+      shippingPhone:       sourceOrder.shippingPhone,
+      mondialRelayPointId: sourceOrder.mondialRelayPointId,
+    };
+
+    // 4d. Créer la commande REFILL (totalAmount = 0 — gratuit)
+    newRefillOrder = await tx.orders.create({
+      data: {
+        userId:              sourceOrder.userId,
+        orderType:           'REFILL',
+        status:              'PREPARING',
+        totalAmount:         0,
+        stripeSubscriptionId: sourceOrder.stripeSubscriptionId,
+        shippingName:        shipping.shippingName,
+        shippingAddress:     shipping.shippingAddress,
+        shippingZip:         shipping.shippingZip,
+        shippingCity:        shipping.shippingCity,
+        shippingPhone:       shipping.shippingPhone,
+        mondialRelayPointId: shipping.mondialRelayPointId ?? null,
+        OrderProducts: {
+          create: newCartItems.map((item) => ({
+            ProductId:      item.productId,
+            quantity:       item.quantity || 1,
+            rentalEndDate:  sourceRentalEnd,
+            nextBillingDate: sourceNextBilling,
+          })),
+        },
+      },
+    });
+  });
+
+  // 5. Emails Brevo
+  const user       = sourceOrder.Users;
+  const client_nom = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+  const prenom     = user?.firstName || 'Client(e)';
+  const shipping   = shippingOverride ?? sourceOrder;
+  const client_adresse = [
+    shipping.shippingName || client_nom,
+    shipping.shippingAddress,
+    `${shipping.shippingZip || ''} ${shipping.shippingCity || ''}`.trim(),
+    'France',
+  ].filter(Boolean).join('\n');
+
+  const jouets_envoi = products.map((p) => p.name).join(' / ') || 'Nouveaux jouets';
+  const appUrl       = process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com';
+  const lien_compte  = `${appUrl}/mon-compte`;
+  const lien_admin   = `${appUrl}/admin/orders?type=REFILL`;
+
+  // Email client — Template 22
+  if (user?.email) {
+    await sendBrevoTemplate(user.email, 22, {
+      prenom,
+      jouets_envoi,
+      lien_compte,
+    }).catch((err) => console.error('[BREVO] Erreur email réassort client:', err));
+  }
+
+  // Email admin — Template 23
+  const adminEmail = process.env.BREVO_SENDER_EMAIL || 'contact@bibliojouets.com';
+  await sendBrevoTemplate(adminEmail, 23, {
+    client_nom,
+    client_email: user?.email || '',
+    client_adresse,
+    jouets_envoi,
+    lien_admin,
+  }).catch((err) => console.error('[BREVO] Erreur email réassort admin:', err));
+
+  return { success: true, refillOrderId: newRefillOrder.id };
+};
+
 export const getUserOrders = async (userId) => {
     try {
       return await prisma.orders.findMany({

@@ -47,8 +47,8 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
     }
   }
 
-  // Commandes clôturées : aucun bouton d'action ne doit être affiché
-  const isHistorical = ['RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
+  // Commandes non encore actives ou clôturées : aucun bouton d'action
+  const isHistorical = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
 
   return (
     <div className="order-item-row">
@@ -87,7 +87,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
             - masqué totalement si retour en cours ou commande clôturée (hideExchangeButton)
             - grisé avec message si limite de période atteinte (exchangeBlocked)
             - actif sinon */}
-        {orderStatus === 'ACTIVE' && !hideExchangeButton && (
+        {orderStatus === 'ACTIVE' && !hideExchangeButton && !isAdopted && (
           exchangeBlocked ? (
             <div className="flex flex-col items-start gap-1">
               <button

@@ -14,26 +14,35 @@ export default function OrdersTab() {
   const [exchangeGuard, setExchangeGuard] = useState({ canExchange: true, reason: null });
   const [loading, setLoading] = useState(true);
 
+  const fetchOrders = async (userId) => {
+    try {
+      const res = await fetch(`/api/orders/user/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data.orders);
+        setExchangeGuard(data.exchangeGuard);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la récupération des commandes :", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await fetch(`/api/orders/user/${session.user.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setOrders(data.orders);
-          setExchangeGuard(data.exchangeGuard);
-        }
-      } catch (err) {
-        console.error("Erreur lors de la récupération des commandes :", err);
-      } finally {
-        setLoading(false);
+    if (session?.user?.id) fetchOrders(session.user.id);
+  }, [session]);
+
+  // Refetch quand l'onglet redevient visible (retour depuis Stripe, confirmation, etc.)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && session?.user?.id) {
+        fetchOrders(session.user.id);
       }
     };
-
-    if (session?.user?.id) {
-      fetchOrders();
-    }
-  }, [session]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="loader-message">Chargement de vos commandes...</div>;
 
