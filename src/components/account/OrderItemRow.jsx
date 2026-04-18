@@ -6,7 +6,7 @@ import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
 import AdoptModal from './AdoptModal';
 
-export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, exchangeBlocked = false, exchangeBlockReason = null }) {
+export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, hideExchangeButton = false, exchangeBlocked = false, exchangeBlockReason = null }) {
   const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAdoptModal, setShowAdoptModal] = useState(false);
@@ -83,8 +83,11 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
         </div>
       ) : (
       <div className="item-actions">
-        {/* Bouton Échanger — bloqué si jeton consommé OU retour en cours */}
-        {orderStatus === 'ACTIVE' && (
+        {/* Bouton Échanger :
+            - masqué totalement si retour en cours ou commande clôturée (hideExchangeButton)
+            - grisé avec message si limite de période atteinte (exchangeBlocked)
+            - actif sinon */}
+        {orderStatus === 'ACTIVE' && !hideExchangeButton && (
           exchangeBlocked ? (
             <div className="flex flex-col items-start gap-1">
               <button
@@ -109,8 +112,16 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
           )
         )}
 
-        {/* Badge "Adopté" — remplace tous les boutons d'action */}
-        {isAdopted ? (
+        {/* Règle d'exclusion stricte : retour en cours → badge seul, rien d'autre */}
+        {isReturning ? (
+          <button
+            className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
+            type="button"
+            disabled
+          >
+            Retour en cours
+          </button>
+        ) : isAdopted ? (
           <span
             className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}
@@ -120,7 +131,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
         ) : (
           <>
             {/* Bouton Rendre — conditionnel selon le statut */}
-            {(['ACTIVE', 'SHIPPED'].includes(orderStatus)) && !isReturning && (
+            {['ACTIVE', 'SHIPPED'].includes(orderStatus) && (
               <button
                 className="border border-gray-300 text-gray-500 text-sm px-4 py-2 rounded-full hover:border-red-300 hover:text-red-500 transition-colors"
                 type="button"
@@ -129,25 +140,14 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
                 Rendre
               </button>
             )}
-            {(orderStatus === 'RETURNING' || isReturning) && (
-              <button
-                className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
-                type="button"
-                disabled
-              >
-                Retour en cours
-              </button>
-            )}
 
-            {!isReturning && (
-              <button
-                className="btn-pill btn-adopt"
-                type="button"
-                onClick={() => setShowAdoptModal(true)}
-              >
-                Adopter
-              </button>
-            )}
+            <button
+              className="btn-pill btn-adopt"
+              type="button"
+              onClick={() => setShowAdoptModal(true)}
+            >
+              Adopter
+            </button>
 
             {showProlongButton ? (
               <ProlongButton

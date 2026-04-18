@@ -38,13 +38,18 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
   const isAdoption = order.orderType === 'ADOPTION';
   const isExchange = order.orderType === 'EXCHANGE';
 
-  // Bouclier échange : bloqué si la garde de période dit "non" OU si un retour est déjà en cours
+  const isHistorical = ['RETURNED', 'COMPLETED', 'CANCELLED'].includes(order.status);
   const hasRetourDemande = items.some((item) => item.renewalIntention === 'RETOUR_DEMANDE');
-  const exchangeBlocked = !canExchange || hasRetourDemande;
+
+  // Masquage total du bouton d'échange : commande clôturée OU retour logistique en cours
+  // Dans ces deux cas on ne montre rien — inutile de charger l'interface.
+  const hideExchangeButton = isHistorical || hasRetourDemande;
+
+  // Grisage du bouton d'échange : uniquement si la limite temporelle de période est atteinte
+  // (le retour en cours est géré par hideExchangeButton, pas ici)
+  const exchangeBlocked = !canExchange;
   const exchangeBlockReason = !canExchange
     ? (canExchangeReason ?? "Échange indisponible sur cette période de facturation.")
-    : hasRetourDemande
-    ? "Un retour est déjà en cours — échange disponible après réception."
     : null;
 
   return (
@@ -113,6 +118,7 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
             orderStatus={order.status}
             orderId={order.id}
             isAdoptionOrder={isAdoption}
+            hideExchangeButton={hideExchangeButton}
             exchangeBlocked={exchangeBlocked}
             exchangeBlockReason={exchangeBlockReason}
           />
