@@ -59,6 +59,10 @@ export function CartProvider({ children }) {
     }
   };
 
+  const clearCart = () => {
+    setCart({ items: [] });
+  };
+
   const removeFromCart = async (itemId) => {
     try {
       const res = await fetch(`/api/cart?itemId=${itemId}`, {
@@ -79,7 +83,7 @@ export function CartProvider({ children }) {
 const planInfo = getSuggestedPlan(cartCount);
 const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext }}>
       {children}
     </CartContext.Provider>
   );

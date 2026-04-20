@@ -22,7 +22,8 @@ export default function LibraryPage() {
   // Active le contexte d'échange ou de réassort dans le CartContext dès l'arrivée sur la page
   useEffect(() => {
     if (exchangeMode && exchangeOrderId) {
-      setExchangeContext({ orderId: parseInt(exchangeOrderId) });
+      const exchangeSlots = parseInt(searchParams.get('slots') || '0', 10);
+      setExchangeContext({ orderId: parseInt(exchangeOrderId), slots: exchangeSlots || null });
       setRefillContext(null);
     } else if (refillMode && refillOrderId && refillSlots > 0) {
       setRefillContext({ sourceOrderId: parseInt(refillOrderId), slots: refillSlots });

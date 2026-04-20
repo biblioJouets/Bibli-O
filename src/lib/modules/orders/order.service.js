@@ -415,9 +415,14 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
     throw err;
   }
 
-  // 4. Guard panier — signaler si upgrade nécessaire
-  const currentToyCount = order.OrderProducts.length;
+  // 4. Guard panier — seuls les jouets actifs (non adoptés) sont échangeables
+  const ADOPTED_STATUSES = ['ADOPTE', 'ADOPTE_REMPLACE'];
+  const activeProducts = order.OrderProducts.filter(
+    (op) => !ADOPTED_STATUSES.includes(op.renewalIntention)
+  );
+  const currentToyCount = activeProducts.length;
   const newToyCount = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
   if (newToyCount > currentToyCount) {
     const newPriceAmount = PRICING_MAP[newToyCount];
     return {
@@ -426,6 +431,13 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       newToyCount,
       newMonthlyPrice: newPriceAmount ? newPriceAmount / 100 : null,
     };
+  }
+
+  // Guard strict : le client ne peut pas demander plus de jouets que de slots actifs
+  if (newToyCount > currentToyCount) {
+    const err = new Error("Nombre de jouets invalide : vous demandez plus de jouets que votre box n'en contient.");
+    err.status = 400;
+    throw err;
   }
 
   // 5. Décrémentation atomique du stock des nouveaux jouets
@@ -446,10 +458,11 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       });
     }
 
-    // 6. Marquer TOUS les produits de l'ancienne commande en RETOUR_DEMANDE
-    //    (l'échange est total — toute la boîte repart)
+    // 6. Marquer UNIQUEMENT les jouets actifs (non adoptés) en RETOUR_DEMANDE
+    //    Les jouets ADOPTE / ADOPTE_REMPLACE restent intacts
+    const activeProductIds = activeProducts.map((op) => op.ProductId);
     await tx.orderProducts.updateMany({
-      where: { OrderId: orderId },
+      where: { OrderId: orderId, ProductId: { in: activeProductIds } },
       data: { renewalIntention: 'RETOUR_DEMANDE' },
     });
 

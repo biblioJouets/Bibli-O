@@ -6,7 +6,7 @@ import ProlongButton from './ProlongButton';
 import ReturnModal from './ReturnModal';
 import AdoptModal from './AdoptModal';
 
-export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, hideExchangeButton = false, exchangeBlocked = false, exchangeBlockReason = null }) {
+export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, hideExchangeButton = false, exchangeBlocked = false, exchangeBlockReason = null, exchangeableSlots = 0 }) {
   const router = useRouter();
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showAdoptModal, setShowAdoptModal] = useState(false);
@@ -105,7 +105,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
             <button
               className="bg-[#6EC1E4] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#5aafcf] transition-colors shadow-md text-sm"
               type="button"
-              onClick={() => router.push(`/bibliotheque?mode=exchange&orderId=${orderId}`)}
+              onClick={() => router.push(`/bibliotheque?mode=exchange&orderId=${orderId}&slots=${exchangeableSlots}`)}
             >
               Échanger
             </button>

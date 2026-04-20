@@ -45,6 +45,10 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
   // Réassort : jouets adoptés non encore remplacés (ADOPTE_REMPLACE exclus)
   const adoptedSlots = items.filter((item) => item.renewalIntention === 'ADOPTE').length;
 
+  // Échange : jouets actifs (non adoptés) — détermine combien le client peut choisir
+  const ADOPTED_STATUSES = ['ADOPTE', 'ADOPTE_REMPLACE'];
+  const exchangeableSlots = items.filter((item) => !ADOPTED_STATUSES.includes(item.renewalIntention)).length;
+
   const isHistorical = ['RETURNED', 'COMPLETED', 'CANCELLED'].includes(order.status);
   const hasRetourDemande = items.some((item) => item.renewalIntention === 'RETOUR_DEMANDE');
 
@@ -133,6 +137,7 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
             hideExchangeButton={hideExchangeButton}
             exchangeBlocked={exchangeBlocked}
             exchangeBlockReason={exchangeBlockReason}
+            exchangeableSlots={exchangeableSlots}
           />
         ))}
       </div>

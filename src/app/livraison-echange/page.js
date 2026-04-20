@@ -19,7 +19,7 @@ const normalizeText = (text) => {
 
 export default function LivraisonEchangePage() {
   const { data: session } = useSession();
-  const { cart, exchangeContext, setExchangeContext, refillContext, setRefillContext } = useCart();
+  const { cart, exchangeContext, setExchangeContext, refillContext, setRefillContext, clearCart } = useCart();
   const router = useRouter();
 
   // Détermine le mode actif : échange ou réassort
@@ -174,6 +174,7 @@ export default function LivraisonEchangePage() {
         return;
       }
       setExchangeContext(null);
+      clearCart();
       router.push(`/echange-confirme${data.exchangeOrderId ? `?id=${data.exchangeOrderId}` : ''}`);
     } catch {
       setError("Problème de connexion. Veuillez réessayer.");
@@ -199,6 +200,7 @@ export default function LivraisonEchangePage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Une erreur est survenue."); return; }
       setRefillContext(null);
+      clearCart();
       router.push('/confirmation-commande?type=refill');
     } catch {
       setError("Problème de connexion. Veuillez réessayer.");

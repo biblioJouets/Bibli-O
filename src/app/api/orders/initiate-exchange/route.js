@@ -58,6 +58,10 @@ export async function POST(req) {
       return NextResponse.json(result, { status: 200 });
     }
 
+    // Vider le panier DB après validation réussie
+    const { default: prisma } = await import('@/lib/core/database');
+    await prisma.cartItem.deleteMany({ where: { cart: { userId: parseInt(session.user.id) } } });
+
     return NextResponse.json({ success: true, exchangeOrderId: result.exchangeOrderId, message: "Échange initié ! Votre boîte navette est en préparation." }, { status: 200 });
   } catch (error) {
     const status = error.status ?? 500;
