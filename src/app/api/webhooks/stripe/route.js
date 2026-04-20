@@ -80,17 +80,19 @@ export async function POST(req) {
     console.log(` [Debug Webhook] Facture payée reçue. ID Abonnement Stripe: ${stripeSubId}`);
     
     if (stripeSubId) {
+      // On cible STRICTEMENT les commandes de type RENTAL pour éviter de traiter
+      // par erreur une commande ADOPTION ou REFILL qui partage le même stripeSubscriptionId.
       const order = await prisma.orders.findFirst({
-        where: { stripeSubscriptionId: stripeSubId },
-        include: { 
+        where: { stripeSubscriptionId: stripeSubId, orderType: 'RENTAL' },
+        include: {
           OrderProducts: { include: { Products: true } },
-          Users: true 
+          Users: true
         }
       });
-      
+
       if (order) {
-        const productsToRenew = order.OrderProducts.filter(p => 
-          p.renewalIntention === 'PROLONGATION' || 
+        const productsToRenew = order.OrderProducts.filter(p =>
+          p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
           p.renewalIntention === 'PAIEMENT_ECHOUE'
         );

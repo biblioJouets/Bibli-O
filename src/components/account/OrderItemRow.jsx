@@ -13,7 +13,7 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
   const [isReturning, setIsReturning] = useState(
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
-  const isAdopted = item.renewalIntention === 'ADOPTE';
+  const isAdopted = ['ADOPTE', 'ADOPTE_REMPLACE'].includes(item.renewalIntention);
 
   const productData = item.product || item.Products || {};
   const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';

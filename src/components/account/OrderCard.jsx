@@ -125,7 +125,7 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
       <div className="order-items-container flex flex-col gap-4 mt-2">
         {items.map((item, index) => (
           <OrderItemRow
-            key={item.ProductId || index}
+            key={`${order.id}-${item.ProductId ?? index}`}
             item={item}
             orderStatus={order.status}
             orderId={order.id}
