@@ -17,6 +17,7 @@ export async function GET() {
       // Counts pour badges sidebar
       rentalPreparing,
       exchangePending,
+      refillPending,
 
       // KPIs abonnements
       totalActiveOrders,
@@ -37,10 +38,13 @@ export async function GET() {
     ] = await Promise.all([
       // Badges urgence
       prisma.orders.count({
-        where: { orderType: "RENTAL", status: "PREPARING" },
+        where: { orderType: "RENTAL", status: { in: ["PENDING", "PREPARING"] } },
       }),
       prisma.orders.count({
         where: { orderType: "EXCHANGE", status: { in: ["PREPARING", "SHIPPED"] } },
+      }),
+      prisma.orders.count({
+        where: { orderType: "REFILL", status: { in: ["PREPARING", "PAID"] } },
       }),
 
       // Abonnements actifs (RENTAL + EXCHANGE en cours)
@@ -126,6 +130,7 @@ export async function GET() {
       // Badges sidebar
       rentalPreparing,
       exchangePending,
+      refillPending,
 
       // KPIs financiers
       mrr: Math.round(activeOrdersRevenue._sum.totalAmount ?? 0),

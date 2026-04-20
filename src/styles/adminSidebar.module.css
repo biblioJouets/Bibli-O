@@ -86,9 +86,14 @@
   border-left: 3px solid #c4a8d5;
 }
 
+.navItemRefill {
+  border-left: 3px solid #88D4AB;
+}
+
 .navItemRental:hover,
 .navItemExchange:hover,
-.navItemAdoption:hover {
+.navItemAdoption:hover,
+.navItemRefill:hover {
   background-color: rgba(46, 29, 33, 0.04);
 }
 
@@ -122,6 +127,10 @@
 
 .badgeOrange {
   background-color: #e08a00;
+}
+
+.badgeGreen {
+  background-color: #3a9e6f;
 }
 
 /* Items désactivés (placeholder) */

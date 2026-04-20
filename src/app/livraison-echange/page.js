@@ -201,7 +201,7 @@ export default function LivraisonEchangePage() {
       if (!res.ok) { setError(data.error || "Une erreur est survenue."); return; }
       setRefillContext(null);
       clearCart();
-      router.push('/confirmation-commande?type=refill');
+      router.push('/reassort-confirme');
     } catch {
       setError("Problème de connexion. Veuillez réessayer.");
     } finally {
@@ -210,15 +210,31 @@ export default function LivraisonEchangePage() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (deliveryMode === 'DOMICILE' && !isEligibleForHome()) {
-      setError("Adresse non éligible à la livraison domicile. Veuillez choisir un Point Relais.");
+    if (e) e.preventDefault();
+
+    // Validation des champs communs
+    if (!shipping.firstName.trim() || !shipping.lastName.trim() || !shipping.phone.trim()) {
+      setError("Veuillez renseigner votre prénom, nom et téléphone.");
       return;
     }
+
+    if (deliveryMode === 'DOMICILE') {
+      if (!shipping.address.trim() || !shipping.zipCode.trim() || !shipping.city.trim()) {
+        setError("Veuillez renseigner votre adresse complète.");
+        return;
+      }
+      if (!isEligibleForHome()) {
+        setError("Adresse non éligible à la livraison domicile. Veuillez choisir un Point Relais.");
+        return;
+      }
+    }
+
     if (deliveryMode === 'MONDIAL_RELAY' && !selectedRelay) {
       setError("Veuillez sélectionner un Point Relais sur la carte.");
       return;
     }
+
+    setError(null);
     if (isRefillMode) {
       callRefillAPI();
     } else {
@@ -361,9 +377,9 @@ export default function LivraisonEchangePage() {
             )}
 
             <button
-              form="exchange-form"
-              type="submit"
-              disabled={isSubmitting || (deliveryMode === 'MONDIAL_RELAY' && !selectedRelay)}
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
               className={`w-full mt-4 px-6 py-3 rounded-full font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 isRefillMode
                   ? 'bg-[#88D4AB] hover:bg-[#6abf92] text-[#2E1D21]'

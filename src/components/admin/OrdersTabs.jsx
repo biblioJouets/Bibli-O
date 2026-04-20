@@ -223,9 +223,19 @@ function ReturnLabelUpload({ order, onRefresh }) {
 }
 
 // --- COMPOSANT : Audit physique des jouets retournés ---
+const ACQUIRED_STATUSES = ["ADOPTE", "ADOPTE_REMPLACE"];
+
 function AuditPanel({ order, onRefresh }) {
+  // Seuls les jouets non-adoptés font partie du carton de retour
+  const auditableProducts = order.OrderProducts.filter(
+    (op) => !ACQUIRED_STATUSES.includes(op.renewalIntention)
+  );
+  const acquiredProducts = order.OrderProducts.filter(
+    (op) => ACQUIRED_STATUSES.includes(op.renewalIntention)
+  );
+
   const [statuses, setStatuses] = useState(
-    () => Object.fromEntries(order.OrderProducts.map((op) => [op.ProductId, "SAIN"]))
+    () => Object.fromEntries(auditableProducts.map((op) => [op.ProductId, "SAIN"]))
   );
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -280,32 +290,76 @@ function AuditPanel({ order, onRefresh }) {
   return (
     <div className={styles.auditPanel}>
       <p className={styles.auditTitle}>🔍 Audit retour — état de chaque jouet</p>
-      <div className={styles.auditList}>
-        {order.OrderProducts.map((op) => {
-          const isCasse = statuses[op.ProductId] === "CASSE";
-          return (
-            <div key={op.ProductId} className={styles.auditItem}>
-              <span className={styles.auditProductName}>
+
+      {/* Jouets acquis par le client — hors carton de retour */}
+      {acquiredProducts.length > 0 && (
+        <div style={{
+          background: "#F5F0FA",
+          border: "1px solid #c4a8d5",
+          borderRadius: "12px",
+          padding: "10px 14px",
+          marginBottom: "12px",
+          fontSize: "0.85rem",
+          color: "#3d1a5c",
+        }}>
+          <strong>🧸 Jouets acquis — ne seront PAS dans le carton de retour</strong>
+          <ul style={{ margin: "6px 0 0 0", paddingLeft: "1.2rem" }}>
+            {acquiredProducts.map((op) => (
+              <li key={op.ProductId}>
                 {op.Products?.name ?? `Jouet #${op.ProductId}`}
-              </span>
-              <button
-                type="button"
-                onClick={() => toggle(op.ProductId)}
-                className={isCasse ? styles.auditBtnCasse : styles.auditBtnSain}
-              >
-                {isCasse ? "💥 Cassé" : "✅ Sain"}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      <button
-        className={styles.btnRed}
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? "Enregistrement..." : "Valider l'audit"}
-      </button>
+                <span style={{
+                  marginLeft: "8px",
+                  background: "#c4a8d5",
+                  color: "#2E1D21",
+                  padding: "1px 8px",
+                  borderRadius: "20px",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                }}>
+                  ACQUIS / ACHAT
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Jouets à auditer — ceux qui reviennent physiquement */}
+      {auditableProducts.length === 0 ? (
+        <p style={{ color: "#888", fontSize: "0.9rem", marginBottom: "12px" }}>
+          Aucun jouet à auditer — tous les jouets de cette commande ont été acquis.
+        </p>
+      ) : (
+        <div className={styles.auditList}>
+          {auditableProducts.map((op) => {
+            const isCasse = statuses[op.ProductId] === "CASSE";
+            return (
+              <div key={op.ProductId} className={styles.auditItem}>
+                <span className={styles.auditProductName}>
+                  {op.Products?.name ?? `Jouet #${op.ProductId}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggle(op.ProductId)}
+                  className={isCasse ? styles.auditBtnCasse : styles.auditBtnSain}
+                >
+                  {isCasse ? "💥 Cassé" : "✅ Sain"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {auditableProducts.length > 0 && (
+        <button
+          className={styles.btnRed}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Enregistrement..." : "Valider l'audit"}
+        </button>
+      )}
     </div>
   );
 }
@@ -443,7 +497,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
           <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
-              const isAdopted = op.renewalIntention === "ADOPTE";
+              const isAdopted = ACQUIRED_STATUSES.includes(op.renewalIntention);
               const endDate = op.rentalEndDate
                 ? new Date(op.rentalEndDate).toLocaleDateString("fr-FR")
                 : null;

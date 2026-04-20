@@ -7,7 +7,7 @@ import styles from "@/styles/adminSidebar.module.css";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const [counts, setCounts] = useState({ rentalPreparing: 0, exchangePending: 0 });
+  const [counts, setCounts] = useState({ rentalPreparing: 0, exchangePending: 0, refillPending: 0 });
 
   useEffect(() => {
     fetch("/api/admin/stats")
@@ -17,6 +17,7 @@ export default function AdminSidebar() {
           setCounts({
             rentalPreparing: data.rentalPreparing,
             exchangePending: data.exchangePending,
+            refillPending: data.refillPending ?? 0,
           });
         }
       })
@@ -90,6 +91,20 @@ export default function AdminSidebar() {
         >
           <span className={styles.navIcon}>💜</span>
           <span className={styles.navLabel}>Adoption</span>
+        </Link>
+
+        {/* Réassort */}
+        <Link
+          href="/admin/orders?type=REFILL"
+          className={`${styles.navItem} ${styles.navItemRefill}`}
+        >
+          <span className={styles.navIcon}>🎁</span>
+          <span className={styles.navLabel}>Réassort</span>
+          {counts.refillPending > 0 && (
+            <span className={`${styles.badge} ${styles.badgeGreen}`}>
+              {counts.refillPending}
+            </span>
+          )}
         </Link>
       </nav>
 

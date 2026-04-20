@@ -48,6 +48,10 @@ export async function POST(req) {
       shipping ?? null
     );
 
+    // Vider le panier DB après validation réussie
+    const { default: prisma } = await import('@/lib/core/database');
+    await prisma.cartItem.deleteMany({ where: { cart: { userId: parseInt(session.user.id) } } });
+
     return NextResponse.json(
       { success: true, refillOrderId: result.refillOrderId, message: "Réassort initié ! Votre nouveau jouet est en préparation." },
       { status: 200 }
