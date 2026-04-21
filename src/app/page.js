@@ -69,9 +69,9 @@ export default async function Homepage() {
         "description": "Service de location de jouets éducatifs et jeux de société par abonnement.",
         "sameAs": [
             "https://www.facebook.com/people/Biblio-jouets/61581916582706/?locale=fr_FR", 
-            "https://www.instagram.com/bibliojouets/",
+            "https://www.instagram.com/location_jouets_biblio/",
             "https://www.linkedin.com/company/bibli-o-jouets/posts/?feedView=all",
-            "https://www.tiktok.com/@bibliojouets"
+            "https://www.tiktok.com/@location_jouets_biblio"
         ]
     };
 
