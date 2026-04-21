@@ -59,7 +59,7 @@ export default function Footer() {
               <li>
                 <a
                   className="social-link instagram"
-                  href="https://www.instagram.com/bibliojouets/"
+                  href="https://www.instagram.com/location_jouets_biblio/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Bibli'O Jouets sur Instagram"
@@ -82,7 +82,7 @@ export default function Footer() {
               <li>
                 <a
                   className="social-link tiktok"
-                  href="https://www.tiktok.com/@bibliojouets"
+                  href="https://www.tiktok.com/@location_jouets_biblio"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Bibli'O Jouets sur TikTok"
