@@ -32,6 +32,18 @@ const BOTTOM_NAV_ITEMS = [
   { href: '/mon-compte/profil', label: 'Profil', icon: User },
 ];
 
+// Pages en cours de construction — non accessibles
+const COMING_SOON = new Set([
+  '/mon-compte/logistique',
+  '/mon-compte/profils-enfants',
+  '/mon-compte/wishlist',
+  '/mon-compte/impact',
+  '/mon-compte/parrainage',
+  '/mon-compte/fidelite',
+  '/mon-compte/notifications',
+  '/mon-compte/support',
+]);
+
 // Sidebar : groupes de navigation
 const NAV_GROUPS = [
   {
@@ -128,6 +140,28 @@ export default function AccountNavigation() {
               {group.items.map((item) => {
                 const active = isActive(item, pathname);
                 const Icon = item.icon;
+                const soon = COMING_SOON.has(item.href);
+
+                if (soon) {
+                  return (
+                    <span
+                      key={item.href}
+                      className="nav-item"
+                      style={{ opacity: 0.4, cursor: 'not-allowed', pointerEvents: 'none' }}
+                      aria-disabled="true"
+                    >
+                      <Icon size={18} aria-hidden="true" />
+                      {item.label}
+                      <span
+                        className="ml-auto text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+                        style={{ background: '#f3f4f6', color: '#aaa' }}
+                      >
+                        Bientôt
+                      </span>
+                    </span>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}
@@ -213,6 +247,28 @@ export default function AccountNavigation() {
               {MORE_ITEMS.map((item) => {
                 const active = isActive(item, pathname);
                 const Icon = item.icon;
+                const soon = COMING_SOON.has(item.href);
+
+                if (soon) {
+                  return (
+                    <span
+                      key={item.href}
+                      aria-disabled="true"
+                      className="flex flex-col items-center gap-1.5 rounded-[15px] p-3 text-center text-xs font-medium relative"
+                      style={{ opacity: 0.4, cursor: 'not-allowed', background: '#f3f4f6', color: '#aaa' }}
+                    >
+                      <Icon size={20} aria-hidden="true" />
+                      <span className="leading-tight">{item.label}</span>
+                      <span
+                        className="absolute top-1.5 right-1.5 text-[9px] font-bold uppercase px-1 py-0.5 rounded-full"
+                        style={{ background: '#e5e7eb', color: '#9ca3af' }}
+                      >
+                        Bientôt
+                      </span>
+                    </span>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}

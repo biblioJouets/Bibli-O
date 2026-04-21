@@ -8,25 +8,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function GET(req) {
   try {
-    // 1. On récupère l'ID de la commande envoyé par le bouton
     const { searchParams } = new URL(req.url);
     const orderId = searchParams.get('orderId');
+    const subscriptionId = searchParams.get('subscriptionId');
 
-    if (!orderId) {
-      return NextResponse.json({ error: "ID de commande manquant" }, { status: 400 });
+    let stripeSubscriptionId;
+
+    if (subscriptionId) {
+      // Chemin direct : subscriptionId fourni (depuis facturation/abonnement)
+      stripeSubscriptionId = subscriptionId;
+    } else if (orderId) {
+      // Chemin legacy : résoudre via orderId
+      const order = await prisma.orders.findUnique({ where: { id: parseInt(orderId) } });
+      if (!order?.stripeSubscriptionId) {
+        return NextResponse.json({ error: "Commande ou abonnement introuvable" }, { status: 404 });
+      }
+      stripeSubscriptionId = order.stripeSubscriptionId;
+    } else {
+      return NextResponse.json({ error: "orderId ou subscriptionId requis" }, { status: 400 });
     }
 
-    // 2. On cherche la commande dans ta base de données Prisma
-    const order = await prisma.orders.findUnique({
-      where: { id: parseInt(orderId) }
-    });
-
-    if (!order || !order.stripeSubscriptionId) {
-      return NextResponse.json({ error: "Commande ou abonnement introuvable" }, { status: 404 });
-    }
-
-    // 3. On interroge Stripe pour récupérer le vrai "Customer ID" lié à cet abonnement
-    const subscription = await stripe.subscriptions.retrieve(order.stripeSubscriptionId);
+    // On interroge Stripe pour récupérer le vrai "Customer ID" lié à cet abonnement
+    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     
     if (!subscription || !subscription.customer) {
       return NextResponse.json({ error: "Client Stripe introuvable" }, { status: 404 });

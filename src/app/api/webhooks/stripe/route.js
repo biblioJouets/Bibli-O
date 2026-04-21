@@ -451,5 +451,79 @@ export async function POST(req) {
     }
   }
 
+  // --- SCÉNARIO D : Abonnement mis à jour (résiliation / pause) ---
+  if (event.type === 'customer.subscription.updated') {
+    const sub      = event.data.object;
+    const prevAttr = event.data.previous_attributes ?? {};
+
+    // Récupérer l'utilisateur via le stripeSubscriptionId
+    const order = await prisma.orders.findFirst({
+      where: { stripeSubscriptionId: sub.id },
+      include: { Users: true },
+    });
+
+    if (order?.Users) {
+      const user   = order.Users;
+      let prenom   = (user.firstName || 'Client(e)').trim();
+      prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+      const lienCompte = `${appUrl}/mon-compte`;
+
+      // D1 : cancel_at_period_end vient de passer à true → email d'adieu
+      if (!prevAttr.cancel_at_period_end && sub.cancel_at_period_end === true) {
+        const item0 = sub.items?.data?.[0];
+        const endTs = sub.current_period_end ?? item0?.current_period_end ?? null;
+        const endDate = endTs ? new Date(endTs * 1000).toLocaleDateString('fr-FR') : '—';
+
+        await sendBrevoEmail(user.email, prenom, 31, {
+          prenom,
+          date_fin: endDate,
+          lienCompte,
+        });
+        console.log(`[Brevo] Email résiliation (template 31) envoyé à ${user.email}`);
+      }
+
+      // D2 : pause_collection vient d'être activé → email de confirmation pause
+      if (!prevAttr.pause_collection && sub.pause_collection?.behavior === 'keep_as_draft') {
+        await sendBrevoEmail(user.email, prenom, 32, {
+          prenom,
+          lienCompte,
+        });
+        console.log(`[Brevo] Email pause (template 32) envoyé à ${user.email}`);
+      }
+    }
+  }
+
+  // --- SCÉNARIO E : Échec de paiement d'abonnement (alerte renforcée) ---
+  // Note : le template 14 (existant scénario C) gère déjà invoice.payment_failed.
+  // On ajoute ici un email d'alerte dédié (template 30) orienté "action urgente carte bancaire"
+  if (event.type === 'invoice.payment_failed') {
+    const invoice    = event.data.object;
+    const stripeSubId =
+      invoice.subscription ||
+      invoice.parent?.subscription_details?.subscription ||
+      invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
+
+    if (stripeSubId) {
+      const order = await prisma.orders.findFirst({
+        where: { stripeSubscriptionId: stripeSubId },
+        include: { Users: true },
+      });
+
+      if (order?.Users) {
+        const user   = order.Users;
+        let prenom   = (user.firstName || 'Client(e)').trim();
+        prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+
+        await sendBrevoEmail(user.email, prenom, 30, {
+          prenom,
+          montant: ((invoice.amount_due ?? 0) / 100).toFixed(2),
+          lienPortail: `${appUrl}/api/stripe/create-portal-session?subscriptionId=${stripeSubId}`,
+          lienCompte:  `${appUrl}/mon-compte/facturation`,
+        });
+        console.log(`[Brevo] Email alerte paiement échoué (template 30) envoyé à ${user.email}`);
+      }
+    }
+  }
+
   return NextResponse.json({ received: true });
 }
