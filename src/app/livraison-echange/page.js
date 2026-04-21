@@ -35,13 +35,15 @@ export default function LivraisonEchangePage() {
   const [error, setError] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeInfo, setUpgradeInfo] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Redirection si ni échange ni réassort actif
+  // isSuccess court-circuite ce guard pour laisser router.push de succès s'exécuter
   useEffect(() => {
-    if (!isExchangeMode && !isRefillMode) {
+    if (!isExchangeMode && !isRefillMode && !isSuccess) {
       router.replace('/mon-compte');
     }
-  }, [isExchangeMode, isRefillMode, router]);
+  }, [isExchangeMode, isRefillMode, isSuccess, router]);
 
   // Pré-remplir depuis les données utilisateur
   useEffect(() => {
@@ -173,6 +175,7 @@ export default function LivraisonEchangePage() {
         setShowUpgradeModal(true);
         return;
       }
+      setIsSuccess(true);
       setExchangeContext(null);
       clearCart();
       router.push(`/echange-confirme${data.exchangeOrderId ? `?id=${data.exchangeOrderId}` : ''}`);
@@ -199,6 +202,7 @@ export default function LivraisonEchangePage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Une erreur est survenue."); return; }
+      setIsSuccess(true);
       setRefillContext(null);
       clearCart();
       router.push('/reassort-confirme');
