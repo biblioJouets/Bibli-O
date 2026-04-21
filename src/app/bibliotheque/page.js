@@ -23,7 +23,13 @@ export default function LibraryPage() {
   useEffect(() => {
     if (exchangeMode && exchangeOrderId) {
       const exchangeSlots = parseInt(searchParams.get('slots') || '0', 10);
-      setExchangeContext({ orderId: parseInt(exchangeOrderId), slots: exchangeSlots || null });
+      // Merger avec le contexte existant pour préserver selectedProductIds et totalActiveCount
+      // fixés par OrderCard avant la redirection
+      setExchangeContext((prev) => ({
+        ...(prev ?? {}),
+        orderId: parseInt(exchangeOrderId),
+        slots: exchangeSlots || null,
+      }));
       setRefillContext(null);
     } else if (refillMode && refillOrderId && refillSlots > 0) {
       setRefillContext({ sourceOrderId: parseInt(refillOrderId), slots: refillSlots });

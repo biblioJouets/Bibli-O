@@ -68,6 +68,7 @@ export default function OrdersTab() {
             order={order}
             canExchange={exchangeGuard.canExchange}
             canExchangeReason={exchangeGuard.reason}
+            onRefresh={() => fetchOrders(session.user.id)}
           />
         ))}
       </div>

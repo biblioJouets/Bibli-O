@@ -371,7 +371,7 @@ export const getPriceIdForToyCount = (count) => {
   return priceIds[count] || null;
 };
 
-export const initiateExchange = async (orderId, userId, newCartItems, shippingOverride = null) => {
+export const initiateExchange = async (orderId, userId, newCartItems, selectedProductIds, shippingOverride = null) => {
   const { default: Stripe } = await import('stripe');
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -405,22 +405,38 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
     throw err;
   }
 
-  // 3b. Guard retour en cours — bloquer si l'ancienne boîte n'a pas encore été réceptionnée
+  // 4. Résoudre les jouets à échanger :
+  //    - Si selectedProductIds est fourni et non vide → cibler uniquement ces jouets
+  //    - Sinon (ancien flow ou contexte perdu) → fallback sur tous les jouets actifs non-adoptés
+  const ADOPTED_STATUSES = ['ADOPTE', 'ADOPTE_REMPLACE'];
+  const allActiveProducts = order.OrderProducts.filter(
+    (op) => !ADOPTED_STATUSES.includes(op.renewalIntention) && op.renewalIntention !== 'RETOUR_DEMANDE'
+  );
+
+  const effectiveIds = selectedProductIds && selectedProductIds.length > 0
+    ? selectedProductIds
+    : allActiveProducts.map((op) => op.ProductId);
+
+  // 3b. Guard retour en cours — bloquer si un des jouets ciblés est déjà en RETOUR_DEMANDE
   const hasRetourDemande = order.OrderProducts.some(
-    (op) => op.renewalIntention === 'RETOUR_DEMANDE'
+    (op) => effectiveIds.includes(op.ProductId) && op.renewalIntention === 'RETOUR_DEMANDE'
   );
   if (hasRetourDemande) {
-    const err = new Error("Un retour est déjà en cours pour cette commande. L'échange sera disponible une fois la boîte réceptionnée.");
+    const err = new Error("Un retour est déjà en cours pour un des jouets sélectionnés. L'échange sera disponible une fois la boîte réceptionnée.");
     err.status = 400;
     throw err;
   }
 
-  // 4. Guard panier — seuls les jouets actifs (non adoptés) sont échangeables
-  const ADOPTED_STATUSES = ['ADOPTE', 'ADOPTE_REMPLACE'];
-  const activeProducts = order.OrderProducts.filter(
-    (op) => !ADOPTED_STATUSES.includes(op.renewalIntention)
+  const selectedProducts = order.OrderProducts.filter(
+    (op) => effectiveIds.includes(op.ProductId) && !ADOPTED_STATUSES.includes(op.renewalIntention)
   );
-  const currentToyCount = activeProducts.length;
+  if (selectedProducts.length === 0) {
+    const err = new Error("Aucun jouet échangeable trouvé dans la sélection.");
+    err.status = 400;
+    throw err;
+  }
+  // currentToyCount = nombre de jouets renvoyés (= slots de la nouvelle boîte navette)
+  const currentToyCount = selectedProducts.length;
   const newToyCount = newCartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
   if (newToyCount > currentToyCount) {
@@ -431,13 +447,6 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       newToyCount,
       newMonthlyPrice: newPriceAmount ? newPriceAmount / 100 : null,
     };
-  }
-
-  // Guard strict : le client ne peut pas demander plus de jouets que de slots actifs
-  if (newToyCount > currentToyCount) {
-    const err = new Error("Nombre de jouets invalide : vous demandez plus de jouets que votre box n'en contient.");
-    err.status = 400;
-    throw err;
   }
 
   // 5. Décrémentation atomique du stock des nouveaux jouets
@@ -458,11 +467,9 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
       });
     }
 
-    // 6. Marquer UNIQUEMENT les jouets actifs (non adoptés) en RETOUR_DEMANDE
-    //    Les jouets ADOPTE / ADOPTE_REMPLACE restent intacts
-    const activeProductIds = activeProducts.map((op) => op.ProductId);
+    // 6. Marquer UNIQUEMENT les jouets sélectionnés par le client en RETOUR_DEMANDE
     await tx.orderProducts.updateMany({
-      where: { OrderId: orderId, ProductId: { in: activeProductIds } },
+      where: { OrderId: orderId, ProductId: { in: effectiveIds } },
       data: { renewalIntention: 'RETOUR_DEMANDE' },
     });
 
@@ -576,7 +583,7 @@ export const initiateExchange = async (orderId, userId, newCartItems, shippingOv
   return { requiresUpgrade: false, success: true, exchangeOrderId: newExchangeOrder.id };
 };
 
-export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCount, shippingOverride = null) => {
+export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCount, selectedProductIds, shippingOverride = null) => {
   const { default: Stripe } = await import('stripe');
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -617,7 +624,7 @@ export const upgradeAndExchange = async (orderId, userId, newCartItems, newToyCo
   }
 
   // Réutilise la même logique d'échange standard (stock + jeton + email)
-  return initiateExchange(orderId, userId, newCartItems, shippingOverride);
+  return initiateExchange(orderId, userId, newCartItems, selectedProductIds, shippingOverride);
 };
 
 // ============================================================

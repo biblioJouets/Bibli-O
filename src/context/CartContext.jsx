@@ -10,7 +10,7 @@ export function CartProvider({ children }) {
   const { data: session } = useSession();
   const [cart, setCart] = useState({ items: [] });
   const [loading, setLoading] = useState(false);
-  // Contexte d'échange : null si mode normal, { orderId } si mode échange
+  // Contexte d'échange : null si mode normal, { orderId, selectedProductIds } si mode échange
   const [exchangeContext, setExchangeContext] = useState(null);
   // Contexte de réassort : null si mode normal, { sourceOrderId, slots } si mode refill
   const [refillContext, setRefillContext] = useState(null);

@@ -158,6 +158,7 @@ export default function LivraisonEchangePage() {
     try {
       const body = {
         orderId: exchangeContext.orderId,
+        selectedProductIds: exchangeContext.selectedProductIds ?? [],
         newCartItems: cart.items.map(item => ({ productId: item.product.id, quantity: item.quantity })),
         shipping: buildShippingPayload(),
         confirmUpgrade,

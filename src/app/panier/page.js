@@ -8,6 +8,125 @@ import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
 import '@/styles/panier.css';
 
+// Grille tarifaire pour affichage dans la modale downgrade
+const PRICING_MAP = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
+
+// Modale unifiée : sous-occupation (déficit > 0) ET surcapacité (surplus > 0)
+function BoxSizeModal({ finalCount, totalCapacity, orderId, selectedCount, onClose, onSuccess }) {
+  const isUnder = finalCount < totalCapacity;  // sous-occupation
+  const isOver  = finalCount > totalCapacity;  // surcapacité
+  const diff    = Math.abs(finalCount - totalCapacity);
+  const newPrice = PRICING_MAP[finalCount];
+
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState(null);
+
+  const handleAdjust = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const endpoint = isOver
+        ? '/api/stripe/upgrade-subscription'
+        : '/api/stripe/downgrade-subscription';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newToyCount: finalCount }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la mise à jour.');
+      onSuccess(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2E1D21]/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-[25px] shadow-xl max-w-md w-full p-6 flex flex-col gap-4">
+
+        <div className="text-center">
+          <span className="text-4xl">{isOver ? '⬆️' : '📦'}</span>
+          <h3 className="text-xl font-bold text-[#2E1D21] mt-2">
+            {isOver ? 'Box agrandie' : 'Box sous-occupée'}
+          </h3>
+          <p className="text-sm text-[#2E1D21]/70 mt-1 leading-relaxed">
+            Votre abonnement actuel prévoit <strong>{totalCapacity} jouet{totalCapacity > 1 ? 's' : ''}</strong>,
+            mais votre prochaine box en contiendra <strong>{finalCount}</strong>.
+          </p>
+          {isUnder && (
+            <p className="text-sm text-[#a0888c] mt-1">
+              Il vous manque <strong>{diff} jouet{diff > 1 ? 's' : ''}</strong> pour remplir votre box.
+            </p>
+          )}
+          {isOver && (
+            <p className="text-sm text-[#a0888c] mt-1">
+              Vous avez <strong>{diff} jouet{diff > 1 ? 's' : ''} de plus</strong> que votre formule actuelle.
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 mt-1">
+
+          {/* Option 1 : Continuer quand même (sous-occupation) → rediriger vers biblio pour compléter */}
+          {isUnder && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                window.location.href = `/bibliotheque?mode=exchange&orderId=${orderId}&slots=${selectedCount}`;
+              }}
+              className="w-full px-5 py-3 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold text-sm transition-colors shadow-sm"
+            >
+              🔍 Compléter ma box ({diff} jouet{diff > 1 ? 's' : ''} à ajouter)
+            </button>
+          )}
+
+          {/* Option principale : Ajuster l'abonnement */}
+          <button
+            type="button"
+            onClick={handleAdjust}
+            disabled={loading}
+            className={`w-full px-5 py-3 rounded-full font-semibold text-sm transition-colors shadow-sm disabled:opacity-50 ${
+              isOver
+                ? 'bg-[#6EC1E4] hover:bg-[#5aafcf] text-white'
+                : 'bg-white border border-[#88D4AB] text-[#2E1D21] hover:bg-[#F2FAF6]'
+            }`}
+          >
+            {loading ? 'Mise à jour...' : isOver
+              ? `⬆️ Passer à ${finalCount} jouet${finalCount > 1 ? 's' : ''}${newPrice ? ` — ${newPrice}€/mois` : ''}`
+              : `⬇️ Réduire à ${finalCount} jouet${finalCount > 1 ? 's' : ''}${newPrice ? ` — ${newPrice}€/mois` : ''}`
+            }
+          </button>
+
+          {isOver && (
+            <p className="text-xs text-[#2E1D21]/50 text-center -mt-1">
+              Le changement prend effet immédiatement avec prorata.
+            </p>
+          )}
+          {isUnder && (
+            <p className="text-xs text-[#2E1D21]/50 text-center -mt-1">
+              La réduction prend effet à la fin de votre cycle de facturation actuel.
+            </p>
+          )}
+
+          {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs text-[#a0888c] underline underline-offset-2 text-center mt-1"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext, refillContext, setRefillContext } = useCart();
@@ -24,13 +143,15 @@ export default function PanierPage() {
   const exchangeError = null;
 
   const [refillError, setRefillError] = useState(null);
+  const [showBoxSizeModal, setShowBoxSizeModal] = useState(false);
+  const [boxAdjustSuccess, setBoxAdjustSuccess] = useState(null);
 
   // En mode réassort, on redirige vers la page de livraison (comme l'échange)
   const handleRefillValidation = () => {
     router.push('/livraison-echange');
   };
 
-  
+
   // Calcul valeur théorique (Prix boutique des jouets)
   const cartValue = cart.items?.reduce((total, item) => {
     return total + (item.product.price * item.quantity);
@@ -42,8 +163,20 @@ export default function PanierPage() {
   const buildCartPayload = () =>
     cart.items.map((item) => ({ productId: item.product.id, quantity: item.quantity }));
 
-  // En mode échange, le bouton "Confirmer l'échange" redirige vers la page de livraison
+  // Capacité abonnement : totalActiveCount stocké dans le contexte par OrderCard
+  // keptCount = jouets gardés = capacité totale - jouets sélectionnés à rendre
+  const totalCapacity = exchangeContext?.totalActiveCount ?? 0;
+  const selectedCount = exchangeContext?.selectedProductIds?.length ?? 0;
+  const keptCount     = totalCapacity - selectedCount;
+  const finalCount    = keptCount + itemCount;       // ce que contiendra la prochaine box
+  const mismatch      = totalCapacity > 0 && finalCount !== totalCapacity;
+
+  // En mode échange, intercepter la sous-occupation ET la surcapacité avant de rediriger
   const handleExchangeValidation = () => {
+    if (exchangeMode && mismatch) {
+      setShowBoxSizeModal(true);
+      return;
+    }
     router.push('/livraison-echange');
   };
 
@@ -140,6 +273,29 @@ export default function PanierPage() {
   // --- AFFICHAGE PANIER REMPLI ---
   return (
     <div className="cart-page-container">
+
+      {/* Modale ajustement taille box (sous-occupation ou surcapacité) */}
+      {showBoxSizeModal && exchangeMode && (
+        <BoxSizeModal
+          finalCount={finalCount}
+          totalCapacity={totalCapacity}
+          orderId={exchangeOrderId}
+          selectedCount={selectedCount}
+          onClose={() => setShowBoxSizeModal(false)}
+          onSuccess={(data) => {
+            setShowBoxSizeModal(false);
+            setBoxAdjustSuccess(`Abonnement mis à jour — ${data.newPrice ?? ''}€/mois. Redirection en cours...`);
+            setTimeout(() => router.push('/livraison-echange'), 2000);
+          }}
+        />
+      )}
+
+      {/* Message succès ajustement */}
+      {boxAdjustSuccess && (
+        <div className="w-full bg-[#DAEEE6] border border-[#88D4AB] text-[#2E1D21] px-6 py-3 rounded-[16px] mb-4 text-sm font-medium text-center">
+          ✅ {boxAdjustSuccess}
+        </div>
+      )}
 
       {/* Bandeau mode échange */}
       {exchangeMode && (

@@ -21,6 +21,7 @@ const shippingSchema = z.object({
 const bodySchema = z.object({
   orderId: z.number().int().positive(),
   newCartItems: z.array(cartItemSchema).min(1),
+  selectedProductIds: z.array(z.number().int().positive()).optional().default([]),
   confirmUpgrade: z.boolean().optional().default(false),
   newToyCount: z.number().int().min(1).max(9).optional(),
   shipping: shippingSchema,
@@ -38,7 +39,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Données invalides", details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { orderId, newCartItems, confirmUpgrade, newToyCount, shipping } = parsed.data;
+    const { orderId, newCartItems, selectedProductIds, confirmUpgrade, newToyCount, shipping } = parsed.data;
 
     // Vérification de la garde de période de facturation avant tout traitement
     const { canExchange, reason } = await canUserExchange(session.user.id);
@@ -48,9 +49,9 @@ export async function POST(req) {
 
     let result;
     if (confirmUpgrade && newToyCount) {
-      result = await upgradeAndExchange(orderId, session.user.id, newCartItems, newToyCount, shipping ?? null);
+      result = await upgradeAndExchange(orderId, session.user.id, newCartItems, newToyCount, selectedProductIds, shipping ?? null);
     } else {
-      result = await initiateExchange(orderId, session.user.id, newCartItems, shipping ?? null);
+      result = await initiateExchange(orderId, session.user.id, newCartItems, selectedProductIds, shipping ?? null);
     }
 
     // Le service retourne requiresUpgrade: true si le panier dépasse l'abonnement actuel

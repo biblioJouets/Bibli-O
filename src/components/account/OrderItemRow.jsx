@@ -1,58 +1,65 @@
 /* src/components/account/OrderItemRow.jsx */
+'use client';
 import Image from 'next/image';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import ProlongButton from './ProlongButton';
-import ReturnModal from './ReturnModal';
 import AdoptModal from './AdoptModal';
+import ReturnModal from './ReturnModal';
 
-export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrder = false, hideExchangeButton = false, exchangeBlocked = false, exchangeBlockReason = null, exchangeableSlots = 0 }) {
-  const router = useRouter();
-  const [showReturnModal, setShowReturnModal] = useState(false);
-  const [showAdoptModal, setShowAdoptModal] = useState(false);
+const ADOPTED_STATUSES = ['ADOPTE', 'ADOPTE_REMPLACE'];
+
+export default function OrderItemRow({
+  item,
+  orderStatus,
+  orderId,
+  isAdoptionOrder = false,
+  // Mode sélection groupée transmis par OrderCard
+  activeMode     = null,   // null | 'exchange' | 'prolong'
+  isSelected     = false,
+  onToggleSelect = null,
+}) {
+  const [showReturnModal,  setShowReturnModal]  = useState(false);
+  const [showAdoptModal,   setShowAdoptModal]   = useState(false);
   const [isReturning, setIsReturning] = useState(
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
-  const isAdopted = ['ADOPTE', 'ADOPTE_REMPLACE'].includes(item.renewalIntention);
 
-  const productData = item.product || item.Products || {};
-  const imageUrl = productData?.images?.[0] || '/assets/box_bj.png';
-  const productName = productData?.name || "Jouet Mystère";
-  const productPrice = Number(productData?.price || 0).toFixed(2);
-  // On utilise la date de fin DU JOUET
-  const returnDate = item.rentalEndDate 
-    ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR') 
-    : "Non définie";
-
-// --- LOGIQUE TEMPORELLE (J-7) AU NIVEAU DU JOUET ---
-  let showProlongButton = false;
-  
-  if (orderStatus === 'ACTIVE') {
-    if (item.renewalIntention === 'PAIEMENT_ECHOUE') {
-      // Priorité absolue : Si le paiement a échoué, on affiche TOUJOURS le bouton d'alerte
-      showProlongButton = true;
-    } else if (item.nextBillingDate) {
-      // Sinon, on applique la règle classique des 7 jours
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); 
-      const billingDate = new Date(item.nextBillingDate);
-      billingDate.setHours(0, 0, 0, 0);
-      const diffTime = billingDate.getTime() - today.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-      // On affiche le bouton de J-7 jusqu'à la date de facturation (et même un peu après s'il y a un retard)
-      if (diffDays <= 7) {
-        showProlongButton = true;
-      }
-    }
-  }
-
-  // Commandes non encore actives ou clôturées : aucun bouton d'action
+  const isAdopted    = ADOPTED_STATUSES.includes(item.renewalIntention);
   const isHistorical = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
 
+  const productData  = item.product || item.Products || {};
+  const imageUrl     = productData?.images?.[0] || '/assets/box_bj.png';
+  const productName  = productData?.name || "Jouet Mystère";
+  const productPrice = Number(productData?.price || 0).toFixed(2);
+  const returnDate   = item.rentalEndDate
+    ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR')
+    : "Non définie";
+
+  // La checkbox n'apparaît que si un mode actif est en cours ET que le jouet est éligible
+  const isSelectable = !!onToggleSelect && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
+
   return (
-    <div className="order-item-row">
-      <div className="item-info">
+    <div className={`order-item-row transition-colors ${isSelected ? 'bg-[#EBF7FD] rounded-[16px] px-2' : ''}`}>
+
+      {/* Checkbox — visible uniquement en mode sélection */}
+      {activeMode && (
+        isSelectable ? (
+          <label className="flex items-center justify-center px-2 cursor-pointer flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect(item.ProductId)}
+              className="w-4 h-4 cursor-pointer"
+              style={{ accentColor: activeMode === 'exchange' ? '#6EC1E4' : '#88D4AB' }}
+            />
+          </label>
+        ) : (
+          <div className="w-8 flex-shrink-0" />
+        )
+      )}
+
+      {/* Infos jouet */}
+      <div className="item-info flex-1">
         <div className="item-image-wrapper">
           <Image src={imageUrl} alt={productName} width={80} height={80} className="item-thumbnail" />
         </div>
@@ -70,120 +77,71 @@ export default function OrderItemRow({ item, orderStatus, orderId, isAdoptionOrd
         </div>
       </div>
 
-      {/* Pas de boutons d’action pour une commande clôturée ou d’achat */}
-      {isHistorical ? null : isAdoptionOrder ? (
-        <div className="item-actions">
-          <span
-            className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}
-          >
-
+      {/* Zone d'état / actions par jouet */}
+      <div className="item-actions">
+        {isHistorical ? null
+        : isAdoptionOrder ? (
+          <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}>
             🧸 À vous pour toujours
           </span>
-        </div>
-      ) : (
-      <div className="item-actions">
-        {/* Bouton Échanger :
-            - masqué totalement si retour en cours ou commande clôturée (hideExchangeButton)
-            - grisé avec message si limite de période atteinte (exchangeBlocked)
-            - actif sinon */}
-        {orderStatus === 'ACTIVE' && !hideExchangeButton && !isAdopted && (
-          exchangeBlocked ? (
-            <div className="flex flex-col items-start gap-1">
-              <button
-                disabled
-                className="bg-gray-200 text-gray-400 font-semibold px-6 py-2 rounded-full cursor-not-allowed text-sm"
-                type="button"
-              >
-                Échanger
-              </button>
-              {exchangeBlockReason && (
-                <span className="text-xs text-gray-400 px-1">{exchangeBlockReason}</span>
-              )}
-            </div>
-          ) : (
-            <button
-              className="bg-[#6EC1E4] text-white font-semibold px-6 py-2 rounded-full hover:bg-[#5aafcf] transition-colors shadow-md text-sm"
-              type="button"
-              onClick={() => router.push(`/bibliotheque?mode=exchange&orderId=${orderId}&slots=${exchangeableSlots}`)}
-            >
-              Échanger
-            </button>
-          )
-        )}
-
-        {/* Règle d'exclusion stricte : retour en cours → badge seul, rien d'autre */}
-        {isReturning ? (
-          <button
-            className="border border-gray-200 text-gray-400 text-sm px-4 py-2 rounded-full cursor-not-allowed"
-            type="button"
-            disabled
-          >
+        ) : isReturning ? (
+          <span className="text-gray-400 text-sm px-4 py-2 rounded-full"
+            style={{ background: '#f3f4f6' }}>
             Retour en cours
-          </button>
+          </span>
         ) : isAdopted ? (
-          <span
-            className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
-            style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}
-          >
+          <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}>
             Adopté pour la vie 🧸
           </span>
-        ) : (
+        ) : orderStatus === 'ACTIVE' && !activeMode ? (
+          /* Boutons individuels — visibles hors mode sélection groupée */
           <>
-            {/* Bouton Rendre — conditionnel selon le statut */}
+            {/* Paiement échoué : action urgente, toujours prioritaire */}
+            {item.renewalIntention === 'PAIEMENT_ECHOUE' && (
+              <button type="button"
+                onClick={() => window.location.href = `/api/stripe/create-portal-session?orderId=${item.OrderId}`}
+                className="px-4 py-2 rounded-full font-semibold text-sm transition-colors shadow-sm"
+                style={{ background: '#FFD9DC', color: '#2E1D21', border: '1px solid #FF8C94' }}>
+                ⚠️ Action requise
+              </button>
+            )}
+
+            <button type="button"
+              onClick={() => setShowAdoptModal(true)}
+              className="px-4 py-2 rounded-full text-white font-semibold text-sm transition-colors shadow-sm"
+              style={{ background: '#FF8C94' }}>
+              🧸 Adopter
+            </button>
+
             {['ACTIVE', 'SHIPPED'].includes(orderStatus) && (
-              <button
-                className="border border-gray-300 text-gray-500 text-sm px-4 py-2 rounded-full hover:border-red-300 hover:text-red-500 transition-colors"
-                type="button"
+              <button type="button"
                 onClick={() => setShowReturnModal(true)}
-              >
+                className="px-4 py-2 rounded-full text-[#a0888c] font-semibold text-sm transition-colors"
+                style={{ background: '#f3f4f6' }}>
                 Rendre
               </button>
             )}
-
-            <button
-              className="btn-pill btn-adopt"
-              type="button"
-              onClick={() => setShowAdoptModal(true)}
-            >
-              Adopter
-            </button>
-
-            {showProlongButton ? (
-              <ProlongButton
-                orderId={item.OrderId}
-                productId={item.ProductId}
-                currentIntention={item.renewalIntention}
-              />
-            ) : (
-              <button className="btn-pill btn-extend opacity-50 cursor-not-allowed" type="button" disabled>
-                Prolonger
-              </button>
-            )}
           </>
-        )}
-
-        {showReturnModal && (
-          <ReturnModal
-            orderId={item.OrderId}
-            productId={item.ProductId}
-            onClose={() => setShowReturnModal(false)}
-            onSuccess={() => {
-              setIsReturning(true);
-              setShowReturnModal(false);
-            }}
-          />
-        )}
-
-        {showAdoptModal && (
-          <AdoptModal
-            orderId={orderId}
-            productId={item.ProductId}
-            productName={productName}
-            onClose={() => setShowAdoptModal(false)}
-          />
-        )}
+        ) : null}
       </div>
+
+      {showReturnModal && (
+        <ReturnModal
+          orderId={item.OrderId}
+          productId={item.ProductId}
+          onClose={() => setShowReturnModal(false)}
+          onSuccess={() => { setIsReturning(true); setShowReturnModal(false); }}
+        />
+      )}
+      {showAdoptModal && (
+        <AdoptModal
+          orderId={orderId}
+          productId={item.ProductId}
+          productName={productName}
+          onClose={() => setShowAdoptModal(false)}
+        />
       )}
     </div>
   );

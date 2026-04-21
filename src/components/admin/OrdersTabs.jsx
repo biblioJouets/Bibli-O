@@ -226,12 +226,16 @@ function ReturnLabelUpload({ order, onRefresh }) {
 const ACQUIRED_STATUSES = ["ADOPTE", "ADOPTE_REMPLACE"];
 
 function AuditPanel({ order, onRefresh }) {
-  // Seuls les jouets non-adoptés font partie du carton de retour
+  // Seuls les jouets explicitement marqués RETOUR_DEMANDE sont dans le carton retour
   const auditableProducts = order.OrderProducts.filter(
-    (op) => !ACQUIRED_STATUSES.includes(op.renewalIntention)
+    (op) => op.renewalIntention === 'RETOUR_DEMANDE'
   );
   const acquiredProducts = order.OrderProducts.filter(
     (op) => ACQUIRED_STATUSES.includes(op.renewalIntention)
+  );
+  // Jouets encore chez le client (location en cours, non échangés)
+  const stillRentedProducts = order.OrderProducts.filter(
+    (op) => op.renewalIntention !== 'RETOUR_DEMANDE' && !ACQUIRED_STATUSES.includes(op.renewalIntention)
   );
 
   const [statuses, setStatuses] = useState(
@@ -290,6 +294,39 @@ function AuditPanel({ order, onRefresh }) {
   return (
     <div className={styles.auditPanel}>
       <p className={styles.auditTitle}>🔍 Audit retour — état de chaque jouet</p>
+
+      {/* Jouets encore chez le client — hors carton de retour */}
+      {stillRentedProducts.length > 0 && (
+        <div style={{
+          background: "#EBF7FD",
+          border: "1px solid #6EC1E4",
+          borderRadius: "12px",
+          padding: "10px 14px",
+          marginBottom: "12px",
+          fontSize: "0.85rem",
+          color: "#0a4a6e",
+        }}>
+          <strong>📦 Toujours en location chez le client — ne seront PAS dans ce carton</strong>
+          <ul style={{ margin: "6px 0 0 0", paddingLeft: "1.2rem" }}>
+            {stillRentedProducts.map((op) => (
+              <li key={op.ProductId}>
+                {op.Products?.name ?? `Jouet #${op.ProductId}`}
+                <span style={{
+                  marginLeft: "8px",
+                  background: "#6EC1E4",
+                  color: "#fff",
+                  padding: "1px 8px",
+                  borderRadius: "20px",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                }}>
+                  EN LOCATION
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Jouets acquis par le client — hors carton de retour */}
       {acquiredProducts.length > 0 && (
