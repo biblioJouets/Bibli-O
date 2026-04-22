@@ -534,16 +534,29 @@ function OrderCard({ order, type, onStatusUpdate }) {
           <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
-              const isAdopted = ACQUIRED_STATUSES.includes(op.renewalIntention);
+              const isAdopted   = ACQUIRED_STATUSES.includes(op.renewalIntention);
+              const isProlonged = op.renewalIntention === 'PROLONGATION' || op.renewalIntention === 'PROLONGATION_TACITE';
               const endDate = op.rentalEndDate
-                ? new Date(op.rentalEndDate).toLocaleDateString("fr-FR")
+                ? new Date(op.rentalEndDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
                 : null;
+              // Date projetée : nextBillingDate + 1 mois (même logique que le webhook et l'API prolong-item)
+              const projectedDate = (() => {
+                if (!op.nextBillingDate) return null;
+                const d = new Date(op.nextBillingDate);
+                d.setMonth(d.getMonth() + 1);
+                return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+              })();
+              const billingDate = op.nextBillingDate
+                ? new Date(op.nextBillingDate).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
+                : null;
+
               return (
                 <li key={idx} className={`${styles.productItem} ${isAdopted ? styles.productItemAdopted : ""}`}>
                   <span className={styles.qtyBadge}>{op.quantity ?? 1}</span>
                   <span className={styles.productItemName}>
                     {op.Products?.name ?? "Jouet"}
                     {isAdopted && <span className={styles.adoptedBadge}>Adopté 💜</span>}
+                    {isProlonged && <span className={styles.prolongBadge}>⏳ Prolongation demandée</span>}
                   </span>
                   {order.status === "ACTIVE" && !isAdopted && (
                     <span className={styles.productMeta}>
@@ -555,6 +568,12 @@ function OrderCard({ order, type, onStatusUpdate }) {
                       {endDate && (
                         <span className={styles.possessionDate}>
                           En possession jusqu&apos;au {endDate}
+                        </span>
+                      )}
+                      {isProlonged && (
+                        <span className={styles.prolongInfo}>
+                          Nouvelle date estimée : <strong>{projectedDate ?? "—"}</strong>
+                          {billingDate && <> · après paiement du {billingDate}</>}
                         </span>
                       )}
                     </span>

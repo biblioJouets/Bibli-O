@@ -695,6 +695,28 @@
   font-style: italic;
 }
 
+.prolongBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #DAEEE6;
+  color: #1a6b45;
+  padding: 1px 8px;
+  border-radius: 50px;
+  border: 1px solid #b7e4c7;
+  white-space: nowrap;
+}
+
+.prolongInfo {
+  font-size: 0.72rem;
+  color: #1a6b45;
+  background: #EDF7F2;
+  border: 1px solid #b7e4c7;
+  border-radius: 10px;
+  padding: 3px 8px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
 /* ── Bouton Facture ── */
 .btnInvoice {
   display: inline-flex;

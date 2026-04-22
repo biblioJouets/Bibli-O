@@ -23,16 +23,28 @@ export default function OrderItemRow({
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
 
-  const isAdopted    = ADOPTED_STATUSES.includes(item.renewalIntention);
-  const isHistorical = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
+  const isAdopted      = ADOPTED_STATUSES.includes(item.renewalIntention);
+  const isProlonged    = item.renewalIntention === 'PROLONGATION' || item.renewalIntention === 'PROLONGATION_TACITE';
+  const isHistorical   = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
 
   const productData  = item.product || item.Products || {};
   const imageUrl     = productData?.images?.[0] || '/assets/box_bj.png';
   const productName  = productData?.name || "Jouet Mystère";
   const productPrice = Number(productData?.price || 0).toFixed(2);
   const returnDate   = item.rentalEndDate
-    ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR')
+    ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : "Non définie";
+
+  // Date projetée après prolongation : nextBillingDate + 1 mois (même logique que le webhook)
+  const projectedEndDate = (() => {
+    if (!item.nextBillingDate) return null;
+    const d = new Date(item.nextBillingDate);
+    d.setMonth(d.getMonth() + 1);
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  })();
+  const billingDate = item.nextBillingDate
+    ? new Date(item.nextBillingDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
 
   // La checkbox n'apparaît que si un mode actif est en cours ET que le jouet est éligible
   const isSelectable = !!onToggleSelect && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
@@ -68,7 +80,21 @@ export default function OrderItemRow({
           {!isAdoptionOrder && (
             <>
               <p className="item-price">Prix d&apos;adoption : {productPrice} €</p>
-              <p className="item-date">En votre possession jusqu&apos;au <strong>{returnDate}</strong></p>
+              {isProlonged ? (
+                <div className="flex flex-col gap-1 mt-0.5">
+                  <p className="item-date">En votre possession jusqu&apos;au <strong>{returnDate}</strong></p>
+                  <p className="text-xs leading-snug px-2 py-1.5 rounded-[10px]"
+                    style={{ background: '#EDF7F2', color: '#2d6a4f', border: '1px solid #b7e4c7' }}>
+                    ✅ Prolongation enregistrée.{' '}
+                    {projectedEndDate && billingDate
+                      ? <>Votre nouvelle date (env. <strong>{projectedEndDate}</strong>) sera confirmée après le paiement du <strong>{billingDate}</strong>.</>
+                      : 'Votre nouvelle date sera confirmée après le prochain paiement.'
+                    }
+                  </p>
+                </div>
+              ) : (
+                <p className="item-date">En votre possession jusqu&apos;au <strong>{returnDate}</strong></p>
+              )}
             </>
           )}
           {isAdoptionOrder && (

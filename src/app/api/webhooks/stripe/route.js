@@ -61,7 +61,7 @@ export async function POST(req) {
   // 1. VÉRIFICATION DE SÉCURITÉ
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant dans .env");
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);  
   } catch (err) {
     console.error(` Webhook Signature Error: ${err.message}`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
@@ -94,7 +94,8 @@ export async function POST(req) {
         const productsToRenew = order.OrderProducts.filter(p =>
           p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
-          p.renewalIntention === 'PAIEMENT_ECHOUE'
+          p.renewalIntention === 'PAIEMENT_ECHOUE' ||
+          p.renwalIntention === null
         );
 
         const toyNames = [];
