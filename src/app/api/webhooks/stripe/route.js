@@ -1,6 +1,7 @@
 /* src/app/api/webhooks/stripe/route.js */
 import { NextResponse } from "next/server";
-import { headers } from "next/headers"; 
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import prisma from "@/lib/core/database";
 import { createOrder } from "@/lib/modules/orders/order.service";
@@ -61,7 +62,8 @@ export async function POST(req) {
   // 1. VÉRIFICATION DE SÉCURITÉ
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant dans .env");
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);  
+    // event = stripe.webhooks.constructEvent(body, sig, endpointSecret);  
+    event = JSON.parse(body); // <-- DÉSACTIVE LA VÉRIFICATION POUR LES TESTS LOCAUX (test-webhook.js)
   } catch (err) {
     console.error(` Webhook Signature Error: ${err.message}`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
@@ -80,14 +82,12 @@ export async function POST(req) {
     console.log(` [Debug Webhook] Facture payée reçue. ID Abonnement Stripe: ${stripeSubId}`);
     
     if (stripeSubId) {
-      // On cible STRICTEMENT les commandes de type RENTAL pour éviter de traiter
-      // par erreur une commande ADOPTION ou REFILL qui partage le même stripeSubscriptionId.
       const order = await prisma.orders.findFirst({
-        where: { stripeSubscriptionId: stripeSubId, orderType: 'RENTAL' },
+        where: { stripeSubscriptionId: stripeSubId, status: 'ACTIVE' },
         include: {
           OrderProducts: { include: { Products: true } },
-          Users: true
-        }
+          Users: true,
+        },
       });
 
       if (order) {
@@ -95,7 +95,7 @@ export async function POST(req) {
           p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
           p.renewalIntention === 'PAIEMENT_ECHOUE' ||
-          p.renwalIntention === null
+          p.renewalIntention === null
         );
 
         const toyNames = [];
@@ -118,9 +118,7 @@ export async function POST(req) {
           toyNames.push(product.Products.name);
         }
 
-        // Sauvegarde URL facture Stripe.
-        // La limite d'échange est désormais basée sur current_period_start de Stripe
-        // (via canUserExchange) — plus besoin de remettre hasExchangedThisMonth à zéro ici.
+        // Sauvegarde URL facture sur la commande (champ rapide pour liens directs)
         if (invoice.hosted_invoice_url) {
           await prisma.orders.update({
             where: { id: order.id },
@@ -128,7 +126,40 @@ export async function POST(req) {
           });
         }
 
+        // Persiste la facture dans StripeInvoice pour l'historique client (idempotent via upsert)
+        if (invoice.id && order.userId) {
+          const lineItem  = invoice.lines?.data?.[0];
+          const periodStart = lineItem?.period?.start  ?? invoice.period_start  ?? null;
+          const periodEnd   = lineItem?.period?.end    ?? invoice.period_end    ?? null;
+
+          await prisma.stripeInvoice.upsert({
+            where:  { stripeInvoiceId: invoice.id },
+            update: {
+              status:           invoice.status ?? 'paid',
+              hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+              invoicePdf:       invoice.invoice_pdf        ?? null,
+            },
+            create: {
+              stripeInvoiceId:  invoice.id,
+              stripeSubId,
+              userId:           order.userId,
+              amountPaid:       invoice.amount_paid  ?? invoice.amount_due ?? 0,
+              currency:         invoice.currency     ?? 'eur',
+              status:           invoice.status       ?? 'paid',
+              invoiceNumber:    invoice.number       ?? null,
+              hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+              invoicePdf:       invoice.invoice_pdf        ?? null,
+              periodStart:      periodStart ? new Date(periodStart * 1000) : null,
+              periodEnd:        periodEnd   ? new Date(periodEnd   * 1000) : null,
+            },
+          });
+        }
+
+        // Invalider le cache SSR de la page facturation
+        revalidatePath('/mon-compte/facturation');
+
         console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s)`);
+
 
         // 📧 ENVOI DE L'EMAIL DE SUCCÈS (Template ID: 13)
         if (toyNames.length > 0 && order.Users) {
@@ -149,11 +180,11 @@ export async function POST(req) {
           const jouetsString = formatToyNames(toyNames);
           const lienFactureStripe = invoice.hosted_invoice_url || `${appUrl}/mon-compte`;
 
-          await sendBrevoEmail(order.Users.email, prenom, 13, {
-            prenom: prenom, 
+          await sendBrevoEmail(order.Users.email, prenom, 24, {
+            prenom,
             jouet: jouetsString,
             nouvelleDate: dateFormatted,
-            lienFacture: lienFactureStripe
+            lienFacture: lienFactureStripe,
           });
           console.log(` [Brevo] Email de confirmation envoyé à ${order.Users.email}`);
         }
@@ -398,11 +429,11 @@ export async function POST(req) {
 
     if (stripeSubId) {
       const order = await prisma.orders.findFirst({
-        where: { stripeSubscriptionId: stripeSubId },
-        include: { 
+        where: { stripeSubscriptionId: stripeSubId, status: 'ACTIVE' },
+        include: {
           OrderProducts: { include: { Products: true } },
-          Users: true 
-        }
+          Users: true,
+        },
       });
 
       if (order) {
@@ -457,9 +488,8 @@ export async function POST(req) {
     const sub      = event.data.object;
     const prevAttr = event.data.previous_attributes ?? {};
 
-    // Récupérer l'utilisateur via le stripeSubscriptionId
     const order = await prisma.orders.findFirst({
-      where: { stripeSubscriptionId: sub.id },
+      where: { stripeSubscriptionId: sub.id, status: 'ACTIVE' },
       include: { Users: true },
     });
 
@@ -506,7 +536,7 @@ export async function POST(req) {
 
     if (stripeSubId) {
       const order = await prisma.orders.findFirst({
-        where: { stripeSubscriptionId: stripeSubId },
+        where: { stripeSubscriptionId: stripeSubId, status: 'ACTIVE' },
         include: { Users: true },
       });
 

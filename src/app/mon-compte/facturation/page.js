@@ -68,12 +68,6 @@ async function getBillingData(userId) {
 
   if (!customerId) return null;
 
-  // 12 dernières factures
-  const invoicesRes = await stripe.invoices.list({
-    customer: customerId,
-    limit: 12,
-  });
-
   // Méthode de paiement par défaut
   const customer = await stripe.customers.retrieve(customerId, {
     expand: ['invoice_settings.default_payment_method'],
@@ -91,18 +85,47 @@ async function getBillingData(userId) {
     ?? item0?.current_period_end
     ?? null;
 
-  const latestInvoice = invoicesRes.data[0] ?? null;
+  // --- Historique des factures : BDD en priorité, Stripe en fallback ---
+  const dbInvoices = await prisma.stripeInvoice.findMany({
+    where: { userId: parseInt(userId) },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  let invoices;
+  if (dbInvoices.length > 0) {
+    // Normalise les enregistrements BDD au même format que les objets Stripe
+    invoices = dbInvoices.map((inv) => ({
+      id:                  inv.stripeInvoiceId,
+      number:              inv.invoiceNumber,
+      created:             Math.floor(new Date(inv.createdAt).getTime() / 1000),
+      amount_paid:         inv.amountPaid,
+      amount_due:          inv.amountPaid,
+      currency:            inv.currency,
+      status:              inv.status,
+      hosted_invoice_url:  inv.hostedInvoiceUrl,
+      invoice_pdf:         inv.invoicePdf,
+      attempted:           inv.status !== 'paid',
+    }));
+  } else {
+    // Fallback Stripe (premier démarrage ou données manquantes)
+    const allInvoices = [];
+    for await (const inv of stripe.invoices.list({ customer: customerId, limit: 100 })) {
+      allInvoices.push(inv);
+    }
+    invoices = allInvoices;
+  }
+
+  const latestInvoice = invoices[0] ?? null;
   const hasFailedPayment = latestInvoice?.status === 'open' && latestInvoice?.attempted;
 
   return {
-    invoices: invoicesRes.data,
+    invoices,
     card,
     nextBillingTs,
     nextBillingAmount: subscription.items?.data?.[0]?.price?.unit_amount ?? null,
     nextBillingCurrency: subscription.currency ?? 'eur',
     hasFailedPayment,
     latestInvoice,
-    portalOrderId: null, // non nécessaire — on passe par stripeSubscriptionId côté route
     stripeSubscriptionId: activeOrder.stripeSubscriptionId,
   };
 }

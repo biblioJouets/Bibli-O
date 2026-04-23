@@ -152,8 +152,8 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
     }
   };
 
-  // Afficher les boutons d'action uniquement sur commandes ACTIVE location
-  const showActions = order.status === 'ACTIVE' && !isAdoption && !isExchange && !isRefill && selectableItems.length > 0;
+  // Afficher les boutons d'action sur toutes les commandes ACTIVE non-adoption
+  const showActions = order.status === 'ACTIVE' && !isAdoption && selectableItems.length > 0;
 
   const allSelected = selectableItems.length > 0 && selectableItems.every((i) => selectedIds.includes(i.ProductId));
 
@@ -212,35 +212,40 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
       {showActions && (
         <div className="flex flex-col gap-3">
 
-          {/* État repos : 3 boutons d'action */}
+          {/* État repos : boutons d'action */}
           {!activeMode && (
-            <div className="flex flex-wrap gap-2">
-              {/* Échanger */}
-              {exchangeBlocked ? (
-                <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
+              {/* Ligne de boutons — hauteur fixe, alignés au centre */}
+              <div className="flex flex-wrap items-center gap-2">
+
+                {/* Échanger */}
+                {exchangeBlocked ? (
                   <button disabled type="button"
-                    className="px-5 py-2 rounded-full bg-gray-100 text-gray-400 font-semibold text-sm cursor-not-allowed">
+                    className="px-3 py-2 rounded-full bg-gray-100 text-gray-400 font-semibold text-sm cursor-not-allowed border-none">
                     🔄 Échanger
                   </button>
-                  {exchangeBlockReason && (
-                    <span className="text-xs text-gray-400 px-1">{exchangeBlockReason}</span>
-                  )}
-                </div>
-              ) : (
-                <button type="button" onClick={() => enterMode('exchange')}
-                  className="px-5 py-2 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold text-sm transition-colors shadow-sm">
-                  🔄 Échanger
-                </button>
-              )}
+                ) : (
+                  <button type="button" onClick={() => enterMode('exchange')}
+                    className="px-3 py-2 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold text-sm transition-colors shadow-sm border-none">
+                    🔄 Échanger
+                  </button>
+                )}
 
-              {/* Prolonger — actif uniquement si au moins un jouet est dans les 7 jours */}
-              <button type="button"
-                onClick={() => enterMode('prolong')}
-                disabled={!hasProlongable}
-                title={!hasProlongable ? "Disponible dans les 7 jours avant votre prochaine facturation" : ""}
-                className="px-5 py-2 rounded-full bg-[#88D4AB] hover:bg-[#6abf92] text-white font-semibold text-sm transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
-                ⏳ Prolonger
-              </button>
+                {/* Prolonger — actif uniquement si au moins un jouet est dans les 7 jours */}
+                <button type="button"
+                  onClick={() => enterMode('prolong')}
+                  disabled={!hasProlongable}
+                  title={!hasProlongable ? "Disponible dans les 7 jours avant votre prochaine facturation" : ""}
+                  className="px-5 py-2 rounded-full bg-[#88D4AB] hover:bg-[#6abf92] text-white font-semibold text-sm transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed border-none">
+                  ⏳ Prolonger
+                </button>
+
+              </div>
+
+              {/* Raison du blocage — sous la ligne, sans impacter la hauteur des boutons */}
+              {exchangeBlocked && exchangeBlockReason && (
+                <span className="text-xs text-gray-400 px-1">{exchangeBlockReason}</span>
+              )}
             </div>
           )}
 

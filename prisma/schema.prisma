@@ -33,11 +33,12 @@ model Users {
  
 
   // Relations
-  Orders    Orders[]
-  Addresses Address[]
-  reviews   Reviews[]
+  Orders          Orders[]
+  Addresses       Address[]
+  reviews         Reviews[]
   promoCodeUsages PromoCodeUsage[]
-  cart      Cart?
+  cart            Cart?
+  stripeInvoices  StripeInvoice[]
 }
 
 model Address {
@@ -228,7 +229,29 @@ model ContactMessage {
 }
 
 
-//Code Promotionnel 
+// Historique des factures Stripe (persisté en BDD pour affichage fiable)
+model StripeInvoice {
+  id                 String   @id @default(cuid())
+  stripeInvoiceId    String   @unique @db.VarChar(255) // ID Stripe ex: in_xxx
+  stripeSubId        String   @db.VarChar(255)         // sub_xxx
+  userId             Int
+  amountPaid         Int                               // en centimes
+  currency           String   @default("eur") @db.VarChar(10)
+  status             String   @db.VarChar(50)          // paid, open, void…
+  invoiceNumber      String?  @db.VarChar(100)         // numéro lisible ex: BJ-0001
+  hostedInvoiceUrl   String?                           // lien hébergé Stripe
+  invoicePdf         String?                           // lien PDF
+  periodStart        DateTime? @db.Timestamptz(6)
+  periodEnd          DateTime? @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @db.Timestamptz(6)
+
+  user               Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripeSubId])
+}
+
+//Code Promotionnel
 model PromoCodeUsage {
   id             String   @id @default(cuid())
   userId         Int      

@@ -136,7 +136,7 @@ export default function OrderItemRow({
 
             <button type="button"
               onClick={() => setShowAdoptModal(true)}
-              className="px-4 py-2 rounded-full text-white font-semibold text-sm transition-colors shadow-sm"
+              className="px-4 py-2 rounded-full text-white font-semibold text-sm transition-colors shadow-sm border-none"
               style={{ background: '#FF8C94' }}>
               🧸 Adopter
             </button>
@@ -144,7 +144,7 @@ export default function OrderItemRow({
             {['ACTIVE', 'SHIPPED'].includes(orderStatus) && (
               <button type="button"
                 onClick={() => setShowReturnModal(true)}
-                className="px-4 py-2 rounded-full text-[#a0888c] font-semibold text-sm transition-colors"
+                className="px-4 py-2 rounded-full text-[#a0888c] font-semibold text-sm transition-colors border-none"
                 style={{ background: '#f3f4f6' }}>
                 Rendre
               </button>
