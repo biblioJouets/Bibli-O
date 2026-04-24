@@ -405,6 +405,8 @@ function OrderCard({ order, type, onStatusUpdate }) {
   const [loading, setLoading] = useState(false);
   const [tracking, setTracking] = useState(order.trackingNumber ?? "");
   const [selectedStatus, setSelectedStatus] = useState(order.status);
+  const [invoiceUrl, setInvoiceUrl] = useState(order.stripeInvoiceUrl ?? null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
 
   const isMondialRelay = order.mondialRelayPointId &&
     order.mondialRelayPointId !== "DOMICILE" &&
@@ -456,6 +458,25 @@ function OrderCard({ order, type, onStatusUpdate }) {
     await handleMarkStatus(newStatus);
   }
 
+  async function handleFetchInvoice() {
+    if (invoiceUrl) { window.open(invoiceUrl, "_blank", "noreferrer"); return; }
+    setInvoiceLoading(true);
+    try {
+      const res = await fetch(`/api/admin/invoice?orderId=${order.id}`);
+      const data = await res.json();
+      if (data.url) {
+        setInvoiceUrl(data.url);
+        window.open(data.url, "_blank", "noreferrer");
+      } else {
+        alert("Aucune facture disponible pour cette commande.");
+      }
+    } catch {
+      alert("Erreur lors de la récupération de la facture.");
+    } finally {
+      setInvoiceLoading(false);
+    }
+  }
+
   return (
     <div className={styles.orderCard}>
       {/* En-tête de la carte */}
@@ -482,10 +503,15 @@ function OrderCard({ order, type, onStatusUpdate }) {
           </button>
 
           {/* Bouton Facture Stripe */}
-          {order.stripeInvoiceUrl ? (
-            <a href={order.stripeInvoiceUrl} target="_blank" rel="noreferrer" className={styles.btnInvoice}>
-              🧾 Facture
-            </a>
+          {order.stripeSubscriptionId ? (
+            <button
+              className={styles.btnInvoice}
+              onClick={handleFetchInvoice}
+              disabled={invoiceLoading}
+              title={invoiceUrl ? "Voir la facture" : "Récupérer la facture depuis Stripe"}
+            >
+              {invoiceLoading ? "⏳" : "🧾"} Facture
+            </button>
           ) : null}
 
           {/* Sélecteur de statut */}

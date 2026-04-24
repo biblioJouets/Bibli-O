@@ -58,12 +58,11 @@ export async function POST(req) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   let event;
-  
+
   // 1. VÉRIFICATION DE SÉCURITÉ
   try {
     if (!endpointSecret) throw new Error("Webhook secret manquant dans .env");
-    // event = stripe.webhooks.constructEvent(body, sig, endpointSecret);  
-    event = JSON.parse(body); // <-- DÉSACTIVE LA VÉRIFICATION POUR LES TESTS LOCAUX (test-webhook.js)
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch (err) {
     console.error(` Webhook Signature Error: ${err.message}`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
@@ -83,7 +82,10 @@ export async function POST(req) {
     
     if (stripeSubId) {
       const order = await prisma.orders.findFirst({
-        where: { stripeSubscriptionId: stripeSubId, status: 'ACTIVE' },
+        where: {
+          stripeSubscriptionId: stripeSubId,
+          status: { in: ['ACTIVE', 'PREPARING', 'SHIPPED'] },
+        },
         include: {
           OrderProducts: { include: { Products: true } },
           Users: true,
