@@ -150,14 +150,16 @@ model Products {
 
   reference   String   @unique @db.VarChar(50)
   name        String   @db.VarChar(255)
+  slug        String?  @unique @db.VarChar(300)
   description String?
   price       Float
   stock       Int      @default(0)
   highlights  String[]
 
-  brand    String?  @db.VarChar(100)
-  ageRange String?  @db.VarChar(50)
-  category String?  @db.VarChar(100)
+  brand      String?  @db.VarChar(100)
+  brandSlug  String?  @db.VarChar(150)
+  ageRange   String?  @db.VarChar(50)
+  category   String?  @db.VarChar(100)
 
   material String?  @db.VarChar(100)
 

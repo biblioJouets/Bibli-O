@@ -1,20 +1,27 @@
 import prisma from '@/lib/core/database';
+import { slugify } from '@/lib/core/utils/slugify';
 
 export const productService = {
     // création produit
     async create(data){
         const { reviews, ...productData } = data;
-        
+
         const cleanData = { ...productData };
 
-        // 3. Si des avis (reviews) sont présents dans la requête, 
+        // Génère automatiquement les slugs à la création
+        if (!cleanData.slug && cleanData.name) {
+            const brandSlug = slugify(cleanData.brand || 'autre');
+            const productSlug = slugify(cleanData.name);
+            cleanData.brandSlug = brandSlug;
+            cleanData.slug = `${brandSlug}/${productSlug}`;
+        }
+
         if (reviews && reviews.create) {
             cleanData.reviews = {
                 create: reviews.create
             };
         }
 
-        // 4. On lance la création avec les données parfaitement formatées
         return await prisma.products.create({
             data: cleanData
         });
@@ -36,24 +43,49 @@ export const productService = {
         });
     },
 
-    //récupération un produit par ID 
+    //récupération un produit par ID
     async getById(id){
         return await prisma.products.findUnique({
             where: { id: parseInt(id)},
             include: {
                 reviews:{
-                    include: { User: { select: { firstName: true }}} // récupération du prénom de l'auteur de l'avis
+                    include: { User: { select: { firstName: true }}}
                 }
             }
         });
     },
-//MAJ du produit 
-  async update(id, data) {
-    return await prisma.products.update({
-      where: { id: parseInt(id) },
-      data: data
-    });
-  },
+
+    // récupération par slug complet : "{brandSlug}/{productSlug}"
+    async getBySlug(fullSlug){
+        return await prisma.products.findUnique({
+            where: { slug: fullSlug },
+            include: {
+                reviews:{
+                    include: { User: { select: { firstName: true }}}
+                }
+            }
+        });
+    },
+    // MAJ du produit — régénère les slugs si nom ou marque changent
+    async update(id, data) {
+        const cleanData = { ...data };
+
+        if (cleanData.name || cleanData.brand) {
+            const current = await prisma.products.findUnique({
+                where: { id: parseInt(id) },
+                select: { name: true, brand: true },
+            });
+            const newName = cleanData.name || current.name;
+            const newBrand = cleanData.brand ?? current.brand;
+            cleanData.brandSlug = slugify(newBrand || 'autre');
+            cleanData.slug = `${cleanData.brandSlug}/${slugify(newName)}`;
+        }
+
+        return await prisma.products.update({
+            where: { id: parseInt(id) },
+            data: cleanData,
+        });
+    },
 
 //delete du produit
   async delete(id) {

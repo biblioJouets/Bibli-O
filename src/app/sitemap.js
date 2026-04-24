@@ -32,12 +32,14 @@ export default async function sitemap() {
   try {
     const products = await productService.getAll(); 
     
-    productRoutes = products.map((product) => ({
-      url: `${baseUrl}/bibliotheque/${product.id}`,
-      lastModified: product.updatedAt || new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    }));
+    productRoutes = products
+      .filter((product) => product.slug)
+      .map((product) => ({
+        url: `${baseUrl}/bibliotheque/${product.slug}`,
+        lastModified: product.updatedAt || new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      }));
   } catch (error) {
     console.error("Erreur lors de la génération du sitemap produits:", error);
   }

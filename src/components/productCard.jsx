@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useCart } from "@/context/CartContext";
+import { buildProductPath } from '@/lib/core/utils/slugify';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -33,7 +34,7 @@ export default function ProductCard({ product }) {
   return (
     <div className="product-card" style={{ opacity: isOutOfStock ? 0.6 : 1, filter: isOutOfStock ? 'grayscale(100%)' : 'none' }}>
       
-<Link href={`/bibliotheque/${product.id}`} className="product-card-link">        
+<Link href={`/bibliotheque/${product.slug || buildProductPath(product.brand, product.name)}`} className="product-card-link">
         <div className="product-image-wrapper">
           <span className="product-badge">{product.ageRange || 'Tout âge'}</span>
           

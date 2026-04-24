@@ -44,7 +44,7 @@ export async function GET() {
         where: { orderType: "EXCHANGE", status: { in: ["PREPARING", "SHIPPED"] } },
       }),
       prisma.orders.count({
-        where: { orderType: "REFILL", status: { in: ["PREPARING", "PAID"] } },
+        where: { orderType: "REFILL", status: { in: ["PENDING", "PREPARING"] } },
       }),
 
       // Abonnements actifs (RENTAL + EXCHANGE en cours)
