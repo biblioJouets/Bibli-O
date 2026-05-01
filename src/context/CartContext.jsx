@@ -124,7 +124,14 @@ export function CartProvider({ children }) {
   ) ?? false;
 
   const planInfo = isBoxMystereCart
-    ? { name: 'Box Mystère de Mai', price: '24,90€', contactLink: null }
+    ? {
+        id: 'box-mystere',
+        name: 'La Box Mystère de Mai',
+        price: '24,90€',
+        priceNumber: 24.90,
+        description: '4 jouets surprises',
+        contactLink: null,
+      }
     : getSuggestedPlan(cartCount);
 
   const cartTotalDisplay = planInfo.price;

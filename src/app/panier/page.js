@@ -129,7 +129,7 @@ function BoxSizeModal({ finalCount, totalCapacity, orderId, selectedCount, onClo
 
 
 export default function PanierPage() {
-  const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext, refillContext, setRefillContext } = useCart();
+  const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext, refillContext, setRefillContext, planName, cartTotalDisplay, isBoxMystereCart } = useCart();
   const router = useRouter();
 
   const exchangeMode = !!exchangeContext;
@@ -180,45 +180,7 @@ export default function PanierPage() {
     router.push('/livraison-echange');
   };
 
-  // ---  NOUVELLE LOGIQUE TARIFAIRE ---
-  const getSuggestedPlan = (count) => {
-    // Grille tarifaire exacte fournie
-    const pricingMap = {
-        1: 20,
-        2: 25,
-        3: 35,
-        4: 38,
-        5: 45,
-        6: 51,
-        7: 56,
-        8: 60,
-        9: 63
-    };
-
-    // Si le panier est vide
-    if (!count || count === 0) return { name: "Aucune formule", price: "0€", contactLink: null };
-
-    // Si le nombre est dans la grille (1 à 9)
-    if (pricingMap[count]) {
-        return { 
-            name: `Box ${count} Jouet${count > 1 ? 's' : ''}`, 
-            price: `${pricingMap[count]}€`, 
-            contactLink: null,
-            details: null
-        };
-    }
-
-    // Au-delà de 9 jouets -> Sur devis
-    return { 
-        name: "Maxi Box (+9 jouets)", 
-        price: "Sur devis", 
-        contactLink: "/contact",
-        details: "Besoin d'une offre sur mesure ?"
-    };
-  };
-
-    // ---   CODE PROMO ---  
-  const suggestedPlan = getSuggestedPlan(itemCount);
+    // ---   CODE PROMO ---
   const [promoCode, setPromoCode] = useState("");  
   const cleanCode = promoCode.trim().toUpperCase();
   const isPromoValid = cleanCode.length > 0;
@@ -237,7 +199,7 @@ export default function PanierPage() {
         const res = await fetch("/api/verify-promo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ promoCode: promoCode.trim() })
+            body: JSON.stringify({ promoCode: promoCode.trim(), cartItems: cart.items })
         });
         const data = await res.json();
 
@@ -433,27 +395,17 @@ export default function PanierPage() {
           {/* FORMULE DYNAMIQUE MISE À JOUR */}
           <div className="cart-plan-box">
             <p className="cart-plan-label">Formule calculée :</p>
-            
+
             <div className="cart-plan-header">
-                <span className="cart-plan-name">{suggestedPlan.name}</span>
-                
-                {suggestedPlan.contactLink ? (
-                    <Link 
-                        href={suggestedPlan.contactLink}
-                        className="cart-plan-link"
-                    >
-                        Nous contacter
-                    </Link>
-                ) : (
-                    <span className="cart-plan-price">
-                        {suggestedPlan.price}<span className="cart-plan-price-month">/mois</span>
-                    </span>
-                )}
+                <span className="cart-plan-name">{planName}</span>
+                <span className="cart-plan-price">
+                    {cartTotalDisplay}<span className="cart-plan-price-month">/mois</span>
+                </span>
             </div>
-            
-            {suggestedPlan.details && (
+
+            {isBoxMystereCart && (
                 <p className="cart-plan-details">
-                    {suggestedPlan.details}
+                    Offre non renouvelable. Passage automatique au forfait 4 jouets (38 €/mois) dès le 2e mois.
                 </p>
             )}
           </div>
@@ -465,7 +417,7 @@ export default function PanierPage() {
 
             {/* Section Promo Code  */}
   {/* 🛡️ CHAMP CODE PROMO INTERACTIF */}
-{!suggestedPlan.contactLink && (
+{!isBoxMystereCart && (
   <div className="mb-4 text-left w-full mt-2">
     <form onSubmit={handleVerifyPromo} className="flex gap-2 w-full">
       <input
@@ -536,8 +488,6 @@ export default function PanierPage() {
           {exchangeLoading ? 'Traitement...' : 'Confirmer l\'échange — 0€'}
         </button>
       </>
-    ) : suggestedPlan.contactLink ? (
-          <ButtonBlue text="Demander un devis" href="/contact" />
     ) : (
           <ButtonBlue
             text="Valider ma sélection"

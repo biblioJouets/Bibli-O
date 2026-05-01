@@ -1,12 +1,14 @@
 // src/components/ProductCard.jsx
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { useCart } from "@/context/CartContext";
 import { buildProductPath } from '@/lib/core/utils/slugify';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
+  const router = useRouter();
 
   // Vérification du stock
   const isOutOfStock = product.stock <= 0;
@@ -26,8 +28,12 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
+    if (product.reference === 'BOX-MYSTERE') {
+      router.push('/#mysteryBox-title');
+      return;
+    }
     if (!isOutOfStock) {
-       addToCart(product.id, 1);
+      addToCart(product.id, 1);
     }
   };
 

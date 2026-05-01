@@ -9,7 +9,7 @@ import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react";
 import '@/styles/paiement.css';
 
 export default function PaiementPage() {
-  const { cart, loading, boxMystereData } = useCart();
+  const { cart, loading, boxMystereData, isBoxMystereCart, planName, cartTotalDisplay } = useCart();
   const { data: session } = useSession();
 
   const searchParams = useSearchParams();
@@ -86,16 +86,12 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
-  // Calcul prix
+  // Calcul prix — court-circuit Box Mystère
   const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
-  const getSubscriptionPrice = (count) => {
-    const pricingMap = {
-        1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 
-        6: 51, 7: 56, 8: 60, 9: 63
-    };
-    return pricingMap[count] || 0;
-  };
-  const subscriptionPrice = getSubscriptionPrice(itemCount);
+  const subscriptionPrice = isBoxMystereCart ? 24.90 : (() => {
+    const pricingMap = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
+    return pricingMap[itemCount] || 0;
+  })();
 
   // Scripts Mondial Relay
   useEffect(() => {
@@ -169,7 +165,7 @@ export default function PaiementPage() {
   const handleOrder = async (e) => {
     e.preventDefault();
 
-    if (subscriptionPrice === 0) {
+    if (!isBoxMystereCart && subscriptionPrice === 0) {
         alert("Pour plus de 9 jouets, veuillez nous contacter.");
         return;
     }
@@ -357,7 +353,7 @@ export default function PaiementPage() {
             <div className="divider"></div>
 
             <div className="price-row">
-              <span>{itemCount <= 9 ? `Box ${itemCount} jouet${itemCount > 1 ? 's' : ''}` : `Maxi Box`}</span>
+              <span>{planName}</span>
               <strong>{Number(subscriptionPrice).toFixed(2)}€ <span className="month-suffix">/mois</span></strong>
             </div>
 
@@ -382,7 +378,7 @@ export default function PaiementPage() {
             <button 
               type="submit" 
               form="payment-form"
-              disabled={isSubmitting || subscriptionPrice === 0 || (deliveryMode === 'DOMICILE' && !canSubmit)}
+              disabled={isSubmitting || (!isBoxMystereCart && subscriptionPrice === 0) || (deliveryMode === 'DOMICILE' && !canSubmit)}
               className={`submit-btn ${(isSubmitting || (deliveryMode === 'DOMICILE' && !canSubmit)) ? 'disabled' : ''}`}
             >
               {isSubmitting ? "Validation..." : "Payer et Valider"} <ShieldCheck size={20} />

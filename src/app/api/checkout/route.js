@@ -127,13 +127,25 @@ export async function POST(req) {
     let priceId;
 
     if (isBoxMystere) {
-        // Box Mystère : abonnement 4 jouets avec coupon de réduction appliqué automatiquement
+        console.log('[Checkout] 📦 Box Mystère détectée');
         priceId = process.env.STRIPE_PRICE_4_TOYS;
-        if (!priceId) return NextResponse.json({ error: "Configuration Stripe manquante pour la Box Mystère." }, { status: 500 });
+        const couponId = process.env.STRIPE_COUPON_BOX_MAI;
+
+        console.log('[Checkout] STRIPE_PRICE_4_TOYS:', priceId || '❌ MANQUANT');
+        console.log('[Checkout] STRIPE_COUPON_BOX_MAI:', couponId || '❌ MANQUANT');
+
+        if (!priceId) {
+            return NextResponse.json({ error: "Configuration Stripe manquante : STRIPE_PRICE_4_TOYS absent." }, { status: 500 });
+        }
+        if (!couponId) {
+            return NextResponse.json({ error: "Configuration Stripe manquante : STRIPE_COUPON_BOX_MAI absent." }, { status: 500 });
+        }
+
         line_items.push({ price: priceId, quantity: 1 });
-        // Forcer le coupon Box Mystère (remplace tout autre discount)
-        stripeDiscount = [{ coupon: process.env.STRIPE_COUPON_BOX_MAI }];
+        stripeDiscount = [{ coupon: couponId }];
         appliedPromo = 'BOXMAI24';
+        console.log('[Checkout] line_items:', JSON.stringify(line_items));
+        console.log('[Checkout] discounts:', JSON.stringify(stripeDiscount));
     } else {
         priceId = pricingMap[count];
         if (priceId) {
@@ -146,6 +158,7 @@ export async function POST(req) {
     }
 
     // 3. Créer la session Stripe
+    console.log('[Checkout] Création session Stripe — mode subscription, isBoxMystere:', isBoxMystere);
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: line_items,
@@ -188,7 +201,8 @@ export async function POST(req) {
     return NextResponse.json({ url: stripeSession.url });
 
   } catch (error) {
-    console.error("Erreur Stripe:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error('[Checkout] ❌ Erreur:', error?.type || error?.name || 'unknown', '|', error?.message);
+    if (error?.raw) console.error('[Checkout] Stripe raw error:', JSON.stringify(error.raw));
+    return NextResponse.json({ error: error?.message || "Erreur serveur" }, { status: 500 });
   }
 }
