@@ -117,16 +117,19 @@ export function CartProvider({ children }) {
     }
   };
 
-  // Calcul du total
-  const cartTotal = cart.items?.reduce((total, item) => {
-    return total + (item.product.price * item.quantity);
-  }, 0) || 0;
-
   const cartCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
-const planInfo = getSuggestedPlan(cartCount);
-const cartTotalDisplay = planInfo.price;
+
+  const isBoxMystereCart = cart.items?.some(
+    item => item.product?.reference === 'BOX-MYSTERE'
+  ) ?? false;
+
+  const planInfo = isBoxMystereCart
+    ? { name: 'Box Mystère de Mai', price: '24,90€', contactLink: null }
+    : getSuggestedPlan(cartCount);
+
+  const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, addBoxToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext, boxMystereData, setBoxMystereData }}>
+    <CartContext.Provider value={{ cart, addToCart, addBoxToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, isBoxMystereCart, exchangeContext, setExchangeContext, refillContext, setRefillContext, boxMystereData, setBoxMystereData }}>
       {children}
     </CartContext.Provider>
   );

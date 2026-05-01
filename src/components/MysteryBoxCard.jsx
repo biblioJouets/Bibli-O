@@ -39,7 +39,9 @@ export default function MysteryBoxCard({ boxProduct }) {
   const [childGender, setChildGender] = useState('');
   const [error, setError] = useState('');
 
-  const outOfStock = boxProduct?.stock === 0;
+  if (!boxProduct) return null;
+
+  const outOfStock = boxProduct.stock === 0;
 
   async function handleConfirm() {
     if (!childAge || !childGender) {
