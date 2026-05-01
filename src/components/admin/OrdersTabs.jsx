@@ -493,7 +493,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
           <div className={styles.orderMetaRow}>
             <StatusBadge status={order.status} />
             <span className={styles.orderPrice}>• {order.totalAmount} €</span>
-            {order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE') && (
+            {(order.childAge || order.childGender || Number(order.totalAmount) === 24.90 || order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE')) && (
               <span style={{
                 background: '#ffe264', color: '#7a5c00',
                 padding: '3px 10px', borderRadius: '50px',
@@ -567,7 +567,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
         {/* Contenu */}
         <div className={styles.infoCol}>
           <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
-          {order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE') && (order.childAge || order.childGender) && (
+          {(order.childAge || order.childGender) && (
             <div style={{
               background: '#fffbef', border: '1.5px solid #f5d16e', borderRadius: '10px',
               padding: '8px 12px', marginBottom: '10px', fontSize: '0.85rem', color: '#7a5c00',
@@ -632,6 +632,12 @@ function OrderCard({ order, type, onStatusUpdate }) {
         </div>
       </div>
 
+      {/* Panneau assignation Box Mystère — visible uniquement tant que le fantôme est présent */}
+      {order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE') && (
+        <AssignBoxPanel order={order} onRefresh={onStatusUpdate} />
+      )}
+
+
       {/* Zone bordereau de retour — toujours visible */}
       <div className={styles.cardFooter}>
         <ReturnLabelUpload order={order} onRefresh={onStatusUpdate} />
@@ -673,6 +679,195 @@ function OrderCard({ order, type, onStatusUpdate }) {
       {/* Audit physique — visible uniquement en RETURNING */}
       {order.status === "RETURNING" && (
         <AuditPanel order={order} onRefresh={onStatusUpdate} />
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PANNEAU D'ASSIGNATION BOX MYSTÈRE
+// ─────────────────────────────────────────────────────────────────────────────
+function AssignBoxPanel({ order, onRefresh }) {
+  const [open, setOpen]               = useState(false);
+  const [search, setSearch]           = useState("");
+  const [products, setProducts]       = useState([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [selected, setSelected]       = useState([]); // [{id, name}]
+  const [submitting, setSubmitting]   = useState(false);
+  const [error, setError]             = useState(null);
+  const [success, setSuccess]         = useState(false);
+
+  async function fetchProducts(q) {
+    setLoadingSearch(true);
+    try {
+      const res = await fetch(`/api/admin/products?search=${encodeURIComponent(q)}&inStock=true`);
+      if (res.ok) {
+        const data = await res.json();
+        // filtre le fantôme de la liste
+        setProducts((data.products || data).filter(p => p.reference !== "BOX-MYSTERE"));
+      }
+    } catch { /* silently fail */ }
+    finally { setLoadingSearch(false); }
+  }
+
+  function handleSearchChange(e) {
+    const q = e.target.value;
+    setSearch(q);
+    if (q.length >= 2) fetchProducts(q);
+    else setProducts([]);
+  }
+
+  function toggleProduct(product) {
+    setSelected(prev => {
+      const already = prev.some(p => p.id === product.id);
+      if (already) return prev.filter(p => p.id !== product.id);
+      if (prev.length >= 4) return prev; // max 4
+      return [...prev, { id: product.id, name: product.name }];
+    });
+  }
+
+  async function handleSubmit() {
+    if (selected.length !== 4) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/assign-box`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productIds: selected.map(p => p.id) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur serveur");
+      setSuccess(true);
+      onRefresh();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (success) {
+    return (
+      <div style={{
+        background: "#e8f9ef", border: "1.5px solid #88D4AB", borderRadius: "14px",
+        padding: "14px 18px", marginTop: "12px", color: "#1e5c1a", fontWeight: 600,
+      }}>
+        ✅ Les 4 jouets ont été assignés à la commande avec succès !
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: "12px" }}>
+      {!open ? (
+        <button
+          onClick={() => { setOpen(true); fetchProducts(""); }}
+          style={{
+            background: "linear-gradient(90deg, #f5a623, #f7c948)",
+            margin : "2rem 2rem",
+            color: "#7a3e00", border: "none", borderRadius: "50px",
+            padding: "10px 20px", fontWeight: 700, cursor: "pointer",
+            fontSize: "0.9rem", boxShadow: "0 2px 8px rgba(245,166,35,0.3)",
+          }}
+        >
+          🎁 Assigner les 4 jouets
+        </button>
+      ) : (
+        <div style={{
+          background: "#fffbef", border: "1.5px solid #f5d16e",
+          borderRadius: "16px", padding: "16px 18px",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <strong style={{ color: "#7a3e00", fontSize: "0.95rem" }}>
+              🎁 Assigner les 4 jouets — {selected.length}/4 sélectionné{selected.length > 1 ? "s" : ""}
+            </strong>
+            <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#aaa", fontSize: "1.2rem" }}>×</button>
+          </div>
+
+          {/* Jouets sélectionnés */}
+          {selected.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+              {selected.map(p => (
+                <span key={p.id} style={{
+                  background: "#ffe264", color: "#7a3e00", borderRadius: "20px",
+                  padding: "3px 10px", fontSize: "0.8rem", fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: "6px",
+                }}>
+                  {p.name}
+                  <button onClick={() => toggleProduct(p)} style={{ background: "none", border: "none", cursor: "pointer", color: "#c17f00", fontWeight: 700, padding: 0 }}>×</button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Recherche */}
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Rechercher un jouet (min. 2 caractères)..."
+            style={{
+              width: "100%", padding: "8px 12px", borderRadius: "10px",
+              border: "1.5px solid #e0d0a0", fontSize: "0.9rem",
+              marginBottom: "8px", boxSizing: "border-box",
+            }}
+          />
+
+          {/* Liste résultats */}
+          {loadingSearch && <p style={{ fontSize: "0.82rem", color: "#aaa" }}>Recherche...</p>}
+          {!loadingSearch && products.length > 0 && (
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 10px", maxHeight: "200px", overflowY: "auto", borderRadius: "10px", border: "1px solid #e0d0a0" }}>
+              {products.map(p => {
+                const isChosen = selected.some(s => s.id === p.id);
+                const maxed = selected.length >= 4 && !isChosen;
+                return (
+                  <li
+                    key={p.id}
+                    onClick={() => !maxed && toggleProduct(p)}
+                    style={{
+                      padding: "8px 12px", cursor: maxed ? "not-allowed" : "pointer",
+                      background: isChosen ? "#fff3cd" : "white",
+                      borderBottom: "1px solid #f5e9c0",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      opacity: maxed ? 0.45 : 1,
+                      fontSize: "0.86rem",
+                    }}
+                  >
+                    <span>{p.name}</span>
+                    <span style={{ color: "#9a7a30", fontSize: "0.78rem" }}>Stock : {p.stock}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {!loadingSearch && search.length >= 2 && products.length === 0 && (
+            <p style={{ fontSize: "0.82rem", color: "#aaa", marginBottom: "8px" }}>Aucun résultat.</p>
+          )}
+
+          {error && <p style={{ color: "#c0392b", fontSize: "0.84rem", marginBottom: "8px" }}>{error}</p>}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={handleSubmit}
+              disabled={selected.length !== 4 || submitting}
+              style={{
+                background: selected.length === 4 ? "#88D4AB" : "#ccc",
+                color: "white", border: "none", borderRadius: "50px",
+                padding: "9px 20px", fontWeight: 700, cursor: selected.length === 4 ? "pointer" : "not-allowed",
+                fontSize: "0.88rem", transition: "background 0.2s",
+              }}
+            >
+              {submitting ? "Assignation..." : `✅ Valider la sélection (${selected.length}/4)`}
+            </button>
+            <button
+              onClick={() => { setOpen(false); setSelected([]); setSearch(""); setProducts([]); setError(null); }}
+              style={{ background: "none", border: "1px solid #ccc", borderRadius: "50px", padding: "9px 16px", cursor: "pointer", fontSize: "0.88rem", color: "#888" }}
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

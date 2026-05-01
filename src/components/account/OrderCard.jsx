@@ -38,10 +38,18 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
   const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
   const formattedPrice = Number(order.totalAmount || 0).toFixed(2);
   const orderId = formatOrderId(order);
-  const isAdoption = order.orderType === 'ADOPTION';
-  const isExchange = order.orderType === 'EXCHANGE';
-  const isRefill   = order.orderType === 'REFILL';
-  const isInactive = ['PENDING', 'PREPARING'].includes(order.status);
+  const isAdoption    = order.orderType === 'ADOPTION';
+  const isExchange    = order.orderType === 'EXCHANGE';
+  const isRefill      = order.orderType === 'REFILL';
+  const isInactive    = ['PENDING', 'PREPARING'].includes(order.status);
+  // Vrai si c'est une Box Mystère — que le fantôme soit encore là ou que les jouets soient déjà assignés
+  const isBoxMystere = !!(order.childAge || order.childGender) ||
+    Number(order.totalAmount) === 24.90 ||
+    items.some((i) => (i.product?.reference ?? i.Products?.reference) === 'BOX-MYSTERE');
+  // Vrai uniquement si le fantôme est encore là (jouets pas encore assignés)
+  const isBoxPending = items.some(
+    (i) => (i.product?.reference ?? i.Products?.reference) === 'BOX-MYSTERE'
+  );
 
   const adoptedSlots = items.filter((i) => i.renewalIntention === 'ADOPTE').length;
 
@@ -186,6 +194,11 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
                 🎁 Réassort
               </span>
             )}
+            {isBoxMystere && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#ffe264] text-[#7a5c00]">
+                📦 Box Mystère
+              </span>
+            )}
           </div>
           <span className="text-sm font-medium px-3 py-1 rounded-full w-fit bg-white border border-[#DAEEE6]">
             {STATUS_TRANSLATIONS[order.status] || order.status}
@@ -208,8 +221,28 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
         </div>
       </div>
 
+      {/* ── BOX MYSTÈRE EN ATTENTE D'ASSIGNATION ── */}
+      {isBoxPending && (
+        <div className="flex flex-col items-center gap-4 py-4 px-2 rounded-[20px] bg-[#fffbef] border border-[#f5d16e] text-center">
+          <img
+            src="/assets/image_promoBox.png"
+            alt="Box Mystère en préparation"
+            style={{ width: '100%', maxWidth: '320px', borderRadius: '16px', objectFit: 'cover' }}
+          />
+          <div className="flex flex-col gap-1">
+            <p className="font-bold text-[#7a5c00] text-base">
+              ⏳ Votre Box Mystère est en cours de préparation par notre équipe !
+            </p>
+            <p className="text-sm text-[#9a7a30] leading-relaxed">
+              Nous sélectionnons avec soin vos <strong>4 jouets surprises</strong> selon le profil de votre enfant.
+              Ils apparaîtront ici dès l&apos;expédition de votre box. 🎁
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── BOUTONS D'ACTION (au-dessus des jouets) ── */}
-      {showActions && (
+      {showActions && !isBoxPending && (
         <div className="flex flex-col gap-3">
 
           {/* État repos : boutons d'action */}
@@ -303,21 +336,23 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
         </div>
       )}
 
-      {/* Liste des jouets */}
-      <div className="order-items-container flex flex-col gap-3">
-        {items.map((item, index) => (
-          <OrderItemRow
-            key={`${order.id}-${item.ProductId ?? index}`}
-            item={item}
-            orderStatus={order.status}
-            orderId={order.id}
-            isAdoptionOrder={isAdoption}
-            activeMode={activeMode}
-            isSelected={selectedIds.includes(item.ProductId)}
-            onToggleSelect={activeMode ? toggleSelect : null}
-          />
-        ))}
-      </div>
+      {/* Liste des jouets — masquée si Box Mystère non encore assignée */}
+      {!isBoxPending && (
+        <div className="order-items-container flex flex-col gap-3">
+          {items.map((item, index) => (
+            <OrderItemRow
+              key={`${order.id}-${item.ProductId ?? index}`}
+              item={item}
+              orderStatus={order.status}
+              orderId={order.id}
+              isAdoptionOrder={isAdoption}
+              activeMode={activeMode}
+              isSelected={selectedIds.includes(item.ProductId)}
+              onToggleSelect={activeMode ? toggleSelect : null}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Bandeau Réassort */}
       {order.status === 'ACTIVE' && adoptedSlots > 0 && (

@@ -357,12 +357,12 @@ export async function POST(req) {
       console.log(" Commande créée ! ID:", newOrder.id);
 
       // Sauvegarde des données enfant pour les commandes Box Mystère
-      if (isBoxMystere === "true" && (childAge || childGender)) {
+      if (isBoxMystere === "true") {
         await prisma.orders.update({
           where: { id: newOrder.id },
           data: {
-            childAge: childAge || null,
-            childGender: childGender || null,
+            childAge: childAge || "non renseigné",
+            childGender: childGender || "non renseigné",
           },
         });
         console.log(`[Box Mystère] childAge=${childAge} childGender=${childGender} sauvegardé sur commande #${newOrder.id}`);
