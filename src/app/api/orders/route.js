@@ -30,15 +30,11 @@ export async function POST(req) {
   }
 }
 
-// 2. GET: Lister les commandes (Admin) - NOUVEAU
+// 2. GET: Lister les commandes (Admin)
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions);
-    
-    // Sécurité basique : vérifie si admin (à adapter selon ta gestion des rôles)
-    // Ici on suppose que si tu accèdes à cette route en étant logué, c'est pour l'admin
-    // Idéalement : if (session?.user?.role !== "ADMIN") ...
-    if (!session) {
+    if (!session || session.user.role !== "ADMIN") {
         return NextResponse.json({ error: "Accès interdit" }, { status: 403 });
     }
 
@@ -63,20 +59,27 @@ export async function GET(req) {
   }
 }
 
-// 3. PATCH: Modifier le statut (Admin) - NOUVEAU
+// 3. PATCH: Modifier le statut (Admin)
 export async function PATCH(req) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Interdit" }, { status: 403 });
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès interdit" }, { status: 403 });
+    }
 
     const body = await req.json();
     const { orderId, status, trackingNumber } = body;
 
+    const ALLOWED_STATUSES = ['PENDING','PREPARING','SHIPPED','ACTIVE','RETURNING','RETURNED','COMPLETED','CANCELLED'];
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+    }
+
     const updatedOrder = await prisma.orders.update({
       where: { id: parseInt(orderId) },
-      data: { 
-        status: status,
-        trackingNumber: trackingNumber || null 
+      data: {
+        status,
+        trackingNumber: trackingNumber || null,
       }
     });
 

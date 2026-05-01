@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { z } from 'zod';
 import prisma from '@/lib/core/database';
+
+const bodySchema = z.object({
+  orderId:   z.number().int().positive(),
+  productId: z.number().int().positive(),
+});
 
 // Même logique que le webhook : ajoute exactement 1 mois calendaire
 function addOneMonth(date) {
@@ -51,7 +57,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const { orderId, productId } = await req.json();
+    const parsed = bodySchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Données invalides" }, { status: 400 });
+    }
+    const { orderId, productId } = parsed.data;
 
     // Récupère la commande + user + le jouet ciblé en une seule requête
     const order = await prisma.orders.findUnique({

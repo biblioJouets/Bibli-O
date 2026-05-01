@@ -21,8 +21,16 @@ export async function POST(req) {
       return NextResponse.json({ error: "Fichier ou orderId manquant." }, { status: 400 });
     }
 
-    if (file.type !== "application/pdf") {
-      return NextResponse.json({ error: "Seuls les fichiers PDF sont acceptés." }, { status: 400 });
+    // Vérification MIME + magic bytes PDF (%PDF-)
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const isPdf = buffer.slice(0, 5).toString('ascii') === '%PDF-';
+    if (!isPdf) {
+      return NextResponse.json({ error: "Seuls les fichiers PDF valides sont acceptés." }, { status: 400 });
+    }
+    // Limite de taille : 10 Mo
+    if (buffer.length > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Fichier trop volumineux (max 10 Mo)." }, { status: 400 });
     }
 
     const orderIdInt = parseInt(orderId);
@@ -35,10 +43,8 @@ export async function POST(req) {
       return NextResponse.json({ error: "Commande introuvable." }, { status: 404 });
     }
 
-    // Sauvegarder le fichier dans public/uploads/
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `return-label-${orderIdInt}-${randomUUID()}.pdf`;
+    // Nom de fichier sans données issues du body dans le path
+    const filename = `return-label-${randomUUID()}.pdf`;
     const uploadDir = join(process.cwd(), "public", "uploads");
     await writeFile(join(uploadDir, filename), buffer);
 

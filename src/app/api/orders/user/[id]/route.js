@@ -10,10 +10,7 @@ export async function GET(request, props) {
     const params = await props.params; 
     // -----------------------------------
 
-    const id = params.id;
-    console.log("🔹 API (User Orders): ID reçu =", id);
-
-    const userId = parseInt(id);
+    const userId = parseInt(params.id);
 
     // 1. Validation ID
     if (isNaN(userId)) {
@@ -24,9 +21,8 @@ export async function GET(request, props) {
     const session = await getServerSession(authOptions);
     
     // On vérifie que l'utilisateur connecté demande bien SES propres commandes
-    if (!session || session.user.id.toString() !== userId.toString()) {
-       console.log("🔴 Refus: Session ID", session?.user?.id, "!= URL ID", userId);
-       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    if (!session || parseInt(session.user.id) !== userId) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
     // 3. Récupération des commandes + garde d'échange (un seul roundtrip)

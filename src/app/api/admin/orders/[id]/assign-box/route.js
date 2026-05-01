@@ -46,58 +46,45 @@ export async function POST(req, { params: rawParams }) {
     return NextResponse.json({ error: "Cette commande ne contient pas de Box Mystère à assigner." }, { status: 400 });
   }
 
-  // Vérifier stock des 4 jouets sélectionnés
-  const products = await prisma.products.findMany({
-    where: { id: { in: ids } },
-    select: { id: true, name: true, stock: true, reference: true },
-  });
-
-  if (products.length !== 4) {
-    return NextResponse.json({ error: "Un ou plusieurs produits sont introuvables." }, { status: 400 });
-  }
-
-  const outOfStock = products.filter((p) => p.stock <= 0);
-  if (outOfStock.length > 0) {
-    return NextResponse.json({
-      error: `Stock insuffisant pour : ${outOfStock.map((p) => p.name).join(", ")}`,
-    }, { status: 400 });
-  }
-
-  // Calculer les dates (même logique que createOrder)
   const nextBillingDate = new Date(order.createdAt);
   nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
   const rentalEndDate = nextBillingDate;
 
+  try {
   await prisma.$transaction(async (tx) => {
+    // Vérification stock atomique à l'intérieur de la transaction
+    const products = await tx.products.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true, stock: true },
+    });
+    if (products.length !== 4) throw new Error("Un ou plusieurs produits sont introuvables.");
+    const outOfStock = products.filter((p) => p.stock <= 0);
+    if (outOfStock.length > 0) {
+      throw new Error(`Stock insuffisant pour : ${outOfStock.map((p) => p.name).join(", ")}`);
+    }
+
     // 1. Supprimer le produit fantôme de la commande
     await tx.orderProducts.delete({
-      where: {
-        OrderId_ProductId: {
-          OrderId: orderId,
-          ProductId: phantomEntry.ProductId,
-        },
-      },
+      where: { OrderId_ProductId: { OrderId: orderId, ProductId: phantomEntry.ProductId } },
     });
 
-    // 2. Ajouter les 4 vrais jouets (createMany ne supporte pas les clés composites — on boucle)
+    // 2. Ajouter les 4 vrais jouets
     for (const productId of ids) {
       await tx.orderProducts.create({
-        data: {
-          OrderId: orderId,
-          ProductId: productId,
-          quantity: 1,
-          nextBillingDate,
-          rentalEndDate,
-        },
+        data: { OrderId: orderId, ProductId: productId, quantity: 1, nextBillingDate, rentalEndDate },
       });
     }
 
-    // 3. Décrémenter le stock de chaque jouet
+    // 3. Décrémenter le stock
     await tx.products.updateMany({
       where: { id: { in: ids } },
       data: { stock: { decrement: 1 } },
     });
   });
+  } catch (err) {
+    return NextResponse.json({ error: err.message || "Erreur serveur" }, { status: 400 });
+  }
 
   return NextResponse.json({ success: true });
 }
+

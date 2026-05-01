@@ -3,10 +3,23 @@ import Stripe from "stripe";
 import prisma from "@/lib/core/database";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { checkRateLimit, getRateLimitKey } from "@/lib/core/security/rateLimit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
+  // Rate limit : 10 tentatives par minute par IP
+  const rl = checkRateLimit(getRateLimitKey(req), 10);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
+  }
+
+  // Authentification requise pour éviter l'énumération anonyme
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Connexion requise" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { promoCode, cartItems } = body;
@@ -31,14 +44,11 @@ export async function POST(req) {
 
     // 1. Cas spécifique : L'offre 1 mois acheté = 1 mois offert
     if (cleanCode === 'BIBLIOMOISOFFERT') {
-      const session = await getServerSession(authOptions);
-      if (session?.user) {
-         const existingUsage = await prisma.promoCodeUsage.findUnique({
-            where: { userId_promoCode: { userId: parseInt(session.user.id, 10), promoCode: cleanCode } },
-         });
-         if (existingUsage) {
-             return NextResponse.json({ valid: false, message: "Vous avez déjà profité de cette offre de bienvenue !" });
-         }
+      const existingUsage = await prisma.promoCodeUsage.findUnique({
+        where: { userId_promoCode: { userId: parseInt(session.user.id, 10), promoCode: cleanCode } },
+      });
+      if (existingUsage) {
+        return NextResponse.json({ valid: false, message: "Vous avez déjà profité de cette offre de bienvenue !" });
       }
       return NextResponse.json({ valid: true, message: "🎁 Super ! 1er mois payé, 2ème mois à 0€ !" });
     }

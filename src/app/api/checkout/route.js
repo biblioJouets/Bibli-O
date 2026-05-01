@@ -3,12 +3,18 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
-import prisma from "@/lib/core/database"; // 👈 NOUVEAU : Import de Prisma
+import prisma from "@/lib/core/database";
+import { checkRateLimit, getRateLimitKey } from "@/lib/core/security/rateLimit";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
   try {
+    const rl = checkRateLimit(`checkout:${getRateLimitKey(req)}`, 5);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
+    }
+
     const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });

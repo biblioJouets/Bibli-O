@@ -352,6 +352,17 @@ export async function POST(req) {
         mondialRelayPointId: mondialRelayPointId && mondialRelayPointId !== "null" ? mondialRelayPointId : null
       };
       
+      // IDEMPOTENCE : si la commande existe déjà pour ce subscriptionId, ne pas recréer
+      if (stripeSubscriptionId) {
+        const existing = await prisma.orders.findFirst({
+          where: { stripeSubscriptionId },
+        });
+        if (existing) {
+          console.log(`[Webhook] Commande déjà existante pour subscription ${stripeSubscriptionId} — événement ignoré (idempotence)`);
+          return NextResponse.json({ received: true, note: 'Already processed' });
+        }
+      }
+
       console.log(" Création de la commande...");
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
