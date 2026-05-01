@@ -14,7 +14,7 @@ export async function POST(req) {
     if (!session) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
     const body = await req.json();
-    const { cartItems, shippingData, promoCode } = body; // 👈 NOUVEAU : On récupère promoCode
+    const { cartItems, shippingData, promoCode, childAge, childGender } = body;
     
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
         return NextResponse.json({ error: "Panier invalide" }, { status: 400 });
@@ -55,12 +55,25 @@ export async function POST(req) {
         }
     }
 
+    // --- DÉTECTION BOX MYSTÈRE (avant la logique promo) ---
+    // cartItems vient du panier avec shape { productId, quantity, product: { reference } } OU { reference }
+    const isBoxMystere = cartItems.some(
+      item => item.reference === 'BOX-MYSTERE' || item.product?.reference === 'BOX-MYSTERE'
+    );
+
     // ---   CODE PROMO ---
     let appliedPromo = null;
-    let stripeDiscount = undefined; 
+    let stripeDiscount = undefined;
 
     if (promoCode) {
         const cleanCode = promoCode.trim().toUpperCase();
+
+        // Blocage manuel du code BOXMAI24 sans la Box Mystère dans le panier
+        if (cleanCode === 'BOXMAI24' && !isBoxMystere) {
+            return NextResponse.json({
+                error: "Ce code est strictement réservé à la Box Mystère de Mai.",
+            }, { status: 400 });
+        }
 
         if (cleanCode === 'BIBLIOMOISOFFERT') {
             // LOGIQUE 1 : L'offre "1 acheté = 1 offert" (Gérée par Prisma & Webhook)
@@ -111,14 +124,25 @@ export async function POST(req) {
     };
 
     let line_items = [];
-    const priceId = pricingMap[count];
+    let priceId;
 
-    if (priceId) {
+    if (isBoxMystere) {
+        // Box Mystère : abonnement 4 jouets avec coupon de réduction appliqué automatiquement
+        priceId = process.env.STRIPE_PRICE_4_TOYS;
+        if (!priceId) return NextResponse.json({ error: "Configuration Stripe manquante pour la Box Mystère." }, { status: 500 });
         line_items.push({ price: priceId, quantity: 1 });
-    } else if (count > 9) {
-        return NextResponse.json({ error: "Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure." }, { status: 400 });
+        // Forcer le coupon Box Mystère (remplace tout autre discount)
+        stripeDiscount = [{ coupon: process.env.STRIPE_COUPON_BOX_MAI }];
+        appliedPromo = 'BOXMAI24';
     } else {
-        return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
+        priceId = pricingMap[count];
+        if (priceId) {
+            line_items.push({ price: priceId, quantity: 1 });
+        } else if (count > 9) {
+            return NextResponse.json({ error: "Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure." }, { status: 400 });
+        } else {
+            return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
+        }
     }
 
     // 3. Créer la session Stripe
@@ -134,6 +158,10 @@ export async function POST(req) {
         submit: {
           message: "🎁 **Code BIBLIOMOISOFFERT validé !** Réglez votre 1er mois aujourd'hui, votre 2ème mois sera automatiquement à 0,00 €."
         }
+      } : appliedPromo === 'BOXMAI24' ? {
+        submit: {
+          message: "📦 **Box Mystère de Mai** — Offre spéciale 24,90 € appliquée automatiquement pour votre 1er mois !"
+        }
       } : undefined,
     
       success_url: `${baseUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
@@ -141,15 +169,18 @@ export async function POST(req) {
       
       metadata: {
         userId: session.user.id,
-        applied_promo: appliedPromo === 'BIBLIOMOISOFFERT' ? appliedPromo : "", 
-        cartSnapshot: JSON.stringify(cartSnapshot), 
-        cartId: body.cartId || "", 
+        applied_promo: (appliedPromo === 'BIBLIOMOISOFFERT' || appliedPromo === 'BOXMAI24') ? appliedPromo : "",
+        cartSnapshot: JSON.stringify(cartSnapshot),
+        cartId: body.cartId || "",
         shippingName: shippingData.shippingName || "",
         shippingAddress: shippingData.shippingAddress || "",
         shippingCity: shippingData.shippingCity || "",
         shippingZip: shippingData.shippingZip || "",
         shippingPhone: shippingData.shippingPhone || "",
-        mondialRelayPointId: shippingData.mondialRelayPointId ? String(shippingData.mondialRelayPointId) : ""
+        mondialRelayPointId: shippingData.mondialRelayPointId ? String(shippingData.mondialRelayPointId) : "",
+        isBoxMystere: isBoxMystere ? "true" : "",
+        childAge: isBoxMystere ? (childAge || "") : "",
+        childGender: isBoxMystere ? (childGender || "") : "",
       },
       billing_address_collection: 'required',
     });

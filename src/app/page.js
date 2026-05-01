@@ -16,6 +16,8 @@ import Newsletter from "@/components/Newsletter";
 import FunctionalityCard from "@/components/FunctionalityCard";
 import SubChoice from "@/components/SubChoice";
 import GoogleReviews from '@/components/GoogleReviews';
+import MysteryBoxCard from "@/components/MysteryBoxCard";
+import prisma from "@/lib/core/database";
 
 //import style
 import '@/styles/homepage.css';
@@ -59,7 +61,10 @@ async function getGoogleReviews() {
 }
 export default async function Homepage() {
 
-    const reviews = await getGoogleReviews();
+    const [reviews, boxProduct] = await Promise.all([
+        getGoogleReviews(),
+        prisma.products.findUnique({ where: { reference: "BOX-MYSTERE" } }),
+    ]);
   const jsonLd = {
         "@context": "https://schema.org",
         "@type": "Organization", 
@@ -124,7 +129,8 @@ export default async function Homepage() {
                         href="/abonnements"
                     />
                 </section>
-                  
+                
+                    <MysteryBoxCard boxProduct={boxProduct} />
                 {/* NOTE SEO : Nouvelle section sémantique */}
                 <section className="commitmentsSection" aria-labelledby="engagements-title">
                     <h2 className="homePageSubTitle" id="engagements-title">Pourquoi louer plutôt qu'acheter ?</h2>

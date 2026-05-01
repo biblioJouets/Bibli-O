@@ -318,7 +318,8 @@ export async function POST(req) {
     const {
       userId, cartId, cartSnapshot, shippingName, shippingAddress,
       shippingCity, shippingZip, mondialRelayPointId, shippingPhone,
-      applied_promo // <-- NOUVEAU
+      applied_promo,
+      isBoxMystere, childAge, childGender,
     } = session.metadata;
 
     try {
@@ -354,6 +355,18 @@ export async function POST(req) {
       console.log(" Création de la commande...");
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
+
+      // Sauvegarde des données enfant pour les commandes Box Mystère
+      if (isBoxMystere === "true" && (childAge || childGender)) {
+        await prisma.orders.update({
+          where: { id: newOrder.id },
+          data: {
+            childAge: childAge || null,
+            childGender: childGender || null,
+          },
+        });
+        console.log(`[Box Mystère] childAge=${childAge} childGender=${childGender} sauvegardé sur commande #${newOrder.id}`);
+      }
       
       if (cartIdInt) {
         console.log(" Suppression du panier ID:", cartIdInt);

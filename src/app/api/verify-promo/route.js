@@ -9,11 +9,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { promoCode } = body;
-    
+    const { promoCode, cartItems } = body;
+
     if (!promoCode) return NextResponse.json({ error: "Code manquant" }, { status: 400 });
 
     const cleanCode = promoCode.trim().toUpperCase();
+
+    // Blocage BOXMAI24 : réservé exclusivement à la Box Mystère
+    if (cleanCode === 'BOXMAI24') {
+      const hasBox = Array.isArray(cartItems) && cartItems.some(
+        item => item.reference === 'BOX-MYSTERE' || item.product?.reference === 'BOX-MYSTERE'
+      );
+      if (!hasBox) {
+        return NextResponse.json({
+          valid: false,
+          message: "Ce code est strictement réservé à la Box Mystère de Mai.",
+        });
+      }
+      return NextResponse.json({ valid: true, message: "📦 Code Box Mystère validé ! Réduction de 13,10 € appliquée." });
+    }
 
     // 1. Cas spécifique : L'offre 1 mois acheté = 1 mois offert
     if (cleanCode === 'BIBLIOMOISOFFERT') {

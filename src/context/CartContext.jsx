@@ -14,6 +14,8 @@ export function CartProvider({ children }) {
   const [exchangeContext, setExchangeContext] = useState(null);
   // Contexte de réassort : null si mode normal, { sourceOrderId, slots } si mode refill
   const [refillContext, setRefillContext] = useState(null);
+  // Données Box Mystère : null si panier normal, { childAge, childGender } si box présente
+  const [boxMystereData, setBoxMystereData] = useState(null);
 
   // Charger le panier au démarrage si connecté
   useEffect(() => {
@@ -42,6 +44,46 @@ export function CartProvider({ children }) {
         body: JSON.stringify({ productId, quantity }),
       });
       if (res.ok) setCart(await res.json());
+      else {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur ajout au panier");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Vide le panier puis ajoute uniquement la Box Mystère avec les données enfant
+  const addBoxToCart = async (boxProductId, childAge, childGender) => {
+    if (!session) {
+      alert("Veuillez vous connecter pour commander la Box Mystère !");
+      return false;
+    }
+    setLoading(true);
+    try {
+      // 1. Vider tous les items du panier existant
+      const currentCart = cart;
+      for (const item of currentCart.items || []) {
+        await fetch(`/api/cart?itemId=${item.id}`, { method: 'DELETE' });
+      }
+
+      // 2. Ajouter la Box Mystère
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        body: JSON.stringify({ productId: boxProductId, quantity: 1 }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur ajout Box Mystère");
+      }
+      const newCart = await res.json();
+      setCart(newCart);
+      setBoxMystereData({ childAge, childGender });
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -61,6 +103,7 @@ export function CartProvider({ children }) {
 
   const clearCart = () => {
     setCart({ items: [] });
+    setBoxMystereData(null);
   };
 
   const removeFromCart = async (itemId) => {
@@ -83,7 +126,7 @@ export function CartProvider({ children }) {
 const planInfo = getSuggestedPlan(cartCount);
 const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext }}>
+    <CartContext.Provider value={{ cart, addToCart, addBoxToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, exchangeContext, setExchangeContext, refillContext, setRefillContext, boxMystereData, setBoxMystereData }}>
       {children}
     </CartContext.Provider>
   );

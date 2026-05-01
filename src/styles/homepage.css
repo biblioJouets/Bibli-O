@@ -40,6 +40,7 @@ content: '';
     flex-direction: column;
 }
 
+
 .SubChoiceSection{
     max-width: 1400px;
     margin: 0 auto;
@@ -102,16 +103,27 @@ content: '';
 
 
 .functionalityCardsSection{
-    margin-top: 80px;
+    background-color: #DAEEE6;
     display:flex; 
     align-items: center;
     justify-content: center;
     flex-direction: column;
     padding-bottom: 8rem;
 }
-
+.MysteryBoxSection{
+        padding: 3rem 0rem;
+    }
 .seePlansButton{
     padding-left: 45px;
+}
+
+.mbc-cta-modal{
+    background-color:  #f7c948;
+    padding: 15px 20px;
+    border-radius: 25px;
+    border: none;
+    font-size: 1rem;
+   
 }
 /* ---------------------------------- */
 /* --- RESPONSIVE (MOBILE) --- */
@@ -128,6 +140,11 @@ content: '';
 }
 
 @media screen and (max-width: 768px) {
+    
+    .functionalityCardsSection{
+        padding-top: 40px;
+    }
+    
     .FormTextContent{
         grid-template-columns: 1fr;
     }

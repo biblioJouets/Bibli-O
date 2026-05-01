@@ -105,6 +105,10 @@ model Orders {
   createdAt            DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt            DateTime  @updatedAt @db.Timestamptz(6)
 
+  // --- BOX MYSTÈRE ---
+  childAge    String? @db.VarChar(20)
+  childGender String? @db.VarChar(20)
+
   userId        Int?
   Users         Users?          @relation(fields: [userId], references: [id])
   OrderProducts OrderProducts[]

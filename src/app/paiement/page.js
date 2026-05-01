@@ -9,7 +9,7 @@ import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react";
 import '@/styles/paiement.css';
 
 export default function PaiementPage() {
-  const { cart, loading } = useCart();
+  const { cart, loading, boxMystereData } = useCart();
   const { data: session } = useSession();
 
   const searchParams = useSearchParams();
@@ -203,7 +203,9 @@ export default function PaiementPage() {
           cartItems: cart.items,
           cartId: cart.id,
           shippingData: finalShippingData,
-          promoCode: promoCode || null
+          promoCode: promoCode || null,
+          childAge: boxMystereData?.childAge || null,
+          childGender: boxMystereData?.childGender || null,
         })
       });
 

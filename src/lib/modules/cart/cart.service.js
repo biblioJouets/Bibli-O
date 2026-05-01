@@ -35,6 +35,21 @@ export const cartService = {
 
     if (!product) throw new Error("Produit introuvable");
 
+    // RÈGLE BOX MYSTÈRE : la box s'achète seule
+    const BOX_REF = 'BOX-MYSTERE';
+    const cartProducts = await prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+      include: { product: { select: { reference: true } } },
+    });
+    const hasBox = cartProducts.some(ci => ci.product.reference === BOX_REF);
+
+    if (product.reference === BOX_REF && cartProducts.length > 0) {
+      throw new Error("La Box Mystère s'achète seule. Veuillez d'abord vider votre panier.");
+    }
+    if (product.reference !== BOX_REF && hasBox) {
+      throw new Error("Votre panier contient déjà la Box Mystère. Elle s'achète sans autre jouet.");
+    }
+
     // 2. Vérifier si l'item est déjà dans le panier
     const existingItem = await prisma.cartItem.findUnique({
       where: {

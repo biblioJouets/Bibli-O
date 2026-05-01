@@ -32,13 +32,12 @@ export async function POST(request) {
   try {
     const { productId, quantity } = await request.json();
     await cartService.addToCart(userId, productId, quantity);
-    
-    // On renvoie le panier à jour
+
     const cart = await cartService.getCart(userId);
     return NextResponse.json(cart);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Erreur ajout" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Erreur ajout" }, { status: 400 });
   }
 }
 

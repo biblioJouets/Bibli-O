@@ -493,6 +493,15 @@ function OrderCard({ order, type, onStatusUpdate }) {
           <div className={styles.orderMetaRow}>
             <StatusBadge status={order.status} />
             <span className={styles.orderPrice}>• {order.totalAmount} €</span>
+            {order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE') && (
+              <span style={{
+                background: '#ffe264', color: '#7a5c00',
+                padding: '3px 10px', borderRadius: '50px',
+                fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap',
+              }}>
+                📦 BOX MYSTÈRE
+              </span>
+            )}
           </div>
         </div>
 
@@ -558,6 +567,18 @@ function OrderCard({ order, type, onStatusUpdate }) {
         {/* Contenu */}
         <div className={styles.infoCol}>
           <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
+          {order.OrderProducts.some(op => op.Products?.reference === 'BOX-MYSTERE') && (order.childAge || order.childGender) && (
+            <div style={{
+              background: '#fffbef', border: '1.5px solid #f5d16e', borderRadius: '10px',
+              padding: '8px 12px', marginBottom: '10px', fontSize: '0.85rem', color: '#7a5c00',
+            }}>
+              <strong>📦 Box Mystère — Infos enfant</strong>
+              <div style={{ marginTop: '4px' }}>
+                {order.childAge && <div>Âge : <strong>{order.childAge}</strong></div>}
+                {order.childGender && <div>Sexe : <strong style={{ textTransform: 'capitalize' }}>{order.childGender}</strong></div>}
+              </div>
+            </div>
+          )}
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
               const isAdopted   = ACQUIRED_STATUSES.includes(op.renewalIntention);
