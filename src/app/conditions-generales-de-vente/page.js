@@ -35,8 +35,8 @@ function Cgv() {
       <section aria-labelledby="cgv-definition">
         <h2 id="cgv-definition">Article 2 - Définition et durée de l'abonnement</h2>
         <ul>
-          <li>Bibli’o Jouets propose un service de location de jouets et d'articles de puériculture destiné aux familles ayant des enfants de 0 à 10 ans.</li>
-          <li>Le service fonctionne sous forme d'abonnement mensuel sans engagement ou de locations ponctuelles, selon les formules présentées sur le site.</li>
+          <li>Bibli’o Jouets propose un service de location de jouets et d’articles de puériculture destiné aux familles ayant des enfants de 0 à 8 ans.</li>
+          <li>Le service fonctionne sous forme d’abonnement mensuel sans engagement ou box, selon les formules présentées sur le site.</li>
           <li>La formule débute à la date de paiement et reste active jusqu'à son échéance. Le client peut conserver les jeux tant que l'abonnement reste actif.</li>
           <li>Le changement de formule peut être effectué à tout moment depuis l'espace client.</li>
           <li>La résiliation s'effectue depuis l'espace client et prend effet à la réception des jouets, retour dans un délai de maximum <strong>7 jours</strong> suivant la fin de l'abonnement. Toute période entamée reste due.</li>
@@ -61,7 +61,7 @@ function Cgv() {
         <p>Les formules d'abonnement sont détaillées sur le site et peuvent évoluer selon les besoins du service. Les tarifs indiqués sont en euros TTC et comprennent la location, le nettoyage, et le suivi qualité.</p>
         <p>Bibli’o Jouets se réserve le droit de modifier les tarifs à tout moment, mais les modifications ne s'appliqueront qu'aux abonnements futurs.</p>
         <p><strong>Frais de port :</strong> Les tarifs d'abonnement incluent les frais de port uniquement pour une livraison en Locker ou Point Relais. Toute demande de livraison à domicile fera l'objet d'une facturation supplémentaire selon les tarifs en vigueur sur le site.</p>
-        <p><strong>Limites :</strong> Les abonnements donnent droit à l'expédition d'un colis de format standard. Bibli’o Jouets se réserve le droit de limiter le choix des jouets ou de demander un supplément si la combinaison d'articles choisie par le client excède les gabarits logistiques standards (poids {'>'} 10kg ou dimensions hors normes).</p>
+        <p><strong>Limites :</strong> Les abonnements donnent droit à l'expédition d'un colis de format standard. Bibli’o Jouets se réserve le droit de limiter le choix des jouets ou de demander un supplément si la combinaison d'articles choisie par le client excède les gabarits logistiques standards (poids {'>'} 5kg ou dimensions hors normes).</p>
       </section>
 
       {/* Article 5: Modalités de commande et d'abonnement */}
@@ -70,12 +70,11 @@ function Cgv() {
         <p>Le Client peut s'abonner directement en ligne sur le site. Toute souscription implique :</p>
         <ul>
           <li>l'acceptation des présentes CGV,</li>
-          <li>la fourniture d'une empreinte bancaire (ou chèque non encaissé) à titre de caution,</li>
+          <li>la fourniture d’une carte bancaire à titre de caution,</li>
           <li>le paiement du premier mois d'abonnement.</li>
         </ul>
-        <p>Les commandes sont passées depuis l'espace client. Les expéditions sont effectuées sous 24 à 48 heures ouvrées.</p>
-        <p>Un bon de retour prépayé est inclus dans le colis ou à retrouver par mail sous demande.</p>
-        <p>L'abonnement est mensuel, renouvelable automatiquement, sauf résiliation par le Client (voir article 11).</p>
+        <p>Les commandes sont passées depuis l’espace client. Les expéditions sont effectuées sous 24 à 48 heures ouvrées. Un bon de retour prépayé est inclus dans le colis ou à retrouver sur son espace client.</p>
+        <p>L’abonnement est mensuel, renouvelable automatiquement, sauf résiliation par le Client (voir article 11).</p>
       </section>
 
       {/* Article 6: Paiement */}
@@ -172,7 +171,7 @@ function Cgv() {
           <li><strong>Utilisation et Échange des Jouets :</strong> Dans le cadre de cette offre de lancement, le Client conserve les jouets reçus dans son premier colis pendant une durée continue de un mois. Le premier échange de jouets pourra être effectué à l'issue de ce mois. Par la suite, les échanges pourront s'effectuer mensuellement selon les modalités classiques de l'abonnement.</li>
           <li><strong>Flexibilité et Résiliation :</strong> L’abonnement est flexible. Le Client a la possibilité d’ajuster sa formule ou de résilier son abonnement à l'issue du premier mois payé, moyennant le respect des conditions de retour des jouets définies à l'Article 10.</li>
           <li><strong>Hygiène et Service :</strong> Cette offre inclut l'intégralité des services de qualité Bibli’o Jouets, notamment la désinfection rigoureuse des jouets et la fourniture des piles.</li>
-          <li><strong>Validité :</strong> Offre valable du 01/01/2026 au 31/03/2026.</li>
+          <li><strong>Validité :</strong> Offre valable du 01/01/2026 au 31/12/2026.</li>
         </ul>
       </section>
 
@@ -207,11 +206,20 @@ Bibli'o Jouets peut émettre des codes promotionnels ponctuellement. Sauf mentio
       <p><strong>18.5. Responsabilité :</strong>Ces concours ne sont en aucun cas parrainés, administrés ou associés aux plateformes Meta (Facebook, Instagram) ou TikTok. La responsabilité de Bibli'o Jouets est limitée à la valeur du lot mis en jeu.</p>
 
     </section>
-
+            {/* Article 19: Organisation de Jeux-Concours*/}
+<section aria-labelledby="cgv-box-mystere" className="box-section">
+                <h2 id="cgv-jeux-concours">Article 18 - Organisation de Jeux-Concours</h2>
+<p>Nature de l'offre : Bibli'o Jouets peut proposer, en complément des abonnements classiques, des offres de location ponctuelle sous forme de "Box Mystère".</p>
+      <p>Tarification et Contenu : Le tarif de la Box est fixé à 24,90 € TTC et comprend la location de 4 jouets (et la livraison) dont la sélection est effectuée par Bibli'o Jouets en fonction de l'âge de l'enfant.</p>
+      <p>Absence de Tacite Reconduction : Contrairement aux formules détaillées à l'Article 5, la Box Mystère est une commande ponctuelle qui ne donne pas lieu à un abonnement mensuel renouvelable automatiquement.</p>
+      <p>Durée et Disponibilité : Cette offre est disponible uniquement durant les périodes indiquées sur le site internet. Bibli'o Jouets se réserve le droit de suspendre ou de prolonger cette offre à tout moment.</p>
+        <p>Conditions de Retour : Les jouets doivent être retournés complets et en bon état dans un délai de 7 jours suivant la fin de la période de location définie lors de l'achat, sous peine des pénalités prévues à l'Article 8.</p>
+   <p>Application des CGV : Toutes les clauses relatives à la caution (Article 5), l'hygiène (Article 9) et la responsabilité du client (Article 10) s'appliquent intégralement à cette offre.</p>
+    </section>
       {/* Pied de page du document */}
       <footer className="cgv-footer">
-        <p>Ces CGV sont valables à compter du 11 mars 2026. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
-        <p><em>Mis à jour le 11 mars 2026</em></p>
+        <p>Ces CGV sont valables à compter du 1 mai 2026. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
+        <p><em>Mis à jour le 1 mai 2026</em></p>
       </footer>
     </div>
   );

@@ -11,6 +11,37 @@
   z-index: 10;
 }
 
+/* Burger (mobile uniquement) */
+.burgerButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background-color 0.15s;
+}
+
+.burgerButton:hover {
+  background-color: rgba(46, 29, 33, 0.06);
+}
+
+@media (max-width: 768px) {
+  .burgerButton {
+    display: flex;
+  }
+}
+
+/* Partie gauche (burger + breadcrumb) */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Breadcrumb */
 .breadcrumb {
   display: flex;
@@ -84,6 +115,24 @@
   padding: 2px 7px;
   background: rgba(46, 29, 33, 0.06);
   border-radius: 50px;
+}
+
+.btnHome {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7a8c6a;
+  background: transparent;
+  border: 1px solid rgba(46, 29, 33, 0.12);
+  border-radius: 50px;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  text-decoration: none;
+}
+
+.btnHome:hover {
+  color: #4a7c3f;
+  border-color: #4a7c3f;
 }
 
 .btnLogout {

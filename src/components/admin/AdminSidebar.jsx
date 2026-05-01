@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
+import { useAdminSidebar } from "@/context/AdminSidebarContext";
 import styles from "@/styles/adminSidebar.module.css";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { isOpen, close } = useAdminSidebar();
+  const menuRef = useRef(null);
   const [counts, setCounts] = useState({ rentalPreparing: 0, exchangePending: 0, refillPending: 0 });
 
   useEffect(() => {
@@ -24,6 +28,16 @@ export default function AdminSidebar() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) close();
+    };
+    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, close]);
+
+  useEffect(() => { close(); }, [pathname]);
+
   const isActive = (href) => {
     if (href === "/admin" && pathname === "/admin") return true;
     if (href !== "/admin" && pathname.startsWith(href.split("?")[0])) return true;
@@ -31,124 +45,83 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      {/* Logo / titre */}
-      <div className={styles.sidebarHeader}>
-        <span className={styles.sidebarLogo}>🧸</span>
-        <span className={styles.sidebarTitle}>Admin</span>
-      </div>
+    <div className={styles.sidebarWrapper}>
+      {isOpen && <div className={styles.overlay} onClick={close} />}
 
-      {/* TABLEAU DE BORD */}
-      <nav className={styles.navGroup}>
-        <p className={styles.navGroupLabel}>Tableau de bord</p>
-        <Link
-          href="/admin"
-          className={`${styles.navItem} ${pathname === "/admin" ? styles.navItemActive : ""}`}
-        >
-          <span className={styles.navIcon}>📊</span>
-          Vue d'ensemble
-        </Link>
-      </nav>
+      <aside ref={menuRef} className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}>
+        <div className={styles.sidebarHeader}>
+          <span className={styles.sidebarLogo}>🧸</span>
+          <span className={styles.sidebarTitle}>Admin</span>
+          <button className={styles.closeButton} onClick={close} aria-label="Fermer le menu">
+            <X size={20} color="#2E1D21" />
+          </button>
+        </div>
 
-      {/* RACCOURCIS RAPIDES */}
-      <nav className={styles.navGroup}>
-        <p className={styles.navGroupLabel}>Raccourcis rapides</p>
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Tableau de bord</p>
+          <Link href="/admin" className={`${styles.navItem} ${pathname === "/admin" ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>📊</span>
+            Vue d'ensemble
+          </Link>
+        </nav>
 
-        {/* Location */}
-        <Link
-          href="/admin/orders?type=RENTAL"
-          className={`${styles.navItem} ${styles.navItemRental} ${
-            pathname === "/admin/orders" ? styles.navItemActive : ""
-          }`}
-        >
-          <span className={styles.navIcon}>📦</span>
-          <span className={styles.navLabel}>Location</span>
-          {counts.rentalPreparing > 0 && (
-            <span className={`${styles.badge} ${styles.badgeRed}`}>
-              {counts.rentalPreparing}
-            </span>
-          )}
-        </Link>
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Raccourcis rapides</p>
+          <Link href="/admin/orders?type=RENTAL" className={`${styles.navItem} ${styles.navItemRental} ${pathname === "/admin/orders" ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>📦</span>
+            <span className={styles.navLabel}>Location</span>
+            {counts.rentalPreparing > 0 && <span className={`${styles.badge} ${styles.badgeRed}`}>{counts.rentalPreparing}</span>}
+          </Link>
+          <Link href="/admin/orders?type=EXCHANGE" className={`${styles.navItem} ${styles.navItemExchange}`}>
+            <span className={styles.navIcon}>🔄</span>
+            <span className={styles.navLabel}>Boîte Navette</span>
+            {counts.exchangePending > 0 && <span className={`${styles.badge} ${styles.badgeOrange}`}>{counts.exchangePending}</span>}
+          </Link>
+          <Link href="/admin/orders?type=ADOPTION" className={`${styles.navItem} ${styles.navItemAdoption}`}>
+            <span className={styles.navIcon}>💜</span>
+            <span className={styles.navLabel}>Adoption</span>
+          </Link>
+          <Link href="/admin/orders?type=REFILL" className={`${styles.navItem} ${styles.navItemRefill}`}>
+            <span className={styles.navIcon}>🎁</span>
+            <span className={styles.navLabel}>Réassort</span>
+            {counts.refillPending > 0 && <span className={`${styles.badge} ${styles.badgeGreen}`}>{counts.refillPending}</span>}
+          </Link>
+        </nav>
 
-        {/* Boîte Navette */}
-        <Link
-          href="/admin/orders?type=EXCHANGE"
-          className={`${styles.navItem} ${styles.navItemExchange}`}
-        >
-          <span className={styles.navIcon}>🔄</span>
-          <span className={styles.navLabel}>Boîte Navette</span>
-          {counts.exchangePending > 0 && (
-            <span className={`${styles.badge} ${styles.badgeOrange}`}>
-              {counts.exchangePending}
-            </span>
-          )}
-        </Link>
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Logistique</p>
+          <Link href="/admin/orders?status=PREPARING" className={styles.navItem}>
+            <span className={styles.navIcon}>🚚</span>
+            Expéditions
+          </Link>
+          <Link href="/admin/orders?status=RETURNING" className={styles.navItem}>
+            <span className={styles.navIcon}>↩️</span>
+            Retours
+          </Link>
+        </nav>
 
-        {/* Adoption */}
-        <Link
-          href="/admin/orders?type=ADOPTION"
-          className={`${styles.navItem} ${styles.navItemAdoption}`}
-        >
-          <span className={styles.navIcon}>💜</span>
-          <span className={styles.navLabel}>Adoption</span>
-        </Link>
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Catalogue</p>
+          <Link href="/admin/products" className={`${styles.navItem} ${isActive("/admin/products") ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>🧩</span>
+            Gestion Produits
+          </Link>
+        </nav>
 
-        {/* Réassort */}
-        <Link
-          href="/admin/orders?type=REFILL"
-          className={`${styles.navItem} ${styles.navItemRefill}`}
-        >
-          <span className={styles.navIcon}>🎁</span>
-          <span className={styles.navLabel}>Réassort</span>
-          {counts.refillPending > 0 && (
-            <span className={`${styles.badge} ${styles.badgeGreen}`}>
-              {counts.refillPending}
-            </span>
-          )}
-        </Link>
-      </nav>
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Clients</p>
+          <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItemDisabled}`}>
+            <span className={styles.navIcon}>👥</span>
+            Comptes clients
+            <span className={styles.comingSoon}>bientôt</span>
+          </Link>
+          <Link href="/admin/support" className={`${styles.navItem} ${styles.navItemDisabled}`}>
+            <span className={styles.navIcon}>💬</span>
+            Support
+            <span className={styles.comingSoon}>bientôt</span>
+          </Link>
+        </nav>
 
-      {/* LOGISTIQUE */}
-      <nav className={styles.navGroup}>
-        <p className={styles.navGroupLabel}>Logistique</p>
-        <Link href="/admin/orders?status=PREPARING" className={styles.navItem}>
-          <span className={styles.navIcon}>🚚</span>
-          Expéditions
-        </Link>
-        <Link href="/admin/orders?status=RETURNING" className={styles.navItem}>
-          <span className={styles.navIcon}>↩️</span>
-          Retours
-        </Link>
-      </nav>
-
-      {/* CATALOGUE */}
-      <nav className={styles.navGroup}>
-        <p className={styles.navGroupLabel}>Catalogue</p>
-        <Link
-          href="/admin/products"
-          className={`${styles.navItem} ${isActive("/admin/products") ? styles.navItemActive : ""}`}
-        >
-          <span className={styles.navIcon}>🧩</span>
-          Gestion Produits
-        </Link>
-      </nav>
-
-      {/* CLIENTS */}
-      <nav className={styles.navGroup}>
-        <p className={styles.navGroupLabel}>Clients</p>
-        <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItemDisabled}`}>
-          <span className={styles.navIcon}>👥</span>
-          Comptes clients
-          <span className={styles.comingSoon}>bientôt</span>
-        </Link>
-        <Link href="/admin/support" className={`${styles.navItem} ${styles.navItemDisabled}`}>
-          <span className={styles.navIcon}>💬</span>
-          Support
-          <span className={styles.comingSoon}>bientôt</span>
-        </Link>
-      </nav>
-
-       {/* BLOGS */}
         <nav className={styles.navGroup}>
           <p className={styles.navGroupLabel}>Blogs</p>
           <Link href="/admin/blogs" className={`${styles.navItem} ${isActive("/admin/blogs") ? styles.navItemActive : ""}`}>
@@ -156,7 +129,7 @@ export default function AdminSidebar() {
             Gestion Blogs
           </Link>
         </nav>
-        
-    </aside>
+      </aside>
+    </div>
   );
 }
