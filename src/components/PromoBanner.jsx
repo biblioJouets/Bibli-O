@@ -5,8 +5,8 @@ import '@/styles/promoBanner.css';
 
 const PromoBanner = () => {
   const baseMessages = [
-    "🎁 Offre : 1 mois acheté = 1 mois OFFERT !",
-    "🐻 Code : BIBLIOMOISOFFERT",
+    "🎁 Box Mystère : 4 jouets, 24.90€ au lieu de 38€",
+    // "🐻 Code : BIBLIOMOISOFFERT",
     "🚚 Livraison dans toute la France", 
     "✨ Sans engagement : la liberté de jouer !",
   ];
