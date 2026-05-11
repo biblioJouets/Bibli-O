@@ -163,13 +163,22 @@ export async function POST(req) {
         }
     }
 
+    // 3. Récupération du stripeCustomerId pour appliquer le solde créditeur
+    const dbUser = await prisma.users.findUnique({
+      where: { id: parseInt(session.user.id) },
+      select: { stripeCustomerId: true },
+    });
+
     // 3. Créer la session Stripe
     console.log('[Checkout] Création session Stripe — mode subscription, isBoxMystere:', isBoxMystere);
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: line_items,
-      mode: "subscription", 
-      customer_email: session.user.email,
+      mode: "subscription",
+      // Si le client a un stripeCustomerId, on le passe pour activer le solde créditeur (cartes cadeaux)
+      ...(dbUser?.stripeCustomerId
+        ? { customer: dbUser.stripeCustomerId }
+        : { customer_email: session.user.email }),
       discounts: stripeDiscount,
       allow_promotion_codes: stripeDiscount ? undefined : true,
     

@@ -129,6 +129,14 @@ export default function AdminSidebar() {
             Gestion Blogs
           </Link>
         </nav>
+
+        <nav className={styles.navGroup}>
+          <p className={styles.navGroupLabel}>Fidélité</p>
+          <Link href="/admin/cartes-cadeaux" className={`${styles.navItem} ${isActive("/admin/cartes-cadeaux") ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>🎟️</span>
+            <span className={styles.navLabel}>Cartes Cadeaux</span>
+          </Link>
+        </nav>
       </aside>
     </div>
   );

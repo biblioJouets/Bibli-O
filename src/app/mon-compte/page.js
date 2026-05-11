@@ -7,6 +7,8 @@ import DashboardAlerts from '@/components/account/DashboardAlerts';
 import WidgetCurrentToys from '@/components/account/WidgetCurrentToys';
 import WidgetSubscription from '@/components/account/WidgetSubscription';
 import WidgetImpact from '@/components/account/WidgetImpact';
+import GiftCodeActivator from '@/components/account/GiftCodeActivator';
+import WidgetStripeBalance from '@/components/account/WidgetStripeBalance';
 
 export const metadata = {
   title: 'Tableau de bord — Bibliojouets',
@@ -43,6 +45,8 @@ export default async function MonCompteDashboard() {
         <WidgetCurrentToys orders={orders} />
         <WidgetSubscription orders={orders} />
         <WidgetImpact orders={orders} />
+        <WidgetStripeBalance />
+        <GiftCodeActivator />
       </div>
     </div>
   );
