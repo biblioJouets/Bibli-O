@@ -9,7 +9,15 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'bj-text':   '#2E1D21',
+        'bj-pink':   '#FF8C94',
+        'bj-blue':   '#6EC1E4',
+        'bj-green':  '#88D4AB',
+        'bj-yellow': '#FFE264',
+      },
+    },
   },
   plugins: [],
 }
