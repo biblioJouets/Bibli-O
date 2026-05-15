@@ -271,6 +271,21 @@ model GiftCode {
   user      Users?    @relation(fields: [usedBy], references: [id], onDelete: SetNull)
 }
 
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(300)
+  thumbnail   String?  @db.VarChar(500)
+  category    String   @db.VarChar(100)
+  excerpt     String?  @db.Text
+  author      String   @default("L'équipe Bibli'o") @db.VarChar(255)
+  readTime    String?  @db.VarChar(20)
+  content     Json     @default("[]")
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+}
+
 //Code Promotionnel
 model PromoCodeUsage {
   id             String   @id @default(cuid())

@@ -1,0 +1,338 @@
+/* ============================================================
+   Blog List — Page publique /blogs
+   ============================================================ */
+
+.blog-page {
+  background: #FFFAF4;
+  min-height: 100vh;
+  padding-bottom: 5rem;
+  padding-top: 100px;
+}
+
+/* ── Hero ── */
+.blog-hero {
+  position: relative;
+  padding: 4rem 6vw 3rem;
+  overflow: hidden;
+  text-align: center;
+}
+
+.blog-hero__blob {
+  position: absolute;
+  pointer-events: none;
+  filter: blur(40px);
+  opacity: 0.65;
+}
+.blog-hero__blob--tl {
+  top: -4rem; left: -5rem;
+  width: 18rem; height: 15rem;
+  background: #DFF1F9;
+  border-radius: 40% 60% 70% 30% / 40% 50% 50% 60%;
+}
+.blog-hero__blob--tr {
+  top: -2.5rem; right: -4rem;
+  width: 20rem; height: 18rem;
+  background: #FFD9DC;
+  border-radius: 60% 40% 30% 70% / 60% 70% 30% 40%;
+}
+.blog-hero__blob--bc {
+  bottom: -2rem; left: 40%;
+  width: 15rem; height: 12rem;
+  background: #FFF7D4;
+  border-radius: 50% 50% 60% 40% / 60% 40% 50% 50%;
+}
+
+.blog-hero__inner {
+  position: relative;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.blog-hero__badge {
+  display: inline-block;
+  padding: 0.375rem 1rem;
+  background: rgba(110, 193, 228, 0.18);
+  color: #2E96C8;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.blog-hero__title {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #2E1D21;
+  font-size: clamp(2rem, 4.6vw, 3.2rem);
+}
+
+.blog-hero__title span {
+  color: #FF8C94;
+}
+
+.blog-hero__subtitle {
+  margin: 1rem auto 0;
+  max-width: 36rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #5C4A4F;
+}
+
+/* ── Filtres ── */
+.blog-filters {
+  padding: 0 6vw 2.5rem;
+}
+
+.blog-filters__row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.blog-filter-btn {
+  padding: 0.7rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #2E1D21;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+  font-family: inherit;
+}
+
+.blog-filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ── Grille articles ── */
+.blog-grid {
+  padding: 0 6vw;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.75rem;
+}
+
+/* ── Carte article ── */
+.blog-card {
+  background: #fff;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(46, 29, 33, 0.06);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(46, 29, 33, 0.11);
+}
+
+.blog-card__img-wrap {
+  position: relative;
+  padding: 12px;
+  aspect-ratio: 16 / 10;
+}
+
+.blog-card__img-inner {
+  position: relative;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.blog-card__img-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.blog-card__cat {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.blog-card__body {
+  padding: 0.5rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.blog-card__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  color: #2E1D21;
+}
+
+.blog-card__excerpt {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: #5C4A4F;
+}
+
+.blog-card__footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.blog-card__author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.blog-card__avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #FFF7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #2E1D21;
+  flex-shrink: 0;
+}
+
+.blog-card__author-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2E1D21;
+  line-height: 1.2;
+}
+
+.blog-card__author-meta {
+  font-size: 0.65rem;
+  color: #8C7B7F;
+  line-height: 1.2;
+}
+
+.blog-card__arrow {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #6EC1E4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(110, 193, 228, 0.55);
+  flex-shrink: 0;
+  transition: transform 0.18s;
+}
+
+.blog-card__arrow:hover {
+  transform: translateX(2px);
+}
+
+/* ── Pagination ── */
+.blog-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.blog-pagination__btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.blog-pagination__btn--active {
+  background: #FF8C94;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 140, 148, 0.55);
+}
+
+.blog-pagination__btn--inactive {
+  background: #fff;
+  color: #2E1D21;
+  box-shadow: 0 2px 8px rgba(46, 29, 33, 0.08);
+}
+
+.blog-pagination__next {
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 50px;
+  background: #fff;
+  color: #2E1D21;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 2px 8px rgba(46, 29, 33, 0.08);
+  font-family: inherit;
+  transition: transform 0.15s;
+}
+
+.blog-pagination__next:hover {
+  transform: translateX(2px);
+}
+
+/* ── Empty state ── */
+.blog-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #8C7B7F;
+  font-size: 1rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .blog-page {
+    padding-top: 80px;
+  }
+}
+
+@media (max-width: 640px) {
+  .blog-hero {
+    padding: 2.5rem 5vw 2rem;
+  }
+  .blog-filters {
+    padding: 0 5vw 2rem;
+  }
+  .blog-grid {
+    padding: 0 5vw;
+    grid-template-columns: 1fr;
+  }
+}
