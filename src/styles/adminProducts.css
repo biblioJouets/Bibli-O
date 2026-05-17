@@ -242,7 +242,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin: 0.5rem;
 }
+
 
 .form-group.full-width {
     grid-column: span 2;

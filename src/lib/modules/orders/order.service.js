@@ -674,8 +674,11 @@ export const createAdoptionSession = async (orderId, productId, userId) => {
     throw err;
   }
 
-  const product = orderProduct.Products;
+const product = orderProduct.Products;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bibliojouets.com';
+
+  // NOUVELLE LOGIQUE : On priorise le prix Bibli'O, sinon on prend le prix classique
+  const finalPrice = product.biblioPrice ? product.biblioPrice : product.price;
 
   // 5. Création de la session Stripe Checkout (mode 'payment' = one-shot)
   const session = await stripe.checkout.sessions.create({
@@ -693,7 +696,8 @@ export const createAdoptionSession = async (orderId, productId, userId) => {
               ? [`${appUrl}${product.images[0]}`]
               : [],
           },
-          unit_amount: Math.round(product.price * 100),
+          // utilisation finalPrice au lieu de product.price
+          unit_amount: Math.round(finalPrice * 100),
         },
         quantity: 1,
       },

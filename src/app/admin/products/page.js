@@ -35,7 +35,7 @@ export default function AdminProductsPage() {
     const [newReview, setNewReview] = useState({ rating: 5, authorName: "", comment: "" });
 
     const emptyProduct = {
-        reference: "BJ", name: "", description: "", price: "", stock: 1,
+        reference: "BJ", name: "", description: "", price: "", biblioPrice: "", stock: 1,
         brand: "", ageRange: "", category: "", material: "",tags: [], images: [],
         highlights: [], reviews: [],
         manualUrl: "", weight: "", length: "", width: "", height: "",
@@ -172,6 +172,7 @@ export default function AdminProductsPage() {
             const payload = {
                 ...cleanData,
                 price: parseFloat(cleanData.price) || 0,
+                biblioPrice: cleanData.biblioPrice ? parseFloat(cleanData.biblioPrice) : null,
                 stock: parseInt(cleanData.stock) || 0,
                 weight: parseFloat(cleanData.weight) || 0,
                 length: parseFloat(cleanData.length) || 0,
@@ -373,6 +374,7 @@ export default function AdminProductsPage() {
                                         />
                                     </div>
                                     <div className="form-group"><label>Prix (Valeur) € *</label><input type="number" step="0.01" required value={currentProduct.price} onChange={e => setCurrentProduct({...currentProduct, price: e.target.value})} /></div>
+                                    <div className="form-group"><label>Prix d'adoption (Bibli'O) €</label><input type="number" step="0.01" value={currentProduct.biblioPrice || ''} onChange={e => setCurrentProduct({...currentProduct, biblioPrice: e.target.value})} placeholder="Ex: 15.50" /></div>
                                     <div className="form-group"><label>Stock</label><input type="number" required value={currentProduct.stock} onChange={e => setCurrentProduct({...currentProduct, stock: e.target.value})} /></div>
 
                                     <div className="form-group">

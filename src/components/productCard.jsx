@@ -66,7 +66,7 @@ export default function ProductCard({ product }) {
                 DÉJÀ LOUÉ 🧸
             </span>
           )}
-
+    
           <Image 
             src={mainImage} 
             alt={product.name} 
@@ -77,6 +77,7 @@ export default function ProductCard({ product }) {
         </div>
         
         <div className="product-info">
+          
           <div className="product-brand">{product.brand || 'Bibli\'O'}</div>
           <h3 className="product-name">{product.name}</h3>
           
@@ -93,8 +94,21 @@ export default function ProductCard({ product }) {
                ({product.reviews?.length || 0})
             </span>
           </div>
+          {product.biblioPrice ? (
+  <div className="product-card-prices" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <span className="main-rental-info" style={{ fontWeight: 'bold', color: '#6ec1e4' }}>0€ <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#666' }}>avec l'abonnement.</span></span>
+    <span className="adoption-preview" style={{ fontSize: '0.8rem', color: '#88D4AB', fontWeight: '600' }}>
+      Option achat : {product.biblioPrice}€ <span style={{ textDecoration: 'line-through', color: '#999', fontWeight: 'normal' }}>{product.price}€</span>
+    </span>
+  </div>
+) : (
+  <div className="product-card-prices">
+    <span style={{ fontWeight: 'bold', color: '#2E1D21' }}>0€ <span style={{ fontSize: '0.8rem', fontWeight: 'normal', color: '#666' }}>avec abo.</span></span>
+  </div>
+)}
         </div>
       </Link>
+      
 
       <div className="product-action-footer">
         <div className="buttonPanier">

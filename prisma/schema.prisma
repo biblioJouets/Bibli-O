@@ -159,6 +159,7 @@ model Products {
   slug        String?  @unique @db.VarChar(300)
   description String?
   price       Float
+  biblioPrice Float? //Prix Biblio
   stock       Int      @default(0)
   highlights  String[]
 

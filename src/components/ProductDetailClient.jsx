@@ -106,15 +106,27 @@ export default function ProductDetailClient({ product }) {
             )}
           </div>
 
-          <div className="description" style={{ whiteSpace: 'pre-wrap' }}>
-            {product.description}
-          </div>
-
-          {product.tags && product.tags.length > 0 && (
-            <div className="tags-container">
-              {product.tags.map((tag, idx) => (
-                <span key={idx} className="tag">{tag}</span>
-              ))}
+          {/* AJOUT : Badge de prix d'adoption Bibli'O */}
+          {product.biblioPrice && (
+            <div className="biblio-adoption-badge" style={{
+              background: '#FFD9DC',
+              marginBottom: '20px', 
+              color: '#2E1D21', 
+              padding: '10px 16px', 
+              borderRadius: '20px', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              marginTop: '12px',
+              border: '1px solid #FF8C94',
+              boxShadow: '0 2px 4px rgba(46, 29, 33, 0.05)'
+            }}>
+              <span>💝</span>
+              <span>
+                Coup de cœur ? Adoptez-le pour seulement <strong style={{ color: '#FF8C94', fontSize: '1.1rem' }}>{product.biblioPrice}€</strong> <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>(au lieu de {product.price}€ sur le marché)</span>
+              </span>
             </div>
           )}
 

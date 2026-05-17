@@ -30,7 +30,7 @@ export default function OrderItemRow({
   const productData  = item.product || item.Products || {};
   const imageUrl     = productData?.images?.[0] || '/assets/box_bj.png';
   const productName  = productData?.name || "Jouet Mystère";
-  const productPrice = Number(productData?.price || 0).toFixed(2);
+  const productPrice = Number(productData?.biblioPrice || productData?.price || 0).toFixed(2);
   const returnDate   = item.rentalEndDate
     ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : "Non définie";
