@@ -39,25 +39,50 @@ export async function POST(request) {
     console.error(error);
     return NextResponse.json({ error: error.message || "Erreur ajout" }, { status: 400 });
   }
+  
 }
 
-// PUT : Modifier quantité
 export async function PUT(request) {
-  const userId = await getUserId();
-  if (!userId) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
-
   try {
-    const { itemId, quantity } = await request.json();
-    if (quantity < 1) {
-       await cartService.removeItem(userId, itemId);
-    } else {
-       await cartService.updateQuantity(userId, itemId, quantity);
+    // 1. Vérification de l'utilisateur
+    const userId = await getUserId(); 
+    if (!userId) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+
+    // 2. Extraction des données envoyées par le frontend
+    const body = await request.json();
+    const { action, productId, intent } = body;
+
+    // 3. Traitement de l'action "updateIntent"
+    if (action === 'updateIntent') {
+      
+      // On cherche d'abord le panier de cet utilisateur
+      const userCart = await prisma.cart.findUnique({
+        where: { userId: userId }
+      });
+
+      if (!userCart) {
+        return NextResponse.json({ error: "Panier introuvable" }, { status: 404 });
+      }
+
+      // On met à jour l'intention (RENTAL ou PURCHASE) pour ce produit spécifique
+      await prisma.cartItem.updateMany({
+        where: { 
+          cartId: userCart.id,
+          productId: parseInt(productId)
+        },
+        data: { 
+          intent: intent 
+        }
+      });
+
+      return NextResponse.json({ message: "Intention mise à jour avec succès" }, { status: 200 });
     }
-    
-    const cart = await cartService.getCart(userId);
-    return NextResponse.json(cart);
+
+    return NextResponse.json({ error: "Action non reconnue" }, { status: 400 });
+
   } catch (error) {
-    return NextResponse.json({ error: "Erreur update" }, { status: 500 });
+    console.error("Erreur PUT /api/cart :", error);
+    return NextResponse.json({ error: "Erreur lors de la mise à jour" }, { status: 500 });
   }
 }
 

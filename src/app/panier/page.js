@@ -117,6 +117,25 @@ export default function PanierPage() {
   const [showBoxSizeModal, setShowBoxSizeModal] = useState(false);
   const [boxAdjustSuccess, setBoxAdjustSuccess] = useState(null);
 
+  // --- FONCTION DE MISE À JOUR DE L'INTENTION (LOCATION VS ACHAT) ---
+  const updateItemIntent = async (productId, newIntent) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateIntent', productId, intent: newIntent })
+      });
+      if (response.ok) {
+        // Recharge la page pour actualiser le contexte du panier (solution la plus fiable)
+        window.location.reload(); 
+      } else {
+        console.error("Erreur lors de la modification de l'option.");
+      }
+    } catch (error) {
+      console.error("Erreur réseau :", error);
+    }
+  };
+
   // --- SÉPARATION DES ARTICLES PAR INTENTION ---
   const rentalItems = cart.items?.filter(item => item.intent !== 'PURCHASE') || [];
   const purchaseItems = cart.items?.filter(item => item.intent === 'PURCHASE') || [];
@@ -271,6 +290,31 @@ export default function PanierPage() {
                     <div className="cart-item-details">
                       <h3 className="cart-item-title">{item.product.name}</h3>
                       <p className="cart-item-ref">Réf: {item.product.reference}</p>
+                      
+                {/* TOGGLE SUR LOCATION */}
+                  <div className="cart-intent-switch">
+    <button
+    onClick={() => updateItemIntent(item.product.id, 'RENTAL')}
+    className={`cart-intent-switch__btn ${
+      item.intent !== 'PURCHASE' 
+        ? 'cart-intent-switch__btn--active-rental' 
+        : 'cart-intent-switch__btn--inactive-rental'
+    }`}
+  >
+    Location
+  </button>
+  <button
+    onClick={() => updateItemIntent(item.product.id, 'PURCHASE')}
+    className={`cart-intent-switch__btn ${
+      item.intent === 'PURCHASE' 
+        ? 'cart-intent-switch__btn--active-purchase' 
+        : 'cart-intent-switch__btn--inactive-purchase'
+    }`}
+  >
+    Achat définitif
+  </button>
+</div>
+
                       <div className="cart-item-price-wrapper">
                         <span className="cart-item-price-old">Valeur : {item.product.price}€</span>
                         <span className="cart-item-price-free">0€ avec abonnement</span>
@@ -292,7 +336,7 @@ export default function PanierPage() {
 
           {/* SECTION ACHAT */}
           {purchaseItems.length > 0 && (
-            <div>
+            <div className="mt-8">
               <h2 className="cart-section-heading">
                 <span className="cart-section-heading__icon">💝</span> Vos achats directs
               </h2>
@@ -306,6 +350,31 @@ export default function PanierPage() {
                     <div className="cart-item-details">
                       <h3 className="cart-item-title">{item.product.name}</h3>
                       <p className="cart-item-ref">Réf: {item.product.reference}</p>
+
+                      {/* TOGGLE PASSAGE DE LOCATION A ACHAT */}
+                      <div className="cart-intent-switch">
+  <button
+    onClick={() => updateItemIntent(item.product.id, 'RENTAL')}
+    className={`cart-intent-switch__btn ${
+      item.intent !== 'PURCHASE' 
+        ? 'cart-intent-switch__btn--active-rental' 
+        : 'cart-intent-switch__btn--inactive-rental'
+    }`}
+  >
+    Location
+  </button>
+  <button
+    onClick={() => updateItemIntent(item.product.id, 'PURCHASE')}
+    className={`cart-intent-switch__btn ${
+      item.intent === 'PURCHASE' 
+        ? 'cart-intent-switch__btn--active-purchase' 
+        : 'cart-intent-switch__btn--inactive-purchase'
+    }`}
+  >
+    Achat définitif
+  </button>
+</div>
+
                       <div className="cart-item-price-wrapper">
                         <span className="cart-item-price-old">Prix neuf : {item.product.price}€</span>
                         <span className="cart-item-price-purchase">
