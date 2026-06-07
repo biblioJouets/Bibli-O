@@ -30,8 +30,8 @@ export async function POST(request) {
   if (!userId) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   try {
-    const { productId, quantity } = await request.json();
-    await cartService.addToCart(userId, productId, quantity);
+    const { productId, quantity, intent } = await request.json();
+    await cartService.addToCart(userId, productId, quantity, intent || "RENTAL");
 
     const cart = await cartService.getCart(userId);
     return NextResponse.json(cart);

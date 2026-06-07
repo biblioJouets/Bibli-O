@@ -75,8 +75,10 @@ model CartItem {
   product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   quantity Int @default(1)
+  
+  intent   String @default("RENTAL") @db.VarChar(20) 
 
-  @@unique([cartId, productId])
+  @@unique([cartId, productId, intent])
 }
 
 model Orders {

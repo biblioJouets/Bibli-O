@@ -24,7 +24,7 @@ export const cartService = {
   },
 
   // Ajouter un item avec VÉRIFICATION DU STOCK
-  async addToCart(userId, productId, quantity = 1) {
+  async addToCart(userId, productId, quantity = 1, intent = "RENTAL") {
     const cart = await this.getCart(userId);
     const pId = parseInt(productId);
 
@@ -55,7 +55,8 @@ export const cartService = {
       where: {
         cartId_productId: {
           cartId: cart.id,
-          productId: pId
+          productId: pId,
+          intent: intent
         }
       }
     });
@@ -81,7 +82,8 @@ export const cartService = {
         data: {
           cartId: cart.id,
           productId: pId,
-          quantity: quantity
+          quantity: quantity,
+          intent: intent // "RENTAL" ou "PURCHASE"
         }
       });
     }

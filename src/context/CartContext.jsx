@@ -32,7 +32,7 @@ export function CartProvider({ children }) {
     }
   };
 
-  const addToCart = async (productId, quantity = 1) => {
+const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
     if (!session) {
       alert("Veuillez vous connecter pour ajouter au panier !");
       return;
@@ -41,7 +41,8 @@ export function CartProvider({ children }) {
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
-        body: JSON.stringify({ productId, quantity }),
+        // inclut intent dans le payload envoyé à l'API
+        body: JSON.stringify({ productId, quantity, intent }), 
       });
       if (res.ok) setCart(await res.json());
       else {

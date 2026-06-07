@@ -130,15 +130,33 @@ export default function ProductDetailClient({ product }) {
             </div>
           )}
 
-          <div className="actions">
+<div className="actions" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {isOutOfStock ? (
                 <button disabled className="add-to-cart-btn" style={{ backgroundColor: '#ccc', cursor: 'not-allowed', transform: 'none' }}>
                     <XCircle size={20} /> Indisponible
                 </button>
             ) : (
-                <button className="add-to-cart-btn" onClick={handleAddToCart}>
-                    <ShoppingCart size={20} /> Ajouter au panier
-                </button>
+                <>
+                  {/* Bouton Primaire : LOCATION */}
+                  <button 
+                    className="add-to-cart-btn" 
+                    onClick={() => addToCart(product.id, 1, "RENTAL")}
+                    style={{ backgroundColor: '#6EC1E4', color: '#2E1D21' }}
+                  >
+                      <ShoppingCart size={20} /> Louer ce jouet (0€ avec abo)
+                  </button>
+
+                  {/* Bouton Secondaire : ACHAT (Uniquement si le Prix Bibli'o existe) */}
+                  {product.biblioPrice && (
+                    <button 
+                      className="add-to-cart-btn" 
+                      onClick={() => addToCart(product.id, 1, "PURCHASE")}
+                      style={{ backgroundColor: '#FF8C94', color: '#2E1D21' }}
+                    >
+                        <Package size={20} /> Acheter définitivement ({product.biblioPrice}€)
+                    </button>
+                  )}
+                </>
             )}
 
             {product.manualUrl && (
