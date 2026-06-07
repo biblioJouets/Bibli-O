@@ -53,7 +53,7 @@ export const cartService = {
     // 2. Vérifier si l'item est déjà dans le panier
     const existingItem = await prisma.cartItem.findUnique({
       where: {
-        cartId_productId: {
+        cartId_productId_intent: {
           cartId: cart.id,
           productId: pId,
           intent: intent

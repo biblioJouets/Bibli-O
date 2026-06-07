@@ -118,7 +118,9 @@ const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
     }
   };
 
-  const cartCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  const cartCount = cart.items
+    ?.filter(item => item.intent !== 'PURCHASE')
+    .reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   const isBoxMystereCart = cart.items?.some(
     item => item.product?.reference === 'BOX-MYSTERE'

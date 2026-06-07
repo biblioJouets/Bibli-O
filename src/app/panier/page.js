@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Minus, Plus, Truck, CheckCircle, Gift } from "lucide-react";
+import { Trash2, Minus, Plus, Truck, CheckCircle, Gift, Package } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
 import '@/styles/panier.css';
 
@@ -13,13 +13,13 @@ const PRICING_MAP = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9:
 
 // Modale unifiée : sous-occupation (déficit > 0) ET surcapacité (surplus > 0)
 function BoxSizeModal({ finalCount, totalCapacity, orderId, selectedCount, onClose, onSuccess }) {
-  const isUnder = finalCount < totalCapacity;  // sous-occupation
-  const isOver  = finalCount > totalCapacity;  // surcapacité
+  const isUnder = finalCount < totalCapacity;
+  const isOver  = finalCount > totalCapacity;
   const diff    = Math.abs(finalCount - totalCapacity);
   const newPrice = PRICING_MAP[finalCount];
 
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState(null);
 
   const handleAdjust = async () => {
     setLoading(true);
@@ -44,33 +44,30 @@ function BoxSizeModal({ finalCount, totalCapacity, orderId, selectedCount, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2E1D21]/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-[25px] shadow-xl max-w-md w-full p-6 flex flex-col gap-4">
-
-        <div className="text-center">
-          <span className="text-4xl">{isOver ? '⬆️' : '📦'}</span>
-          <h3 className="text-xl font-bold text-[#2E1D21] mt-2">
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-header">
+          <span className="modal-header__icon">{isOver ? '⬆️' : '📦'}</span>
+          <h3 className="modal-header__title">
             {isOver ? 'Box agrandie' : 'Box sous-occupée'}
           </h3>
-          <p className="text-sm text-[#2E1D21]/70 mt-1 leading-relaxed">
+          <p className="modal-header__desc">
             Votre abonnement actuel prévoit <strong>{totalCapacity} jouet{totalCapacity > 1 ? 's' : ''}</strong>,
             mais votre prochaine box en contiendra <strong>{finalCount}</strong>.
           </p>
           {isUnder && (
-            <p className="text-sm text-[#a0888c] mt-1">
+            <p className="modal-header__note">
               Il vous manque <strong>{diff} jouet{diff > 1 ? 's' : ''}</strong> pour remplir votre box.
             </p>
           )}
           {isOver && (
-            <p className="text-sm text-[#a0888c] mt-1">
+            <p className="modal-header__note">
               Vous avez <strong>{diff} jouet{diff > 1 ? 's' : ''} de plus</strong> que votre formule actuelle.
             </p>
           )}
         </div>
 
-        <div className="flex flex-col gap-3 mt-1">
-
-          {/* Option 1 : Continuer quand même (sous-occupation) → rediriger vers biblio pour compléter */}
+        <div className="modal-actions">
           {isUnder && (
             <button
               type="button"
@@ -78,55 +75,31 @@ function BoxSizeModal({ finalCount, totalCapacity, orderId, selectedCount, onClo
                 onClose();
                 window.location.href = `/bibliotheque?mode=exchange&orderId=${orderId}&slots=${selectedCount}`;
               }}
-              className="w-full px-5 py-3 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold text-sm transition-colors shadow-sm"
+              className="modal-btn-primary-blue"
             >
               🔍 Compléter ma box ({diff} jouet{diff > 1 ? 's' : ''} à ajouter)
             </button>
           )}
-
-          {/* Option principale : Ajuster l'abonnement */}
           <button
             type="button"
             onClick={handleAdjust}
             disabled={loading}
-            className={`w-full px-5 py-3 rounded-full font-semibold text-sm transition-colors shadow-sm disabled:opacity-50 ${
-              isOver
-                ? 'bg-[#6EC1E4] hover:bg-[#5aafcf] text-white'
-                : 'bg-white border border-[#88D4AB] text-[#2E1D21] hover:bg-[#F2FAF6]'
-            }`}
+            className={isOver ? 'modal-btn-primary-blue' : 'modal-btn-secondary-green'}
           >
             {loading ? 'Mise à jour...' : isOver
               ? `⬆️ Passer à ${finalCount} jouet${finalCount > 1 ? 's' : ''}${newPrice ? ` — ${newPrice}€/mois` : ''}`
               : `⬇️ Réduire à ${finalCount} jouet${finalCount > 1 ? 's' : ''}${newPrice ? ` — ${newPrice}€/mois` : ''}`
             }
           </button>
-
-          {isOver && (
-            <p className="text-xs text-[#2E1D21]/50 text-center -mt-1">
-              Le changement prend effet immédiatement avec prorata.
-            </p>
-          )}
-          {isUnder && (
-            <p className="text-xs text-[#2E1D21]/50 text-center -mt-1">
-              La réduction prend effet à la fin de votre cycle de facturation actuel.
-            </p>
-          )}
-
-          {error && <p className="text-red-500 text-xs text-center">{error}</p>}
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-xs text-[#a0888c] underline underline-offset-2 text-center mt-1"
-          >
-            Annuler
-          </button>
+          {isOver && <p className="modal-note">Le changement prend effet immédiatement avec prorata.</p>}
+          {isUnder && <p className="modal-note">La réduction prend effet à la fin de votre cycle de facturation actuel.</p>}
+          {error && <p className="modal-error">{error}</p>}
+          <button type="button" onClick={onClose} className="modal-cancel-link">Annuler</button>
         </div>
       </div>
     </div>
   );
 }
-
 
 export default function PanierPage() {
   const { cart, updateQuantity, removeFromCart, loading, exchangeContext, setExchangeContext, refillContext, setRefillContext, planName, cartTotalDisplay, isBoxMystereCart } = useCart();
@@ -134,44 +107,40 @@ export default function PanierPage() {
 
   const exchangeMode = !!exchangeContext;
   const exchangeOrderId = exchangeContext?.orderId ?? null;
-
   const refillMode      = !!refillContext;
   const refillOrderId   = refillContext?.sourceOrderId ?? null;
   const refillSlots     = refillContext?.slots ?? 0;
 
   const exchangeLoading = false;
   const exchangeError = null;
-
   const [refillError, setRefillError] = useState(null);
   const [showBoxSizeModal, setShowBoxSizeModal] = useState(false);
   const [boxAdjustSuccess, setBoxAdjustSuccess] = useState(null);
 
-  // En mode réassort, on redirige vers la page de livraison (comme l'échange)
-  const handleRefillValidation = () => {
-    router.push('/livraison-echange');
-  };
+  // --- SÉPARATION DES ARTICLES PAR INTENTION ---
+  const rentalItems = cart.items?.filter(item => item.intent !== 'PURCHASE') || [];
+  const purchaseItems = cart.items?.filter(item => item.intent === 'PURCHASE') || [];
 
+  const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
+  const purchaseCount = purchaseItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalItemCount = rentalCount + purchaseCount;
 
-  // Calcul valeur théorique (Prix boutique des jouets)
-  const cartValue = cart.items?.reduce((total, item) => {
-    return total + (item.product.price * item.quantity);
-  }, 0) || 0;
+  const rentalTheoreticalValue = rentalItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
 
-  const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  const purchaseTotal = purchaseItems.reduce((total, item) => {
+    const activePrice = item.product.biblioPrice || item.product.price;
+    return total + (activePrice * item.quantity);
+  }, 0);
 
-  // --- LOGIQUE MODE ÉCHANGE ---
-  const buildCartPayload = () =>
-    cart.items.map((item) => ({ productId: item.product.id, quantity: item.quantity }));
+  const handleRefillValidation = () => router.push('/livraison-echange');
 
-  // Capacité abonnement : totalActiveCount stocké dans le contexte par OrderCard
-  // keptCount = jouets gardés = capacité totale - jouets sélectionnés à rendre
+  // --- LOGIQUE MODE ÉCHANGE (Basée uniquement sur les locations) ---
   const totalCapacity = exchangeContext?.totalActiveCount ?? 0;
   const selectedCount = exchangeContext?.selectedProductIds?.length ?? 0;
   const keptCount     = totalCapacity - selectedCount;
-  const finalCount    = keptCount + itemCount;       // ce que contiendra la prochaine box
+  const finalCount    = keptCount + rentalCount;
   const mismatch      = totalCapacity > 0 && finalCount !== totalCapacity;
 
-  // En mode échange, intercepter la sous-occupation ET la surcapacité avant de rediriger
   const handleExchangeValidation = () => {
     if (exchangeMode && mismatch) {
       setShowBoxSizeModal(true);
@@ -180,51 +149,42 @@ export default function PanierPage() {
     router.push('/livraison-echange');
   };
 
-    // ---   CODE PROMO ---
-  const [promoCode, setPromoCode] = useState("");  
-  const cleanCode = promoCode.trim().toUpperCase();
-  const isPromoValid = cleanCode.length > 0;
-
-  const [promoStatus, setPromoStatus] = useState("idle"); // 'idle', 'loading', 'success', 'error'
+  // --- CODE PROMO ---
+  const [promoCode, setPromoCode] = useState("");
+  const [promoStatus, setPromoStatus] = useState("idle");
   const [promoMessage, setPromoMessage] = useState("");
 
   const handleVerifyPromo = async (e) => {
     if (e) e.preventDefault();
     if (!promoCode.trim()) return;
-
     setPromoStatus("loading");
     setPromoMessage("");
 
     try {
-        const res = await fetch("/api/verify-promo", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ promoCode: promoCode.trim(), cartItems: cart.items })
-        });
-        const data = await res.json();
-
-        if (data.valid) {
-            setPromoStatus("success");
-            setPromoMessage(data.message);
-        } else {
-            setPromoStatus("error");
-            setPromoMessage(data.message || "Code invalide.");
-        }
-    } catch (err) {
+      const res = await fetch("/api/verify-promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ promoCode: promoCode.trim(), cartItems: cart.items })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromoStatus("success");
+        setPromoMessage(data.message);
+      } else {
         setPromoStatus("error");
-        setPromoMessage("Erreur de vérification.");
+        setPromoMessage(data.message || "Code invalide.");
+      }
+    } catch (err) {
+      setPromoStatus("error");
+      setPromoMessage("Erreur de vérification.");
     }
   };
-  // ------------------------------------------------
-
 
   // --- AFFICHAGE PANIER VIDE ---
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return (
       <div className="cart-empty-container">
-        <div className="cart-empty-icon-wrapper">
-             <Gift size={64} color="#88D4AB" />
-        </div>
+        <div className="cart-empty-icon-wrapper"><Gift size={64} color="#88D4AB" /></div>
         <h2 className="cart-empty-title">Votre coffre à jouets est vide 🛒</h2>
         <p className="cart-empty-text">Commencez par ajouter des jeux pour composer votre box idéale !</p>
         <ButtonBlue text="Parcourir la bibliothèque" href="/bibliotheque" />
@@ -235,14 +195,9 @@ export default function PanierPage() {
   // --- AFFICHAGE PANIER REMPLI ---
   return (
     <div className="cart-page-container">
-
-      {/* Modale ajustement taille box (sous-occupation ou surcapacité) */}
       {showBoxSizeModal && exchangeMode && (
         <BoxSizeModal
-          finalCount={finalCount}
-          totalCapacity={totalCapacity}
-          orderId={exchangeOrderId}
-          selectedCount={selectedCount}
+          finalCount={finalCount} totalCapacity={totalCapacity} orderId={exchangeOrderId} selectedCount={selectedCount}
           onClose={() => setShowBoxSizeModal(false)}
           onSuccess={(data) => {
             setShowBoxSizeModal(false);
@@ -252,45 +207,38 @@ export default function PanierPage() {
         />
       )}
 
-      {/* Message succès ajustement */}
       {boxAdjustSuccess && (
-        <div className="w-full bg-[#DAEEE6] border border-[#88D4AB] text-[#2E1D21] px-6 py-3 rounded-[16px] mb-4 text-sm font-medium text-center">
+        <div className="cart-success-banner">
           ✅ {boxAdjustSuccess}
         </div>
       )}
 
-      {/* Bandeau mode échange */}
       {exchangeMode && (
-        <div className="w-full bg-[#6EC1E4] text-white px-6 py-3 flex items-center justify-between gap-4 rounded-[16px] mb-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">🔄</span>
+        <div className="cart-exchange-banner">
+          <div className="cart-exchange-banner__left">
+            <span className="cart-exchange-banner__icon">🔄</span>
             <div>
-              <p className="font-semibold text-sm leading-tight">Mode Échange — Panier à 0€</p>
-              <p className="text-xs opacity-90">Votre sélection remplacera vos jouets actuels sans frais supplémentaires.</p>
+              <p className="cart-exchange-banner__title">Mode Échange — Panier à 0€</p>
+              <p className="cart-exchange-banner__subtitle">Votre sélection remplacera vos jouets actuels sans frais supplémentaires.</p>
             </div>
           </div>
-          <a href="/mon-compte" className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap">
-            Annuler
-          </a>
+          <a href="/mon-compte" className="cart-exchange-banner__cancel">Annuler</a>
         </div>
       )}
 
-      {/* Bandeau mode réassort */}
       {refillMode && (
-        <div className="w-full bg-[#88D4AB] text-[#2E1D21] px-6 py-3 flex items-center justify-between gap-4 rounded-[16px] mb-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">🎁</span>
+        <div className="cart-refill-banner">
+          <div className="cart-refill-banner__left">
+            <span className="cart-refill-banner__icon">🎁</span>
             <div>
-              <p className="font-semibold text-sm leading-tight">Mode Réassort — Gratuit</p>
-              <p className="text-xs opacity-80">
-                Choisissez jusqu&apos;à {refillSlots} jouet{refillSlots > 1 ? 's' : ''} pour remplacer vos jouets adoptés.
-              </p>
+              <p className="cart-refill-banner__title">Mode Réassort — Gratuit</p>
+              <p className="cart-refill-banner__subtitle">Choisissez jusqu'à {refillSlots} jouet{refillSlots > 1 ? 's' : ''} pour remplacer vos jouets adoptés.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => { setRefillContext(null); router.push('/mon-compte/commandes'); }}
-            className="text-xs underline underline-offset-2 opacity-80 hover:opacity-100 whitespace-nowrap bg-transparent border-none cursor-pointer"
+            className="cart-refill-banner__cancel"
           >
             Annuler
           </button>
@@ -298,214 +246,193 @@ export default function PanierPage() {
       )}
 
       <header className="cart-header">
-        <h1 className="cart-header-title">
-          Ma Sélection
-        </h1>
-        <p className="cart-header-subtitle">
-          Vous avez sélectionné <strong>{itemCount} jouet{itemCount > 1 ? 's' : ''}</strong> pour votre prochaine box.
-        </p>
+        <h1 className="cart-header-title">Ma Sélection</h1>
+        <p className="cart-header-subtitle">Vous avez sélectionné <strong>{totalItemCount} article{totalItemCount > 1 ? 's' : ''}</strong>.</p>
       </header>
 
       <div className="cart-layout">
-        
+
         {/* --- COLONNE GAUCHE : LISTE DES JOUETS --- */}
         <div className="cart-items-list">
-          {cart.items.map((item) => (
-            <div key={item.id} className="cart-item-card">
-              
-              <div className="cart-item-badge">
-                INCLUS
-              </div>
 
-              <div className="cart-item-image-wrapper">
-                <Image 
-                  src={item.product.images && item.product.images[0] ? item.product.images[0] : "/assets/toys/jouet1.jpg"} 
-                  alt={item.product.name}
-                  fill
-                  className="cart-item-image"
-                />
-              </div>
-
-              <div className="cart-item-details">
-                <h3 className="cart-item-title">{item.product.name}</h3>
-                <p className="cart-item-ref">Réf: {item.product.reference}</p>
-                
-                <div className="cart-item-price-wrapper">
-                    <span className="cart-item-price-old">
-                        Valeur : {item.product.price}€
-                    </span>
-                    <span className="cart-item-price-free">
-                        0€ avec abonnement
-                    </span>
-                </div>
-              </div>
-
-              <div className="cart-item-actions">
-                <button 
-                  onClick={() => removeFromCart(item.id)}
-                  className="cart-item-delete-btn"
-                  aria-label="Supprimer"
-                >
-                  <Trash2 size={20} />
-                </button>
-
-                <div className="cart-item-qty-wrapper">
-                  <button 
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="cart-item-qty-btn"
-                  >
-                    <Minus size={14} color="#2E1D21" />
-                  </button>
-                  <span className="cart-item-qty-text">{item.quantity}</span>
-                  <button 
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="cart-item-qty-btn"
-                  >
-                    <Plus size={14} color="#2E1D21" />
-                  </button>
-                </div>
+          {/* SECTION LOCATION */}
+          {rentalItems.length > 0 && (
+            <div>
+              <h2 className="cart-section-heading">
+                <span className="cart-section-heading__icon">📦</span> Vos jouets en location
+              </h2>
+              <div className="cart-section-items">
+                {rentalItems.map((item) => (
+                  <div key={item.id} className="cart-item-card">
+                    <div className="cart-item-badge cart-item-badge--rental">INCLUS</div>
+                    <div className="cart-item-image-wrapper">
+                      <Image src={item.product.images?.[0] || "/assets/toys/jouet1.jpg"} alt={item.product.name} fill className="cart-item-image" />
+                    </div>
+                    <div className="cart-item-details">
+                      <h3 className="cart-item-title">{item.product.name}</h3>
+                      <p className="cart-item-ref">Réf: {item.product.reference}</p>
+                      <div className="cart-item-price-wrapper">
+                        <span className="cart-item-price-old">Valeur : {item.product.price}€</span>
+                        <span className="cart-item-price-free">0€ avec abonnement</span>
+                      </div>
+                    </div>
+                    <div className="cart-item-actions">
+                      <button onClick={() => removeFromCart(item.id)} className="cart-item-delete-btn"><Trash2 size={20} /></button>
+                      <div className="cart-item-qty-wrapper">
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="cart-item-qty-btn"><Minus size={14} color="#2E1D21" /></button>
+                        <span className="cart-item-qty-text">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="cart-item-qty-btn"><Plus size={14} color="#2E1D21" /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+          )}
+
+          {/* SECTION ACHAT */}
+          {purchaseItems.length > 0 && (
+            <div>
+              <h2 className="cart-section-heading">
+                <span className="cart-section-heading__icon">💝</span> Vos achats directs
+              </h2>
+              <div className="cart-section-items">
+                {purchaseItems.map((item) => (
+                  <div key={item.id} className="cart-item-card cart-item-card--purchase">
+                    <div className="cart-item-badge cart-item-badge--purchase">ACHAT</div>
+                    <div className="cart-item-image-wrapper">
+                      <Image src={item.product.images?.[0] || "/assets/toys/jouet1.jpg"} alt={item.product.name} fill className="cart-item-image" />
+                    </div>
+                    <div className="cart-item-details">
+                      <h3 className="cart-item-title">{item.product.name}</h3>
+                      <p className="cart-item-ref">Réf: {item.product.reference}</p>
+                      <div className="cart-item-price-wrapper">
+                        <span className="cart-item-price-old">Prix neuf : {item.product.price}€</span>
+                        <span className="cart-item-price-purchase">
+                          {item.product.biblioPrice || item.product.price}€
+                          <span className="cart-item-price-purchase__unit"> / unité</span>
+                        </span>
+                      </div>
+                    </div>
+                    <div className="cart-item-actions">
+                      <button onClick={() => removeFromCart(item.id)} className="cart-item-delete-btn"><Trash2 size={20} /></button>
+                      <div className="cart-item-qty-wrapper">
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="cart-item-qty-btn"><Minus size={14} color="#2E1D21" /></button>
+                        <span className="cart-item-qty-text">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="cart-item-qty-btn"><Plus size={14} color="#2E1D21" /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* --- COLONNE DROITE : RÉSUMÉ & ABONNEMENT --- */}
         <div className="cart-summary-card">
-          <h3 className="cart-summary-title">
-            Ma future Box
-          </h3>
+          <h3 className="cart-summary-title">Résumé de la commande</h3>
 
-          <div className="cart-summary-row">
-            <span>Nombre de jouets</span>
-            <strong className="cart-summary-row-bold">{itemCount}</strong>
-          </div>
+          {/* RÉSUMÉ LOCATION */}
+          {rentalItems.length > 0 && (
+            <div className="cart-plan-box">
+              <p className="cart-plan-label">Abonnement ({rentalCount} jouet{rentalCount > 1 ? 's' : ''}) :</p>
+              <div className="cart-plan-header">
+                <span className="cart-plan-name">{planName}</span>
+                <span className="cart-plan-price">
+                  {cartTotalDisplay}<span className="cart-plan-price-month">/mois</span>
+                </span>
+              </div>
+              {isBoxMystereCart && (
+                <p className="cart-plan-details">
+                  Offre non renouvelable. Passage automatique au forfait 4 jouets (38 €/mois) dès le 2e mois.
+                </p>
+              )}
+            </div>
+          )}
 
-          <div className="cart-summary-row">
-            <span>Valeur réelle des jouets</span>
-            <span className="cart-summary-price-old">{cartValue.toFixed(2)}€</span>
-          </div>
+          {/* RÉSUMÉ ACHAT */}
+          {purchaseItems.length > 0 && (
+            <div className="cart-summary-purchase-row">
+              <span className="cart-summary-purchase-label">
+                <Package size={18} color="#FF8C94" /> Achat définitif ({purchaseCount} article{purchaseCount > 1 ? 's' : ''})
+              </span>
+              <strong className="cart-summary-purchase-total">{purchaseTotal.toFixed(2)}€</strong>
+            </div>
+          )}
 
           <div className="cart-summary-row cart-summary-margin-bottom">
             <span className="cart-summary-delivery-label">
-                <Truck size={18} color="#88D4AB" /> Livraison
+              <Truck size={18} color="#88D4AB" /> Livraison
             </span>
             <span className="cart-summary-delivery-value">OFFERTE</span>
           </div>
 
-          {/* FORMULE DYNAMIQUE MISE À JOUR */}
-          <div className="cart-plan-box">
-            <p className="cart-plan-label">Formule calculée :</p>
-
-            <div className="cart-plan-header">
-                <span className="cart-plan-name">{planName}</span>
-                <span className="cart-plan-price">
-                    {cartTotalDisplay}<span className="cart-plan-price-month">/mois</span>
-                </span>
-            </div>
-
-            {isBoxMystereCart && (
-                <p className="cart-plan-details">
-                    Offre non renouvelable. Passage automatique au forfait 4 jouets (38 €/mois) dès le 2e mois.
-                </p>
-            )}
-          </div>
-
           <div className="cart-checkout-section">
             <p className="cart-checkout-text">
-                Aucun paiement n'est prélevé maintenant. Vous confirmerez votre abonnement à l'étape suivante.
+              Aucun paiement n'est prélevé maintenant. Vous confirmerez {rentalCount > 0 && purchaseCount > 0 ? "votre abonnement et votre achat" : "votre commande"} à l'étape suivante.
             </p>
 
-            {/* Section Promo Code  */}
-  {/* 🛡️ CHAMP CODE PROMO INTERACTIF */}
-{!isBoxMystereCart && (
-  <div className="mb-4 text-left w-full mt-2">
-    <form onSubmit={handleVerifyPromo} className="flex gap-2 w-full">
-      <input
-        type="text"
-        placeholder="Code promo :"
-        value={promoCode}
-        onChange={(e) => {
-          setPromoCode(e.target.value.toUpperCase());
-          setPromoStatus("idle"); // Efface le message dès qu'on retape
-        }}
-        className={`flex-1 bg-[#FFFAF4] border-2 rounded-[25px] px-4 py-3 text-[#2E1D21] focus:outline-none transition-colors ${
-          promoStatus === 'error' ? 'border-[#FF8C94] animate-shake' : 
-          promoStatus === 'success' ? 'border-[#88D4AB]' : 
-          'border-[#DFF1F9] focus:border-[#6EC1E4]'
-        }`}
-      />
-      <button 
-        type="submit" 
-        disabled={promoStatus === 'loading' || !promoCode} 
-        className="bg-[#DFF1F9] text-[#6EC1E4] hover:bg-[#6EC1E4] hover:text-white font-bold rounded-[25px] px-5 py-3 transition-colors disabled:opacity-50"
-      >
-         {promoStatus === 'loading' ? '...' : 'Appliquer'}
-      </button>
-    </form>
-    
-    {/* Messages de retour visuel */}
-    {promoStatus === 'success' && (
-      <p className="text-[#88D4AB] text-sm mt-2 font-medium px-2">{promoMessage}</p>
-    )}
-    {promoStatus === 'error' && (
-      <p className="text-[#FF8C94] text-sm mt-2 font-medium px-2">{promoMessage}</p>
-    )}
-  </div>
-)}
+            {/* CODE PROMO */}
+            {!isBoxMystereCart && (
+              <div className="cart-promo-wrapper">
+                <form onSubmit={handleVerifyPromo} className="cart-promo-form">
+                  <input
+                    type="text"
+                    placeholder="Code promo :"
+                    value={promoCode}
+                    onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoStatus("idle"); }}
+                    className={`cart-promo-input${promoStatus === 'error' ? ' cart-promo-input--error' : promoStatus === 'success' ? ' cart-promo-input--success' : ''}`}
+                  />
+                  <button type="submit" disabled={promoStatus === 'loading' || !promoCode} className="cart-promo-btn">
+                    {promoStatus === 'loading' ? '...' : 'Appliquer'}
+                  </button>
+                </form>
+                {promoStatus === 'success' && <p className="cart-promo-msg--success">{promoMessage}</p>}
+                {promoStatus === 'error' && <p className="cart-promo-msg--error">{promoMessage}</p>}
+              </div>
+            )}
 
-{/* BOUTON DE VALIDATION DU PANIER */}
-<div className="cart-checkout-btn-wrapper">
-    {refillMode ? (
-      <>
-        {refillError && (
-          <p className="text-red-500 text-sm text-center mb-2">{refillError}</p>
-        )}
-        <button
-          onClick={handleRefillValidation}
-          disabled={itemCount === 0 || itemCount !== refillSlots}
-          className="w-full px-6 py-3 rounded-full bg-[#88D4AB] hover:bg-[#6abf92] text-[#2E1D21] font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          type="button"
-        >
-          Choisir la livraison — 0€
-        </button>
-        {itemCount !== refillSlots && itemCount > 0 && (
-          <p className="text-amber-600 text-xs text-center mt-1">
-            Vous devez sélectionner exactement {refillSlots} jouet{refillSlots > 1 ? 's' : ''} ({itemCount} dans le panier).
-          </p>
-        )}
-      </>
-    ) : exchangeMode ? (
-      <>
-        {exchangeError && (
-          <p className="text-red-500 text-sm text-center mb-2">{exchangeError}</p>
-        )}
-        <button
-          onClick={() => handleExchangeValidation(false)}
-          disabled={exchangeLoading || itemCount === 0}
-          className="w-full px-6 py-3 rounded-full bg-[#6EC1E4] hover:bg-[#5aafcf] text-white font-semibold shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          type="button"
-        >
-          {exchangeLoading ? 'Traitement...' : 'Confirmer l\'échange — 0€'}
-        </button>
-      </>
-    ) : (
-          <ButtonBlue
-            text="Valider ma sélection"
-            href={`/paiement${promoStatus === 'success' ? `?promo=${promoCode.trim().toUpperCase()}` : ''}`}
-          />
-    )}
-</div>  
+            {/* BOUTON DE VALIDATION DU PANIER */}
+            <div className="cart-checkout-btn-wrapper">
+              {refillMode ? (
+                <>
+                  {refillError && <p className="cart-error-msg">{refillError}</p>}
+                  <button
+                    onClick={handleRefillValidation}
+                    disabled={rentalCount === 0 || rentalCount !== refillSlots}
+                    className="cart-checkout-btn-refill"
+                    type="button"
+                  >
+                    Choisir la livraison — 0€
+                  </button>
+                  {rentalCount !== refillSlots && rentalCount > 0 && (
+                    <p className="cart-warning-msg">Vous devez louer exactement {refillSlots} jouet{refillSlots > 1 ? 's' : ''} ({rentalCount} en location).</p>
+                  )}
+                </>
+              ) : exchangeMode ? (
+                <>
+                  {exchangeError && <p className="cart-error-msg">{exchangeError}</p>}
+                  <button
+                    onClick={() => handleExchangeValidation(false)}
+                    disabled={exchangeLoading || rentalCount === 0}
+                    className="cart-checkout-btn-exchange"
+                    type="button"
+                  >
+                    {exchangeLoading ? 'Traitement...' : "Confirmer l'échange — 0€"}
+                  </button>
+                </>
+              ) : (
+                <ButtonBlue text="Valider ma sélection" href={`/paiement${promoStatus === 'success' ? `?promo=${promoCode.trim().toUpperCase()}` : ''}`} />
+              )}
+            </div>
           </div>
 
           <div className="cart-reassurance-wrapper">
-             <div className="cart-reassurance-item">
-                <CheckCircle size={14} /> Sans engagement
-             </div>
-             <div className="cart-reassurance-item">
-                <CheckCircle size={14} /> Nettoyage PRO
-             </div>
+            <div className="cart-reassurance-item"><CheckCircle size={14} /> Sans engagement</div>
+            <div className="cart-reassurance-item"><CheckCircle size={14} /> Nettoyage PRO</div>
           </div>
-
         </div>
       </div>
     </div>
