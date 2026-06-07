@@ -219,15 +219,20 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData, s
         shippingPhone: shippingData.shippingPhone,
         stripeSubscriptionId: stripeSubscriptionId,
         OrderProducts: {
-          create: cartData.items.map(item => ({
-            ProductId: item.productId,
-            quantity: item.quantity,
-            nextBillingDate: nextMonth, 
-            rentalEndDate: nextMonth
-          }))
-        }
-      }
-    });
+      create: cartData.items.map(item => {
+        const isPurchase = item.intent === 'PURCHASE';
+        
+        return {
+          ProductId: item.productId,
+          quantity: item.quantity,
+          nextBillingDate: isPurchase ? null : nextMonth, 
+          rentalEndDate: isPurchase ? null : nextMonth,
+          renewalIntention: isPurchase ? 'ACHETE' : null 
+        };
+      })
+    }
+  }
+});
 
     // 3. Décrémentation Stock
     for (const item of cartData.items) {

@@ -1,4 +1,4 @@
-//src/app/api/checkout/route.js
+// src/app/api/checkout/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -35,16 +35,14 @@ export async function POST(req) {
         return NextResponse.json({ error: "Quantités invalides détectées." }, { status: 400 });
     }
     
-    // Calcul du nombre total de jouets
-    const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-    
-    // Snapshot du panier
+    // Snapshot enrichi du panier pour le transmettre de manière transparente au Webhook
     const cartSnapshot = cartItems.map(item => ({ 
       id: item.productId, 
-      q: item.quantity 
+      q: item.quantity,
+      intent: item.intent || 'RENTAL' // 'RENTAL' par défaut si non précisé
     }));
 
-    // validation de l'adresse pour livraison domicile
+    // Validation de l'adresse pour livraison domicile
     const AUTHORIZED_ZONES = {
         "34690": ["FABREGUES", "FABRÈGUES"],
         "34570": ["PIGNAN", "SAUSSAN"]
@@ -61,20 +59,18 @@ export async function POST(req) {
         }
     }
 
-    // --- DÉTECTION BOX MYSTÈRE (avant la logique promo) ---
-    // cartItems vient du panier avec shape { productId, quantity, product: { reference } } OU { reference }
+    // --- DÉTECTION BOX MYSTÈRE ---
     const isBoxMystere = cartItems.some(
       item => item.reference === 'BOX-MYSTERE' || item.product?.reference === 'BOX-MYSTERE'
     );
 
-    // ---   CODE PROMO ---
+    // --- CODE PROMO ---
     let appliedPromo = null;
     let stripeDiscount = undefined;
 
     if (promoCode) {
         const cleanCode = promoCode.trim().toUpperCase();
 
-        // Blocage manuel du code BOXMAI24 sans la Box Mystère dans le panier
         if (cleanCode === 'BOXMAI24' && !isBoxMystere) {
             return NextResponse.json({
                 error: "Ce code est strictement réservé à la Box Mystère de Mai.",
@@ -82,7 +78,6 @@ export async function POST(req) {
         }
 
         if (cleanCode === 'BIBLIOMOISOFFERT') {
-            // LOGIQUE 1 : L'offre "1 acheté = 1 offert" (Gérée par Prisma & Webhook)
             const userIdInt = parseInt(session.user.id, 10);
             const existingUsage = await prisma.promoCodeUsage.findUnique({
                 where: { userId_promoCode: { userId: userIdInt, promoCode: cleanCode } },
@@ -94,17 +89,14 @@ export async function POST(req) {
             appliedPromo = cleanCode;
 
         } else {
-            // LOGIQUE 2 : Codes UGC dynamiques (Gérés par Stripe Dashboard)
             try {
-                // On interroge Stripe pour savoir si ce code existe et est actif
                 const promoCodes = await stripe.promotionCodes.list({
                     code: cleanCode,
-                    active: true, // Vérifie qu'il n'est pas expiré
+                    active: true,
                     limit: 1
                 });
 
                 if (promoCodes.data.length > 0) {
-                    // Code Stripe valide trouvé ! On récupère son ID pour l'injecter
                     stripeDiscount = [{ promotion_code: promoCodes.data[0].id }];
                     appliedPromo = cleanCode;
                 } else {
@@ -115,7 +107,6 @@ export async function POST(req) {
             }
         }
     }
-    // ------------------------------------------------
 
     const pricingMap = {
         1: process.env.STRIPE_PRICE_1_TOY,
@@ -129,66 +120,99 @@ export async function POST(req) {
         9: process.env.STRIPE_PRICE_9_TOYS
     };
 
+    // --- 1. SÉCURISATION DES PRIX VIA LA BDD ---
+    const productIds = cartItems.map(item => item.productId).filter(Boolean);
+    const dbProducts = await prisma.products.findMany({
+      where: { id: { in: productIds } }
+    });
+
+    // --- 2. SÉPARATION DES ARTICLES SELON L'INTENTION ---
+    const rentalItems = cartItems.filter(item => item.intent !== 'PURCHASE');
+    const purchaseItems = cartItems.filter(item => item.intent === 'PURCHASE');
+
+    // Le décompte de l'abonnement s'appuie uniquement sur les locations
+    const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
+
     let line_items = [];
     let priceId;
 
-    if (isBoxMystere) {
-        console.log('[Checkout] 📦 Box Mystère détectée');
-        priceId = process.env.STRIPE_PRICE_4_TOYS;
-        const couponId = process.env.STRIPE_COUPON_BOX_MAI;
+    // --- 3. TRAITEMENT DU BLOC LOCATION (ABONNEMENT) ---
+    if (rentalCount > 0) {
+        if (isBoxMystere) {
+            console.log('[Checkout] 📦 Box Mystère détectée');
+            priceId = process.env.STRIPE_PRICE_4_TOYS;
+            const couponId = process.env.STRIPE_COUPON_BOX_MAI;
 
-        console.log('[Checkout] STRIPE_PRICE_4_TOYS:', priceId || '❌ MANQUANT');
-        console.log('[Checkout] STRIPE_COUPON_BOX_MAI:', couponId || '❌ MANQUANT');
+            if (!priceId || !couponId) {
+                return NextResponse.json({ error: "Configuration Stripe manquante pour la Box Mystère." }, { status: 500 });
+            }
 
-        if (!priceId) {
-            return NextResponse.json({ error: "Configuration Stripe manquante : STRIPE_PRICE_4_TOYS absent." }, { status: 500 });
-        }
-        if (!couponId) {
-            return NextResponse.json({ error: "Configuration Stripe manquante : STRIPE_COUPON_BOX_MAI absent." }, { status: 500 });
-        }
-
-        line_items.push({ price: priceId, quantity: 1 });
-        stripeDiscount = [{ coupon: couponId }];
-        appliedPromo = 'BOXMAI24';
-        console.log('[Checkout] line_items:', JSON.stringify(line_items));
-        console.log('[Checkout] discounts:', JSON.stringify(stripeDiscount));
-    } else {
-        priceId = pricingMap[count];
-        if (priceId) {
             line_items.push({ price: priceId, quantity: 1 });
-        } else if (count > 9) {
-            return NextResponse.json({ error: "Pour plus de 9 jouets, veuillez nous contacter pour une offre sur mesure." }, { status: 400 });
+            stripeDiscount = [{ coupon: couponId }];
+            appliedPromo = 'BOXMAI24';
         } else {
-            return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
+            priceId = pricingMap[rentalCount];
+            if (priceId) {
+                line_items.push({ price: priceId, quantity: 1 });
+            } else if (rentalCount > 9) {
+                return NextResponse.json({ error: "Pour plus de 9 jouets en location, veuillez nous contacter." }, { status: 400 });
+            } else {
+                return NextResponse.json({ error: "Votre panier de location est invalide." }, { status: 400 });
+            }
         }
+    } else if (purchaseItems.length === 0) {
+        return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
     }
 
-    // 3. Récupération du stripeCustomerId pour appliquer le solde créditeur
+    // --- 4. TRAITEMENT DU BLOC ACHAT IMMÉDIAT (PRIX BIBLIO) ---
+    for (const item of purchaseItems) {
+        const dbProduct = dbProducts.find(p => p.id === item.productId);
+        if (!dbProduct) continue;
+
+        // Choix sécurisé du prix : priorité absolue à la valeur issue de la BDD
+        const finalPrice = dbProduct.biblioPrice || dbProduct.price;
+
+        line_items.push({
+            price_data: {
+                currency: 'eur',
+                product_data: {
+                    name: `Achat définitif — ${dbProduct.name}`,
+                    images: dbProduct.images?.length ? [`${baseUrl}${dbProduct.images[0]}`] : [],
+                },
+                unit_amount: Math.round(finalPrice * 100),
+            },
+            quantity: item.quantity,
+        });
+    }
+
+    // --- 5. SÉLECTION DYNAMIQUE DU MODE DE LA SESSION ---
+    // S'il n'y a que de l'achat définitif, on bascule en mode 'payment'
+    const stripeMode = rentalCount > 0 ? "subscription" : "payment";
+
+    // Récupération optionnelle du stripeCustomerId pour appliquer les crédits cadeaux
     const dbUser = await prisma.users.findUnique({
       where: { id: parseInt(session.user.id) },
       select: { stripeCustomerId: true },
     });
 
-    // 3. Créer la session Stripe
-    console.log('[Checkout] Création session Stripe — mode subscription, isBoxMystere:', isBoxMystere);
+    console.log(`[Checkout] Session Stripe configurée en mode ${stripeMode}`);
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: line_items,
-      mode: "subscription",
-      // Si le client a un stripeCustomerId, on le passe pour activer le solde créditeur (cartes cadeaux)
+      mode: stripeMode,
       ...(dbUser?.stripeCustomerId
         ? { customer: dbUser.stripeCustomerId }
         : { customer_email: session.user.email }),
       discounts: stripeDiscount,
       allow_promotion_codes: stripeDiscount ? undefined : true,
     
-        custom_text: appliedPromo === 'BIBLIOMOISOFFERT' ? {
+      custom_text: appliedPromo === 'BIBLIOMOISOFFERT' ? {
         submit: {
           message: "🎁 **Code BIBLIOMOISOFFERT validé !** Réglez votre 1er mois aujourd'hui, votre 2ème mois sera automatiquement à 0,00 €."
         }
       } : appliedPromo === 'BOXMAI24' ? {
         submit: {
-          message: "📦 **Box Mystère de Mai** — Offre spéciale 24,90 € appliquée automatiquement pour votre 1er mois !"
+          message: "📦 **Box Mystère de Mai** — Offre spéciale applied_promo !"
         }
       } : undefined,
     
