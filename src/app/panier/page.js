@@ -170,6 +170,16 @@ export default function PanierPage() {
   } = useCart();
   const router = useRouter();
 
+  // --- CRÉDIT CARTE CADEAU ---
+  const [giftCredit, setGiftCredit] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/user/stripe-balance")
+      .then((r) => r.json())
+      .then((data) => setGiftCredit(data.balance ?? 0))
+      .catch(() => setGiftCredit(0));
+  }, []);
+
   const exchangeMode = !!exchangeContext;
   const exchangeOrderId = exchangeContext?.orderId ?? null;
   const refillMode = !!refillContext;
@@ -228,6 +238,14 @@ export default function PanierPage() {
     return total + activePrice * item.quantity;
   }, 0);
 
+  // --- TOTAL AVEC DÉDUCTION DU CRÉDIT CARTE CADEAU ---
+  const subscriptionPriceValue = rentalItems.length > 0
+    ? parseFloat(String(cartTotalDisplay).replace('€', '').replace(',', '.')) || 0
+    : 0;
+  const baseTotal = subscriptionPriceValue + purchaseTotal;
+  const giftCreditAmount = giftCredit / 100;
+  const totalAfterCredit = Math.max(0, baseTotal - giftCreditAmount);
+
   const handleRefillValidation = () => router.push("/livraison-echange");
 
   // --- LOGIQUE MODE ÉCHANGE (Basée uniquement sur les locations) ---
@@ -244,16 +262,6 @@ export default function PanierPage() {
     }
     router.push("/livraison-echange");
   };
-
-  // --- CRÉDIT CARTE CADEAU ---
-  const [giftCredit, setGiftCredit] = useState(0);
-
-  useEffect(() => {
-    fetch("/api/user/stripe-balance")
-      .then((r) => r.json())
-      .then((data) => setGiftCredit(data.balance ?? 0))
-      .catch(() => setGiftCredit(0));
-  }, []);
 
   // --- CODE PROMO ---
   const [promoCode, setPromoCode] = useState("");
@@ -656,6 +664,20 @@ export default function PanierPage() {
             </span>
             <span className="cart-summary-delivery-value">OFFERTE</span>
           </div>
+
+          {giftCredit > 0 && baseTotal > 0 && (
+            <div className="cart-summary-row cart-summary-row--bold cart-total-with-credit">
+              <span>Total avec crédit déduit</span>
+              <span className="cart-total-with-credit__values">
+                <span className="cart-total-with-credit__old">
+                  {baseTotal.toFixed(2)}€
+                </span>
+                <span className="cart-total-with-credit__new">
+                  {totalAfterCredit.toFixed(2)}€
+                </span>
+              </span>
+            </div>
+          )}
 
           <div className="cart-checkout-section">
             <p className="cart-checkout-text">

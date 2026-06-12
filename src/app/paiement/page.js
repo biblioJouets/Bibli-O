@@ -156,6 +156,10 @@ export default function PaiementPage() {
   // Total à régler aujourd'hui : achats + (premier mois si nouvel abonné)
   const totalToday = purchaseTotal + (isExistingSubscriber ? 0 : subscriptionPrice);
 
+  // --- TOTAL APRÈS DÉDUCTION DU CRÉDIT CARTE CADEAU ---
+  const giftCreditAmount = giftCredit / 100;
+  const totalAfterCredit = Math.max(0, totalToday - giftCreditAmount);
+
   // Scripts Mondial Relay
   useEffect(() => {
     const loadScripts = async () => {
@@ -468,7 +472,14 @@ export default function PaiementPage() {
             <div className="divider"></div>
             <div className="total-row">
               <span>Total à régler</span>
-              <span>{totalToday.toFixed(2)}€</span>
+              {giftCreditAmount > 0 ? (
+                <span className="total-row__values">
+                  <span className="total-row__old">{totalToday.toFixed(2)}€</span>
+                  <span className="total-row__new">{totalAfterCredit.toFixed(2)}€</span>
+                </span>
+              ) : (
+                <span>{totalToday.toFixed(2)}€</span>
+              )}
             </div>
 
             <button 

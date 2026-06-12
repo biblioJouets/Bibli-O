@@ -478,6 +478,24 @@
   margin-left: auto;
 }
 
+.cart-total-with-credit__values {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cart-total-with-credit__old {
+  text-decoration: line-through;
+  color: #999;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.cart-total-with-credit__new {
+  color: #2E1D21;
+  font-weight: 800;
+}
+
 /* --- Résumé achat --- */
 .cart-summary-purchase-row {
   display: flex;

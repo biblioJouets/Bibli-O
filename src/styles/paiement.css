@@ -419,6 +419,23 @@
   margin-left: auto;
 }
 
+.total-row__values {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.total-row__old {
+  text-decoration: line-through;
+  color: #999;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.total-row__new {
+  font-weight: 800;
+}
+
 /* Centrage pour le panier vide */
 .cart-empty-msg {
     text-align: center;
