@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
+
 import Link from "next/link";
 import {
   Trash2,
@@ -243,6 +244,16 @@ export default function PanierPage() {
     }
     router.push("/livraison-echange");
   };
+
+  // --- CRÉDIT CARTE CADEAU ---
+  const [giftCredit, setGiftCredit] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/user/stripe-balance")
+      .then((r) => r.json())
+      .then((data) => setGiftCredit(data.balance ?? 0))
+      .catch(() => setGiftCredit(0));
+  }, []);
 
   // --- CODE PROMO ---
   const [promoCode, setPromoCode] = useState("");
@@ -627,7 +638,18 @@ export default function PanierPage() {
               </strong>
             </div>
           )}
-
+{giftCredit > 0 && (
+            <div className="cart-gift-credit">
+              <Gift size={18} color="#FFC93C" />
+              <span className="cart-gift-credit__label">Crédit carte cadeau disponible :</span>
+              <strong className="cart-gift-credit__amount">
+                {(giftCredit / 100).toLocaleString("fr-FR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}€
+              </strong>
+            </div>
+          )}
           <div className="cart-summary-row cart-summary-margin-bottom">
             <span className="cart-summary-delivery-label">
               <Truck size={18} color="#88D4AB" /> Livraison

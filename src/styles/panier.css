@@ -456,6 +456,28 @@
   color: #2E1D21;
 }
 
+/* --- Crédit carte cadeau --- */
+.cart-gift-credit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+  background-color: #FFFAF4;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #FFE9B3;
+}
+
+.cart-gift-credit__label {
+  color: #2E1D21;
+  font-size: 0.9rem;
+}
+
+.cart-gift-credit__amount {
+  color: #2E1D21;
+  margin-left: auto;
+}
+
 /* --- Résumé achat --- */
 .cart-summary-purchase-row {
   display: flex;

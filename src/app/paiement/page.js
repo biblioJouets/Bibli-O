@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react"; 
+import { ShieldCheck, Truck, Package, MapPin, AlertCircle, Gift } from "lucide-react";
 import '@/styles/paiement.css';
 
 export default function PaiementPage() {
@@ -18,6 +18,16 @@ export default function PaiementPage() {
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [promoStatus, setPromoStatus] = useState(promoCode ? "loading" : "idle");
+  const [promoMessage, setPromoMessage] = useState("");
+  const [giftCredit, setGiftCredit] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/user/stripe-balance")
+      .then((r) => r.json())
+      .then((data) => setGiftCredit(data.balance ?? 0))
+      .catch(() => setGiftCredit(0));
+  }, []);
   const [deliveryMode, setDeliveryMode] = useState("DOMICILE"); 
   const [selectedRelay, setSelectedRelay] = useState(null); 
   const [shipping, setShipping] = useState({
@@ -62,7 +72,44 @@ export default function PaiementPage() {
     };
 
     fetchUserData();
-  }, [session]); 
+  }, [session]);
+
+  // --- RE-VÉRIFICATION DU CODE PROMO AU CHARGEMENT ---
+  useEffect(() => {
+    if (!promoCode) {
+      setPromoStatus("idle");
+      return;
+    }
+    if (loading || !cart.items) return;
+
+    let cancelled = false;
+    const verify = async () => {
+      setPromoStatus("loading");
+      try {
+        const res = await fetch("/api/verify-promo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ promoCode, cartItems: cart.items }),
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.valid) {
+          setPromoStatus("success");
+          setPromoMessage(data.message);
+        } else {
+          setPromoStatus("error");
+          setPromoMessage(data.message || "Ce code promo n'est plus valide.");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setPromoStatus("error");
+          setPromoMessage("Erreur lors de la vérification du code promo.");
+        }
+      }
+    };
+    verify();
+    return () => { cancelled = true; };
+  }, [promoCode, loading, cart.items]);
 
   // Zones éligibles domicile
   const AUTHORIZED_HOME_DELIVERY = {
@@ -191,6 +238,10 @@ export default function PaiementPage() {
     }
     if (deliveryMode === 'MONDIAL_RELAY' && !selectedRelay) {
         alert("Veuillez sélectionner un point relais.");
+        return;
+    }
+    if (promoCode && promoStatus !== "success") {
+        alert("Le code promo n'est plus valide. Veuillez retourner au panier pour le corriger.");
         return;
     }
 
@@ -356,7 +407,6 @@ export default function PaiementPage() {
         <div>
           <div className="summary-card">
             <h3 className="summary-title">Mon Panier</h3>
-            
             <div className="cart-items-list">
               {rentalItems.map(item => (
                 <div key={item.id} className="cart-item-row">
@@ -403,6 +453,19 @@ export default function PaiementPage() {
                 </div>
             )}
             <div className="divider"></div>
+            {giftCredit > 0 && (
+              <div className="gift-credit-row">
+                <Gift size={18} color="#FFC93C" />
+                <span>Crédit carte cadeau disponible :</span>
+                <strong>
+                  {(giftCredit / 100).toLocaleString("fr-FR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}€
+                </strong>
+              </div>
+            )}
+            <div className="divider"></div>
             <div className="total-row">
               <span>Total à régler</span>
               <span>{totalToday.toFixed(2)}€</span>
@@ -411,7 +474,7 @@ export default function PaiementPage() {
             <button 
               type="submit" 
               form="payment-form"
-              disabled={isSubmitting || (!isBoxMystereCart && rentalItems.length > 0 && subscriptionPrice === 0) || (deliveryMode === 'DOMICILE' && !canSubmit)}
+              disabled={isSubmitting || (!isBoxMystereCart && rentalItems.length > 0 && subscriptionPrice === 0) || (deliveryMode === 'DOMICILE' && !canSubmit) || (!!promoCode && promoStatus !== "success")}
               className={`submit-btn ${(isSubmitting || (deliveryMode === 'DOMICILE' && !canSubmit)) ? 'disabled' : ''}`}
             >
               {isSubmitting ? "Validation..." : "Payer et Valider"} <ShieldCheck size={20} />
@@ -420,23 +483,44 @@ export default function PaiementPage() {
             <p className="secure-text">Paiement sécurisé. En validant, vous acceptez les CGV.</p>
           </div>
 
-      {promoCode && (
-  <div className="promo-banner">
-    <span className="promo-banner__icon">🎁</span>
-    <div>
-      <p className="promo-banner__title">
-        {promoCode === 'BIBLIOMOISOFFERT'
-          ? 'Offre de bienvenue activée !'
-          : `Code promo bien activé : ${promoCode} !`}
-      </p>
-      <p className="promo-banner__text">
-         {promoCode === 'BIBLIOMOISOFFERT'
-          ? 'Vous réglez votre première box aujourd\'hui, et votre prochain mois sera à 0€.'
-          : 'La réduction s\'appliquera automatiquement et de manière sécurisée à la page suivante.'}
-      </p>
-    </div>
-  </div>
-)}
+      {promoCode && promoStatus === "loading" && (
+        <div className="promo-banner promo-banner--loading">
+          <span className="promo-banner__icon">⏳</span>
+          <div>
+            <p className="promo-banner__title">Vérification du code promo {promoCode}...</p>
+          </div>
+        </div>
+      )}
+
+      {promoCode && promoStatus === "success" && (
+        <div className="promo-banner">
+          <span className="promo-banner__icon">🎁</span>
+          <div>
+            <p className="promo-banner__title">
+              {promoCode === 'BIBLIOMOISOFFERT'
+                ? 'Offre de bienvenue activée !'
+                : `Code promo bien activé : ${promoCode} !`}
+            </p>
+            <p className="promo-banner__text">
+              {promoCode === 'BIBLIOMOISOFFERT'
+                ? 'Vous réglez votre première box aujourd\'hui, et votre prochain mois sera à 0€.'
+                : promoMessage || 'La réduction s\'appliquera automatiquement et de manière sécurisée au paiement.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {promoCode && promoStatus === "error" && (
+        <div className="promo-banner promo-banner--error">
+          <span className="promo-banner__icon">⚠️</span>
+          <div>
+            <p className="promo-banner__title">Code promo invalide</p>
+            <p className="promo-banner__text">
+              {promoMessage} Retournez au panier pour le retirer ou en saisir un autre.
+            </p>
+          </div>
+        </div>
+      )}
         </div>
       </div>
     </div>

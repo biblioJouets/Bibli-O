@@ -54,17 +54,45 @@ export async function POST(req) {
     }
 
     // 2. Cas UGC : Interrogation de Stripe en temps réel
-    const promoCodes = await stripe.promotionCodes.list({
+    // On recherche d'abord sans filtre "active" pour distinguer "inexistant" de "expiré/désactivé"
+    const allMatches = await stripe.promotionCodes.list({
         code: cleanCode,
-        active: true, // Vérifie que le code n'est pas expiré ou désactivé
         limit: 1
     });
 
-    if (promoCodes.data.length > 0) {
-        return NextResponse.json({ valid: true, message: "🎁 Code enregistré ! La réduction s'appliquera au paiement." });
-    } else {
-        return NextResponse.json({ valid: false, message: "Code inexistant ou expiré." });
+    if (allMatches.data.length === 0) {
+        return NextResponse.json({ valid: false, message: "Ce code promo n'existe pas." });
     }
+
+    const promo = allMatches.data[0];
+
+    if (!promo.active) {
+        return NextResponse.json({ valid: false, message: "Ce code promo est expiré ou a été désactivé." });
+    }
+
+    // Vérifie l'épuisement global (nombre max de rédemptions atteint)
+    if (promo.max_redemptions !== null && promo.times_redeemed >= promo.max_redemptions) {
+        return NextResponse.json({ valid: false, message: "Ce code promo a déjà été entièrement utilisé." });
+    }
+
+    // Vérifie que le code n'a pas déjà été consommé par cet utilisateur
+    const existingUsage = await prisma.promoCodeUsage.findUnique({
+        where: { userId_promoCode: { userId: parseInt(session.user.id, 10), promoCode: cleanCode } },
+    });
+    if (existingUsage) {
+        return NextResponse.json({ valid: false, message: "Vous avez déjà utilisé ce code promo." });
+    }
+
+    // Construit un message décrivant la réduction
+    const coupon = promo.coupon;
+    let discountLabel = "Réduction appliquée";
+    if (coupon?.percent_off) {
+        discountLabel = `-${coupon.percent_off}% appliqué`;
+    } else if (coupon?.amount_off) {
+        discountLabel = `-${(coupon.amount_off / 100).toFixed(2)}€ appliqué`;
+    }
+
+    return NextResponse.json({ valid: true, message: `🎁 Code valide ! ${discountLabel}` });
 
   } catch (error) {
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
