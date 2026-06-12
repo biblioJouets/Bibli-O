@@ -9,7 +9,7 @@ import { ShieldCheck, Truck, Package, MapPin, AlertCircle } from "lucide-react";
 import '@/styles/paiement.css';
 
 export default function PaiementPage() {
-  const { cart, loading, boxMystereData, isBoxMystereCart, planName, cartTotalDisplay } = useCart();
+  const { cart, loading, boxMystereData, isBoxMystereCart, planName, cartTotalDisplay, exchangeContext, refillContext } = useCart();
   const { data: session } = useSession();
 
   const searchParams = useSearchParams();
@@ -86,12 +86,28 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
+  // --- SÉPARATION DES ARTICLES PAR INTENTION ---
+  const rentalItems = cart.items?.filter((item) => item.intent !== 'PURCHASE') || [];
+  const purchaseItems = cart.items?.filter((item) => item.intent === 'PURCHASE') || [];
+
   // Calcul prix — court-circuit Box Mystère
-  const itemCount = cart.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
   const subscriptionPrice = isBoxMystereCart ? 24.90 : (() => {
     const pricingMap = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
-    return pricingMap[itemCount] || 0;
+    return pricingMap[rentalCount] || 0;
   })();
+
+  // Total des achats définitifs (Prix Bibli'O)
+  const purchaseTotal = purchaseItems.reduce((total, item) => {
+    const activePrice = item.product.biblioPrice || item.product.price;
+    return total + activePrice * item.quantity;
+  }, 0);
+
+  // Le client est déjà abonné s'il est en mode échange ou réassort
+  const isExistingSubscriber = !!exchangeContext || !!refillContext;
+
+  // Total à régler aujourd'hui : achats + (premier mois si nouvel abonné)
+  const totalToday = purchaseTotal + (isExistingSubscriber ? 0 : subscriptionPrice);
 
   // Scripts Mondial Relay
   useEffect(() => {
@@ -165,7 +181,7 @@ export default function PaiementPage() {
   const handleOrder = async (e) => {
     e.preventDefault();
 
-    if (!isBoxMystereCart && subscriptionPrice === 0) {
+    if (!isBoxMystereCart && rentalItems.length > 0 && subscriptionPrice === 0) {
         alert("Pour plus de 9 jouets, veuillez nous contacter.");
         return;
     }
@@ -342,20 +358,37 @@ export default function PaiementPage() {
             <h3 className="summary-title">Mon Panier</h3>
             
             <div className="cart-items-list">
-              {cart.items?.map(item => (
+              {rentalItems.map(item => (
                 <div key={item.id} className="cart-item-row">
                   <Package size={16} color="#2E1D21" />
                   <span>{item.quantity}x {item.product.name}</span>
+                  <span className="item-badge item-badge--rental">Box Jouet</span>
+                </div>
+              ))}
+              {purchaseItems.map(item => (
+                <div key={item.id} className="cart-item-row">
+                  <Package size={16} color="#2E1D21" />
+                  <span>{item.quantity}x {item.product.name}</span>
+                  <span className="item-badge item-badge--purchase">Achat définitif</span>
                 </div>
               ))}
             </div>
 
             <div className="divider"></div>
 
-            <div className="price-row">
-              <span>{planName}</span>
-              <strong>{Number(subscriptionPrice).toFixed(2)}€ <span className="month-suffix">/mois</span></strong>
-            </div>
+            {rentalItems.length > 0 && (
+              <div className="price-row">
+                <span>{planName}</span>
+                <strong>{Number(subscriptionPrice).toFixed(2)}€ <span className="month-suffix">/mois</span></strong>
+              </div>
+            )}
+
+            {purchaseItems.length > 0 && (
+              <div className="price-row">
+                <span>Achat définitif ({purchaseItems.reduce((acc, item) => acc + item.quantity, 0)} article{purchaseItems.reduce((acc, item) => acc + item.quantity, 0) > 1 ? 's' : ''})</span>
+                <strong>{purchaseTotal.toFixed(2)}€</strong>
+              </div>
+            )}
 
             <div className="price-row-small">
               <span>Livraison</span>
@@ -369,16 +402,16 @@ export default function PaiementPage() {
                     {selectedRelay.city} ({selectedRelay.id})
                 </div>
             )}
-
+            <div className="divider"></div>
             <div className="total-row">
               <span>Total à régler</span>
-              <span>{Number(subscriptionPrice).toFixed(2)}€</span>
+              <span>{totalToday.toFixed(2)}€</span>
             </div>
 
             <button 
               type="submit" 
               form="payment-form"
-              disabled={isSubmitting || (!isBoxMystereCart && subscriptionPrice === 0) || (deliveryMode === 'DOMICILE' && !canSubmit)}
+              disabled={isSubmitting || (!isBoxMystereCart && rentalItems.length > 0 && subscriptionPrice === 0) || (deliveryMode === 'DOMICILE' && !canSubmit)}
               className={`submit-btn ${(isSubmitting || (deliveryMode === 'DOMICILE' && !canSubmit)) ? 'disabled' : ''}`}
             >
               {isSubmitting ? "Validation..." : "Payer et Valider"} <ShieldCheck size={20} />
@@ -388,16 +421,16 @@ export default function PaiementPage() {
           </div>
 
       {promoCode && (
-  <div className="bg-[#DAEEE6] border-2 border-[#88D4AB] rounded-[25px] p-4 mb-6 flex items-center gap-3">
-    <span className="text-2xl">🎁</span>
+  <div className="promo-banner">
+    <span className="promo-banner__icon">🎁</span>
     <div>
-      <p className="text-[#2E1D21] font-bold">
-        {promoCode === 'BIBLIOMOISOFFERT' 
+      <p className="promo-banner__title">
+        {promoCode === 'BIBLIOMOISOFFERT'
           ? 'Offre de bienvenue activée !'
           : `Code promo bien activé : ${promoCode} !`}
       </p>
-      <p className="text-sm text-[#2E1D21]">
-         {promoCode === 'BIBLIOMOISOFFERT' 
+      <p className="promo-banner__text">
+         {promoCode === 'BIBLIOMOISOFFERT'
           ? 'Vous réglez votre première box aujourd\'hui, et votre prochain mois sera à 0€.'
           : 'La réduction s\'appliquera automatiquement et de manière sécurisée à la page suivante.'}
       </p>

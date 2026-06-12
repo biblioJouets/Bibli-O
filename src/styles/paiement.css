@@ -244,6 +244,28 @@
   border-radius: 10px;
 }
 
+.cart-item-row span:nth-child(2) {
+  flex: 1;
+}
+
+/* --- MACARONS RÉCAPITULATIF --- */
+.item-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 25px;
+  color: #2E1D21;
+  white-space: nowrap;
+}
+
+.item-badge--rental {
+  background: #DFF1F9;
+}
+
+.item-badge--purchase {
+  background: #FFD9DC;
+}
+
 .divider {
   border-top: 2px dashed #ccc;
   margin: 25px 0;
@@ -342,6 +364,32 @@
   color: #999;
   text-align: center;
   margin-top: 20px;
+}
+
+/* --- BANDEAU CODE PROMO --- */
+.promo-banner {
+  background: #DAEEE6;
+  border: 2px solid #88D4AB;
+  border-radius: 25px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.promo-banner__icon {
+  font-size: 1.5rem;
+}
+
+.promo-banner__title {
+  color: #2E1D21;
+  font-weight: 800;
+}
+
+.promo-banner__text {
+  font-size: 0.85rem;
+  color: #2E1D21;
 }
 
 /* Centrage pour le panier vide */
