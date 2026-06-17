@@ -581,6 +581,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
           )}
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
+              const isPurchased  = op.intent === 'PURCHASE';
               const isAdopted   = ACQUIRED_STATUSES.includes(op.renewalIntention);
               const isProlonged = op.renewalIntention === 'PROLONGATION' || op.renewalIntention === 'PROLONGATION_TACITE';
               const endDate = op.rentalEndDate
@@ -602,14 +603,18 @@ function OrderCard({ order, type, onStatusUpdate }) {
                   <span className={styles.qtyBadge}>{op.quantity ?? 1}</span>
                   <span className={styles.productItemName}>
                     {op.Products?.name ?? "Jouet"}
+                    {isPurchased
+                      ? <span className={styles.intentBadgePurchase}>ACHAT</span>
+                      : <span className={styles.intentBadgeRental}>LOCATION</span>
+                    }
                     {isAdopted && <span className={styles.adoptedBadge}>Adopté 💜</span>}
                     {isProlonged && <span className={styles.prolongBadge}>⏳ Prolongation demandée</span>}
                   </span>
-                  {order.status === "ACTIVE" && !isAdopted && (
+                  {order.status === "ACTIVE" && !isAdopted && !isPurchased && (
                     <span className={styles.productMeta}>
                       {op.Products?.price != null && (
                         <span className={styles.adoptionPrice}>
-                          Adoption : {Number(op.Products.price).toFixed(2)} €
+                          Adoption : {Number(op.Products.biblioPrice ?? op.Products.price).toFixed(2)} €
                         </span>
                       )}
                       {endDate && (

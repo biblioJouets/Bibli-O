@@ -158,7 +158,7 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData, s
 
 try {
     const { newOrder, user } = result;
-    const products = cartData.items.map(item => item.product);
+    const products = cartData.items.map(item => ({ ...item.product, intent: item.intent }));
 
     const orderInfoForMail = {
       id: newOrder.id,

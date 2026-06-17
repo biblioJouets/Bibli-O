@@ -661,6 +661,28 @@
   opacity: 0.6;
 }
 
+.intentBadgePurchase {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: #FFD9DC;
+  color: #8B0000;
+  padding: 1px 7px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.intentBadgeRental {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(110, 193, 228, 0.25);
+  color: #0a4a6e;
+  padding: 1px 7px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
 .adoptedBadge {
   font-size: 0.7rem;
   font-weight: 700;

@@ -23,6 +23,7 @@ export default function OrderItemRow({
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
 
+  const isPurchased    = item.intent === 'PURCHASE';
   const isAdopted      = ADOPTED_STATUSES.includes(item.renewalIntention);
   const isProlonged    = item.renewalIntention === 'PROLONGATION' || item.renewalIntention === 'PROLONGATION_TACITE';
   const isHistorical   = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
@@ -47,7 +48,7 @@ export default function OrderItemRow({
     : null;
 
   // La checkbox n'apparaît que si un mode actif est en cours ET que le jouet est éligible
-  const isSelectable = !!onToggleSelect && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
+  const isSelectable = !!onToggleSelect && !isPurchased && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
 
   return (
     <div className={`order-item-row transition-colors ${isSelected ? 'bg-[#EBF7FD] rounded-[16px] px-2' : ''}`}>
@@ -105,7 +106,11 @@ export default function OrderItemRow({
 
       {/* Zone d'état / actions par jouet */}
       <div className="item-actions">
-        {isHistorical ? null
+        {isPurchased ? (
+          <span className="badge-purchased">
+            💝 Acquis définitivement
+          </span>
+        ) : isHistorical ? null
         : isAdoptionOrder ? (
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}>

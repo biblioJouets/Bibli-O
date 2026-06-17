@@ -16,7 +16,7 @@ const orderInclude = {
   OrderProducts: {
     include: {
       Products: {
-        select: { id: true, name: true, images: true, reference: true },
+        select: { id: true, name: true, images: true, reference: true, price: true, biblioPrice: true },
       },
     },
   },
