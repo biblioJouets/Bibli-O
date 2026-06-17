@@ -412,6 +412,11 @@ function OrderCard({ order, type, onStatusUpdate }) {
     order.mondialRelayPointId !== "DOMICILE" &&
     order.mondialRelayPointId !== "null";
 
+  const allPurchased  = order.OrderProducts.length > 0 && order.OrderProducts.every(op => op.intent === 'PURCHASE');
+  const anyPurchased  = order.OrderProducts.some(op => op.intent === 'PURCHASE');
+  const anyRental     = order.OrderProducts.some(op => op.intent !== 'PURCHASE');
+  const isHybrid      = anyPurchased && anyRental;
+
   const clientName = order.Users
     ? `${order.Users.firstName ?? ""} ${order.Users.lastName ?? ""}`.trim()
     : "Client inconnu";
@@ -501,6 +506,12 @@ function OrderCard({ order, type, onStatusUpdate }) {
               }}>
                 📦 BOX MYSTÈRE
               </span>
+            )}
+            {allPurchased && (
+              <span className={styles.hybridBadgePurchase}>📦 100% ACHAT</span>
+            )}
+            {isHybrid && (
+              <span className={styles.hybridBadgeMixed}>🔄 HYBRIDE</span>
             )}
           </div>
         </div>
@@ -610,7 +621,15 @@ function OrderCard({ order, type, onStatusUpdate }) {
                     {isAdopted && <span className={styles.adoptedBadge}>Adopté 💜</span>}
                     {isProlonged && <span className={styles.prolongBadge}>⏳ Prolongation demandée</span>}
                   </span>
-                  {order.status === "ACTIVE" && !isAdopted && !isPurchased && (
+                  {isPurchased ? (
+                    <span className={styles.productMeta}>
+                      {op.Products?.price != null && (
+                        <span className={styles.purchasePrice}>
+                          Prix d&apos;achat : {Number(op.Products.biblioPrice ?? op.Products.price).toFixed(2)} €
+                        </span>
+                      )}
+                    </span>
+                  ) : order.status === "ACTIVE" && !isAdopted && (
                     <span className={styles.productMeta}>
                       {op.Products?.price != null && (
                         <span className={styles.adoptionPrice}>

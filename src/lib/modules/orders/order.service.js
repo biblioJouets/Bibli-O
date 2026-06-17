@@ -132,9 +132,10 @@ export const createOrder = async (userId, cartData, totalAmount, shippingData, s
         return {
           ProductId: item.productId,
           quantity: item.quantity,
-          nextBillingDate: isPurchase ? null : nextMonth, 
+          intent: isPurchase ? 'PURCHASE' : 'RENTAL',
+          nextBillingDate: isPurchase ? null : nextMonth,
           rentalEndDate: isPurchase ? null : nextMonth,
-          renewalIntention: isPurchase ? 'ACHETE' : null 
+          renewalIntention: isPurchase ? 'ACHETE' : null
         };
       })
     }
