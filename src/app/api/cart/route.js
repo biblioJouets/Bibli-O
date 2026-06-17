@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { cartService } from "@/lib/modules/cart/cart.service";
+import prisma from "@/lib/core/database";
 
 // Middleware interne pour récupérer l'ID User
 async function getUserId() {
