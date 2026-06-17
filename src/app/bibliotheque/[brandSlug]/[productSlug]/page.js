@@ -110,7 +110,7 @@ export default async function ProductPage({ params }) {
             unitCode: 'DAY'
           },
           transitTime: {
-            '@type': 'ShippingDeliveryTime',
+            '@type': 'QuantitativeValue',
             minValue: 2,
             maxValue: 4,
             unitCode: 'DAY'
@@ -121,7 +121,7 @@ export default async function ProductPage({ params }) {
       hasMerchantReturnPolicy: {
         '@type': 'MerchantReturnPolicy',
         applicableCountry: 'FR',
-        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnPeriod',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
         merchantReturnDays: 14,
         returnMethod: 'https://schema.org/ReturnByMail',
         returnFees: 'https://schema.org/FreeReturn'
