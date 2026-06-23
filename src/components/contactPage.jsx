@@ -26,7 +26,7 @@ function ContactPage() {
       <div className="contactSection">
         <div className="contactLeft">
           {/* Texte ajusté pour correspondre à l'intention du style (plus centré sur le contenu) */}
-          <h5 className="contact-subtitle">🧸 UN PROJET ? UN JEU ? ON ÉCOUTE !</h5> 
+          <h5 className="contact-subtitle">UN PROJET ? UN JEU ? ON ÉCOUTE !</h5> 
           <h2 className="contact-title">Envoyez-nous un message, lancez la partie !</h2>
           <p>
             Que vous ayez une question précise, besoin d'un devis sur mesure ou envie de partager une idée géniale, n'hésitez plus ! Laissez-nous un message, et notre équipe s'empressera de vous répondre plus vite qu'un jeu de construction.

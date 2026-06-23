@@ -101,8 +101,8 @@ export default async function Homepage() {
                     
                     <div className="functionalityCardsContainer">
                         <FunctionalityCard className="firstCard"
-                            title="Choisissez vos jouets"
-                            description="Choisissez parmi notre large sélection de jouets éducatifs adaptés à l'âge et aux intérêts de vos enfants."
+                            title="Composez votre box"
+                            description="Créez votre box sur-mesure parmi notre sélection de jeux."
                             number="1️⃣"
                         />
                         
@@ -110,23 +110,23 @@ export default async function Homepage() {
                         <Redo className="arrow arrow-top" aria-hidden="true" />
 
                         <FunctionalityCard className="secondCard"
-                            title="Choisissez votre abonnement"
-                            description="Sélectionnez votre abonnement avec le nombre de jouets qui vous convient sans engagement."
+                            title="Recevez et jouez"
+                            description="Recevez, profitez, puis gardez-les autant de temps qu'il vous plaira."
                             number="2️⃣"
                         />
                         
                         <Redo className="arrow arrow-bottom" aria-hidden="true" />
                         
                         <FunctionalityCard className="thirdCard"
-                            title="Livré, Jouez, échangez"
-                            description="Votre sélection de jouets est livrée propre et prête à jouer. Échangez quand vous voulez."
+                            title="Échangez ou Adoptez"
+                            description="Échangez votre sélection, gardez vos favoris, ou arrêtez quand vous voulez."
                             number="3️⃣"
                         />
                     </div>
                     
                     <ButtonBlue  
-                        text="Voir les abonnements"
-                        href="/abonnements"
+                        text="Lancer l'aventure Bibli'o Jouets"
+                        href="/bibliotheque"
                     />
                 </section>
                 

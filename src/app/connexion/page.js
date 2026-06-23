@@ -59,7 +59,7 @@ export default function ConnexionPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="auth-title">Bon retour parmi nous ! 👋</h1>
+        <h1 className="auth-title">Bon retour parmi nous !</h1>
 
         {successMessage && (
           <div className="bg-green-100 text-green-800 p-4 rounded mb-4 text-center">

@@ -50,7 +50,7 @@ export default function AdminSidebar() {
 
       <aside ref={menuRef} className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}>
         <div className={styles.sidebarHeader}>
-          <span className={styles.sidebarLogo}>🧸</span>
+          <span className={styles.sidebarLogo}></span>
           <span className={styles.sidebarTitle}>Admin</span>
           <button className={styles.closeButton} onClick={close} aria-label="Fermer le menu">
             <X size={20} color="#2E1D21" />

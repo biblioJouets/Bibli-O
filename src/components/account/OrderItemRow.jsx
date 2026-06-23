@@ -108,13 +108,13 @@ export default function OrderItemRow({
       <div className="item-actions">
         {isPurchased ? (
           <span className="badge-purchased">
-            💝 Acquis définitivement
+            Acquis définitivement
           </span>
         ) : isHistorical ? null
         : isAdoptionOrder ? (
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}>
-            🧸 À vous pour toujours
+           À vous pour toujours
           </span>
         ) : isReturning ? (
           <span className="text-gray-400 text-sm px-4 py-2 rounded-full"
@@ -124,7 +124,7 @@ export default function OrderItemRow({
         ) : isAdopted ? (
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}>
-            Adopté pour la vie 🧸
+            Adopté pour la vie
           </span>
         ) : orderStatus === 'ACTIVE' && !activeMode ? (
           /* Boutons individuels — visibles hors mode sélection groupée */
@@ -143,7 +143,7 @@ export default function OrderItemRow({
               onClick={() => setShowAdoptModal(true)}
               className="px-4 py-2 rounded-full text-white font-semibold text-sm transition-colors shadow-sm border-none"
               style={{ background: '#FF8C94' }}>
-              🧸 Adopter
+               Adopter
             </button>
 
             {['ACTIVE', 'SHIPPED'].includes(orderStatus) && (

@@ -123,7 +123,6 @@ export default function ProductDetailClient({ product }) {
               border: '1px solid #FF8C94',
               boxShadow: '0 2px 4px rgba(46, 29, 33, 0.05)'
             }}>
-              <span>💝</span>
               <span>
                 Coup de cœur ? Adoptez-le pour seulement <strong style={{ color: '#FF8C94', fontSize: '1.1rem' }}>{product.biblioPrice}€</strong> <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>(au lieu de {product.price}€ sur le marché)</span>
               </span>
@@ -141,7 +140,7 @@ export default function ProductDetailClient({ product }) {
                   <button 
                     className="add-to-cart-btn" 
                     onClick={() => addToCart(product.id, 1, "RENTAL")}
-                    style={{ backgroundColor: '#6EC1E4', color: '#2E1D21' }}
+                    style={{ backgroundColor: '#6EC1E4', color: '#ffffff' }}
                   >
                       <ShoppingCart size={20} /> Louer ce jouet (0€ avec abo)
                   </button>
@@ -151,7 +150,7 @@ export default function ProductDetailClient({ product }) {
                     <button 
                       className="add-to-cart-btn" 
                       onClick={() => addToCart(product.id, 1, "PURCHASE")}
-                      style={{ backgroundColor: '#FF8C94', color: '#2E1D21' }}
+                      style={{ backgroundColor: '#FF8C94', color: '#ffffff' }}
                     >
                         <Package size={20} /> Acheter définitivement ({product.biblioPrice}€)
                     </button>

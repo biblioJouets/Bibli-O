@@ -577,7 +577,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
 
         {/* Contenu */}
         <div className={styles.infoCol}>
-          <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
+          <h4 className={styles.infoColTitle}>Contenu ({order.OrderProducts.length})</h4>
           {(order.childAge || order.childGender) && (
             <div style={{
               background: '#fffbef', border: '1.5px solid #f5d16e', borderRadius: '10px',

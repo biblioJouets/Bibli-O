@@ -25,7 +25,7 @@ export default function Newsletter() {
 
     // Vérification du captcha avant tout
     if (!token) {
-      alert("Veuillez prouver que vous n’êtes pas un robot 😅");
+      alert("Veuillez prouver que vous n’êtes pas un robot ");
       return;
     }
 
@@ -74,10 +74,10 @@ export default function Newsletter() {
       <div className="newsletter-bubble yellow"></div>
 
       <div className="newsletter-content">
-        <h2 className="homePageSubTitle newsletter-title">✨ Restons connectés ! ✨</h2>
+        <h2 className="homePageSubTitle newsletter-title"> Restons connectés ! </h2>
         
         <p className="text-content">
-Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Laissez-nous votre email pour embarquer : l'aventure Bibli'O Jouets continue directement dans votre boîte de réception ! 🎁"        </p>
+Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Laissez-nous votre email pour embarquer : l'aventure Bibli'O Jouets continue directement dans votre boîte de réception !"        </p>
 
         <div className="form-newsletter">
           <form onSubmit={handleSubmit}>
@@ -101,7 +101,7 @@ Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Lais
               </button>
             </div>
 
-            {/* 🔥 hCaptcha intégré proprement */}
+            {/*  hCaptcha intégré proprement */}
             <div style={{ marginTop: "12px", marginBottom: "-5px" }}>
               <HCaptcha
                 sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
@@ -112,17 +112,17 @@ Prêt à découvrir les derniers trésors qui rejoignent notre collection ? Lais
 
           {showError && (
             <div className="error-message">
-              ⚠️ Oups ! Vérifiez votre adresse email 📧
+               Oups ! Vérifiez votre adresse email 
             </div>
           )}
 
           {sent && (
             <div className="success-animation">
               <div className="success-text">
-                🎉 Youhouuu ! Bienvenue dans la Bibliothèque ! 🎈
+                 Youhouuu ! Bienvenue dans la Bibliothèque ! 
               </div>
               <div className="success-subtext">
-                Prépare-toi à recevoir plein de surprises ! 🧸✨
+                Prépare-toi à recevoir plein de surprises !
               </div>
             </div>
           )}

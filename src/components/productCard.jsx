@@ -63,7 +63,7 @@ export default function ProductCard({ product }) {
                 zIndex: 10,
                 whiteSpace: 'nowrap'
             }}>
-                DÉJÀ LOUÉ 🧸
+                DÉJÀ LOUÉ
             </span>
           )}
     

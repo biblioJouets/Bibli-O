@@ -503,7 +503,7 @@ export default function PanierPage() {
           {purchaseItems.length > 0 && (
             <div className="mt-8">
               <h2 className="cart-section-heading">
-                <span className="cart-section-heading__icon">💝</span> Vos
+                <span className="cart-section-heading__icon"></span> Vos
                 achats directs
               </h2>
               <div className="cart-section-items">

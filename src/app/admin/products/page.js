@@ -255,7 +255,7 @@ export default function AdminProductsPage() {
         <div className="admin-container">
             <header className="admin-header">
                 <div>
-                    <h1 className="admin-title">Gestion Produits 🧸</h1>
+                    <h1 className="admin-title">Gestion Produits</h1>
                     <p>Gérez le catalogue de la bibliothèque</p>
                 </div>
                 <button className="Button Blue" onClick={() => handleOpenModal('create')}>
