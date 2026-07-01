@@ -59,14 +59,14 @@ export default function MysteryBoxCard({ boxProduct }) {
   return (
     <>
   <section className="MysteryBoxSection">
-    <h2 className="homePageSubTitle " id="mysteryBox-title">La Box Mystère de Mai</h2>
+    <h2 className="homePageSubTitle " id="mysteryBox-title">La Box Mystère</h2>
       <div className="mbc-wrapper">
 
         {/* Colonne image */}
         <div className="mbc-img-col">
           <Image
             src="/assets/image_promoBox.png"
-            alt="Box Mystère de Mai — Bibli'o Jouets"
+            alt="Box Mystère — Bibli'o Jouets"
             width={1024}
             height={657}
             priority
@@ -79,7 +79,7 @@ export default function MysteryBoxCard({ boxProduct }) {
         <div className="mbc-content-col">
           
           <div className="mbc-badge">
-            🌟 OFFRE ÉPHÉMÈRE DE MAI — SÉRIE LIMITÉE (100 BOX)
+            🌟 OFFRE ÉPHÉMÈRE— SÉRIE LIMITÉE (100 BOX)
           </div>
 
           <div className="mbc-body">

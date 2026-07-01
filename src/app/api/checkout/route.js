@@ -73,7 +73,7 @@ export async function POST(req) {
 
         if (cleanCode === 'BOXMAI24' && !isBoxMystere) {
             return NextResponse.json({
-                error: "Ce code est strictement réservé à la Box Mystère de Mai.",
+                error: "Ce code est strictement réservé à la Box Mystère.",
             }, { status: 400 });
         }
 
