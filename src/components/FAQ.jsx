@@ -90,7 +90,8 @@ answer: "C'est un jeu d'enfant ! Vous sélectionnez d'abord les jouets qui feron
     <div className="faq-container">
       <div className="faq-content">
         <div className="faq-left">
-          <h2 className="homePageSubTitle faq-support-label">FAQ</h2>
+          <h2 className="FaqSubtitle faq-support-label">FAQ</h2>
+        
           <h1 className="faq-title">Les questions des (grands) curieux</h1>
           <p className="faq-subtitle">
             On vous dit tout sur le fonctionnement de Bibli'O Jouets. Une question en particulier ?{' '}

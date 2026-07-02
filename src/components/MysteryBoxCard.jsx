@@ -59,7 +59,9 @@ export default function MysteryBoxCard({ boxProduct }) {
   return (
     <>
   <section className="MysteryBoxSection">
-    <h2 className="homePageSubTitle " id="mysteryBox-title">La Box Mystère</h2>
+    <h2 className="bj-main-title " id="mysteryBox-title">La Box <span className="bj-main-title-highlight">Mystère</span></h2>
+
+        
       <div className="mbc-wrapper">
 
         {/* Colonne image */}

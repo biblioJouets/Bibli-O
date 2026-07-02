@@ -61,7 +61,8 @@ export default function AboutPage() {
       <section className="histoire-section" aria-labelledby="histoire-title">
         <div className="histoire-grid">
           <div className="histoire-text">
-            <h2 id="histoire-title" className="homePageSubTitle">Notre Histoire</h2>
+            <h2 id="histoire-title" className="bj-main-title"><span className="bj-main-title-highlight">Notre Histoire</span></h2>
+           
             <p>
               Tout a commencé dans un appartement trop petit et un coin de salon
               envahi de jouets oubliés. En 2025, Laura et Lucas, parents d'un
@@ -103,7 +104,8 @@ export default function AboutPage() {
           SECTION 5 — NOS VALEURS
       ============================================================ */}
       <section className="commitmentsSection" aria-labelledby="valeurs-title">
-        <h2 className="homePageSubTitle" id="valeurs-title">Nos Valeurs</h2>
+        <h2 className="bj-main-title" id="valeurs-title">Nos <span className="bj-main-title-highlight">Valeurs</span></h2>
+       
         <div className="commitmentCards">
           <CommitmentCard
             icon={LEAFIMAGE}

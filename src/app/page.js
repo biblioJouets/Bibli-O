@@ -97,8 +97,11 @@ export default async function Homepage() {
                 {/* NOTE SEO : Remplacement de div par section pour délimiter le sujet */}
                 <section className="functionalityCardsSection" aria-labelledby="fonctionnement-title">
                     {/* NOTE A11Y : Ajout d'un ID pour lier le titre à la section */}
-                    <h2 className="homePageSubTitle" id="fonctionnement-title">Comment fonctionne Bibli'O Jouets ?</h2>
-                    
+
+                <h2 className="bj-main-title" id="fonctionnement-title">
+                      Comment fonctionne <span className="bj-main-title-highlight">Bibli'O Jouets ?</span>
+                    </h2>                    
+
                     <div className="functionalityCardsContainer">
                         <FunctionalityCard className="firstCard"
                             title="Composez votre box"
@@ -131,9 +134,11 @@ export default async function Homepage() {
                 </section>
                 
                     <MysteryBoxCard boxProduct={boxProduct} />
+                    
                 {/* NOTE SEO : Nouvelle section sémantique */}
                 <section className="commitmentsSection" aria-labelledby="engagements-title">
-                    <h2 className="homePageSubTitle" id="engagements-title">Pourquoi louer plutôt qu'acheter ?</h2>
+                    <h2 className="bj-main-title" id="engagements-title">Pourquoi louer plutôt <span className="bj-main-title-highlight">qu'acheter</span> ?</h2>
+                    
                     <div className="commitmentCards">
                         <CommitmentCard
                             className="hygiene"
@@ -177,8 +182,9 @@ export default async function Homepage() {
 
                  <section className="sub-choice-section" aria-labelledby="sub-choice-title">
                     <div className="sectionSub"> 
-            <h2 className="homePageSubTitle " id="plans-title">Nos formules d'abonnement</h2>
+            <h2 className="bj-main-title " id="plans-title">Nos formules <span className="bj-main-title-highlight">d'abonnement</span></h2>
 </div>
+
                     <div className="SubChoiceSection">
              
                 <SubChoice />

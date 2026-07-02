@@ -22,7 +22,8 @@ const TestimonialSlider = () => {
     ];   
     return (
 <div className='cardContentMissionSection'>
-<h2 className="homePageSubTitle">Notre Mission</h2>
+  
+<h2 className="bj-main-title">Notre <span className="bj-main-title-highlight">Mission</span></h2>
 <div className='cardsContentMission'>
     <div className='cardContentMission redCardContent'>
         <p className='CardContentName'>{cardContentMission[0].name}</p>
