@@ -10,7 +10,7 @@
   background-color: #FFFFFF;
   box-shadow: 0 4px 20px rgba(46, 29, 33, 0.08);
   gap: 30px;
-  
+  box-sizing: border-box;
   /* Rendre le header fixe */
   position: fixed;
   top: 0;
@@ -434,8 +434,8 @@ font-size: 0.9rem;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(46, 29, 33, 0.5);
     opacity: 0;
     visibility: hidden;
