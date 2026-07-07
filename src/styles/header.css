@@ -32,6 +32,32 @@
 }
 
 /* ========================================
+   Button Header
+   ======================================== */
+.HeaderButton {
+
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    color: white;
+    gap: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+}
+
+.HeaderButton:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
    LOGO
    ======================================== */
 .logo-container {
@@ -225,18 +251,31 @@
 /* ========================================
    RESPONSIVE TABLETTE (< 1003px)
    ======================================== */
-@media (max-width: 1145px) {
+@media (max-width: 1273px) {
+.nav-menu a{
+font-size: 0.9rem;
+}
+.HeaderButton{
+  font-size: 0.9rem!important;
+}
+.logo-img{ width: 6rem;}
+}
+
+/* ========================================
+   RESPONSIVE TABLETTE (< 1003px)
+   ======================================== */
+@media (max-width: 1155px) {
   .header-nav {
     padding: 15px 25px;
     gap: 20px;
   }
 
   .logo-img {
-    width: 3.5rem;
+    width: 5rem;
   }
 
   .nav-menu {
-    gap: 18px;
+    gap: 5px;
   }
 
   .nav-menu a {
@@ -254,13 +293,21 @@
   }
 }
 /* ========================================
-   DISPLAY NONE BUTTON 
+    BUTTON 
    ======================================== */
-   @media (max-width: 970px){
-    .header-actions .Blue{
-    display: none;
+   @media (max-width: 1010px){
+  .HeaderButton{
+    margin: 0px;
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
 }
+  .nav-menu a{
+    padding : 4px 6px;
    }
+   .header-nav{
+    gap: 5px;
+   }
+  }
    /* ========================================
    RESPONSIVE MOBILE (< 900px)
    ======================================== */
@@ -271,7 +318,7 @@
   }
 
   .logo-img {
-    width: 6rem; 
+    width: 5rem; 
   }
 
   .burger-button {
@@ -404,6 +451,7 @@
     pointer-events: all;
   }
 }
+
 
 /* ========================================
    TRÈS PETITS ÉCRANS (< 480px)

@@ -103,29 +103,31 @@ export default async function Homepage() {
                     </h2>                    
 
                     <div className="functionalityCardsContainer">
-                        <FunctionalityCard className="firstCard"
-                            title="Composez votre box"
-                            description="Créez votre box sur-mesure parmi notre sélection de jeux."
-                            number="1️⃣"
-                        />
-                        
-                        {/* NOTE A11Y : aria-hidden="true" cache cette flèche décorative aux lecteurs d'écran */}
-                        <Redo className="arrow arrow-top" aria-hidden="true" />
+    <FunctionalityCard 
+        className="firstCard"
+        title="Composez votre box"
+        description="Créez votre box sur-mesure parmi notre sélection de jeux."
+        number="1"
+    />
+    
+    <Redo className="arrow arrow-top" aria-hidden="true" />
 
-                        <FunctionalityCard className="secondCard"
-                            title="Recevez et jouez"
-                            description="Recevez, profitez, puis gardez-les autant de temps qu'il vous plaira."
-                            number="2️⃣"
-                        />
-                        
-                        <Redo className="arrow arrow-bottom" aria-hidden="true" />
-                        
-                        <FunctionalityCard className="thirdCard"
-                            title="Échangez ou Adoptez"
-                            description="Échangez votre sélection, gardez vos favoris, ou arrêtez quand vous voulez."
-                            number="3️⃣"
-                        />
-                    </div>
+    <FunctionalityCard 
+        className="secondCard"
+        title="Recevez et jouez"
+        description="Recevez, profitez, puis gardez-les autant de temps qu'il vous plaira."
+        number="2"
+    />
+    
+    <Redo className="arrow arrow-bottom" aria-hidden="true" />
+    
+    <FunctionalityCard 
+        className="thirdCard"
+        title="Échangez ou Adoptez"
+        description="Échangez votre sélection, gardez vos favoris, ou arrêtez quand vous voulez."
+        number="3"
+    />
+</div>
                     
                     <ButtonBlue  
                         text="Lancer l'aventure Bibli'o Jouets"

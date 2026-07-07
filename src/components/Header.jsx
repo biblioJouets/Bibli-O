@@ -165,7 +165,7 @@ export default function HeaderBiblioJouets() {
             )}
             
             <button 
-  className="Button Blue" 
+  className="HeaderButton Blue" 
   onClick={() => signOut({ callbackUrl: window.location.origin })}
   style={{ padding: '15px 20px' }} 
 >
@@ -174,7 +174,7 @@ export default function HeaderBiblioJouets() {
           </div>
         ) : (
           <button 
-            className="Button Blue" 
+            className="HeaderButton Blue" 
             onClick={() => signIn()}
                           style={{ padding: '15px 20px' }} 
 
