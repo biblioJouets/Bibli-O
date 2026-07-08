@@ -17,9 +17,13 @@ export default function HeaderBiblioJouets() {
 
   const [isBurgerOpen, setBurgerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Nouveaux states pour le menu déroulant desktop
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
   const menuRef = useRef(null);
+  const dropdownRef = useRef(null); // Ref pour fermer le dropdown au clic extérieur
 
-  // Gestion du clic en dehors du menu
+  // Gestion du clic en dehors du menu burger
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target) &&
@@ -29,6 +33,17 @@ export default function HeaderBiblioJouets() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Gestion du clic en dehors du menu déroulant desktop
+  useEffect(() => {
+    const handleClickOutsideDropdown = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutsideDropdown);
+    return () => document.removeEventListener('mousedown', handleClickOutsideDropdown);
   }, []);
 
   // Gestion du scroll
@@ -90,7 +105,6 @@ export default function HeaderBiblioJouets() {
           {session ? (
             <>
               {/* --- CAS CONNECTÉ (MOBILE) --- */}
-              
               {session.user.role === 'ADMIN' && (
                 <Link 
                   href="/admin" 
@@ -110,15 +124,14 @@ export default function HeaderBiblioJouets() {
                 <ShoppingCart size={20} />
                 <span>Panier</span>
                  {cartCount > 0 && <span className="cart-badge-dot"></span>}
-                
               </Link>
 
               <Link 
                 href="#" 
                 onClick={(e) => {
                   e.preventDefault();
-                signOut({ callbackUrl: '/' })                  
-                closeBurger();
+                  signOut({ callbackUrl: '/' });                  
+                  closeBurger();
                 }}
                 style={{ borderTop: '1px solid #eee', marginTop: '10px', paddingTop: '15px' }}
               >
@@ -140,44 +153,65 @@ export default function HeaderBiblioJouets() {
          ========================================= */}
       <div className="header-actions">
         
-        {/* Icônes si connecté */}
-        {session && (
+        {session ? (
           <>
-            <Link href="/mon-compte" className="icon-link" aria-label="Mon compte">
-              <User size={22} />
-            </Link>
+            {/* Panier */}
             <Link href="/panier" className="icon-link" aria-label="Panier">
               <ShoppingCart size={22} />
               {cartCount > 0 && (
                 <span className="cart-badge-desktop">{cartCount}</span>
               )}
             </Link>
-          </>
-        )}
 
-        {/* Boutons (Admin / Auth) */}
-        {session ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            {session.user.role === 'ADMIN' && (
-               <Link href="/admin" style={{ fontWeight: 'bold', color: '#FF8C94' }}>
-                 Admin
-               </Link>
-            )}
-            
-            <button 
-  className="HeaderButton Blue" 
-  onClick={() => signOut({ callbackUrl: window.location.origin })}
-  style={{ padding: '15px 20px' }} 
->
-  Se déconnecter
-</button>
-          </div>
+            {/* Menu Déroulant Mon Compte */}
+            <div className="user-dropdown-container" ref={dropdownRef}>
+              <button 
+                className="icon-link dropdown-trigger" 
+                onClick={() => setDropdownOpen(!isDropdownOpen)}
+                aria-label="Menu utilisateur"
+                aria-expanded={isDropdownOpen}
+              >
+                <User size={22} />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="user-dropdown-menu">
+                  <Link 
+                    href="/mon-compte" 
+                    className="dropdown-item"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Mon Compte
+                  </Link>
+                  
+                  {session.user.role === 'ADMIN' && (
+                    <Link 
+                      href="/admin" 
+                      className="dropdown-item admin-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  
+                  <button 
+                    className="dropdown-item logout-btn"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      signOut({ callbackUrl: window.location.origin });
+                    }}
+                  >
+                    Se déconnecter
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <button 
             className="HeaderButton Blue" 
             onClick={() => signIn()}
-                          style={{ padding: '15px 20px' }} 
-
+            style={{ padding: '15px 20px' }} 
           >
             Se connecter
           </button>
