@@ -69,13 +69,13 @@
 
 /* --- VARIATIONS DE COULEURS (HALOS & PASTILLES) --- */
 .firstCard {
-    box-shadow: 0 10px 30px rgba(255, 226, 100, 0.25);
-    border: 2px solid rgba(255, 226, 100, 0.2);
+    box-shadow: 0 10px 30px rgba(244, 76, 104, 0.25);
+    border: 2px solid rgba(244, 76, 104, 0.2);
 }
 .firstCard .functionality-number {
-    background-color: #ffe264;
-    color: #2E1D21; 
-    box-shadow: 0 4px 10px rgba(255, 226, 100, 0.4);
+    box-shadow: 0 4px 10px rgba(255, 100, 188, 0.4);
+    background-color: #FF8C94;
+
 }
 
 .secondCard {
@@ -88,12 +88,12 @@
 }
 
 .thirdCard {
-    box-shadow: 0 10px 30px rgba(255, 140, 148, 0.25);
-    border: 2px solid rgba(255, 140, 148, 0.2);
+    box-shadow: 0 10px 30px rgba(21, 154, 39, 0.25);
+    border: 2px solid rgba(85, 218, 73, 0.2);
 }
 .thirdCard .functionality-number {
-    background-color: #FF8C94;
-    box-shadow: 0 4px 10px rgba(255, 140, 148, 0.4);
+    background-color: #A8D5A2;
+    box-shadow: 0 4px 10px rgba(85, 218, 73, 0.4);
 }
 
 /* --- FLÈCHES DE CONNEXION --- */
@@ -107,7 +107,7 @@
 .arrow-top {
     /* Utilisation de translateY au lieu de margin pour un placement parfait sans casser le layout */
     transform: translateY(-25px) rotate(15deg); 
-    color: #ffe264;
+    color: #FF8C94;
 }
 
 .arrow-bottom {

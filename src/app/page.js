@@ -3,6 +3,7 @@
 //import components
 
 import ButtonBlue from "@/components/ButtonBlue";
+import ButtonRed from "@/components/ButtonRed";
 import PromotionBanner from '@/components/PromoBanner';
 
 // import NewToys from "../components/NewToys";
@@ -129,7 +130,7 @@ export default async function Homepage() {
     />
 </div>
                     
-                    <ButtonBlue  
+                    <ButtonRed  
                         text="Lancer l'aventure Bibli'o Jouets"
                         href="/bibliotheque"
                     />

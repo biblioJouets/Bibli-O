@@ -113,7 +113,7 @@ export default function ProductCard({ product }) {
       <div className="product-action-footer">
         <div className="buttonPanier">
           <button 
-             className="Button Blue" 
+             className="bj-btn-product-cart bj-btn-blue" 
              onClick={handleAddToCart}
              disabled={isOutOfStock}
              style={{ 

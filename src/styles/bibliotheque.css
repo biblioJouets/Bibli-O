@@ -226,18 +226,20 @@
   justify-content: center;
   margin: auto;
 }
-.buttonPanier .Button.Blue {
+.bj-btn-product-cart {
   padding: 15px 25px;
   font-size: 0.9rem !important;
   display: inline-block;
   text-align: center;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  border: none;
+}
+.bj-btn-product-cart:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 0, 0, 0.1);
 }
 
-/* Petit effet au survol spécifique à ce bouton */
-.buttonPanier .Button.Blue:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(110, 193, 228, 0.3);
-}
 .price-period {
   font-size: 0.8rem;
   color: #999;
