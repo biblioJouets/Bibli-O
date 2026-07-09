@@ -1,8 +1,7 @@
 
 
 //import components
-
-import ButtonBlue from "@/components/ButtonBlue";
+import CommitmentsCarousel from "@/components/CommitmentsCarousel";
 import ButtonRed from "@/components/ButtonRed";
 import PromotionBanner from '@/components/PromoBanner';
 
@@ -17,7 +16,6 @@ import Newsletter from "@/components/Newsletter";
 import FunctionalityCard from "@/components/FunctionalityCard";
 import SubChoice from "@/components/SubChoice";
 import GoogleReviews from '@/components/GoogleReviews';
-import MysteryBoxCard from "@/components/MysteryBoxCard";
 import prisma from "@/lib/core/database";
 
 //import style
@@ -135,43 +133,10 @@ export default async function Homepage() {
                         href="/bibliotheque"
                     />
                 </section>
-                
-                    <MysteryBoxCard boxProduct={boxProduct} />
-                    
-                {/* NOTE SEO : Nouvelle section sémantique */}
-                <section className="commitmentsSection" aria-labelledby="engagements-title">
-                    <h2 className="bj-main-title" id="engagements-title">Pourquoi louer plutôt <span className="bj-main-title-highlight">qu'acheter</span> ?</h2>
-                    
-                    <div className="commitmentCards">
-                        <CommitmentCard
-                            className="hygiene"
-                            title="Hygiène"
-                            description="Tous nos jouets sont soigneusement nettoyés et désinfectés avant et après chaque location."
-                            icon={WASHIMAGE} 
-                            iconClassName="icon-large"    
-                        />
-                        <CommitmentCard
-                            title="Écologie"
-                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
-                            icon={LEAFIMAGE} 
-                        />
-                        <CommitmentCard
-                            title="Praticité"
-                            description="Profitez de la commodité de notre service de location, avec une livraison rapide et un retour facile."
-                            icon={ZENIMAGE}
-                        />
-                        <CommitmentCard
-                            title="Économie"
-                            description="Optez pour une solution économique en louant des jouets de qualité à moindre coût."
-                            icon={EUROIMAGE}
-                        />
-                        <CommitmentCard
-                            title="Casse et usure"
-                            description="Casse et usure, tout est compris dans la formule d'abonnement, pas de stress ni de surprise."
-                            icon={APPROBATIONIMAGE}
-                        />
-                    </div>
-                </section>
+                {/* Section Engagements */}
+        <CommitmentsCarousel />
+
+
 
                 {/* Section Mission */}
                 <section>
