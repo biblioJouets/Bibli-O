@@ -86,16 +86,20 @@
    CARROUSEL MOBILE (SIMPLE & FONCTIONNEL)
    ========================================= */
 @media screen and (max-width: 1024px) {
+    .bj-commitments-section {
+        padding: 3rem 0rem;
+    }
     .bj-commitments-grid {
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
+        width: 90%;
         scroll-snap-type: x mandatory;
         scrollbar-width: none; /* Cache la barre Firefox */
         -ms-overflow-style: none; /* Cache la barre IE */
-        width: 100%;
         gap: 1rem;
         padding-bottom: 1rem;
+        margin: 0 ;
     }
 
     .bj-commitments-grid::-webkit-scrollbar {

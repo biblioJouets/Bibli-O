@@ -42,8 +42,8 @@ export default function CommitmentsCarousel() {
                 <CommitmentCard iconWrapperClass="bj-bg-green" title="Écologie" description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable." icon={LEAFIMAGE} />
                 <CommitmentCard iconWrapperClass="bj-bg-rose" title="Praticité" description="Profitez de la commodité de notre service de location, avec une livraison rapide et un retour facile." icon={ZENIMAGE} />
                 <CommitmentCard iconWrapperClass="bj-bg-yellow" title="Économie" description="Optez pour une solution économique en louant des jouets de qualité à moindre coût." icon={EUROIMAGE} />
-                <CommitmentCard iconWrapperClass="bj-bg-blue-pastel" title="Casse et usure" description="Casse et usure, tout est compris dans la formule d'abonnement, pas de stress ni de surprise." icon={APPROBATIONIMAGE} />
                 <CommitmentCard iconWrapperClass="bj-bg-rose" title="Sélection experte" description="Nos jouets sont choisis par des pros de l'enfance pour garantir un éveil optimal à chaque étape." icon={ZENIMAGE} />
+                <CommitmentCard iconWrapperClass="bj-bg-blue" title="Casse et usure" description="Casse et usure, tout est compris dans la formule d'abonnement, pas de stress ni de surprise." icon={APPROBATIONIMAGE} />
             </div>
 
             {/* Affichage des points (Dots) gérés par React */}
