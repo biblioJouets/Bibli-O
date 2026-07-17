@@ -1,0 +1,120 @@
+
+/* features.css */
+
+/* --- Section globale --- */
+.features-section {
+  padding: 60px 20px;
+}
+
+.features-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+
+/* --- Grille Responsive (Mobile-First) --- */
+.features-grid {
+  display: block; /* Une seule colonne par défaut sur mobile */
+}
+
+/* --- Cartes et éléments --- */
+.organic-card {
+  padding: 35px 25px;
+  border-radius: 25px; /* Rayon strict de ta charte */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px; /* Espace entre les cartes sur mobile */
+  box-shadow: 0 4px 10px rgba(46, 29, 33, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.organic-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(46, 29, 33, 0.08);
+}
+
+/* Formes organiques des blobs pour les icônes */
+.organic-blob {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  transition: border-radius 0.3s ease-in-out;
+}
+
+.organic-card:hover .organic-blob {
+  border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%;
+}
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Forcer le blanc pur sur les PNG (sauf pour l'assurance qui l'est déjà) */
+.icon-white {
+  filter: brightness(0) invert(1);
+}
+
+.feature-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2E1D21;
+  margin-bottom: 12px;
+}
+
+.feature-card-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(46, 29, 33, 0.85);
+  margin: 0;
+}
+
+/* --- Variations des Couleurs de la Charte Graphique --- */
+
+/* 1. Thème Bleu (Livraison) */
+.card-blue { background-color: #DFF1F9; }
+.blob-blue { background-color: #6EC1E4; }
+
+/* 2. Thème Rose (Casse) */
+.card-rose { background-color: #FFD9DC; }
+.blob-rose { background-color: #FF8C94; }
+
+/* 3. Thème Vert (Hygiène) */
+.card-vert { background-color: #DAEEE6; }
+.blob-vert { background-color: #88D4AB; }
+
+/* 2. Thème jaune (Engagement) */
+.card-jaune { background-color: #FFF7D4; }
+.blob-jaune { background-color: #ffe264; }
+
+/* --- Media Queries pour les tablettes et ordinateurs --- */
+
+/* Tablettes (2 colonnes) */
+@media (min-width: 640px) {
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .organic-card {
+    margin-bottom: 0; /* On retire le margin-bottom du mode vertical */
+  }
+}
+
+/* Écrans PC / Desktop (4 colonnes alignées) */
+@media (min-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .features-title {
+    font-size: 36px;
+    margin-bottom: 60px;
+  }
+}

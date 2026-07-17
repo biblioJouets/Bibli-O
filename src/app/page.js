@@ -18,6 +18,8 @@ import SubChoice from "@/components/SubChoice";
 import GoogleReviews from '@/components/GoogleReviews';
 import prisma from "@/lib/core/database";
 
+import Feature from '@/components/FeaturesSection';
+
 //import style
 import '@/styles/homepage.css';
 //import icon 
@@ -27,10 +29,7 @@ const CARIMAGE = "assets/icons/car.png";
 const CLICKIMAGE = "assets/icons/click.png";
 const DELIVERYIMAGE ="assets/icons/delivery.png";
 const WASHIMAGE = "assets/icons/wash.png";
-const LEAFIMAGE = "assets/icons/leaf.png";
-const ZENIMAGE = "assets/icons/zen.png";
-const EUROIMAGE = "assets/icons/euro.png";
-const APPROBATIONIMAGE = "assets/icons/approbation.png";
+
 
 async function getGoogleReviews() {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
@@ -157,32 +156,12 @@ export default async function Homepage() {
              
                 <SubChoice />
  </div>
-        <div className="commitmentCards subHomePage">
-         <CommitmentCard
-                            className="hygiene"
-                            icon={DELIVERYIMAGE}
-                            title="Livraison et retour inclus"
-                            description="Livraison et retour inclus dans toutes nos formules, pour une expérience sans souci."
-                        />
-                        <CommitmentCard
-                            title="Assurance &quot;Casse&quot;"
-                            icon={CARIMAGE}
-                            description="L'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien."
-                        />
-                        <CommitmentCard
-                            className="hygiene"
-                            icon={WASHIMAGE}
-                            title=" Nettoyage baby self"
-                            description="Nettoyage baby self de tous nos jouets pour garantir sécurité et propreté à chaque échange."
-                            
-                        />
-                        <CommitmentCard
-                            icon={CLICKIMAGE}
-                            title="Annulable en 1 clic"
-                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
-                        />
-                        </div>
+       
                 </section>
+
+
+                <Feature />
+
                  <section className="bg-green-homepage">
                   <Protocol />
                 </section>
