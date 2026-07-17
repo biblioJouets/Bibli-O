@@ -1,54 +1,69 @@
 'use client';
 import React, { useState } from 'react';
 import 'styles/cardsContentMission.css';
-const TestimonialSlider = () => {     
+
+const MissionSection = () => {     
     const cardContentMission = [
         {
             name: "L'Éveil par le Jeu",
             title: "Une Sélection Experte",
-            content: "Notre mission n'est pas de vous noyer sous les jouets, mais de les sélectionner avec soin. Nous collaborons avec des experts de la petite enfance pour choisir des jeux qui stimulent la curiosité, l'autonomie et la créativité.",
+            colorClass: "redCardContent",
+            points: [
+                "Sélection soignée par des experts de la petite enfance.",
+                "Jeux stimulant la curiosité et l'autonomie.",
+                "Privilégie la qualité à la quantité."
+            ],
         },
         {
             name: "L'Écologie par l'Action",
             title: "Notre Pacte Circulaire",
-            content: "Plus que de simples paroles, nous agissons. Notre mission est de réduire le gaspillage en prolongeant la vie de chaque jouet et de privilégier l'économie circulaire. Un jouet loué, c'est un jouet de moins à la décharge.",
+            colorClass: "greenCardContent",
+            points: [
+                "Réduction active du gaspillage.",
+                "Prolongation de la vie de chaque jouet.",
+                "Un jouet loué = un jouet de moins à la décharge."
+            ],
         },
         {
             name: "La Communauté avant tout",
             title: "Créé pour les Parents",
-            content: "Nous sommes passés par là. Bibli'O Jouets est né d'une volonté de simplifier la vie des familles. Notre mission est d'être un service fiable et bienveillant, qui vous écoute et vous accompagne.",
+            colorClass: "blueCardContent", 
+            points: [
+                "Simplifie le quotidien et la gestion de l'espace.",
+                "Service fiable, bienveillant et à votre écoute.",
+                "Un accompagnement pensé par des parents."
+            ],
         }
-    
     ];   
+
     return (
-<div className='cardContentMissionSection'>
-  
-<h2 className="bj-main-title">Notre <span className="bj-main-title-highlight">Mission</span></h2>
-<div className='cardsContentMission'>
-    <div className='cardContentMission redCardContent'>
-        <p className='CardContentName'>{cardContentMission[0].name}</p>
-        <p className='CardContentTitle'>{cardContentMission[0].title}</p>
-        <p className='CardContentContent'>{cardContentMission[0].content}</p>
-        
-</div>
-<div className='cardContentMission greenCardContent'>
-    <p className='CardContentName'>{cardContentMission[1].name}</p>
-        <p className='CardContentTitle'>{cardContentMission[1].title}</p>
-        <p className='CardContentContent'>{cardContentMission[1].content}</p>
-        
-        
-</div>
-<div className='cardContentMission yellowCardContent'>
-    <p className='CardContentName'>{cardContentMission[2].name}</p>
-        <p className='CardContentTitle'>{cardContentMission[2].title}</p>
-        <p className='CardContentContent'>{cardContentMission[2].content}</p>
-        
-        
-</div>
+        <section className='cardContentMissionSection'>
+            <h2 className="bj-main-title" style={{ color: '#2E1D21' }}>
+                Notre <span style={{ color: '#6EC1E4' }}>Mission</span>
+            </h2>
 
-</div>
+            <div className='cardsContentMission'>
+                {cardContentMission.map((card, index) => (
+                    <div key={index} className={`cardContentMission ${card.colorClass}`}>
+                        <p className='CardContentName'>{card.name}</p>
+                        <h3 className='CardContentTitle'>{card.title}</h3>
+                        
+                        {/* Remplacement du <p> par une liste <ul> pour faciliter la lecture */}
+                        <ul className='CardContentList'>
+                            {card.points.map((point, idx) => (
+                                <li key={idx}>{point}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
 
-</div>
-    )
-}
-export default TestimonialSlider;
+            {/* CTA pour diriger le flux utilisateur */}
+            <a href="/fonctionnement" className="missionCTA">
+                Découvrir le concept
+            </a>
+        </section>
+    );
+};
+
+export default MissionSection;

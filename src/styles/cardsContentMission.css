@@ -1,42 +1,123 @@
+/* Section globale avec un fond neutre chaud de la charte */
 .cardContentMissionSection {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin: 4rem;
+    padding: 3rem 1.5rem; /* Adapté pour mobile (fini le margin 4rem qui écrase l'écran) */
+    background-color: #FFFAF4; 
 }
-.cardsContentMission{
+
+.cardsContentMission {
     display: flex;
-    width: auto;
-    gap: 30px;
+    flex-direction: column; /* Mobile first : empilé */
+    width: 100%;
+    max-width: 1200px;
+    gap: 2rem;
     margin-top: 2rem;
 }
 
-.cardContentMission{
+/* Passage en ligne uniquement sur Desktop */
+@media screen and (min-width: 768px) {
+    .cardsContentMission {
+        flex-direction: row;
+        align-items: stretch; /* Permet aux cartes d'avoir la même hauteur */
+    }
+}
+
+.cardContentMission {
     background-color: #ffffff;
-    max-width: 450px;
-    padding: 2rem 4rem;
-    border-radius: 25px;
-}
-.yellowCardContent{
-    box-shadow: rgba(192, 182, 37, 0.5) 0px 4px 12px;
-}
-.redCardContent{
-    box-shadow: rgba(233, 35, 35, 0.5) 0px 4px 12px;
-}
-
-.greenCardContent{
-    box-shadow: rgba(17, 179, 71, 0.5) 0px 4px 12px;
-}
-
-.CardContentName, .CardContentTitle{
-    font-weight: 800;
-    font-size: large;
-
-}
-@media screen and (max-width: 768px) {
-.cardsContentMission{
+    flex: 1;
+    padding: 2.5rem 2rem;
+    border-radius: 25px; /* Rayon défini dans ta charte */
+    display: flex;
     flex-direction: column;
-
+    color: #2E1D21; /* Marron très foncé/Noir chaud */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* Micro-interaction douce au survol (Desktop) */
+@media (hover: hover) {
+    .cardContentMission:hover {
+        transform: translateY(-5px);
+    }
+}
+
+/* Ombres douces basées sur TA charte + petite bordure en haut pour asseoir la couleur */
+.redCardContent {
+    box-shadow: rgba(255, 140, 148, 0.25) 0px 10px 24px; /* #FF8C94 */
+    border-top: 6px solid #FF8C94;
+}
+
+.greenCardContent {
+    box-shadow: rgba(136, 212, 171, 0.25) 0px 10px 24px; /* #88D4AB */
+    border-top: 6px solid #88D4AB;
+}
+
+.blueCardContent {
+    box-shadow: rgba(110, 193, 228, 0.25) 0px 10px 24px; /* #6EC1E4 */
+    border-top: 6px solid #6EC1E4;
+}
+
+/* Typographie hiérarchisée */
+.CardContentName {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666; /* Plus discret pour mettre en valeur le titre */
+    margin-bottom: 0.5rem;
+}
+
+.CardContentTitle {
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+}
+
+/* Styles pour la liste à puces (remplace le paragraphe) */
+.CardContentList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Pousse le contenu pour équilibrer les cartes */
+}
+
+.CardContentList li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Création de puces (bullet points) colorées */
+.CardContentList li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    top: -0.15rem;
+}
+
+.redCardContent .CardContentList li::before { color: #FF8C94; }
+.greenCardContent .CardContentList li::before { color: #88D4AB; }
+.blueCardContent .CardContentList li::before { color: #6EC1E4; }
+
+/* Bouton d'appel à l'action final */
+.missionCTA {
+    margin-top: 3rem;
+    background-color: #6EC1E4;
+    color: #ffffff;
+    padding: 1rem 2.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: rgba(110, 193, 228, 0.4) 0px 8px 16px;
+    transition: opacity 0.3s ease;
+}
+
+.missionCTA:hover {
+    opacity: 0.9;
 }
