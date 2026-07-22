@@ -68,6 +68,7 @@
   cursor: pointer;
   text-align: left;
   transition: background 0.3s ease;
+  background: rgb(255, 217, 220);
 }
 
 .faq-question-btn:hover {
@@ -84,7 +85,7 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background:#FFD9DC;
+  background:#fcc9cd;
   display: flex;
   align-items: center;
   justify-content: center;

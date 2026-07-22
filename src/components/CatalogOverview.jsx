@@ -3,21 +3,21 @@ import "styles/catalogOverview.css";
 import SliderLogoSection from './SliderLogo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faGraduationCap,     // Jeux Éducatifs
-  faCubes,              // Jeux de Construction
-  faTree,               // Jeux en Bois
-  faLightbulb,          // Jeux d'Éveil & Apprentissage
-  faRobot,              // Interactifs & Électroniques
-  faPuzzlePiece         // Jeux d'initiation
+  faGraduationCap,
+  faCubes,
+  faTree,
+  faLightbulb,
+  faRobot,
+  faPuzzlePiece
 } from '@fortawesome/free-solid-svg-icons';
 
 const bubulleTagsList = [
-  { label: "Jeux Éducatifs", icon: faGraduationCap },
-  { label: "Jeux de Construction", icon: faCubes },
-  { label: "Jeux en Bois", icon: faTree },
-  { label: "Jeux d'Éveil & Apprentissage", icon: faLightbulb },
-  { label: "Interactifs & Électroniques", icon: faRobot },
-  { label: "Jeux d'initiation", icon: faPuzzlePiece },
+  { label: "Jeux Éducatifs", icon: faGraduationCap, link: "/catalogue?categorie=educatifs" },
+  { label: "Jeux de Construction", icon: faCubes, link: "/catalogue?categorie=construction" },
+  { label: "Jeux en Bois", icon: faTree, link: "/catalogue?categorie=bois" },
+  { label: "Éveil & Apprentissage", icon: faLightbulb, link: "/catalogue?categorie=eveil" },
+  { label: "Interactifs & Électroniques", icon: faRobot, link: "/catalogue?categorie=interactifs" },
+  { label: "Jeux d'initiation", icon: faPuzzlePiece, link: "/catalogue?categorie=initiation" },
 ];
 
 function CatalogOverview() {
@@ -25,18 +25,36 @@ function CatalogOverview() {
 
   return (
     <div className="catalogOverviewSection">
-      <h2 className="bj-main-title">Un aperçu de notre <span className="bj-main-title-highlight">catalogue</span></h2>
-      <h3>Accédez à des centaines de références triées sur le volet.</h3>
-      <div className='BubulleTags'>
+      
+      {/* En-tête avec Badge de réassurance */}
+      <div className="catalogHeader">
+        <h2 className="bj-main-title">
+          Un aperçu de notre <span className="bj-main-title-highlight">catalogue</span>
+        </h2>
+        <h3 className="catalogSubtitle">Accédez à des centaines de références triées sur le volet.</h3>
+        
+        <div className="reassuranceBadge">
+          <span>🔋 Piles toujours incluses</span>
+          <span className="badgeSeparator">|</span>
+          <span>✨ Nettoyage certifié</span>
+        </div>
+      </div>
+
+      {/* Grille de catégories organiques (Blobs) */}
+      <div className='blobTagsContainer'>
         {bubulleTagsList.map((item, index) => (
-          <div key={index} className={`BubulleTag ${tagClasses[index % tagClasses.length]}`}>
-            <FontAwesomeIcon icon={item.icon} className="bubulleIcon" />
-            <span>{item.label}</span>
-          </div>
+          <a key={index} href={item.link} className="blobItem">
+            <div className={`blobIcon ${tagClasses[index % tagClasses.length]}`}>
+              <FontAwesomeIcon icon={item.icon} className="blobFaIcon" />
+            </div>
+            <span className="blobLabel">{item.label}</span>
+          </a>
         ))}
       </div>
-      <h2>Nos marques partenaires</h2>
+
+      <h2 className="bj-main-title marquesTitle">Nos marques <span className="bj-main-title-highlight">partenaires</span></h2>
       <SliderLogoSection />
+      
     </div>
   );
 }

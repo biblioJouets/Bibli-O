@@ -1,8 +1,39 @@
+/* Nouveau conteneur pill-shape */
+.sliderPillWrapper {
+  background-color: #FFFAF4; /* Ton neutre chaud de la charte */
+  border-radius: 40px; /* Coins très arrondis type pilule */
+  padding: 1.5rem 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); /* Ombre quasi invisible, juste pour décoller */
+}
+
 .sliderLogoWrapper {
   overflow: hidden;
   width: 100%;
   position: relative;
-  padding: 20px 0;
+}
+
+/* Fondu blanc sur les côtés intérieurs du conteneur pill pour adoucir l'entrée/sortie des logos */
+.sliderLogoWrapper::before,
+.sliderLogoWrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 60px;
+  height: 100%;
+  z-index: 2;
+}
+
+.sliderLogoWrapper::before {
+  left: 0;
+  background: linear-gradient(to right, #FFFAF4 0%, rgba(255, 250, 244, 0) 100%);
+}
+
+.sliderLogoWrapper::after {
+  right: 0;
+  background: linear-gradient(to left, #FFFAF4 0%, rgba(255, 250, 244, 0) 100%);
 }
 
 .sliderLogoContainer {
@@ -10,56 +41,52 @@
   align-items: center;
   gap: 60px;
   animation: slide 40s linear infinite;
+  /* La largeur doit s'adapter au contenu double pour l'animation */
+  width: max-content; 
+}
+
+/* Pause au survol pour permettre aux parents de regarder les marques */
+.sliderLogoWrapper:hover .sliderLogoContainer {
+  animation-play-state: paused;
 }
 
 .sliderLogoImage {
-  width: 160px;
+  width: 120px;
   height: auto;
   object-fit: contain;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+  filter: grayscale(20%); /* Légèrement grisé de base pour ne pas agresser l'œil */
 }
 
 .sliderLogoImage:hover {
+  opacity: 1;
   filter: grayscale(0%) brightness(1);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* Animation de défilement infini */
 @keyframes slide {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  /* Déplace de la moitié exacte de la largeur (car le tableau est doublé) */
+  100% { transform: translateX(-50%); } 
 }
 
-/* ✅ Responsive */
+/* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
-  .sliderLogoImage {
-    width: 120px;
-  }
-  .sliderLogoContainer {
-    gap: 40px;
-    animation-duration: 30s;
-  }
+  .sliderLogoImage { width: 110px; }
+  .sliderLogoContainer { gap: 40px; animation-duration: 35s; }
+  .sliderPillWrapper { border-radius: 30px; }
 }
 
 @media (max-width: 768px) {
-  .sliderLogoImage {
-    width: 90px;
-  }
-  .sliderLogoContainer {
-    gap: 30px;
-    animation-duration: 25s;
-  }
+  .sliderLogoImage { width: 90px; }
+  .sliderLogoContainer { gap: 30px; animation-duration: 30s; }
+  .sliderPillWrapper { border-radius: 25px; }
+  .sliderLogoWrapper::before, .sliderLogoWrapper::after { width: 30px; }
 }
 
 @media (max-width: 480px) {
-  .sliderLogoImage {
-    width: 70px;
-  }
-  .sliderLogoContainer {
-    gap: 20px;
-    animation-duration: 20s;
-  }
+  .sliderLogoImage { width: 75px; }
+  .sliderLogoContainer { gap: 25px; animation-duration: 25s; }
 }
