@@ -1,0 +1,182 @@
+/* src/styles/client.css */
+
+.admin-container {
+    max-width: 1400px;
+    margin: 8rem auto 2rem;
+    padding: 0 2rem;
+    color: #2E1D21;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #2E1D21;
+}
+
+.admin-filters-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 10px 10px 45px;
+    border: 2px solid #eee;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: #fff;
+}
+
+.search-input:focus {
+    border-color: #6EC1E4;
+}
+
+/* --- TABLEAU --- */
+.table-container {
+    background: #ffffff;
+    border-radius: 25px; /* Radius organique Bibli'o Jouets */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.client-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.client-table th {
+    background-color: #f3f0ed; /* Fond neutre chaud */
+    color: #2E1D21;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1.2rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid #FAE9CF;
+}
+
+.inline-icon {
+    vertical-align: text-bottom;
+    margin-right: 4px;
+    color: #FF8C94; /* Touche rose accent */
+}
+
+.client-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f9f9f9;
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.client-table tr:hover {
+    background-color: #DFF1F9; /* Bleu pastel au survol */
+}
+
+.client-name {
+    font-weight: bold;
+    color: #2E1D21;
+}
+
+.client-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.client-email {
+    color: #6EC1E4;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.client-email:hover {
+    text-decoration: underline;
+}
+
+.client-phone {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stripe-id {
+    font-family: monospace;
+    color: #555;
+    background: #f4f4f4;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.empty-data {
+    font-style: italic;
+    color: #aaa;
+    background: none;
+}
+
+/* --- BADGES --- */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+}
+
+.badge-admin {
+    background-color: #ffe264;
+    color: #2E1D21;
+}
+
+.badge-user {
+    background-color: #eee;
+    color: #666;
+}
+
+.badge-orders-yes {
+    background-color: #DAEEE6; /* Vert pastel */
+    color: #1b5e20;
+    border: 1px solid #88D4AB;
+}
+
+.badge-orders-no {
+    background-color: #FFD9DC; /* Rose pastel */
+    color: #991b1b;
+    border: 1px solid #FF8C94;
+}
+
+/* --- ÉTATS VIDES & CHARGEMENT --- */
+.loading-state, .empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
