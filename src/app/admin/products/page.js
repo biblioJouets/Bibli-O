@@ -17,6 +17,7 @@ export default function AdminProductsPage() {
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all'); // 👈 Nouvel état pour le filtre de stock ('all', 'available', 'unavailable')
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState('create'); 
@@ -135,7 +136,6 @@ export default function AdminProductsPage() {
 
     // --- GESTION DES AVIS CLIENTS ---
     const addReview = () => {
-        // Règle de sécurité : Étoiles obligatoires (entre 1 et 5)
         if (newReview.rating < 1 || newReview.rating > 5) {
             alert("Veuillez sélectionner une note entre 1 et 5 étoiles.");
             return;
@@ -146,7 +146,6 @@ export default function AdminProductsPage() {
             reviews: [...(prev.reviews || []), { ...newReview }]
         }));
         
-        // On réinitialise l'input
         setNewReview({ rating: 5, authorName: "", comment: "" });
     };
     
@@ -163,7 +162,6 @@ export default function AdminProductsPage() {
         try {
             const { id, createdAt, updatedAt, cartItems, OrderProducts, reviews, ...cleanData } = currentProduct;
 
-            // Calcul automatique de la moyenne des étoiles pour la BDD
             const finalReviews = reviews || [];
             const averageRating = finalReviews.length > 0 
                 ? finalReviews.reduce((sum, r) => sum + parseInt(r.rating), 0) / finalReviews.length 
@@ -180,11 +178,10 @@ export default function AdminProductsPage() {
                 height: parseFloat(cleanData.height) || 0,
                 pieceCount: parseInt(cleanData.pieceCount) || 0,
                 highlights: cleanData.highlights || [],
-                rating: parseFloat(averageRating.toFixed(1)), // On sauvegarde la moyenne
+                rating: parseFloat(averageRating.toFixed(1)),
                 
-                // Magie de Prisma : création imbriquée
                 reviews: {
-                    deleteMany: {}, // Efface les anciens pour éviter les doublons lors de la modification
+                    deleteMany: {},
                     create: finalReviews.map(r => ({
                         rating: parseInt(r.rating),
                         comment: r.comment || null,
@@ -246,10 +243,20 @@ export default function AdminProductsPage() {
         setSelectedIds([]);
     };
 
-    const filteredProducts = products.filter(p => 
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        p.reference?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // 🚀 LOGIQUE DE FILTRAGE MISE À JOUR (Recherche + Disponibilité)
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = 
+            p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            p.reference?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        if (filterStatus === 'available') {
+            return matchesSearch && (p.stock > 0);
+        }
+        if (filterStatus === 'unavailable') {
+            return matchesSearch && (p.stock <= 0);
+        }
+        return matchesSearch; // 'all'
+    });
 
     return (
         <div className="admin-container">
@@ -258,17 +265,32 @@ export default function AdminProductsPage() {
                     <h1 className="admin-title">Gestion Produits</h1>
                     <p>Gérez le catalogue de la bibliothèque</p>
                 </div>
-                <button className="Button Blue" onClick={() => handleOpenModal('create')}>
+                <button className="bj-btn bj-btn-blue" onClick={() => handleOpenModal('create')}>
                     <Plus size={18} style={{marginRight: '8px'}}/> Ajouter un produit
                 </button>
             </header>
 
-            <div className="search-wrapper">
-                <Search className="search-icon" size={20} />
-                <input 
-                    type="text" placeholder="Rechercher par nom ou référence..." className="search-input"
-                    value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                />
+            {/* 🚀 Barre de recherche + Sélecteur de disponibilité */}
+            <div className="admin-filters-bar">
+                <div className="search-wrapper">
+                    <Search className="search-icon" size={20} />
+                    <input 
+                        type="text" placeholder="Rechercher par nom ou référence..." className="search-input"
+                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <div className="filter-select-wrapper">
+                    <select 
+                        className="filter-select"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="all">Tous les jouets</option>
+                        <option value="available">Disponibles uniquement</option>
+                        <option value="unavailable">Indisponibles uniquement</option>
+                    </select>
+                </div>
             </div>
 
             <div className="table-container">
@@ -300,7 +322,13 @@ export default function AdminProductsPage() {
                                 </td>
                                 <td style={{fontWeight:'600'}}>{product.name}</td>
                                 <td>{product.brand}</td>
-                                <td>{product.stock}</td>
+                                <td>
+                                    {product.stock > 0 ? (
+                                        <span className="badge badge-instock">En stock ({product.stock})</span>
+                                    ) : (
+                                        <span className="badge badge-outstock">Indisponible</span>
+                                    )}
+                                </td>
                                 <td style={{color: '#ffe264', fontWeight: 'bold'}}>
                                     ★ {product.rating || 0} <span style={{color: '#999', fontSize: '0.8rem'}}>({product.reviews?.length || 0})</span>
                                 </td>
@@ -416,7 +444,7 @@ export default function AdminProductsPage() {
                                         {modalMode !== 'view' && (
                                             <div className="highlight-input-group">
                                                 <input type="text" placeholder="Ajouter un point fort..." value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())} />
-                                                <button type="button" onClick={addHighlight} className="Button Blue" style={{padding:'5px 15px', margin:0}}><ListPlus size={18}/></button>
+                                                <button type="button" onClick={addHighlight} className="bj-btn bj-btn-blue" style={{padding:'5px 15px', margin:0}}><ListPlus size={18}/></button>
                                             </div>
                                         )}
                                         <ul className="highlight-list">
@@ -459,7 +487,7 @@ export default function AdminProductsPage() {
                                                     style={{flex: 1}}
                                                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addReview())}
                                                 />
-                                                <button type="button" onClick={addReview} className="Button Blue" style={{padding:'5px 15px', margin:0}}><Plus size={18}/></button>
+                                                <button type="button" onClick={addReview} className="bj-btn bj-btn-blue" style={{padding:'5px 15px', margin:0}}><Plus size={18}/></button>
                                             </div>
                                         )}
                                         <ul className="highlight-list">
@@ -495,7 +523,7 @@ export default function AdminProductsPage() {
                                         <div style={{display:'flex', gap:'10px'}}>
                                             <input type="text" placeholder="https://..." value={currentProduct.manualUrl || ''} onChange={e => setCurrentProduct({...currentProduct, manualUrl: e.target.value})} style={{flex:1}} />
                                             {modalMode !== 'view' && (
-                                                <label className="Button Blue" style={{padding:'8px 15px', margin:0, cursor:'pointer', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
+                                                <label className="bj-btn bj-btn-blue" style={{padding:'8px 15px', margin:0, cursor:'pointer', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
                                                     <FileText size={16}/><input type="file" accept="application/pdf" style={{display:'none'}} onChange={handlePdfUpload} disabled={isUploadingPdf}/>{isUploadingPdf ? '...' : 'Upload'}
                                                 </label>
                                             )}
@@ -507,7 +535,7 @@ export default function AdminProductsPage() {
                             {modalMode !== 'view' && (
                                 <div className="modal-footer">
                                     <button type="button" onClick={() => setIsModalOpen(false)} className="btn-cancel">Annuler</button>
-                                    <button type="submit" className="Button Blue" style={{border:'none'}}>Enregistrer</button>
+                                    <button type="submit" className="bj-btn bj-btn-blue" style={{border:'none'}}>Enregistrer</button>
                                 </div>
                             )}
                         </form>

@@ -110,10 +110,9 @@ export default function AdminSidebar() {
 
         <nav className={styles.navGroup}>
           <p className={styles.navGroupLabel}>Clients</p>
-          <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItemDisabled}`}>
+          <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItem}`}>
             <span className={styles.navIcon}>👥</span>
             Comptes clients
-            <span className={styles.comingSoon}>bientôt</span>
           </Link>
           <Link href="/admin/support" className={`${styles.navItem} ${styles.navItemDisabled}`}>
             <span className={styles.navIcon}>💬</span>

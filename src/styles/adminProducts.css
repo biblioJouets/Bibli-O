@@ -448,6 +448,43 @@
 .btn-icon-only:hover {
     background-color: rgba(0,0,0,0.05);
 }
+.admin-filters-bar {
+    display: flex;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* On ajuste le search-wrapper pour qu'il ne prenne plus toute la largeur par défaut */
+.admin-filters-bar .search-wrapper {
+    flex: 1;
+    min-width: 280px;
+    margin-bottom: 0;
+}
+
+/* Style du menu déroulant de filtre */
+.filter-select-wrapper {
+    min-width: 220px;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #eee;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    background-color: #fff;
+    color: #2E1D21;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.filter-select:focus {
+    border-color: #6EC1E4;
+}
 
 @keyframes slideUp {
     from { transform: translate(-50%, 50px); opacity: 0; }

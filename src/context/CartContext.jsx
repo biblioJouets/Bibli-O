@@ -3,12 +3,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { getSuggestedPlan } from '@/lib/core/utils/subscription';
+import { useRouter } from 'next/navigation';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const { data: session } = useSession();
   const [cart, setCart] = useState({ items: [] });
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   // Contexte d'échange : null si mode normal, { orderId, selectedProductIds } si mode échange
   const [exchangeContext, setExchangeContext] = useState(null);
@@ -32,9 +34,10 @@ export function CartProvider({ children }) {
     }
   };
 
+
 const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
     if (!session) {
-      alert("Veuillez vous connecter pour ajouter au panier !");
+      router.push('/connexion?message=Veuillez vous connecter pour ajouter un article au panier.');
       return;
     }
     setLoading(true);
