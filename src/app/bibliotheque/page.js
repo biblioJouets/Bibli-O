@@ -15,7 +15,6 @@ export default function LibraryPage() {
   const refillOrderId   = searchParams.get('sourceOrderId');
   const refillSlots     = parseInt(searchParams.get('slots') || '0', 10);
   const { setExchangeContext, setRefillContext } = useCart();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,10 +41,19 @@ export default function LibraryPage() {
 
   // États pour les filtres
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const categoryFromUrl = searchParams.get('categorie');
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || '');
   const [selectedAge, setSelectedAge] = useState('');
   const [sortOption, setSortOption] = useState('newest');
 
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    } else {
+      setSelectedCategory('');
+    }
+  }, [categoryFromUrl]);
+  
   useEffect(() => {
     const fetchProducts = async () => {
       try {

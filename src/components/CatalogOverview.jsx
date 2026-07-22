@@ -1,23 +1,26 @@
+'use client';
 import React from 'react';
+import Link from 'next/link';
 import "styles/catalogOverview.css";
 import SliderLogoSection from './SliderLogo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faGraduationCap,
-  faCubes,
-  faTree,
-  faLightbulb,
-  faRobot,
-  faPuzzlePiece
+  faGraduationCap,  // Éducatif
+  faCubes,           // Construction
+  faStore,           // Imitation (marchande, dinette, etc.)
+  faShapes,          // Motricité / Formes
+  faRobot,           // Robots
+  faPuzzlePiece      // Puzzles
 } from '@fortawesome/free-solid-svg-icons';
 
+// Utilisation EXACTE des libellés de ta base de données
 const bubulleTagsList = [
-  { label: "Jeux Éducatifs", icon: faGraduationCap, link: "/catalogue?categorie=educatifs" },
-  { label: "Jeux de Construction", icon: faCubes, link: "/catalogue?categorie=construction" },
-  { label: "Jeux en Bois", icon: faTree, link: "/catalogue?categorie=bois" },
-  { label: "Éveil & Apprentissage", icon: faLightbulb, link: "/catalogue?categorie=eveil" },
-  { label: "Interactifs & Électroniques", icon: faRobot, link: "/catalogue?categorie=interactifs" },
-  { label: "Jeux d'initiation", icon: faPuzzlePiece, link: "/catalogue?categorie=initiation" },
+  { label: "Jeux Éducatifs & Créatifs", icon: faGraduationCap },
+  { label: "Jeux de Construction et Briques", icon: faCubes },
+  { label: "Jeux d'Imitation & Rôles", icon: faStore },
+  { label: "Motricité Fine & Dextérité", icon: faShapes },
+  { label: "Robots et Jeux Interactifs", icon: faRobot },
+  { label: "Puzzles", icon: faPuzzlePiece },
 ];
 
 function CatalogOverview() {
@@ -40,19 +43,24 @@ function CatalogOverview() {
         </div>
       </div>
 
-      {/* Grille de catégories organiques (Blobs) */}
+      {/* Grille de catégories organiques (Blobs) cliquables */}
       <div className='blobTagsContainer'>
-        {bubulleTagsList.map((item, index) => (
-          <a key={index} href={item.link} className="blobItem">
-            <div className={`blobIcon ${tagClasses[index % tagClasses.length]}`}>
-              <FontAwesomeIcon icon={item.icon} className="blobFaIcon" />
-            </div>
-            <span className="blobLabel">{item.label}</span>
-          </a>
-        ))}
+        {bubulleTagsList.map((item, index) => {
+          // L'encodage gère automatiquement les espaces, les "&" et les accents pour l'URL
+          const categoryUrl = `/bibliotheque?categorie=${encodeURIComponent(item.label)}`;
+          
+          return (
+            <Link key={index} href={categoryUrl} className="blobItem">
+              <div className={`blobIcon ${tagClasses[index % tagClasses.length]}`}>
+                <FontAwesomeIcon icon={item.icon} className="blobFaIcon" />
+              </div>
+              <span className="blobLabel">{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
 
-      <h2 className="bj-main-title marquesTitle">Nos marques <span className="bj-main-title-highlight">partenaires</span></h2>
+      <h2 className="bj-main-title marquesTitle">Nos marques partenaires</h2>
       <SliderLogoSection />
       
     </div>
