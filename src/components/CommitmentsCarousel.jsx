@@ -34,7 +34,7 @@ export default function CommitmentsCarousel() {
             </h2>
             
             <div 
-                className="bj-commitments-grid" 
+                className="bj-commitments-grid cols-6" 
                 ref={carouselRef}
                 onScroll={handleScroll}
             >

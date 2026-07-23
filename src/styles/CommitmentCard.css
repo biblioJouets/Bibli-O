@@ -17,10 +17,17 @@
     width: 100%;
     overflow: hidden; 
 }
+.bj-commitments-grid.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
 
+/* Grille 6 cartes (2 lignes de 3) */
+.bj-commitments-grid.cols-6 {
+    grid-template-columns: repeat(3, 1fr);
+}
 .bj-commitments-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem; 
     max-width: 1200px;
     width: 100%;
