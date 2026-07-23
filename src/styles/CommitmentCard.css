@@ -1,40 +1,50 @@
 /* ---------------------------------- */
 /* --- SECTION ENGAGEMENTS --- */
 /* ---------------------------------- */
+.bj-commitments-section,
+.bj-commitments-section *,
+.bj-commitments-section *::before,
+.bj-commitments-section *::after {
+    box-sizing: border-box;
+}
+
 .bj-commitments-section {
-    padding: 4rem 0rem; /*  décallage screen tablette */
+    padding: 4rem 2rem; 
     background-color: #DAEEE6;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    overflow: hidden; 
 }
 
-/* --- GRILLE DESKTOP (3x2) --- */
 .bj-commitments-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5rem;
-    max-width: 1100px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem; 
+    max-width: 1200px;
     width: 100%;
-    margin: 0 auto;
+    margin: 0 auto; /* Centre parfaitement la grille */
 }
+
+
 
 .bj-commitment-card {
     background-color: #FFFFFF;
-    border-radius: 25px;
-    padding: 2rem 1.5rem;
+    border-radius: 25px; /* Coins arrondis signature */
+    padding: 2rem 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     box-shadow: 0 10px 30px rgba(46, 29, 33, 0.05);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     width: 100%;
 }
 
 .bj-commitment-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(46, 29, 33, 0.1);
 }
 
 /* --- BULLES ET ICÔNES --- */
@@ -45,16 +55,17 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1.5rem;
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* Forme blob organique */
 }
 
 .bj-commitment-icon {
     width: 40px;
     height: 40px;
     object-fit: contain;
-    filter: brightness(0) invert(1);
+    filter: brightness(0) invert(1); /* Rend l'icône blanche */
 }
 
+/* Couleurs des bulles */
 .bj-bg-blue { background-color: #6EC1E4; }
 .bj-bg-green { background-color: #88D4AB; }
 .bj-bg-rose { background-color: #FF8C94; }
@@ -73,63 +84,44 @@
 .bj-commitment-description {
     font-size: 0.95rem;
     color: #2E1D21;
-    line-height: 1.4;
-    opacity: 0.9;
+    line-height: 1.5;
+    opacity: 0.85;
     margin: 0;
 }
 
-.bj-carousel-dots {
-    display: none;
-}
-
 /* =========================================
-   CARROUSEL MOBILE (SIMPLE & FONCTIONNEL)
+   MOBILE FIRST / TABLETTE (CARROUSEL SCROLL)
    ========================================= */
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1120px){
+    .bj-commitments-grid {
+
+    grid-template-columns: 1fr 1fr;
+
+}
+}
+@media screen and (max-width: 768px) {
     .bj-commitments-section {
-        padding: 3rem 0rem;
+        padding: 3rem 1rem;
     }
+    
     .bj-commitments-grid {
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
-        width: 90%;
+        width: 100%;
         scroll-snap-type: x mandatory;
-        scrollbar-width: none; /* Cache la barre Firefox */
-        -ms-overflow-style: none; /* Cache la barre IE */
-        gap: 1rem;
-        padding-bottom: 1rem;
-        margin: 0 ;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        gap: 1.2rem;
+        padding: 1rem 0;
     }
 
     .bj-commitments-grid::-webkit-scrollbar {
-        display: none; /* Cache la barre Chrome/Safari */
+        display: none; /* Chrome/Safari */
     }
 
     .bj-commitment-card {
-        flex: 0 0 85%; /* La carte prend 85% de la place disponible */
+        flex: 0 0 82%; /* Affiche la carte principale + un aperçu de la suivante */
         scroll-snap-align: center;
-    }
-
-    .bj-carousel-dots {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 1rem;
-        width: 100%;
-    }
-
-    .bj-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: rgba(46, 29, 33, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .bj-dot.active {
-        background-color: #2E1D21;
-        width: 25px;
-        border-radius: 10px;
     }
 }

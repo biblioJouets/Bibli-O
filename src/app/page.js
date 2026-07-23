@@ -8,7 +8,6 @@ import PromotionBanner from '@/components/PromoBanner';
 // import NewToys from "../components/NewToys";
 import Banner from "@/components/Banner";
 import CatalogOverview from "@/components/CatalogOverview";
-import CommitmentCard from "@/components/CommitmentCard";
 import Protocol from "@/components/protocol";
 import CardContentMission from "@/components/CardsContentMission";
 import FAQ from "@/components/FAQ"
@@ -17,7 +16,6 @@ import FunctionalityCard from "@/components/FunctionalityCard";
 import SubChoice from "@/components/SubChoice";
 import GoogleReviews from '@/components/GoogleReviews';
 import prisma from "@/lib/core/database";
-
 import Feature from '@/components/FeaturesSection';
 
 //import style

@@ -204,11 +204,7 @@ padding-bottom: 0;
 /* =========================================
    SECTION card choix des formules
 ========================================= */
-.subpage{ 
-  display: flex;
-  justify-content: center;
-  padding-bottom: 4rem;
-}
+
 .pricing-section{
   background-color: #FEF7F0;
   padding-top: 80px;

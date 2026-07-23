@@ -11,10 +11,10 @@ import '@/styles/homepage.css';
 import '@/styles/abonnements.css';
 import '@/styles/aPropos.css';
 
-const LEAFIMAGE = 'assets/icons/leaf.png';
-const APPROBATIONIMAGE = 'assets/icons/approbation.png';
-const ZENIMAGE = 'assets/icons/zen.png';
-const EUROIMAGE = 'assets/icons/euro.png';
+const LEAFIMAGE = '/assets/icons/leaf.png';
+const APPROBATIONIMAGE = '/assets/icons/approbation.png';
+const ZENIMAGE = '/assets/icons/zen.png';
+const EUROIMAGE = '/assets/icons/euro.png';
 
 export const metadata = {
   title: 'À propos',
@@ -103,32 +103,38 @@ export default function AboutPage() {
       {/* ============================================================
           SECTION 5 — NOS VALEURS
       ============================================================ */}
-      <section className="commitmentsSection" aria-labelledby="valeurs-title">
-        <h2 className="bj-main-title" id="valeurs-title">Nos <span className="bj-main-title-highlight">Valeurs</span></h2>
-       
-        <div className="commitmentCards">
-          <CommitmentCard
-            icon={LEAFIMAGE}
-            title="Écologie"
-            description="Chaque jouet loué est un jouet de moins fabriqué. Nous croyons en une consommation raisonnée, au service de la planète que vos enfants hériteront."
-          />
-          <CommitmentCard
-            icon={APPROBATIONIMAGE}
-            title="Qualité & Sécurité"
-            description="Uniquement des jouets conformes aux normes CE, fabriqués dans des matériaux sûrs et durables — bois, textiles certifiés, zéro BPA."
-          />
-          <CommitmentCard
-            icon={ZENIMAGE}
-            title="Bienveillance"
-            description="Chaque famille est unique. Nous adaptons nos recommandations à l'âge de votre enfant, avec toujours un service humain et à l'écoute."
-          />
-          <CommitmentCard
-            icon={EUROIMAGE}
-            title="Accessibilité"
-            description="Le jeu de qualité ne devrait pas être un luxe. Notre abonnement permet à toutes les familles d'accéder à des jouets premium à prix raisonnable."
-          />
-        </div>
-      </section>
+<section className="bj-commitments-section" aria-labelledby="valeurs-title">
+  <h2 className="bj-main-title" id="valeurs-title">
+    Nos <span className="bj-main-title-highlight">Valeurs</span>
+  </h2>
+
+  <div className="bj-commitments-grid">
+    <CommitmentCard
+      icon={LEAFIMAGE}
+      title="Écologie"
+      iconWrapperClass="bj-bg-green"
+      description="Chaque jouet loué est un jouet de moins fabriqué. Nous croyons en une consommation raisonnée, au service de la planète que vos enfants hériteront."
+    />
+    <CommitmentCard
+      icon={APPROBATIONIMAGE}
+      title="Qualité & Sécurité"
+      iconWrapperClass="bj-bg-blue"
+      description="Uniquement des jouets conformes aux normes CE, fabriqués dans des matériaux sûrs et durables — bois, textiles certifiés, zéro BPA."
+    />
+    <CommitmentCard
+      icon={ZENIMAGE}
+      title="Bienveillance"
+      iconWrapperClass="bj-bg-rose"
+      description="Chaque famille est unique. Nous adaptons nos recommandations à l'âge de votre enfant, avec toujours un service humain et à l'écoute."
+    />
+    <CommitmentCard
+      icon={EUROIMAGE}
+      title="Accessibilité"
+      iconWrapperClass="bj-bg-yellow"
+      description="Le jeu de qualité ne devrait pas être un luxe. Notre abonnement permet à toutes les familles d'accéder à des jouets premium à prix raisonnable."
+    />
+  </div>
+</section>
 
       {/* ============================================================
           SECTION 5 — NOTRE MISSION

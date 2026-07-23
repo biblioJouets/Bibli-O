@@ -1,15 +1,21 @@
 import React from "react";
+import Image from "next/image";
 import '../styles/CommitmentCard.css';
 
-function CommitmentCard({ title, description, icon, className = "", iconWrapperClass = "" }) {
+function CommitmentCard({ title, description, icon, className = "", iconWrapperClass = "bj-bg-blue" }) {
     const rootClass = `bj-commitment-card ${className}`.trim();
     const wrapperClass = `bj-commitment-icon-wrapper ${iconWrapperClass}`.trim();
 
     return (
         <div className={rootClass}>
-            {/* La bulle colorée organique qui entoure l'icône */}
             <div className={wrapperClass}>
-                <img src={icon} alt={title} className="bj-commitment-icon" />
+                <Image 
+                    src={icon} 
+                    alt={title} 
+                    width={40} 
+                    height={40} 
+                    className="bj-commitment-icon" 
+                />
             </div>
             <h3 className="bj-commitment-title">{title}</h3>
             <p className="bj-commitment-description">{description}</p>
