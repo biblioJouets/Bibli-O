@@ -72,13 +72,13 @@ export default function FunctioningPage() {
             <div className="step-item">
               <div className="step-number-shape shape-green">3. On reçoit et on joue !</div>
               <h3>Livraison rapide</h3>
-              <p>Recevez votre box en point relais. Place à la découverte et au jeu !</p>
+              <p>Recevez votre box à domicile ou en point relais. Place à la découverte et au jeu !</p>
             </div>
             <div className="step-item">
-              <div className="step-number-shape shape-pink">4. On échange</div>
-              <h3>Lassé ? On change !</h3>
-              <p>Renvoyez gratuitement les jouets et recommencez le cycle pour de nouvelles aventures.</p>
-            </div>
+              <div className="step-number-shape shape-pink">4. Je fais évoluer</div>
+              <h3>Échangez ou gardez !</h3>
+              <p>Envie de nouveauté ? Échangez la box. Un gros coup de cœur ? Gardez-le ou achetez-le au prix Bibli'o Jouets !</p>
+              </div>
           </div>
         </div>
       </section>

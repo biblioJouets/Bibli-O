@@ -13,6 +13,7 @@ import {
   Users,
   Truck,
   Blocks,
+  ToyBrick
 } from 'lucide-react';
 
 import 'styles/FAQ.css';
@@ -31,6 +32,11 @@ answer: "C'est un jeu d'enfant ! Vous sélectionnez d'abord les jouets qui feron
       icon: <RefreshCw size={20} />,
       question: "Les jouets sont-ils vraiment propres et sûrs pour mes enfants ?",
       answer: "Absolument ! L'hygiène et la sécurité sont nos priorités absolues. Après chaque retour, chaque jouet passe par un protocole de nettoyage et de désinfection strict avec des produits écologiques. Ils sont ensuite minutieusement vérifiés pour s'assurer de leur conformité aux normes CE et de leur parfait état avant de repartir pour de nouvelles aventures. La sérénité des parents est notre engagement !"
+    },
+      {
+      icon: <ToyBrick size={20} />,
+      question: "D'où proviennent les jouets ? Sont-ils sûrs pour mes enfants ?",
+      answer: "Tous nos jouets sont soigneusement sélectionnés auprès de fournisseurs réputés et respectent les normes de sécurité européennes (marquage CE). Nous privilégions des jouets éducatifs, ludiques et durables, adaptés à l'âge de vos enfants. Chaque jouet est inspecté avant d'être mis à disposition pour garantir une expérience de jeu sûre et enrichissante."
     },
     {
       icon: <XCircle size={20} />,
