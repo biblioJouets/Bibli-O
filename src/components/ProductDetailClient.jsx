@@ -96,6 +96,21 @@ export default function ProductDetailClient({ product }) {
           <h1 className="product-title">{product.name}</h1>
           <p className="product-ref">Réf: {product.reference}</p>
 
+          {product.description && (
+            <div 
+              className="product-description" 
+              style={{ 
+                marginTop: '1rem', 
+                marginBottom: '1.5rem', 
+                color: '#2E1D21', 
+                lineHeight: '1.6',
+                whiteSpace: 'pre-line' 
+              }}
+            >
+              {product.description}
+            </div>
+          )}
+
           <div className="price-block">
             {isOutOfStock ? (
                 <span style={{ color: '#999', fontSize: '1.1rem', fontWeight: 'normal' }}>
