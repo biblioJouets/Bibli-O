@@ -35,7 +35,7 @@ function ContactPage() {
           {/* Liens Email - utilisation d'une balise <a> pour l'accessibilité */}
           <a href="mailto:contact@bibliojouets.com" className="contactItem">
             <div className="icons">
-              <FontAwesomeIcon className="social-icon" icon={faEnvelope} />
+              <FontAwesomeIcon className="social-icon-contact" icon={faEnvelope} />
             </div>
             <p>contact@bibliojouets.com</p>
           </a>
