@@ -1,23 +1,24 @@
-import React from 'react';
 import '@/styles/mariage.css';
+
+import DevisForm from '@/components/DevisForm.jsx';
 
 const  IMAGE_MARIAGE1  = 'assets/mariage/image_mariage1.webp';
 const  IMAGE_MARIAGE2  = 'assets/mariage/image_mariage2.webp';
 const  IMAGE_MARIAGE3  = 'assets/mariage/image_mariage3.webp';
 
 
-export const metadata = {
-  title: "Location Jouets Mariage & Événements | Bibli'o Jouets",
-  description: "Offrez à vos mariés  le jour J. Des packs de location de jouets avec livraison et installation sur Montpellier et alentours.",
-  openGraph: {
-    title: "Location d'Espace Enfant pour Mariages | Bibli'o Jouets",
-    description: "Des prestations irréprochables pour occuper les enfants. Découvrez nos formules à partir de 50€ avec livraison incluse.",
-    url: 'https://www.bibliojouets.fr/mariage',
-    siteName: "Bibli'o Jouets",
-    locale: 'fr_FR',
-    type: 'website',
-  },
-};
+// export const metadata = {
+//   title: "Location Jouets Mariage & Événements | Bibli'o Jouets",
+//   description: "Offrez à vos mariés  le jour J. Des packs de location de jouets avec livraison et installation sur Montpellier et alentours.",
+//   openGraph: {
+//     title: "Location d'Espace Enfant pour Mariages | Bibli'o Jouets",
+//     description: "Des prestations irréprochables pour occuper les enfants. Découvrez nos formules à partir de 50€ avec livraison incluse.",
+//     url: 'https://www.bibliojouets.fr/mariage',
+//     siteName: "Bibli'o Jouets",
+//     locale: 'fr_FR',
+//     type: 'website',
+//   },
+// };
 
 export default function MariageEventPage() {
   return (
@@ -168,36 +169,7 @@ export default function MariageEventPage() {
       </section>
 
       {/* SECTION 8 : FORMULAIRE / CONTACT FINAL */}
-      <section id="devis" className="bj-mar-section bj-mar-contact bg-warm-3">
-        <div className="bj-mar-container bj-mar-contact-grid">
-          <div className="bj-mar-contact-info">
-             <span className="bj-mar-overline">Contactez-<span className="bj-main-title-highlight">nous</span></span>
-             <h2 className="bj-mar-h2">Possibilité de faire un <span className="bj-main-title-highlight">devis sur mesure</span></h2>
-             <p className="bj-mar-text">Professionnels de l'événementiel ou futurs mariés, déléguez l'espace enfant en toute sérénité. Remplissez ce formulaire et obtenez une proposition rapide.</p>
-          </div>
-          <div className="bj-mar-contact-form-card bg-warm-1">
-            <form className="bj-mar-form">
-              <div className="bj-mar-form-group">
-                <label>Nom & Prénom / Agence</label>
-                <input type="text" placeholder="Vos coordonnées" required />
-              </div>
-              <div className="bj-mar-form-group">
-                <label>Date de l'événement</label>
-                <input type="date" required />
-              </div>
-              <div className="bj-mar-form-group">
-                <label>Lieu de réception</label>
-                <input type="text" placeholder="Montpellier et alentours..." required />
-              </div>
-              <div className="bj-mar-form-group">
-                <label>Détails du projet (Formule souhaitée, nombre d'enfants...)</label>
-                <textarea rows="4" placeholder="Dites-nous tout..." required></textarea>
-              </div>
-              <button type="submit" className="bj-mar-btn-primary">Demander un devis sur mesure</button>
-            </form>
-          </div>
-        </div>
-      </section>
+     <DevisForm />
 
     </main>
   );

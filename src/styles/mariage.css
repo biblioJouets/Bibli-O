@@ -235,23 +235,3 @@
     .bj-mar-stagger-down { transform: translateY(40px); }
   }
   
-  /* SECTION 8 : FORMULAIRE DE CONTACT */
-  .bj-mar-contact-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; }
-  .bj-mar-form { display: flex; flex-direction: column; gap: 1.5rem; }
-  .bj-mar-form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-  .bj-mar-form-group label { font-weight: 700; font-size: 0.875rem; }
-  .bj-mar-form-group input, .bj-mar-form-group textarea {
-    padding: 1rem 1.5rem; border-radius: 15px; border: 1px solid rgba(46, 29, 33, 0.1);
-    background-color: transparent; font-family: inherit; font-size: 1rem; color: var(--bj-c-text);
-  }
-  .bj-mar-form-group input:focus, .bj-mar-form-group textarea:focus {
-    outline: none; border-color: var(--bj-c-pink); background-color: white;
-  }
-  .bj-mar-contact-form-card { padding: 3rem; border-radius: var(--bj-radius-card); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
-  
-  @media (min-width: 992px) {
-    .bj-mar-contact-grid { grid-template-columns: 1fr 1fr; align-items: center; gap: 6rem; }
-  }
-  @media (max-width: 400px) {
-   .bj-mar-contact-form-card { padding: 1rem; }
-  }
