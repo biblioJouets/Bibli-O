@@ -126,7 +126,88 @@
 .nav-menu a:hover::after {
   transform: translateX(-50%) scaleX(1);
 }
+/* ========================================
+   DROPDOWN "NOS OFFRES" (Navigation)
+   ======================================== */
 
+   .offers-container {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link-trigger {
+  background: transparent;
+  border: none;
+  color: #2E1D21;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.nav-link-trigger:hover {
+  color: #6EC1E4;
+  background-color: rgba(110, 193, 228, 0.1);
+}
+
+/* On aligne le menu d'offres à gauche plutôt qu'à droite */
+.offers-dropdown {
+  left: 0;
+  right: auto;
+  top: calc(100% + 5px); /* Un peu plus près du texte */
+}
+
+/* On déplace la petite flèche blanche vers la gauche */
+.offers-dropdown::before {
+  left: 18px;
+  right: auto;
+}
+
+/* Ajustements Mobile pour Nos Offres */
+@media (max-width: 900px) {
+  .offers-container {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .nav-link-trigger {
+    width: 100%;
+    justify-content: space-between;
+    padding: 18px 0;
+    font-size: 1.1rem;
+    border-bottom: 2px dotted #6EC1E4;
+    border-radius: 0;
+  }
+
+  /* Sur mobile, on enlève le style "flottant/absolu" pour que ça pousse le reste du menu vers le bas */
+  .offers-dropdown {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none;
+    background: transparent;
+    padding: 10px 0 0 20px; /* Décalage pour l'effet sous-menu */
+    animation: none;
+  }
+
+  .offers-dropdown::before {
+    display: none; /* On cache la flèche blanche sur mobile */
+  }
+
+  .offers-dropdown .dropdown-item {
+    border-bottom: 1px dotted rgba(46, 29, 33, 0.2);
+    border-radius: 0;
+    padding: 12px 0;
+  }
+}
 /* ========================================
    ACTIONS SECONDAIRES (Desktop)
    ======================================== */
@@ -507,7 +588,6 @@
     pointer-events: all;
   }
 }
-
 /* ========================================
    TRÈS PETITS ÉCRANS (< 480px)
    ======================================== */
