@@ -1,16 +1,16 @@
-import 'styles/Button.css'
-import Link from 'next/link';
+import 'styles/Button.css';
+import Link from "next/link"; 
 
-function ButtonYellow ({text, href, target = "_self"}) {
+function ButtonYellow({ text, href, target = "_self" }) {
     const destination = href || "#"; 
 
     return( 
         <Link 
             href={destination} 
-            className="Button Yellow" 
+            className="bj-btn bj-btn-yellow" 
             target={target}
         >
-            <p>{text}</p>
+            {text}
         </Link>
     )
 }

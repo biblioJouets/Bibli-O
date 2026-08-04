@@ -17,7 +17,8 @@ const listProtocole = [
 export default function Protocol() {
   return (
     <div className="SectionProtocol">
-      <h2 className="homePageSubTitle">Le Protocole de Nettoyage</h2>
+      <h2 className="bj-main-title">Le Protocole de <span className="bj-main-title-highlight">Nettoyage</span></h2>
+
       <div className="TextImage">
         <div className="ImageProtocolWrapper">
           <Image

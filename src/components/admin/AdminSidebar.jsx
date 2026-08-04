@@ -50,7 +50,7 @@ export default function AdminSidebar() {
 
       <aside ref={menuRef} className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}>
         <div className={styles.sidebarHeader}>
-          <span className={styles.sidebarLogo}>🧸</span>
+          <span className={styles.sidebarLogo}></span>
           <span className={styles.sidebarTitle}>Admin</span>
           <button className={styles.closeButton} onClick={close} aria-label="Fermer le menu">
             <X size={20} color="#2E1D21" />
@@ -110,10 +110,9 @@ export default function AdminSidebar() {
 
         <nav className={styles.navGroup}>
           <p className={styles.navGroupLabel}>Clients</p>
-          <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItemDisabled}`}>
+          <Link href="/admin/clients" className={`${styles.navItem} ${styles.navItem}`}>
             <span className={styles.navIcon}>👥</span>
             Comptes clients
-            <span className={styles.comingSoon}>bientôt</span>
           </Link>
           <Link href="/admin/support" className={`${styles.navItem} ${styles.navItemDisabled}`}>
             <span className={styles.navIcon}>💬</span>

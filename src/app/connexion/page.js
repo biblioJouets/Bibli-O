@@ -15,7 +15,7 @@ export default function ConnexionPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  
+  const [infoMessage, setInfoMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -25,6 +25,11 @@ export default function ConnexionPage() {
     if (searchParams.get('error') === 'CredentialsSignin') {
       setError("Email ou mot de passe incorrect.");
     }
+    const messageParam = searchParams.get('message');
+    if (messageParam) {
+      setInfoMessage(messageParam);
+    }
+
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -59,14 +64,24 @@ export default function ConnexionPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="auth-title">Bon retour parmi nous ! 👋</h1>
+        <h1 className="auth-title">Bon retour parmi nous !</h1>
 
         {successMessage && (
           <div className="bg-green-100 text-green-800 p-4 rounded mb-4 text-center">
             {successMessage}
           </div>
         )}
+{infoMessage && (
+          <div className="bg-[#FFF7D4] text-[#2E1D21] border border-[#ffe264] p-4 rounded-xl mb-4 text-center text-sm font-medium">
+            {infoMessage}
+          </div>
+        )}
 
+        {successMessage && (
+          <div className="bg-green-100 text-green-800 p-4 rounded mb-4 text-center">
+            {successMessage}
+          </div>
+        )}
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">

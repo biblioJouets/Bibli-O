@@ -132,6 +132,18 @@
   justify-content: flex-start;
 }
 
+.badge-purchased {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  background-color: #FFD9DC;
+  color: #2E1D21;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 /* --- Boutons (Pill-shape) --- */
 .btn-pill {
   border-radius: 50px; /* Coins pilule */

@@ -37,10 +37,16 @@ const contactSchema = z.object({
   listId: z.union([z.string(), z.number()]).optional(),
 });
 
-const mailjet = Mailjet.apiConnect(
-  process.env.MAILJET_API_KEY,
-  process.env.MAILJET_API_SECRET
-);
+let _mailjet = null;
+function getMailjet() {
+  if (!_mailjet) {
+    _mailjet = Mailjet.apiConnect(
+      process.env.MAILJET_API_KEY,
+      process.env.MAILJET_API_SECRET
+    );
+  }
+  return _mailjet;
+}
 
 // -------------------------
 // 1) Envoi d'un email
@@ -55,7 +61,7 @@ export async function sendMail({ toEmail, subject, text }) {
   };
 
   try {
-    await mailjet.post("send", { version: "v3.1" }).request({
+    await getMailjet().post("send", { version: "v3.1" }).request({
       Messages: [
         {
           From: {
@@ -103,10 +109,10 @@ export async function addContactToList({ email, name, listId }) {
     const payload = { Email: sanitized.email };
     if (sanitized.name) payload.Name = sanitized.name;
 
-    await mailjet.post("contact", { version: "v3" }).request(payload);
+    await getMailjet().post("contact", { version: "v3" }).request(payload);
 
     // Ajout dans la liste
-    await mailjet.post("listrecipient", { version: "v3" }).request({
+    await getMailjet().post("listrecipient", { version: "v3" }).request({
       ContactAlt: sanitized.email,
       ListID: finalListId,
       IsUnsubscribed: false,

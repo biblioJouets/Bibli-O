@@ -50,7 +50,10 @@ export default function GiftCodeActivator() {
       </div>
 
       <p className="text-sm text-gray-500">
-        Saisis ton code pour créditer ton compte Bibli'O Jouets.
+        Saisis ton code pour créditer ton compte Bibli'o Jouets.
+        <br/>
+        <br/>
+        *Uniquement valide pour la location de jouets. Les cartes cadeaux ne sont pas remboursables et ne peuvent pas être échangées contre de l'argent. 
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">

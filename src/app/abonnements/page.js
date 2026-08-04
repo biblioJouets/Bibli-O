@@ -5,6 +5,7 @@ import '@/styles/abonnements.css';
 import Image from 'next/image'
 import React, { useState, useRef } from 'react'; 
 import { useRouter } from 'next/navigation';
+import Feature from '@/components/FeaturesSection';
 import CommitmentCard from '@/components/CommitmentCard';
 
 import SubChoice from '@/components/SubChoice';
@@ -66,36 +67,8 @@ return (
 
 
        </div>
-       <div className="commitmentCards subpage">
-         <CommitmentCard
-                            icon={DELIVERYIMAGE}
-                            title="Livraison et retour inclus"
-                            description="Livraison et retour inclus dans toutes nos formules, pour une expérience sans souci."
-                        />
-                        <CommitmentCard
-                            title="Assurance &quot;Casse&quot;"
-                            icon={CARIMAGE}
-                            description="L'assurance 'Petite Casse' couvre la plupart des petits accidents du quotidien."
-                        />
-                        <CommitmentCard
-                            className="hygiene"
-                            icon={WASHIMAGE}
-                            title=" Nettoyage baby self"
-                            description="Nettoyage baby self de tous nos jouets pour garantir sécurité et propreté à chaque échange."
-                            // iconClassName="icon-large"    
-                        />
-                        <CommitmentCard
-                            icon={CLICKIMAGE}
-                            title="Annulable en 1 clic"
-                            description="En louant des jouets, vous contribuez à réduire les déchets et à promouvoir un mode de consommation plus durable."
-                        />
-                        </div>
-      </section>
-      
-
-
-
-
+       <Feature />
+      </section>     
       {/* --- SECTION POURQUOI CHOISIR --- */}
       <section className="why-section">
         <div className="container">

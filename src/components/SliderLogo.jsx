@@ -25,18 +25,20 @@ export default function SliderLogo() {
   const duplicatedLogos = [...sliderLogos, ...sliderLogos];
 
   return (
-    <div className="sliderLogoWrapper">
-      <div className="sliderLogoContainer">
-        {duplicatedLogos.map((logo, i) => (
-          <Image 
-            key={i} 
-            src={logo.src} 
-            alt={logo.alt} 
-            className="sliderLogoImage"
-            width={120}
-            height={80}
-          />
-        ))}
+    <div className="sliderPillWrapper">
+      <div className="sliderLogoWrapper">
+        <div className="sliderLogoContainer">
+          {duplicatedLogos.map((logo, i) => (
+            <Image 
+              key={i} 
+              src={logo.src} 
+              alt={logo.alt} 
+              className="sliderLogoImage"
+              width={120}
+              height={80}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

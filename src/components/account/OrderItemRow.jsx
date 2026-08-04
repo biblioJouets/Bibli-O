@@ -23,6 +23,7 @@ export default function OrderItemRow({
     item.renewalIntention === 'RETOUR_DEMANDE' || orderStatus === 'RETURNING'
   );
 
+  const isPurchased    = item.intent === 'PURCHASE';
   const isAdopted      = ADOPTED_STATUSES.includes(item.renewalIntention);
   const isProlonged    = item.renewalIntention === 'PROLONGATION' || item.renewalIntention === 'PROLONGATION_TACITE';
   const isHistorical   = ['PENDING', 'PREPARING', 'RETURNED', 'COMPLETED', 'CANCELLED'].includes(orderStatus);
@@ -30,7 +31,7 @@ export default function OrderItemRow({
   const productData  = item.product || item.Products || {};
   const imageUrl     = productData?.images?.[0] || '/assets/box_bj.png';
   const productName  = productData?.name || "Jouet Mystère";
-  const productPrice = Number(productData?.price || 0).toFixed(2);
+  const productPrice = Number(productData?.biblioPrice || productData?.price || 0).toFixed(2);
   const returnDate   = item.rentalEndDate
     ? new Date(item.rentalEndDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : "Non définie";
@@ -47,7 +48,7 @@ export default function OrderItemRow({
     : null;
 
   // La checkbox n'apparaît que si un mode actif est en cours ET que le jouet est éligible
-  const isSelectable = !!onToggleSelect && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
+  const isSelectable = !!onToggleSelect && !isPurchased && !isAdopted && !isReturning && !isHistorical && orderStatus === 'ACTIVE';
 
   return (
     <div className={`order-item-row transition-colors ${isSelected ? 'bg-[#EBF7FD] rounded-[16px] px-2' : ''}`}>
@@ -105,11 +106,15 @@ export default function OrderItemRow({
 
       {/* Zone d'état / actions par jouet */}
       <div className="item-actions">
-        {isHistorical ? null
+        {isPurchased ? (
+          <span className="badge-purchased">
+            Acquis définitivement
+          </span>
+        ) : isHistorical ? null
         : isAdoptionOrder ? (
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#c4a8d5', color: '#2E1D21' }}>
-            🧸 À vous pour toujours
+           À vous pour toujours
           </span>
         ) : isReturning ? (
           <span className="text-gray-400 text-sm px-4 py-2 rounded-full"
@@ -119,7 +124,7 @@ export default function OrderItemRow({
         ) : isAdopted ? (
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold"
             style={{ backgroundColor: '#DAEEE6', color: '#2E1D21' }}>
-            Adopté pour la vie 🧸
+            Adopté pour la vie
           </span>
         ) : orderStatus === 'ACTIVE' && !activeMode ? (
           /* Boutons individuels — visibles hors mode sélection groupée */
@@ -138,7 +143,7 @@ export default function OrderItemRow({
               onClick={() => setShowAdoptModal(true)}
               className="px-4 py-2 rounded-full text-white font-semibold text-sm transition-colors shadow-sm border-none"
               style={{ background: '#FF8C94' }}>
-              🧸 Adopter
+               Adopter
             </button>
 
             {['ACTIVE', 'SHIPPED'].includes(orderStatus) && (

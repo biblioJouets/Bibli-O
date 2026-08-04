@@ -34,7 +34,7 @@ export default async function MonCompteDashboard() {
   return (
     <div className="overflow-x-hidden">
       <h2 className="section-title">
-        Bonjour, {session.user.name} 👋
+        Bonjour, {session.user.name}
       </h2>
 
       {/* Alertes prioritaires */}

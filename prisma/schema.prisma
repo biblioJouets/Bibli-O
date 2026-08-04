@@ -75,8 +75,10 @@ model CartItem {
   product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   quantity Int @default(1)
+  
+  intent   String @default("RENTAL") @db.VarChar(20) 
 
-  @@unique([cartId, productId])
+  @@unique([cartId, productId, intent])
 }
 
 model Orders {
@@ -141,6 +143,7 @@ model OrderProducts {
   ProductId Int
   quantity  Int      @default(1)
 
+  intent           String    @default("RENTAL") @db.VarChar(20) // "RENTAL" | "PURCHASE"
   rentalEndDate    DateTime? @db.Timestamptz(6) // Fin prévue (Date butoir retour)
   nextBillingDate  DateTime? @db.Timestamptz(6) // Jour-J (Date anniversaire)
   renewalIntention String?   @db.VarChar(50) // "PROLONGATION", "PROLONGATION_TACITE", "RESILIATION", "RETOUR_DEMANDE", "PAIEMENT_ECHOUE", "ADOPTE", "ADOPTE_REMPLACE"
@@ -159,6 +162,7 @@ model Products {
   slug        String?  @unique @db.VarChar(300)
   description String?
   price       Float
+  biblioPrice Float? //Prix Biblio
   stock       Int      @default(0)
   highlights  String[]
 

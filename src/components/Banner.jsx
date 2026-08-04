@@ -1,73 +1,49 @@
-"use client"; 
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import '../styles/Banner.css'; 
 
-import Image from "next/image";
-import ButtonDuo from "@/components/ButtonDuo";
-import ButtonRed from "@/components/ButtonRed";
-import "styles/Banner.css";
-
-export default function Banner() {
+const Banner = () => {
   return (
-    <div className="Banner">
-      
-      
-      <div className="banner-bg mobile-only">
+    <section className="bj-banner-container">
+      {/* Zone Image */}
+      <div className="bj-banner-image-wrapper">
         <Image 
-            src="/assets/responsiveBanner.png" 
-            alt="Enfants jouant - version mobile"
-            fill
-            priority 
-            quality={100}
-            sizes="100vw" 
-            style={{ objectFit: "cover" }}
+          src="/assets/image_desktop.webp" 
+          alt="Enfants s'amusant avec les jouets écologiques Bibli'o Jouets" 
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="bj-banner-image"
         />
       </div>
 
-      <div className="banner-bg desktop-only">
-        <Image 
-            src="/assets/imageEnfant.webp" 
-            alt="Enfants jouant avec un jeu de construction en bois"
-            fill
-            priority
-            quality={100}
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-            unoptimized={true}
-
-        />
-      </div>
-
-      <div className="shape top-left blue"></div>
-      <div className="shape top-right yellow"></div>
-      <div className="shape mid-left"></div>
-      <div className="shape bottom-left yellow"></div>
-      <div className="shape bottom-right blue"></div>
-
-      <div className="banner-content">
-        <h1 className="banner-title">Bon pour votre salon, votre budget et leur planète</h1>
-        <p className="banner-subtitle">
-          Une bibliothèque de jouets sur abonnement pour permettre aux enfants de découvrir régulièrement de nouveaux jeux...
+      {/* Zone Texte */}
+      <div className="bj-banner-content">
+        <div className="bj-banner-badge">
+          Sans engagement
+        </div>
+        
+        <h1 className="bj-banner-title">
+          Choississez, Jouez, <span className="bj-banner-highlight">Échangez !</span>
+        </h1>
+        
+        <p className="bj-banner-description">
+          L'abonnement qui libère votre salon et l'imaginaire de vos enfants. 
+          Économisez, préservez la planète et offrez-leur des nouveautés à volonté.
         </p>
         
-        <div className="floating-icon" style={{ top: "10%", right: "15%" }}>
-          ⭐
-        </div>
-        <div className="floating-icon" style={{ bottom: "25%", left: "20%" }}>
-          🧩
-        </div>
-        
-        <div className="button-group desktop">
-          <ButtonDuo
-            blueText="Découvrir nos jouets"
-            redText="Voir les abonnements"
-            blueHref="/bibliotheque"
-            redHref="/abonnements"
-          />
-        </div>
-
-        <div className="button-group mobile">
-          <ButtonRed text="Découvrir nos jouets" href="/bibliotheque" />
+        <div className="bj-banner-actions">
+          <Link href="/bibliotheque" className="bj-banner-btn-primary">
+            Découvrir les jouets
+          </Link>
+          <Link href="/fonctionnement" className="bj-banner-btn-secondary">
+            Comment ça marche ?
+          </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
-}
+};
+
+export default Banner;

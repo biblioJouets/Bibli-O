@@ -338,7 +338,7 @@ export async function POST(req) {
       const virtualCartItems = snapshotItems.map(snapItem => {
         const productInfo = dbProducts.find(p => p.id === snapItem.id);
         if (!productInfo) return null;
-        return { productId: snapItem.id, quantity: snapItem.q, product: productInfo };
+        return { productId: snapItem.id, quantity: snapItem.q, intent: snapItem.intent, product: productInfo };
       }).filter(item => item !== null);
 
       if (virtualCartItems.length === 0) throw new Error("Panier vide après vérification BDD");

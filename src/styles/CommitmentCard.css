@@ -1,69 +1,134 @@
 /* ---------------------------------- */
-/* --- ENGAGEMENT SECTION --- */
+/* --- SECTION ENGAGEMENTS --- */
 /* ---------------------------------- */
-.CardsPlansSections{
-    display: flex;
-flex-direction: column;
-    align-items: center;
+.bj-commitments-section,
+.bj-commitments-section *,
+.bj-commitments-section *::before,
+.bj-commitments-section *::after {
+    box-sizing: border-box;
 }
-.commitmentsSection{
-    margin-top: -2rem;
-    padding-top : 4rem;
-    padding-bottom : 4rem;
+
+.bj-commitments-section {
+    padding: 4rem 2rem; 
     background-color: #DAEEE6;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    overflow: hidden; 
+}
+.bj-commitments-grid.cols-4 {
+    grid-template-columns: repeat(4, 1fr);
 }
 
-.commitmentCards{
+/* Grille 6 cartes (2 lignes de 3) */
+.bj-commitments-grid.cols-6 {
+    grid-template-columns: repeat(3, 1fr);
+}
+.bj-commitments-grid {
+    display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem; 
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto; /* Centre parfaitement la grille */
+}
+
+
+
+.bj-commitment-card {
+    background-color: #FFFFFF;
+    border-radius: 25px; /* Coins arrondis signature */
+    padding: 2rem 0.5rem;
     display: flex;
-  flex-wrap: wrap;
-  gap: 3rem;
-  margin: 0 3rem 0 3rem;
-}
-
-
-
-.commitment-card{
-    flex: 1 1 280px;
-    display:flex;
     flex-direction: column;
-align-content: center;
-justify-content: center;
-background-color: white;
-border-radius: 25px;
-max-width: 400px;
-align-items: center;
-justify-content: center;
- 
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(46, 29, 33, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
 }
 
-.commitment-icon{
+.bj-commitment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(46, 29, 33, 0.1);
+}
+
+/* --- BULLES ET ICÔNES --- */
+.bj-commitment-icon-wrapper {
+    width: 75px;
+    height: 75px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    margin-top: 1.5rem;
- 
+    margin-bottom: 1.5rem;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* Forme blob organique */
 }
 
-.icon-large{
-        width: 70px;
-        height: 70px;
-        
+.bj-commitment-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* Rend l'icône blanche */
 }
-.commitment-description{
-    text-align: center;
-    margin: 0 1rem 2rem 1rem;
+
+/* Couleurs des bulles */
+.bj-bg-blue { background-color: #6EC1E4; }
+.bj-bg-green { background-color: #88D4AB; }
+.bj-bg-rose { background-color: #FF8C94; }
+.bj-bg-yellow { background-color: #ffe264; }
+.bj-bg-blue-pastel { background-color: #DFF1F9; }
+
+/* --- TEXTES --- */
+.bj-commitment-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #2E1D21;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
 }
-.commitment-card h3{
-    font-size: 1.5rem;
-    margin-top: 1rem;
+
+.bj-commitment-description {
+    font-size: 0.95rem;
+    color: #2E1D21;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin: 0;
 }
-@media screen and (max-width: 703px) {
-    .commitmentCards{
-        align-items: center;
-        justify-content: center;
+
+/* =========================================
+   MOBILE FIRST / TABLETTE (CARROUSEL SCROLL)
+   ========================================= */
+@media screen and (max-width: 1120px){
+    .bj-commitments-grid {
+
+    grid-template-columns: 1fr 1fr;
+
+}
+}
+@media screen and (max-width: 768px) {
+    .bj-commitments-section {
+        padding: 3rem 1rem;
+    }
+    
+    .bj-commitments-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        width: 100%;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        gap: 1.2rem;
+        padding: 1rem 0;
+    }
+
+    .bj-commitments-grid::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    .bj-commitment-card {
+        flex: 0 0 82%; /* Affiche la carte principale + un aperçu de la suivante */
+        scroll-snap-align: center;
     }
 }

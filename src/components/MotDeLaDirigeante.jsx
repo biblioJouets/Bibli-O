@@ -70,7 +70,7 @@ export default function MotDeLaDirigeante() {
 
           <p className="dirigeante-closing">
             Rejoignez l&apos;aventure, pour vos enfants, pour la planète, et pour votre
-            café chaud de demain matin&nbsp;! ☕
+            café chaud de demain matin&nbsp;! 
           </p>
         </div>
 

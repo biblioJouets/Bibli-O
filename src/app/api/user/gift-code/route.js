@@ -106,7 +106,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: `🎉 Carte cadeau activée ! ${giftCode.amount.toFixed(2)} € ont été crédités sur ton compte.`,
+      message: `Carte cadeau activée ! ${giftCode.amount.toFixed(2)} € ont été crédités sur ton compte.`,
     });
   } catch (error) {
     console.error("[gift-code] Erreur:", error);

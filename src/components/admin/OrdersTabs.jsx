@@ -412,6 +412,11 @@ function OrderCard({ order, type, onStatusUpdate }) {
     order.mondialRelayPointId !== "DOMICILE" &&
     order.mondialRelayPointId !== "null";
 
+  const allPurchased  = order.OrderProducts.length > 0 && order.OrderProducts.every(op => op.intent === 'PURCHASE');
+  const anyPurchased  = order.OrderProducts.some(op => op.intent === 'PURCHASE');
+  const anyRental     = order.OrderProducts.some(op => op.intent !== 'PURCHASE');
+  const isHybrid      = anyPurchased && anyRental;
+
   const clientName = order.Users
     ? `${order.Users.firstName ?? ""} ${order.Users.lastName ?? ""}`.trim()
     : "Client inconnu";
@@ -502,6 +507,12 @@ function OrderCard({ order, type, onStatusUpdate }) {
                 📦 BOX MYSTÈRE
               </span>
             )}
+            {allPurchased && (
+              <span className={styles.hybridBadgePurchase}>📦 100% ACHAT</span>
+            )}
+            {isHybrid && (
+              <span className={styles.hybridBadgeMixed}>🔄 HYBRIDE</span>
+            )}
           </div>
         </div>
 
@@ -566,7 +577,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
 
         {/* Contenu */}
         <div className={styles.infoCol}>
-          <h4 className={styles.infoColTitle}>🧸 Contenu ({order.OrderProducts.length})</h4>
+          <h4 className={styles.infoColTitle}>Contenu ({order.OrderProducts.length})</h4>
           {(order.childAge || order.childGender) && (
             <div style={{
               background: '#fffbef', border: '1.5px solid #f5d16e', borderRadius: '10px',
@@ -581,6 +592,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
           )}
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
+              const isPurchased  = op.intent === 'PURCHASE';
               const isAdopted   = ACQUIRED_STATUSES.includes(op.renewalIntention);
               const isProlonged = op.renewalIntention === 'PROLONGATION' || op.renewalIntention === 'PROLONGATION_TACITE';
               const endDate = op.rentalEndDate
@@ -602,14 +614,26 @@ function OrderCard({ order, type, onStatusUpdate }) {
                   <span className={styles.qtyBadge}>{op.quantity ?? 1}</span>
                   <span className={styles.productItemName}>
                     {op.Products?.name ?? "Jouet"}
+                    {isPurchased
+                      ? <span className={styles.intentBadgePurchase}>ACHAT</span>
+                      : <span className={styles.intentBadgeRental}>LOCATION</span>
+                    }
                     {isAdopted && <span className={styles.adoptedBadge}>Adopté 💜</span>}
                     {isProlonged && <span className={styles.prolongBadge}>⏳ Prolongation demandée</span>}
                   </span>
-                  {order.status === "ACTIVE" && !isAdopted && (
+                  {isPurchased ? (
+                    <span className={styles.productMeta}>
+                      {op.Products?.price != null && (
+                        <span className={styles.purchasePrice}>
+                          Prix d&apos;achat : {Number(op.Products.biblioPrice ?? op.Products.price).toFixed(2)} €
+                        </span>
+                      )}
+                    </span>
+                  ) : order.status === "ACTIVE" && !isAdopted && (
                     <span className={styles.productMeta}>
                       {op.Products?.price != null && (
                         <span className={styles.adoptionPrice}>
-                          Adoption : {Number(op.Products.price).toFixed(2)} €
+                          Adoption : {Number(op.Products.biblioPrice ?? op.Products.price).toFixed(2)} €
                         </span>
                       )}
                       {endDate && (

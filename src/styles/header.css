@@ -10,25 +10,48 @@
   background-color: #FFFFFF;
   box-shadow: 0 4px 20px rgba(46, 29, 33, 0.08);
   gap: 30px;
-  
-  /* Rendre le header fixe */
+  box-sizing: border-box;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
   padding: 1rem 2rem;
-  
-  /* Ajout des transitions */
   transition: all 0.3s ease-in-out;
-  height: 80px; /* Hauteur initiale */
+  height: 80px; 
 }
 
-/* État réduit au scroll */
 .header-nav.scrolled {
-  height: 80px; /* Hauteur réduite */
-
+  height: 80px; 
   background-color: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(3px);
+}
+
+/* ========================================
+   Button Header
+   ======================================== */
+.HeaderButton {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    color: white;
+    gap: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+}
+
+.HeaderButton:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+.Blue{
+    background-color: #6EC1E4;
 }
 
 /* ========================================
@@ -51,7 +74,7 @@
 }
 
 .header-nav.scrolled .logo-img {
-  width: 6rem; /* Logo plus petit quand scrollé */
+  width: 6rem; 
 }
 
 .logo-img:hover {
@@ -87,7 +110,6 @@
   transform: translateY(-2px);
 }
 
-/* Soulignement ludique au survol */
 .nav-menu a::after {
   content: '';
   position: absolute;
@@ -104,7 +126,88 @@
 .nav-menu a:hover::after {
   transform: translateX(-50%) scaleX(1);
 }
+/* ========================================
+   DROPDOWN "NOS OFFRES" (Navigation)
+   ======================================== */
 
+   .offers-container {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link-trigger {
+  background: transparent;
+  border: none;
+  color: #2E1D21;
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.nav-link-trigger:hover {
+  color: #6EC1E4;
+  background-color: rgba(110, 193, 228, 0.1);
+}
+
+/* On aligne le menu d'offres à gauche plutôt qu'à droite */
+.offers-dropdown {
+  left: 0;
+  right: auto;
+  top: calc(100% + 5px); /* Un peu plus près du texte */
+}
+
+/* On déplace la petite flèche blanche vers la gauche */
+.offers-dropdown::before {
+  left: 18px;
+  right: auto;
+}
+
+/* Ajustements Mobile pour Nos Offres */
+@media (max-width: 900px) {
+  .offers-container {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .nav-link-trigger {
+    width: 100%;
+    justify-content: space-between;
+    padding: 18px 0;
+    font-size: 1.1rem;
+    border-bottom: 2px dotted #6EC1E4;
+    border-radius: 0;
+  }
+
+  /* Sur mobile, on enlève le style "flottant/absolu" pour que ça pousse le reste du menu vers le bas */
+  .offers-dropdown {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none;
+    background: transparent;
+    padding: 10px 0 0 20px; /* Décalage pour l'effet sous-menu */
+    animation: none;
+  }
+
+  .offers-dropdown::before {
+    display: none; /* On cache la flèche blanche sur mobile */
+  }
+
+  .offers-dropdown .dropdown-item {
+    border-bottom: 1px dotted rgba(46, 29, 33, 0.2);
+    border-radius: 0;
+    padding: 12px 0;
+  }
+}
 /* ========================================
    ACTIONS SECONDAIRES (Desktop)
    ======================================== */
@@ -130,6 +233,8 @@
   color: #2E1D21;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(46, 29, 33, 0.1);
+  border: none;
+  cursor: pointer;
 }
 
 .icon-link:hover {
@@ -141,7 +246,7 @@
   position: absolute;
   top: -5px;
   right: -5px;
-  background-color: #FF8C94; /* Rose Bibli'O */
+  background-color: #FF8C94;
   color: white;
   font-size: 0.75rem;
   font-weight: bold;
@@ -151,9 +256,108 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white; /* Pour détacher visuellement de l'icône */
+  border: 2px solid white; 
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ========================================
+   DROPDOWN UTILISATEUR (Desktop)
+   ======================================== */
+.user-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  background: #FFFFFF;
+  border-radius: 20px; /* Coins très arrondis Bibli'O */
+  box-shadow: 0 10px 30px rgba(46, 29, 33, 0.1);
+  padding: 10px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 2000;
+  animation: dropIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Flèche du dropdown */
+.user-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: #FFFFFF;
+  transform: rotate(45deg);
+  border-top-left-radius: 4px;
+  box-shadow: -3px -3px 5px rgba(46, 29, 33, 0.04);
+}
+
+.dropdown-item {
+  text-decoration: none;
+  color: #2E1D21;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box; /* S'assure que le padding est inclus dans les 100% */
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.dropdown-item:hover {
+  background-color: #DFF1F9;
+  color: #6EC1E4;
+  /* On remplace le transform par un décalage du texte via le padding */
+  padding-left: 21px; 
+  padding-right: 11px; 
+}
+
+.dropdown-item.admin-item {
+  color: #FF8C94;
+}
+
+.dropdown-item.admin-item:hover {
+  background-color: #FFD9DC;
+}
+
+.dropdown-item.logout-btn {
+  border-top: 1px dashed rgba(46, 29, 33, 0.1);
+  margin-top: 5px;
+  border-radius: 12px;
+}
+
+.dropdown-item.logout-btn:hover {
+  background-color: #FFFAF4; 
+  color: #2E1D21;
+  padding-left: 21px; /* On applique aussi l'effet de décalage ici */
+  padding-right: 11px;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ========================================
@@ -169,6 +373,7 @@
   box-shadow: 0 2px 8px rgba(46, 29, 33, 0.1);
   z-index: 1500;
   transition: opacity 0.3s ease, transform 0.3s ease;
+  position: relative;
 }
 
 .burger-button:hover {
@@ -176,12 +381,10 @@
   background-color: #FFD9DC;
 }
 
-/* Bouton de fermeture (mobile) */
 .close-menu-button {
   display: none;
 }
 
-/* Actions mobiles (cachées en desktop) */
 .nav-actions-mobile {
   display: none;
 }
@@ -194,9 +397,7 @@
   border-radius: 12px;
   animation: popIn 0.3s ease;
 }
-.burger-button {
-    position: relative;
-}
+
 .cart-badge-dot {
     position: absolute;
     top: 5px;
@@ -208,60 +409,47 @@
     border: 2px solid white;
 }
 
-/* Animation d'apparition "Pop" */
 @keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0); opacity: 0; }
+  80% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
 }
+
 /* ========================================
-   RESPONSIVE TABLETTE (< 1003px)
+   RESPONSIVE TABLETTE (< 1273px)
    ======================================== */
-@media (max-width: 1145px) {
-  .header-nav {
-    padding: 15px 25px;
-    gap: 20px;
-  }
-
-  .logo-img {
-    width: 3.5rem;
-  }
-
-  .nav-menu {
-    gap: 18px;
-  }
-
-  .nav-menu a {
-    font-size: 0.9rem;
-    padding: 6px 12px;
-  }
-
-  .header-actions {
-    gap: 12px;
-  }
-
-  .icon-link {
-    width: 40px;
-    height: 40px;
-  }
+@media (max-width: 1273px) {
+  .nav-menu a { font-size: 0.9rem; }
+  .HeaderButton { font-size: 0.9rem !important; }
+  .logo-img { width: 6rem; }
 }
+
 /* ========================================
-   DISPLAY NONE BUTTON 
+   RESPONSIVE TABLETTE (< 1155px)
    ======================================== */
-   @media (max-width: 970px){
-    .header-actions .Blue{
-    display: none;
+@media (max-width: 1155px) {
+  .header-nav { padding: 15px 25px; gap: 20px; }
+  .logo-img { width: 5rem; }
+  .nav-menu { gap: 5px; }
+  .nav-menu a { font-size: 0.9rem; padding: 6px 12px; }
+  .header-actions { gap: 12px; }
+  .icon-link { width: 40px; height: 40px; }
 }
-   }
-   /* ========================================
+
+/* ========================================
+    BUTTON (< 1010px)
+   ======================================== */
+@media (max-width: 1010px) {
+  .HeaderButton {
+    margin: 0px;
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
+  }
+  .nav-menu a { padding : 4px 6px; }
+  .header-nav { gap: 5px; }
+}
+
+/* ========================================
    RESPONSIVE MOBILE (< 900px)
    ======================================== */
 @media (max-width: 900px) {
@@ -270,9 +458,7 @@
     box-sizing: border-box; 
   }
 
-  .logo-img {
-    width: 6rem; 
-  }
+  .logo-img { width: 5rem; }
 
   .burger-button {
     display: flex;
@@ -346,9 +532,7 @@
     white-space: normal;
   }
 
-  .nav-menu a::after {
-    display: none;
-  }
+  .nav-menu a::after { display: none; }
 
   .nav-menu a:hover {
     padding-left: 15px;
@@ -387,8 +571,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(46, 29, 33, 0.5);
     opacity: 0;
     visibility: hidden;
@@ -404,7 +588,6 @@
     pointer-events: all;
   }
 }
-
 /* ========================================
    TRÈS PETITS ÉCRANS (< 480px)
    ======================================== */
@@ -415,9 +598,6 @@
     padding: 0 15px; 
     height: 80px; 
   }
-
-
-
   .nav-menu {
     width: 60%; 
     max-width: 60%;
@@ -428,13 +608,6 @@
     < 380px 
    ======================================== */
 @media (max-width: 380px) {
-  .header-nav {
-     padding: 0 10px;
-  }
-  
-  
-  
-  .burger-button {
-    transform: scale(0.9); /* Bouton burger un peu plus petit */
-  }
+  .header-nav { padding: 0 10px; }
+  .burger-button { transform: scale(0.9); }
 }

@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="auth-container">
         <div className="auth-card text-center">
-          <h1 className="auth-title">Succès ! 🎉</h1>
+          <h1 className="auth-title">Succès ! </h1>
           <p className="text-green-600 mb-4">Votre mot de passe a été mis à jour.</p>
           <p>Redirection vers la connexion...</p>
         </div>

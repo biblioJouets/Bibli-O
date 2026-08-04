@@ -102,11 +102,12 @@ function FormHomePage() {
         <input type="tel" name="phone" placeholder="Téléphone" value={form.phone} onChange={onChange} required />
         <input type="email" name="email" placeholder="Email" value={form.email} onChange={onChange} required />
         <textarea name="message" placeholder="Commentaire" value={form.message} onChange={onChange} required />
-
-        <HCaptcha
-          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
-          onVerify={(token) => setCaptchaToken(token)}
-        />
+        <div className="captcha-wrapper">
+          <HCaptcha
+            sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
+            onVerify={(token) => setCaptchaToken(token)}
+          />
+        </div>
         <button type="submit">Envoyer</button>
       </form>
 

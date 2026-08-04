@@ -96,6 +96,21 @@ export default function ProductDetailClient({ product }) {
           <h1 className="product-title">{product.name}</h1>
           <p className="product-ref">Réf: {product.reference}</p>
 
+          {product.description && (
+            <div 
+              className="product-description" 
+              style={{ 
+                marginTop: '1rem', 
+                marginBottom: '1.5rem', 
+                color: '#2E1D21', 
+                lineHeight: '1.6',
+                whiteSpace: 'pre-line' 
+              }}
+            >
+              {product.description}
+            </div>
+          )}
+
           <div className="price-block">
             {isOutOfStock ? (
                 <span style={{ color: '#999', fontSize: '1.1rem', fontWeight: 'normal' }}>
@@ -106,27 +121,56 @@ export default function ProductDetailClient({ product }) {
             )}
           </div>
 
-          <div className="description" style={{ whiteSpace: 'pre-wrap' }}>
-            {product.description}
-          </div>
-
-          {product.tags && product.tags.length > 0 && (
-            <div className="tags-container">
-              {product.tags.map((tag, idx) => (
-                <span key={idx} className="tag">{tag}</span>
-              ))}
+          {/* AJOUT : Badge de prix d'adoption Bibli'O */}
+          {product.biblioPrice && (
+            <div className="biblio-adoption-badge" style={{
+              background: '#FFD9DC',
+              marginBottom: '20px', 
+              color: '#2E1D21', 
+              padding: '10px 16px', 
+              borderRadius: '20px', 
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '600',
+              fontSize: '0.95rem',
+              marginTop: '12px',
+              border: '1px solid #FF8C94',
+              boxShadow: '0 2px 4px rgba(46, 29, 33, 0.05)'
+            }}>
+              <span>
+                Coup de cœur ? Adoptez-le pour seulement <strong style={{ color: '#FF8C94', fontSize: '1.1rem' }}>{product.biblioPrice}€</strong> <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>(au lieu de {product.price}€ sur le marché)</span>
+              </span>
             </div>
           )}
 
-          <div className="actions">
+<div className="actions" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {isOutOfStock ? (
                 <button disabled className="add-to-cart-btn" style={{ backgroundColor: '#ccc', cursor: 'not-allowed', transform: 'none' }}>
                     <XCircle size={20} /> Indisponible
                 </button>
             ) : (
-                <button className="add-to-cart-btn" onClick={handleAddToCart}>
-                    <ShoppingCart size={20} /> Ajouter au panier
-                </button>
+                <>
+                  {/* Bouton Primaire : LOCATION */}
+                  <button 
+                    className="add-to-cart-btn" 
+                    onClick={() => addToCart(product.id, 1, "RENTAL")}
+                    style={{ backgroundColor: '#6EC1E4', color: '#ffffff' }}
+                  >
+                      <ShoppingCart size={20} /> Louer ce jouet (0€ avec abo)
+                  </button>
+
+                  {/* Bouton Secondaire : ACHAT (Uniquement si le Prix Bibli'o existe) */}
+                  {product.biblioPrice && (
+                    <button 
+                      className="add-to-cart-btn" 
+                      onClick={() => addToCart(product.id, 1, "PURCHASE")}
+                      style={{ backgroundColor: '#FF8C94', color: '#ffffff' }}
+                    >
+                        <Package size={20} /> Acheter définitivement ({product.biblioPrice}€)
+                    </button>
+                  )}
+                </>
             )}
 
             {product.manualUrl && (
