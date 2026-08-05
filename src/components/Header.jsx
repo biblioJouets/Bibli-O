@@ -114,6 +114,9 @@ export default function HeaderBiblioJouets() {
 
           {isOffersOpen && (
             <div className="user-dropdown-menu offers-dropdown">
+              {/* <Link href="/blogs" className="dropdown-item" onClick={closeBurger}>
+                Blogs & Conseils
+              </Link> */}
               <Link href="/abonnements" className="dropdown-item" onClick={closeBurger}>
                 Nos Abonnements
               </Link>

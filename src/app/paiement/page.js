@@ -150,15 +150,23 @@ export default function PaiementPage() {
     return total + activePrice * item.quantity;
   }, 0);
 
-  // Le client est déjà abonné s'il est en mode échange ou réassort
+// Le client est déjà abonné s'il est en mode échange ou réassort
   const isExistingSubscriber = !!exchangeContext || !!refillContext;
 
-  // Total à régler aujourd'hui : achats + (premier mois si nouvel abonné)
-  const totalToday = purchaseTotal + (isExistingSubscriber ? 0 : subscriptionPrice);
+  // Montant de l'abonnement à payer aujourd'hui
+  const rentTotalToday = isExistingSubscriber ? 0 : subscriptionPrice;
+
+  // Total de base à régler aujourd'hui : achats + (premier mois si nouvel abonné)
+  const totalToday = purchaseTotal + rentTotalToday;
 
   // --- TOTAL APRÈS DÉDUCTION DU CRÉDIT CARTE CADEAU ---
   const giftCreditAmount = giftCredit / 100;
-  const totalAfterCredit = Math.max(0, totalToday - giftCreditAmount);
+  
+  // On plafonne le crédit utilisable UNIQUEMENT à la part abonnement payée aujourd'hui
+  const creditToDeduct = Math.min(giftCreditAmount, rentTotalToday);
+  
+  // Le total final est le total de base moins le crédit réellement déduit
+  const totalAfterCredit = totalToday - creditToDeduct;
 
   // Scripts Mondial Relay
   useEffect(() => {
@@ -458,21 +466,29 @@ export default function PaiementPage() {
             )}
             <div className="divider"></div>
             {giftCredit > 0 && (
-              <div className="gift-credit-row">
-                <Gift size={18} color="#FFC93C" />
-                <span>Crédit carte cadeau disponible :</span>
-                <strong>
-                  {(giftCredit / 100).toLocaleString("fr-FR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}€
-                </strong>
+              <div className="gift-credit-row" style={{ display: 'block' }}>
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-2">
+                    <Gift size={18} color="#FFC93C" />
+                    <span>Crédit carte cadeau disponible :</span>
+                  </div>
+                  <strong>
+                    {(giftCredit / 100).toLocaleString("fr-FR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}€
+                  </strong>
+                </div>
+                <p className="text-xs text-[#2E1D21] opacity-70 italic mt-1 ml-6">
+                  * S'applique uniquement sur l'abonnement (location).
+                </p>
               </div>
             )}
             <div className="divider"></div>
-            <div className="total-row">
+           <div className="total-row">
               <span>Total à régler</span>
-              {giftCreditAmount > 0 ? (
+              {/* Le prix barré ne s'affiche que si du crédit a RÉELLEMENT été déduit */}
+              {creditToDeduct > 0 && totalToday > 0 ? (
                 <span className="total-row__values">
                   <span className="total-row__old">{totalToday.toFixed(2)}€</span>
                   <span className="total-row__new">{totalAfterCredit.toFixed(2)}€</span>
