@@ -39,7 +39,6 @@ export default function PaiementPage() {
     phone: ""
   });
 
-  // --- NOUVEAU : RÉCUPÉRATION DES DONNÉES UTILISATEUR POUR PRÉ-REMPLIR LE FORMULAIRE ---
   useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user?.id) {
@@ -50,11 +49,9 @@ export default function PaiementPage() {
             const userData = response.data;
             
             if (userData) {
-              // Récupération des adresses et recherche de celle par défaut
               const addresses = userData.Addresses || userData.addresses || userData.Address || [];
               const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 
-              // Mise à jour de l'état avec les données récupérées
               setShipping({
                 firstName: userData.firstName || "",
                 lastName: userData.lastName || "",
@@ -74,7 +71,6 @@ export default function PaiementPage() {
     fetchUserData();
   }, [session]);
 
-  // --- RE-VÉRIFICATION DU CODE PROMO AU CHARGEMENT ---
   useEffect(() => {
     if (!promoCode) {
       setPromoStatus("idle");
@@ -111,7 +107,6 @@ export default function PaiementPage() {
     return () => { cancelled = true; };
   }, [promoCode, loading, cart.items]);
 
-  // Zones éligibles domicile
   const AUTHORIZED_HOME_DELIVERY = {
     "34690": ["FABREGUES", "FABRÈGUES"],
     "34570": ["PIGNAN", "SAUSSAN"]
@@ -133,42 +128,29 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
-  // --- SÉPARATION DES ARTICLES PAR INTENTION ---
   const rentalItems = cart.items?.filter((item) => item.intent !== 'PURCHASE') || [];
   const purchaseItems = cart.items?.filter((item) => item.intent === 'PURCHASE') || [];
 
-  // Calcul prix — court-circuit Box Mystère
   const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
   const subscriptionPrice = isBoxMystereCart ? 24.90 : (() => {
     const pricingMap = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
     return pricingMap[rentalCount] || 0;
   })();
 
-  // Total des achats définitifs (Prix Bibli'O)
   const purchaseTotal = purchaseItems.reduce((total, item) => {
     const activePrice = item.product.biblioPrice || item.product.price;
     return total + activePrice * item.quantity;
   }, 0);
 
-// Le client est déjà abonné s'il est en mode échange ou réassort
+  // CORRECTION: Logique de calcul avec plafonnement
   const isExistingSubscriber = !!exchangeContext || !!refillContext;
-
-  // Montant de l'abonnement à payer aujourd'hui
   const rentTotalToday = isExistingSubscriber ? 0 : subscriptionPrice;
-
-  // Total de base à régler aujourd'hui : achats + (premier mois si nouvel abonné)
   const totalToday = purchaseTotal + rentTotalToday;
 
-  // --- TOTAL APRÈS DÉDUCTION DU CRÉDIT CARTE CADEAU ---
   const giftCreditAmount = giftCredit / 100;
-  
-  // On plafonne le crédit utilisable UNIQUEMENT à la part abonnement payée aujourd'hui
   const creditToDeduct = Math.min(giftCreditAmount, rentTotalToday);
-  
-  // Le total final est le total de base moins le crédit réellement déduit
   const totalAfterCredit = totalToday - creditToDeduct;
 
-  // Scripts Mondial Relay
   useEffect(() => {
     const loadScripts = async () => {
       const injectScript = (src, id) => {
@@ -185,7 +167,7 @@ export default function PaiementPage() {
       };
 
       try {
-        await injectScript("https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js", "jquery-script");
+        await injectScript("[https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js](https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js)", "jquery-script");
         
         const waitForJQuery = setInterval(() => {
           if (window.jQuery) {
@@ -193,8 +175,8 @@ export default function PaiementPage() {
             window.$ = window.jQuery; 
 
             Promise.all([
-              injectScript("https://unpkg.com/leaflet/dist/leaflet.js", "leaflet-js"),
-              injectScript("https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js", "mr-plugin")
+              injectScript("[https://unpkg.com/leaflet/dist/leaflet.js](https://unpkg.com/leaflet/dist/leaflet.js)", "leaflet-js"),
+              injectScript("[https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js](https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js)", "mr-plugin")
             ]).then(() => {
               if (deliveryMode === 'MONDIAL_RELAY') loadMondialRelayWidget();
             });
@@ -304,7 +286,7 @@ export default function PaiementPage() {
 
   return (
   <div className="page-container">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="[https://unpkg.com/leaflet/dist/leaflet.css](https://unpkg.com/leaflet/dist/leaflet.css)" />
 
     <h1 className="page-title">Finaliser mon abonnement 🔒</h1>
 
@@ -464,7 +446,10 @@ export default function PaiementPage() {
                     {selectedRelay.city} ({selectedRelay.id})
                 </div>
             )}
+            
             <div className="divider"></div>
+            
+            {/* CORRECTION: Affichage explicite de l'utilisation de la cagnotte */}
             {giftCredit > 0 && (
               <div className="gift-credit-row" style={{ display: 'block' }}>
                 <div className="flex justify-between items-center w-full">
@@ -484,10 +469,12 @@ export default function PaiementPage() {
                 </p>
               </div>
             )}
+            
             <div className="divider"></div>
-           <div className="total-row">
+            
+            {/* CORRECTION: Affichage du prix barré conditionné */}
+            <div className="total-row">
               <span>Total à régler</span>
-              {/* Le prix barré ne s'affiche que si du crédit a RÉELLEMENT été déduit */}
               {creditToDeduct > 0 && totalToday > 0 ? (
                 <span className="total-row__values">
                   <span className="total-row__old">{totalToday.toFixed(2)}€</span>

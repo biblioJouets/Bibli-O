@@ -64,50 +64,6 @@ export async function POST(req) {
       item => item.reference === 'BOX-MYSTERE' || item.product?.reference === 'BOX-MYSTERE'
     );
 
-    // --- CODE PROMO ---
-    let appliedPromo = null;
-    let stripeDiscount = undefined;
-
-    if (promoCode) {
-        const cleanCode = promoCode.trim().toUpperCase();
-
-        if (cleanCode === 'BOXMAI24' && !isBoxMystere) {
-            return NextResponse.json({
-                error: "Ce code est strictement réservé à la Box Mystère.",
-            }, { status: 400 });
-        }
-
-        if (cleanCode === 'BIBLIOMOISOFFERT') {
-            const userIdInt = parseInt(session.user.id, 10);
-            const existingUsage = await prisma.promoCodeUsage.findUnique({
-                where: { userId_promoCode: { userId: userIdInt, promoCode: cleanCode } },
-            });
-
-            if (existingUsage) {
-                return NextResponse.json({ error: "Vous avez déjà profité de cette offre de bienvenue !" }, { status: 403 });
-            }
-            appliedPromo = cleanCode;
-
-        } else {
-            try {
-                const promoCodes = await stripe.promotionCodes.list({
-                    code: cleanCode,
-                    active: true,
-                    limit: 1
-                });
-
-                if (promoCodes.data.length > 0) {
-                    stripeDiscount = [{ promotion_code: promoCodes.data[0].id }];
-                    appliedPromo = cleanCode;
-                } else {
-                    return NextResponse.json({ error: `Le code ${cleanCode} est invalide ou expiré.` }, { status: 400 });
-                }
-            } catch (err) {
-                return NextResponse.json({ error: "Erreur lors de la vérification du code." }, { status: 500 });
-            }
-        }
-    }
-
     const pricingMap = {
         1: process.env.STRIPE_PRICE_1_TOY,
         2: process.env.STRIPE_PRICE_2_TOYS,
@@ -133,25 +89,96 @@ export async function POST(req) {
     // Le décompte de l'abonnement s'appuie uniquement sur les locations
     const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
 
-    let line_items = [];
-    let priceId;
+    // --- 3. NOUVELLE LOGIQUE CARTE CADEAU (Source de vérité: Prisma) ---
+    const dbUser = await prisma.users.findUnique({
+      where: { id: parseInt(session.user.id) },
+      select: { stripeCustomerId: true, giftCredit: true },
+    });
 
-    // --- 3. TRAITEMENT DU BLOC LOCATION (ABONNEMENT) ---
+    const userGiftCreditCents = dbUser?.giftCredit || 0; // en centimes
+
+    // Prix bruts pour calculer le plafond de la cagnotte
+    const priceValuesMap = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
+    const rentTotalTodayCents = rentalCount > 0 ? (priceValuesMap[rentalCount] ? priceValuesMap[rentalCount] * 100 : 0) : 0;
+    
+    // On ne déduit jamais plus que le prix de la box
+    const creditToDeductCents = Math.min(userGiftCreditCents, rentTotalTodayCents);
+
+    let appliedPromo = null;
+    let stripeDiscounts = [];
+    let ephemeralCouponId = null;
+
+    // --- 4. GESTION DES RÉDUCTIONS (Cagnotte vs Promo) ---
+    if (isBoxMystere) {
+        const couponId = process.env.STRIPE_COUPON_BOX_MAI;
+        if (!couponId) return NextResponse.json({ error: "Configuration Stripe manquante pour la Box Mystère." }, { status: 500 });
+        stripeDiscounts.push({ coupon: couponId });
+        appliedPromo = 'BOXMAI24';
+
+    } else if (creditToDeductCents > 0) {
+        // La cagnotte est prioritaire. On génère un coupon éphémère.
+        const rentalPriceId = pricingMap[rentalCount];
+        if (rentalPriceId) {
+            const priceObj = await stripe.prices.retrieve(rentalPriceId);
+            
+            const coupon = await stripe.coupons.create({
+                amount_off: creditToDeductCents,
+                currency: 'eur',
+                duration: 'once',
+                max_redemptions: 1, // Sécurité: 1 seul usage
+                name: 'Crédit Carte Cadeau',
+                applies_to: { products: [priceObj.product] }, // Bloque le coupon sur la box uniquement
+            });
+            
+            ephemeralCouponId = coupon.id;
+            stripeDiscounts.push({ coupon: coupon.id });
+            appliedPromo = 'GIFT_CARD';
+        }
+
+    } else if (promoCode) {
+        // Gestion des codes promos classiques
+        const cleanCode = promoCode.trim().toUpperCase();
+
+        if (cleanCode === 'BOXMAI24' && !isBoxMystere) {
+            return NextResponse.json({ error: "Ce code est strictement réservé à la Box Mystère." }, { status: 400 });
+        }
+
+        if (cleanCode === 'BIBLIOMOISOFFERT') {
+            const userIdInt = parseInt(session.user.id, 10);
+            const existingUsage = await prisma.promoCodeUsage.findUnique({
+                where: { userId_promoCode: { userId: userIdInt, promoCode: cleanCode } },
+            });
+
+            if (existingUsage) {
+                return NextResponse.json({ error: "Vous avez déjà profité de cette offre de bienvenue !" }, { status: 403 });
+            }
+            appliedPromo = cleanCode;
+
+        } else {
+            try {
+                const promoCodes = await stripe.promotionCodes.list({ code: cleanCode, active: true, limit: 1 });
+
+                if (promoCodes.data.length > 0) {
+                    stripeDiscounts.push({ promotion_code: promoCodes.data[0].id });
+                    appliedPromo = cleanCode;
+                } else {
+                    return NextResponse.json({ error: `Le code ${cleanCode} est invalide ou expiré.` }, { status: 400 });
+                }
+            } catch (err) {
+                return NextResponse.json({ error: "Erreur lors de la vérification du code." }, { status: 500 });
+            }
+        }
+    }
+
+    let line_items = [];
+
+    // --- 5. TRAITEMENT DU BLOC LOCATION (ABONNEMENT) ---
     if (rentalCount > 0) {
         if (isBoxMystere) {
             console.log('[Checkout] 📦 Box Mystère détectée');
-            priceId = process.env.STRIPE_PRICE_4_TOYS;
-            const couponId = process.env.STRIPE_COUPON_BOX_MAI;
-
-            if (!priceId || !couponId) {
-                return NextResponse.json({ error: "Configuration Stripe manquante pour la Box Mystère." }, { status: 500 });
-            }
-
-            line_items.push({ price: priceId, quantity: 1 });
-            stripeDiscount = [{ coupon: couponId }];
-            appliedPromo = 'BOXMAI24';
+            line_items.push({ price: process.env.STRIPE_PRICE_4_TOYS, quantity: 1 });
         } else {
-            priceId = pricingMap[rentalCount];
+            const priceId = pricingMap[rentalCount];
             if (priceId) {
                 line_items.push({ price: priceId, quantity: 1 });
             } else if (rentalCount > 9) {
@@ -164,12 +191,11 @@ export async function POST(req) {
         return NextResponse.json({ error: "Votre panier est vide." }, { status: 400 });
     }
 
-    // --- 4. TRAITEMENT DU BLOC ACHAT IMMÉDIAT (PRIX BIBLIO) ---
+    // --- 6. TRAITEMENT DU BLOC ACHAT IMMÉDIAT (PRIX BIBLIO) ---
     for (const item of purchaseItems) {
         const dbProduct = dbProducts.find(p => p.id === item.productId);
         if (!dbProduct) continue;
 
-        // Choix sécurisé du prix : priorité absolue à la valeur issue de la BDD
         const finalPrice = dbProduct.biblioPrice || dbProduct.price;
 
         line_items.push({
@@ -185,15 +211,8 @@ export async function POST(req) {
         });
     }
 
-    // --- 5. SÉLECTION DYNAMIQUE DU MODE DE LA SESSION ---
-    // S'il n'y a que de l'achat définitif, on bascule en mode 'payment'
+    // --- 7. SÉLECTION DYNAMIQUE DU MODE DE LA SESSION ---
     const stripeMode = rentalCount > 0 ? "subscription" : "payment";
-
-    // Récupération optionnelle du stripeCustomerId pour appliquer les crédits cadeaux
-    const dbUser = await prisma.users.findUnique({
-      where: { id: parseInt(session.user.id) },
-      select: { stripeCustomerId: true },
-    });
 
     console.log(`[Checkout] Session Stripe configurée en mode ${stripeMode}`);
     const stripeSession = await stripe.checkout.sessions.create({
@@ -203,17 +222,13 @@ export async function POST(req) {
       ...(dbUser?.stripeCustomerId
         ? { customer: dbUser.stripeCustomerId }
         : { customer_email: session.user.email }),
-      discounts: stripeDiscount,
-      allow_promotion_codes: stripeDiscount ? undefined : true,
+      discounts: stripeDiscounts.length > 0 ? stripeDiscounts : undefined,
+      allow_promotion_codes: stripeDiscounts.length > 0 ? undefined : true,
     
       custom_text: appliedPromo === 'BIBLIOMOISOFFERT' ? {
-        submit: {
-          message: "🎁 **Code BIBLIOMOISOFFERT validé !** Réglez votre 1er mois aujourd'hui, votre 2ème mois sera automatiquement à 0,00 €."
-        }
+        submit: { message: "🎁 **Code BIBLIOMOISOFFERT validé !** Réglez votre 1er mois aujourd'hui, votre 2ème mois sera automatiquement à 0,00 €." }
       } : appliedPromo === 'BOXMAI24' ? {
-        submit: {
-          message: "📦 **Box Mystère de Mai** — Offre spéciale applied_promo !"
-        }
+        submit: { message: "📦 **Box Mystère de Mai** — Offre spéciale appliquée !" }
       } : undefined,
     
       success_url: `${baseUrl}/confirmation-commande?session_id={CHECKOUT_SESSION_ID}`,
@@ -233,6 +248,9 @@ export async function POST(req) {
         isBoxMystere: isBoxMystere ? "true" : "",
         childAge: isBoxMystere ? (childAge || "") : "",
         childGender: isBoxMystere ? (childGender || "") : "",
+        // NOUVEAU : Transmission des données de cagnotte au webhook
+        creditUsed: creditToDeductCents.toString(),
+        couponId: ephemeralCouponId || "",
       },
       billing_address_collection: 'required',
     });

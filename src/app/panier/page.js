@@ -205,7 +205,6 @@ export default function PanierPage() {
         }),
       });
       if (response.ok) {
-        // Recharge la page pour actualiser le contexte du panier (solution la plus fiable)
         window.location.reload();
       } else {
         console.error("Erreur lors de la modification de l'option.");
@@ -244,11 +243,9 @@ export default function PanierPage() {
     : 0;
   const baseTotal = subscriptionPriceValue + purchaseTotal;
   const giftCreditAmount = giftCredit / 100;
-
-  // On plafonne le crédit utilisable à la valeur de la location (abonnement)
-  const creditToDeduct = Math.min(giftCreditAmount, subscriptionPriceValue);
   
-  // Le total final est le total de base moins le crédit réellement déductible
+  // CORRECTION : On plafonne le crédit utilisable à la valeur de la location (abonnement)
+  const creditToDeduct = Math.min(giftCreditAmount, subscriptionPriceValue);
   const totalAfterCredit = baseTotal - creditToDeduct;
 
   const handleRefillValidation = () => router.push("/livraison-echange");
@@ -432,7 +429,6 @@ export default function PanierPage() {
                         Réf: {item.product.reference}
                       </p>
 
-                      {/* TOGGLE SUR LOCATION  | ACHAT */}
                       <div className="cart-intent-switch">
                         <button
                           onClick={() =>
@@ -536,7 +532,6 @@ export default function PanierPage() {
                         Réf: {item.product.reference}
                       </p>
 
-                      {/* TOGGLE PASSAGE DE LOCATION A ACHAT */}
                       <div className="cart-intent-switch">
                         <button
                           onClick={() =>
@@ -651,7 +646,9 @@ export default function PanierPage() {
               </strong>
             </div>
           )}
-{giftCredit > 0 && (
+
+          {/* CORRECTION: Affichage explicite de l'utilisation de la cagnotte */}
+          {giftCredit > 0 && (
             <div className="cart-gift-credit" style={{ display: 'block' }}>
               <div className="flex justify-between items-center w-full">
                 <div className="flex items-center gap-2">
@@ -670,6 +667,7 @@ export default function PanierPage() {
               </p>
             </div>
           )}
+
           <div className="cart-summary-row cart-summary-margin-bottom">
             <span className="cart-summary-delivery-label">
               <Truck size={18} color="#88D4AB" /> Livraison
@@ -677,6 +675,7 @@ export default function PanierPage() {
             <span className="cart-summary-delivery-value">OFFERTE</span>
           </div>
 
+          {/* CORRECTION: On n'affiche le prix barré que si on déduit VRAIMENT du crédit */}
           {creditToDeduct > 0 && baseTotal > 0 && (
             <div className="cart-summary-row cart-summary-row--bold cart-total-with-credit">
               <span>Total avec crédit déduit</span>

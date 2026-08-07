@@ -1,34 +1,25 @@
+// src/app/api/user/stripe-balance/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import Stripe from "stripe";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/core/database";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
+export async function GET(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+    }
 
-// GET /api/user/stripe-balance — solde créditeur du client connecté
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+    // Récupération de la nouvelle variable 'giftCredit' dans le profil User
+    const user = await prisma.users.findUnique({
+      where: { id: parseInt(session.user.id, 10) },
+      select: { giftCredit: true }
+    });
+
+    return NextResponse.json({ balance: user?.giftCredit || 0 });
+  } catch (error) {
+    console.error("Erreur fetch balance:", error);
+    return NextResponse.json({ balance: 0 }, { status: 500 });
   }
-
-  const user = await prisma.users.findUnique({
-    where: { id: parseInt(session.user.id) },
-    select: { stripeCustomerId: true },
-  });
-
-  // Pas de customer Stripe = solde forcément nul
-  if (!user?.stripeCustomerId) {
-    return NextResponse.json({ balance: 0 });
-  }
-
-  const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-
-  // balance Stripe est négatif quand le client a du crédit (convention Stripe inversée)
-  const credit = customer.deleted ? 0 : -customer.balance;
-
-  return NextResponse.json({ balance: credit });
 }
