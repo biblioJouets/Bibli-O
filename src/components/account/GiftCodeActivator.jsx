@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { Gift, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function GiftCodeActivator() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null); // { type: "success" | "error", message: string }
+  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,9 +26,13 @@ export default function GiftCodeActivator() {
       });
       const data = await res.json();
 
-      if (res.ok) {
+    if (res.ok) {
         setResult({ type: "success", message: data.message });
         setCode("");
+        
+        // On déclenche l'événement global : le widget va l'entendre et se mettre à jour !
+        window.dispatchEvent(new Event("giftCodeActivated"));
+        
       } else {
         setResult({ type: "error", message: data.message || "Une erreur est survenue." });
       }

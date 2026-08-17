@@ -120,7 +120,6 @@ export async function POST(req) {
           toyNames.push(product.Products.name);
         }
 
-        // Sauvegarde URL facture sur la commande (champ rapide pour liens directs)
         if (invoice.hosted_invoice_url) {
           await prisma.orders.update({
             where: { id: order.id },
@@ -128,7 +127,6 @@ export async function POST(req) {
           });
         }
 
-        // Persiste la facture dans StripeInvoice pour l'historique client (idempotent via upsert)
         if (invoice.id && order.userId) {
           const lineItem  = invoice.lines?.data?.[0];
           const periodStart = lineItem?.period?.start  ?? invoice.period_start  ?? null;
@@ -157,12 +155,9 @@ export async function POST(req) {
           });
         }
 
-        // Invalider le cache SSR de la page facturation
         revalidatePath('/mon-compte/facturation');
-
         console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s)`);
 
-        // 📧 ENVOI DE L'EMAIL DE SUCCÈS (Template ID: 13)
         if (toyNames.length > 0 && order.Users) {
           let prenom = "Client(e)";
           if (order.shippingName) {
@@ -204,7 +199,6 @@ export async function POST(req) {
       console.log(`[Webhook] Adoption détectée — orderId:${orderId} productId:${productId}`);
 
       try {
-        // BOUCLIER ANTI-DOUBLON
         const existingOrderProduct = await prisma.orderProducts.findUnique({
           where: {
             OrderId_ProductId: {
@@ -219,13 +213,11 @@ export async function POST(req) {
           return NextResponse.json({ received: true, note: 'Already adopted' });
         }
       
-        // Récupération de la commande source pour copier les infos de livraison
         const sourceOrder = await prisma.orders.findUnique({
           where: { id: parseInt(orderId) },
           include: { Users: true },
         });
 
-        // Transaction : marquer ADOPTE + décrémenter stock + créer commande ADOPTION
         await prisma.$transaction(async (tx) => {
           await tx.orderProducts.update({
             where: {
@@ -266,7 +258,6 @@ export async function POST(req) {
 
         console.log(`[Webhook] Adoption finalisée en BDD pour jouet #${productId} + commande ADOPTION créée`);
 
-        // Récupération pour les emails
         const order = await prisma.orders.findUnique({
           where: { id: parseInt(orderId) },
           include: {
@@ -308,13 +299,13 @@ export async function POST(req) {
       return NextResponse.json({ received: true });
     }
 
-    // --- B2 : NOUVELLE COMMANDE (Panier Hybride) ---
+    // --- B2 : NOUVELLE COMMANDE ---
     const {
       userId, cartId, cartSnapshot, shippingName, shippingAddress,
       shippingCity, shippingZip, mondialRelayPointId, shippingPhone,
       applied_promo,
       isBoxMystere, childAge, childGender,
-      creditUsed, couponId // NOUVEAU: Récupération des données cagnotte
+      creditUsed, couponId
     } = session.metadata;
 
     try {
@@ -347,7 +338,6 @@ export async function POST(req) {
         mondialRelayPointId: mondialRelayPointId && mondialRelayPointId !== "null" ? mondialRelayPointId : null
       };
       
-      // IDEMPOTENCE : si la commande existe déjà pour ce subscriptionId, ne pas recréer
       if (stripeSubscriptionId) {
         const existing = await prisma.orders.findFirst({
           where: { stripeSubscriptionId },
@@ -362,12 +352,11 @@ export async function POST(req) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
 
-      // --- LOGIQUE NETTOYAGE CARTE CADEAU (NOUVEAU) ---
+      // --- LOGIQUE NETTOYAGE CARTE CADEAU ---
       const usedAmount = parseInt(creditUsed || '0', 10);
 
       if (userIdInt && usedAmount > 0) {
         try {
-          // 1. Débiter la cagnotte du client dans la BDD
           await prisma.users.update({
             where: { id: userIdInt },
             data: {
@@ -381,7 +370,6 @@ export async function POST(req) {
           console.error(`[Webhook] Erreur de déduction de crédit pour User ${userIdInt}:`, dbError);
         }
 
-        // 2. Nettoyage : Supprimer le coupon de Stripe
         if (couponId) {
           try {
             await stripe.coupons.del(couponId);
@@ -392,7 +380,6 @@ export async function POST(req) {
         }
       }
 
-      // Sauvegarde des données enfant pour les commandes Box Mystère
       if (isBoxMystere === "true") {
         await prisma.orders.update({
           where: { id: newOrder.id },
@@ -411,9 +398,6 @@ export async function POST(req) {
         console.error(" Pas de cartId reçu, IMPOSSIBLE DE VIDER LE PANIER.");
       }
 
-      // -------------------------------------------------------------------
-      // 🎁 GESTION DE L'OFFRE BOGO
-      // -------------------------------------------------------------------
       if (applied_promo === 'BIBLIOMOISOFFERT' && stripeSubscriptionId) {
         try {
           try {
@@ -449,10 +433,9 @@ export async function POST(req) {
 
         } catch (error) {
           console.error(`Erreur critique webhook promo pour l'utilisateur ${userIdInt}:`, error);
-          throw error;
+          throw error; 
         }
       }
-      // -------------------------------------------------------------------
 
     } catch (error) {
       console.error(" Erreur Webhook:", error);
@@ -561,6 +544,36 @@ export async function POST(req) {
           lienCompte,
         });
         console.log(`[Brevo] Email pause (template 32) envoyé à ${user.email}`);
+      }
+    }
+  }
+
+  // --- SCÉNARIO E : Échec de paiement d'abonnement (alerte renforcée) ---
+  if (event.type === 'invoice.payment_failed') {
+    const invoice    = event.data.object;
+    const stripeSubId =
+      invoice.subscription ||
+      invoice.parent?.subscription_details?.subscription ||
+      invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
+
+    if (stripeSubId) {
+      const order = await prisma.orders.findFirst({
+        where: { stripeSubscriptionId: stripeSubId, status: 'ACTIVE' },
+        include: { Users: true },
+      });
+
+      if (order?.Users) {
+        const user   = order.Users;
+        let prenom   = (user.firstName || 'Client(e)').trim();
+        prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+
+        await sendBrevoEmail(user.email, prenom, 30, {
+          prenom,
+          montant: ((invoice.amount_due ?? 0) / 100).toFixed(2),
+          lienPortail: `${appUrl}/api/stripe/create-portal-session?subscriptionId=${stripeSubId}`,
+          lienCompte:  `${appUrl}/mon-compte/facturation`,
+        });
+        console.log(`[Brevo] Email alerte paiement échoué (template 30) envoyé à ${user.email}`);
       }
     }
   }

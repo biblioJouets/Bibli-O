@@ -1,118 +1,68 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
-import Stripe from "stripe";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/core/database";
+import { z } from "zod";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+// Bouclier de validation Zod
+const giftCodeSchema = z.object({
+  code: z.string().min(1, "Le code est requis").trim(),
 });
 
-const bodySchema = z.object({
-  code: z
-    .string({ required_error: "Le code est requis.", invalid_type_error: "Le code doit être une chaîne de caractères." })
-    .min(1, "Le code est requis.")
-    .max(32, "Le code est trop long.")
-    .regex(/^[A-Z0-9\-]+$/, "Format de code invalide."),
-});
-
-export async function POST(request) {
+export async function POST(req) {
   try {
-    // 1. Auth
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, message: "Vous devez être connecté." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Non connecté" }, { status: 401 });
     }
-    const userId = parseInt(session.user.id);
 
-    // 2. Validation
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, message: "Corps de la requête invalide." },
-        { status: 400 }
-      );
+    const body = await req.json();
+    
+    // 1. Validation stricte du payload
+    const parsedData = giftCodeSchema.safeParse(body);
+    if (!parsedData.success) {
+      return NextResponse.json({ error: "Format de code invalide." }, { status: 400 });
     }
-    const validation = bodySchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { success: false, message: validation.error.errors[0].message },
-        { status: 400 }
-      );
-    }
-    const { code } = validation.data;
 
-    // 3. Vérification du code en base
-    const giftCode = await prisma.giftCode.findUnique({ where: { code } });
+    const { code } = parsedData.data;
+
+    // 2. Vérifier si le code existe et n'est pas utilisé
+    const giftCode = await prisma.giftCode.findFirst({
+      where: { code: code, isUsed: false }
+    });
 
     if (!giftCode) {
-      return NextResponse.json(
-        { success: false, message: "Ce code est invalide." },
-        { status: 400 }
-      );
-    }
-    if (giftCode.isUsed) {
-      return NextResponse.json(
-        { success: false, message: "Ce code a déjà été utilisé." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Code invalide ou déjà utilisé." }, { status: 404 });
     }
 
-    // 4. Récupération ou création du stripeCustomerId
-    let user = await prisma.users.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, firstName: true, lastName: true, stripeCustomerId: true },
-    });
+    const userIdInt = parseInt(session.user.id, 10);
 
-    let stripeCustomerId = user.stripeCustomerId;
+    // 3. Gestion des unités
+    // Si ta base stocke les cartes cadeaux en euros (ex: 30), on multiplie par 100 pour la cagnotte en centimes.
+    const amountToAddInCents = giftCode.amount * 100; 
 
-    if (!stripeCustomerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: [user.firstName, user.lastName].filter(Boolean).join(" ") || undefined,
-        metadata: { userId: String(userId) },
-      });
-      stripeCustomerId = customer.id;
+    // 4. Transaction sécurisée : on crédite le compte ET on désactive le code simultanément
+    await prisma.$transaction([
+      prisma.users.update({
+        where: { id: userIdInt },
+        data: { 
+          giftCredit: { increment: amountToAddInCents } 
+        }
+      }),
+      prisma.giftCode.update({
+        where: { id: giftCode.id },
+        data: { 
+          isUsed: true, 
+          usedBy: userIdInt, 
+          usedAt: new Date() 
+        }
+      })
+    ]);
 
-      await prisma.users.update({
-        where: { id: userId },
-        data: { stripeCustomerId },
-      });
-    }
+    return NextResponse.json({ success: true, message: "Cagnotte créditée avec succès !" });
 
-    // 5. Crédit du solde Stripe (montant négatif = crédit client)
-    const amountInCents = Math.round(giftCode.amount * 100);
-    await stripe.customers.createBalanceTransaction(stripeCustomerId, {
-      amount: -amountInCents,
-      currency: "eur",
-      description: `Activation Carte Cadeau — code ${code}`,
-    });
-
-    // 6. Marquage du code comme utilisé
-    await prisma.giftCode.update({
-      where: { id: giftCode.id },
-      data: {
-        isUsed: true,
-        usedBy: userId,
-        usedAt: new Date(),
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: `Carte cadeau activée ! ${giftCode.amount.toFixed(2)} € ont été crédités sur ton compte.`,
-    });
   } catch (error) {
-    console.error("[gift-code] Erreur:", error);
-    return NextResponse.json(
-      { success: false, message: "Une erreur est survenue. Réessayez plus tard." },
-      { status: 500 }
-    );
+    console.error("Erreur GiftCode:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
