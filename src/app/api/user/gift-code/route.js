@@ -1,3 +1,4 @@
+//src/app/api/user/gift-code/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -19,7 +20,6 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    
     const parsedData = giftCodeSchema.safeParse(body);
     if (!parsedData.success) {
       return NextResponse.json({ error: "Format de code invalide." }, { status: 400 });
@@ -27,6 +27,7 @@ export async function POST(req) {
 
     const { code } = parsedData.data;
 
+    // 1. Vérification du code
     const giftCode = await prisma.giftCode.findFirst({
       where: { code: code, isUsed: false }
     });
@@ -38,60 +39,52 @@ export async function POST(req) {
     const userIdInt = parseInt(session.user.id, 10);
     const amountToAddInCents = giftCode.amount * 100; 
 
-    // On récupère l'utilisateur
-    const user = await prisma.users.findUnique({
-      where: { id: userIdInt }
-    });
+    // 2. Vérification et création du client Stripe (Crucial)
+    let user = await prisma.users.findUnique({ where: { id: userIdInt } });
+    let stripeCustomerId = user.stripeCustomerId;
 
-    // 1. Transaction Prisma
+    if (!stripeCustomerId) {
+      // Le client n'a jamais commandé, on lui crée une coquille vide dans Stripe
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        metadata: { userId: userIdInt.toString() }
+      });
+      stripeCustomerId = customer.id;
+
+      // On sauvegarde cet ID dans Prisma
+      await prisma.users.update({
+        where: { id: userIdInt },
+        data: { stripeCustomerId: stripeCustomerId }
+      });
+      console.log(`[GiftCode] Nouveau client Stripe créé : ${stripeCustomerId}`);
+    }
+
+    // 3. Application du crédit sur le Customer Balance de Stripe
+    // Dans Stripe, un crédit en faveur du client est NÉGATIF
+    try {
+      await stripe.customers.createBalanceTransaction(stripeCustomerId, {
+        amount: -amountToAddInCents,
+        currency: 'eur',
+        description: `Carte cadeau ajoutée (${code})`
+      });
+      console.log(`[GiftCode] Solde Stripe crédité de ${amountToAddInCents / 100}€ pour ${stripeCustomerId}`);
+    } catch (stripeErr) {
+      console.error("[GiftCode] Erreur lors du crédit Stripe:", stripeErr);
+      return NextResponse.json({ error: "Erreur de communication avec le processeur de paiement." }, { status: 500 });
+    }
+
+    // 4. Synchronisation visuelle dans Prisma
     await prisma.$transaction([
       prisma.users.update({
         where: { id: userIdInt },
-        data: { 
-          giftCredit: { increment: amountToAddInCents } 
-        }
+        data: { giftCredit: { increment: amountToAddInCents } }
       }),
       prisma.giftCode.update({
         where: { id: giftCode.id },
-        data: { 
-          isUsed: true, 
-          usedBy: userIdInt, 
-          usedAt: new Date() 
-        }
+        data: { isUsed: true, usedBy: userIdInt, usedAt: new Date() }
       })
     ]);
-
-    // 2. Application sur l'Abonnement Actif (Si existant)
-    try {
-      // Chercher une commande active avec un abonnement Stripe
-      const activeOrder = await prisma.orders.findFirst({
-         where: { 
-             userId: userIdInt, 
-             status: 'ACTIVE',
-             stripeSubscriptionId: { not: null }
-         }
-      });
-
-      if (activeOrder && activeOrder.stripeSubscriptionId) {
-         // Créer un coupon à usage unique pour ce montant
-         const coupon = await stripe.coupons.create({
-            amount_off: amountToAddInCents,
-            currency: 'eur',
-            duration: 'once',
-            name: `Carte Cadeau ${code}`,
-         });
-
-         // Appliquer ce coupon au prochain cycle de l'abonnement
-         await stripe.subscriptions.update(activeOrder.stripeSubscriptionId, {
-            discounts: [{ coupon: coupon.id }]
-         });
-         
-         console.log(`[GiftCode] Coupon de ${giftCode.amount}€ appliqué sur l'abonnement ${activeOrder.stripeSubscriptionId}`);
-      }
-    } catch (stripeErr) {
-      console.error("[GiftCode] Erreur lors de l'application du coupon sur l'abonnement Stripe:", stripeErr);
-      // On logue l'erreur mais on ne bloque pas l'UI car Prisma est déjà à jour
-    }
 
     return NextResponse.json({ success: true, message: "Cagnotte créditée avec succès !" });
 
