@@ -404,15 +404,32 @@ if (order) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
 
-      if (session.customer) {
+if (session.customer) {
+        // Extraction de l'adresse de facturation saisie dans Stripe Checkout
+        const billingAddress = session.customer_details?.address;
+        
+        // Préparation de l'objet de mise à jour Prisma
+        const userUpdateData = {
+          stripeCustomerId: session.customer,
+        };
+
+        // Si Stripe a bien récolté l'adresse, on l'ajoute à la mise à jour
+        if (billingAddress) {
+          // 💡 Vérifie bien que ces noms de champs correspondent EXACTEMENT à ton schema.prisma
+          userUpdateData.billingAddress = billingAddress.line1;
+          userUpdateData.billingCity = billingAddress.city;
+          userUpdateData.billingZip = billingAddress.postal_code;
+          userUpdateData.billingCountry = billingAddress.country;
+        }
+
         await prisma.users.update({
           where: { id: userIdInt },
-          data: { stripeCustomerId: session.customer }
+          data: userUpdateData
         });
-        console.log(`[Webhook] ID Stripe ${session.customer} rattaché au client ${userIdInt}`);
+        
+        console.log(`[Webhook] ID Stripe ${session.customer} et adresse de facturation rattachés au client ${userIdInt}`);
       }
       
-      // --- LOGIQUE NETTOYAGE CARTE CADEAU ---
       const usedAmount = parseInt(creditUsed || '0', 10);
 
       if (userIdInt && usedAmount > 0) {

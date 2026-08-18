@@ -216,11 +216,16 @@ export async function POST(req) {
 
     console.log(`[Checkout] Session Stripe configurée en mode ${stripeMode}`);
     const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
       line_items: line_items,
       mode: stripeMode,
-      ...(dbUser?.stripeCustomerId
-        ? { customer: dbUser.stripeCustomerId }
+    ...(dbUser?.stripeCustomerId
+        ? { 
+            customer: dbUser.stripeCustomerId,
+            customer_update: { 
+              address: 'auto',
+              name: 'auto'
+            }
+          }
         : { customer_email: session.user.email }),
       discounts: stripeDiscounts.length > 0 ? stripeDiscounts : undefined,
       allow_promotion_codes: stripeDiscounts.length > 0 ? undefined : true,
@@ -248,7 +253,6 @@ export async function POST(req) {
         isBoxMystere: isBoxMystere ? "true" : "",
         childAge: isBoxMystere ? (childAge || "") : "",
         childGender: isBoxMystere ? (childGender || "") : "",
-        // NOUVEAU : Transmission des données de cagnotte au webhook
         creditUsed: creditToDeductCents.toString(),
         couponId: ephemeralCouponId || "",
       },

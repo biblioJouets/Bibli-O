@@ -1,4 +1,3 @@
-//src/app/api/user/gift-code/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -39,42 +38,7 @@ export async function POST(req) {
     const userIdInt = parseInt(session.user.id, 10);
     const amountToAddInCents = giftCode.amount * 100; 
 
-    // 2. Vérification et création du client Stripe (Crucial)
-    let user = await prisma.users.findUnique({ where: { id: userIdInt } });
-    let stripeCustomerId = user.stripeCustomerId;
-
-    if (!stripeCustomerId) {
-      // Le client n'a jamais commandé, on lui crée une coquille vide dans Stripe
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-        metadata: { userId: userIdInt.toString() }
-      });
-      stripeCustomerId = customer.id;
-
-      // On sauvegarde cet ID dans Prisma
-      await prisma.users.update({
-        where: { id: userIdInt },
-        data: { stripeCustomerId: stripeCustomerId }
-      });
-      console.log(`[GiftCode] Nouveau client Stripe créé : ${stripeCustomerId}`);
-    }
-
-    // 3. Application du crédit sur le Customer Balance de Stripe
-    // Dans Stripe, un crédit en faveur du client est NÉGATIF
-    try {
-      await stripe.customers.createBalanceTransaction(stripeCustomerId, {
-        amount: -amountToAddInCents,
-        currency: 'eur',
-        description: `Carte cadeau ajoutée (${code})`
-      });
-      console.log(`[GiftCode] Solde Stripe crédité de ${amountToAddInCents / 100}€ pour ${stripeCustomerId}`);
-    } catch (stripeErr) {
-      console.error("[GiftCode] Erreur lors du crédit Stripe:", stripeErr);
-      return NextResponse.json({ error: "Erreur de communication avec le processeur de paiement." }, { status: 500 });
-    }
-
-    // 4. Synchronisation visuelle dans Prisma
+    // 2. Mise à jour de Prisma (Source de vérité)
     await prisma.$transaction([
       prisma.users.update({
         where: { id: userIdInt },
@@ -85,6 +49,41 @@ export async function POST(req) {
         data: { isUsed: true, usedBy: userIdInt, usedAt: new Date() }
       })
     ]);
+
+    // 3. Si le client a DÉJÀ un abonnement actif, on attache un coupon pour le prochain cycle
+    try {
+      const activeOrder = await prisma.orders.findFirst({
+        where: {
+          userId: userIdInt,
+          status: 'ACTIVE',
+          stripeSubscriptionId: { not: null }
+        }
+      });
+
+      if (activeOrder?.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(activeOrder.stripeSubscriptionId);
+        const subPrice = subscription.items.data[0].price.unit_amount;
+        const discountToApply = Math.min(amountToAddInCents, subPrice);
+
+        if (discountToApply > 0) {
+          const coupon = await stripe.coupons.create({
+            amount_off: discountToApply,
+            currency: 'eur',
+            duration: 'once',
+            max_redemptions: 1,
+            name: `Carte Cadeau ${code}`,
+            applies_to: { products: [subscription.items.data[0].price.product] }
+          });
+
+          await stripe.subscriptions.update(activeOrder.stripeSubscriptionId, {
+            discounts: [{ coupon: coupon.id }]
+          });
+          console.log(`[GiftCode] Coupon de ${discountToApply / 100}€ attaché à l'abonnement existant.`);
+        }
+      }
+    } catch (stripeErr) {
+      console.error("[GiftCode] Erreur lors de l'application du coupon sur l'abonnement:", stripeErr);
+    }
 
     return NextResponse.json({ success: true, message: "Cagnotte créditée avec succès !" });
 
