@@ -70,7 +70,7 @@ export async function POST(req) {
 
   // 2. ROUTAGE DES ÉVÉNEMENTS STRIPE
 
-  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation Réussie) ---
+// --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation Réussie) ---
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
 
@@ -93,6 +93,23 @@ export async function POST(req) {
       });
 
       if (order) {
+        // --- NOUVEAU BLOC : SYNCHRONISATION DE LA CAGNOTTE VIA LES COUPONS ---
+        // On vérifie si une réduction (notre coupon) a été appliquée sur cette facture
+        const discountAmount = invoice.total_discount_amounts?.reduce((sum, discount) => sum + discount.amount, 0) || 0;
+        
+        if (discountAmount > 0 && order.userId) {
+           try {
+             await prisma.users.update({
+               where: { id: order.userId },
+               // On décrémente Prisma de la somme que le coupon a fait économiser
+               data: { giftCredit: { decrement: discountAmount } }
+             });
+             console.log(`[Webhook] Prisma synchronisé : ${discountAmount / 100}€ déduits de la cagnotte suite au renouvellement.`);
+           } catch (dbErr) {
+             console.error("[Webhook] Erreur de synchro cagnotte Prisma:", dbErr);
+           }
+        }
+        
         const productsToRenew = order.OrderProducts.filter(p =>
           p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
@@ -352,6 +369,14 @@ export async function POST(req) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
 
+      if (session.customer) {
+        await prisma.users.update({
+          where: { id: userIdInt },
+          data: { stripeCustomerId: session.customer }
+        });
+        console.log(`[Webhook] ID Stripe ${session.customer} rattaché au client ${userIdInt}`);
+      }
+      
       // --- LOGIQUE NETTOYAGE CARTE CADEAU ---
       const usedAmount = parseInt(creditUsed || '0', 10);
 
@@ -577,6 +602,5 @@ export async function POST(req) {
       }
     }
   }
-
-  return NextResponse.json({ received: true });
+  return NextResponse.json({ received: true });  
 }
