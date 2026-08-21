@@ -75,8 +75,6 @@ export async function POST(req) {
     const invoice = event.data.object;
 
     // 🛡️ BOUCLIER ANTI-DOUBLON : On ignore la toute première facture !
-    // Elle est déjà gérée par le scénario "checkout.session.completed".
-    // On ne traite que les vrais renouvellements mensuels ("subscription_cycle").
     if (invoice.billing_reason === 'subscription_create') {
       console.log(`[Webhook] Première facture d'abonnement ignorée par le Scénario A.`);
       return NextResponse.json({ received: true });
@@ -100,11 +98,11 @@ export async function POST(req) {
         },
       });
 
-if (order) {
-        // --- SYNCHRONISATION DE LA CAGNOTTE ET ANTICIPATION ---
+      if (order) {
+        // --- SYNCHRONISATION DE LA CAGNOTTE ET ANTICIPATION CONTINUE ---
         const discountAmount = invoice.total_discount_amounts?.reduce((sum, discount) => sum + discount.amount, 0) || 0;
         
-        try {
+      try {
           let currentGiftCredit = 0;
 
           // 1. On déduit ce qui vient d'être consommé
@@ -114,37 +112,46 @@ if (order) {
               data: { giftCredit: { decrement: discountAmount } }
             });
             currentGiftCredit = updatedUser.giftCredit;
-            console.log(`[Webhook] Prisma synchronisé : ${discountAmount / 100}€ déduits.`);
+            console.log(`[Webhook] Prisma synchronisé : ${discountAmount / 100}€ déduits de la cagnotte.`);
           } else if (order.userId) {
             const user = await prisma.users.findUnique({ where: { id: order.userId } });
             currentGiftCredit = user?.giftCredit || 0;
           }
 
-          // 2. On prépare le mois suivant s'il reste de l'argent
-          if (currentGiftCredit > 0 && invoice.lines?.data?.[0]?.price) {
-            const subPrice = invoice.lines.data[0].price.unit_amount;
-            const nextDeduction = Math.min(currentGiftCredit, subPrice);
-            
-            if (nextDeduction > 0) {
-              const nextCoupon = await stripe.coupons.create({
-                amount_off: nextDeduction,
-                currency: 'eur',
-                duration: 'once',
-                max_redemptions: 1,
-                name: 'Déduction Solde Carte Cadeau',
-                applies_to: { products: [invoice.lines.data[0].price.product] }
-              });
+          // 2. On prépare le mois suivant s'il reste de l'argent (Sécurisé par appel à la Subscription)
+          if (currentGiftCredit > 0) {
+            // Appel direct à l'abonnement : source de vérité infaillible
+            const subscription = await stripe.subscriptions.retrieve(stripeSubId);
+            const itemPrice = subscription.items?.data?.[0]?.price;
+
+            if (itemPrice && itemPrice.unit_amount) {
+              const subPrice = itemPrice.unit_amount;
+              const nextDeduction = Math.min(currentGiftCredit, subPrice);
               
-              await stripe.subscriptions.update(stripeSubId, {
-                discounts: [{ coupon: nextCoupon.id }]
-              });
-              console.log(`[Webhook] Anticipation continue : Coupon de ${nextDeduction / 100}€ attaché.`);
+              if (nextDeduction > 0) {
+                const nextCoupon = await stripe.coupons.create({
+                  amount_off: nextDeduction,
+                  currency: 'eur',
+                  duration: 'once',
+                  max_redemptions: 1,
+                  name: 'Déduction Solde Carte Cadeau',
+                  applies_to: { products: [itemPrice.product] }
+                });
+                
+                await stripe.subscriptions.update(stripeSubId, {
+                  discounts: [{ coupon: nextCoupon.id }]
+                });
+                console.log(`[Webhook] Anticipation continue : Coupon de ${nextDeduction / 100}€ attaché pour le mois suivant.`);
+              }
+            } else {
+              console.log(`[Webhook] Anticipation ignorée : Structure de prix introuvable sur l'abonnement.`);
             }
           }
         } catch (dbErr) {
-          console.error("[Webhook] Erreur de gestion de la cagnotte Prisma:", dbErr);
+          console.error("[Webhook] Erreur de gestion de la cagnotte Prisma / Anticipation:", dbErr);
         }
-        // ------------------------------------------------------
+        // --------------------------------------------------------------------------
+
         const productsToRenew = order.OrderProducts.filter(p =>
           p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
@@ -404,47 +411,26 @@ if (order) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
 
-if (session.customer) {
-        // Extraction de l'adresse de facturation saisie dans Stripe Checkout
-        const billingAddress = session.customer_details?.address;
-        
-        // Préparation de l'objet de mise à jour Prisma
-        const userUpdateData = {
-          stripeCustomerId: session.customer,
-        };
-
-        // Si Stripe a bien récolté l'adresse, on l'ajoute à la mise à jour
-        if (billingAddress) {
-          // 💡 Vérifie bien que ces noms de champs correspondent EXACTEMENT à ton schema.prisma
-          userUpdateData.billingAddress = billingAddress.line1;
-          userUpdateData.billingCity = billingAddress.city;
-          userUpdateData.billingZip = billingAddress.postal_code;
-          userUpdateData.billingCountry = billingAddress.country;
-        }
-
+      if (session.customer) {
         await prisma.users.update({
           where: { id: userIdInt },
-          data: userUpdateData
+          data: { stripeCustomerId: session.customer }
         });
-        
-        console.log(`[Webhook] ID Stripe ${session.customer} et adresse de facturation rattachés au client ${userIdInt}`);
+        console.log(`[Webhook] ID Stripe ${session.customer} rattaché au client ${userIdInt}`);
       }
       
+      // --- LOGIQUE NETTOYAGE CARTE CADEAU ET ANTICIPATION ---
       const usedAmount = parseInt(creditUsed || '0', 10);
 
       if (userIdInt && usedAmount > 0) {
         try {
           await prisma.users.update({
             where: { id: userIdInt },
-            data: {
-              giftCredit: {
-                decrement: usedAmount
-              }
-            }
+            data: { giftCredit: { decrement: usedAmount } }
           });
           console.log(`[Webhook] Cagnotte déduite de ${usedAmount} centimes pour l'utilisateur ${userIdInt}`);
         } catch (dbError) {
-          console.error(`[Webhook] Erreur de déduction de crédit pour User ${userIdInt}:`, dbError);
+          console.error(`[Webhook] Erreur de déduction de crédit:`, dbError);
         }
 
         if (couponId) {
@@ -456,31 +442,37 @@ if (session.customer) {
           }
         }
       }
-// --- NOUVEAU BLOC : ANTICIPATION DU CYCLE SUIVANT ---
+
+      // Préparation du mois suivant (Sécurisé)
       if (stripeSubscriptionId) {
         try {
           const currentUser = await prisma.users.findUnique({ where: { id: userIdInt } });
           
           if (currentUser && currentUser.giftCredit > 0) {
-            // Récupère le prix de l'abonnement pour plafonner le coupon
             const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-            const subPrice = subscription.items.data[0].price.unit_amount;
-            const nextDeduction = Math.min(currentUser.giftCredit, subPrice);
+            
+            const item = subscription.items?.data?.[0];
+            if (item?.price?.unit_amount) {
+                const subPrice = item.price.unit_amount;
+                const nextDeduction = Math.min(currentUser.giftCredit, subPrice);
 
-            if (nextDeduction > 0) {
-              const nextCoupon = await stripe.coupons.create({
-                amount_off: nextDeduction,
-                currency: 'eur',
-                duration: 'once',
-                max_redemptions: 1,
-                name: 'Déduction Solde Carte Cadeau',
-                applies_to: { products: [subscription.items.data[0].price.product] }
-              });
-              
-              await stripe.subscriptions.update(stripeSubscriptionId, {
-                discounts: [{ coupon: nextCoupon.id }]
-              });
-              console.log(`[Webhook] Anticipation : Coupon de ${nextDeduction / 100}€ attaché pour le prochain cycle.`);
+                if (nextDeduction > 0) {
+                  const nextCoupon = await stripe.coupons.create({
+                    amount_off: nextDeduction,
+                    currency: 'eur',
+                    duration: 'once',
+                    max_redemptions: 1,
+                    name: 'Déduction Solde Carte Cadeau',
+                    applies_to: { products: [item.price.product] }
+                  });
+                  
+                  await stripe.subscriptions.update(stripeSubscriptionId, {
+                    discounts: [{ coupon: nextCoupon.id }]
+                  });
+                  console.log(`[Webhook] Anticipation : Coupon de ${nextDeduction / 100}€ attaché pour le prochain cycle.`);
+                }
+            } else {
+                console.log(`[Webhook] Anticipation ignorée : Structure de prix introuvable sur l'abonnement.`);
             }
           }
         } catch (prepErr) {
@@ -488,6 +480,7 @@ if (session.customer) {
         }
       }
       // ---------------------------------------------------
+
       if (isBoxMystere === "true") {
         await prisma.orders.update({
           where: { id: newOrder.id },
