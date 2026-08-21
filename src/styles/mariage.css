@@ -168,7 +168,7 @@
 }
 
 .bj-mar-floating-stat {
-  position: absolute; bottom: -20px; right: -20px;
+  position: absolute; bottom: -70px; right: -20px;
   padding: 1.5rem; border-radius: 20px;
   display: flex; align-items: center; gap: 1rem; z-index: 2;
   color: var(--bj-bg-warm-1); box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -229,9 +229,41 @@
   .bj-mar-process-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 3rem; }
   .bj-mar-step-card { padding: 2.5rem; border-radius: var(--bj-radius-card); position: relative; }
   .bj-mar-step-num { position: absolute; top: 2.5rem; right: 2.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 800; font-size: 0.875rem; }
-  
-  @media (min-width: 768px) {
-    .bj-mar-process-grid { grid-template-columns: repeat(4, 1fr); align-items: start; }
-    .bj-mar-stagger-down { transform: translateY(40px); }
+  .bj-mar-step-card .bj-mar-h3 {
+  /* 40px (largeur de la pastille) + 16px (marge respiratoire de 1rem) */
+  padding-right: 3.5rem;
+  /* Optionnel : sécurité pour forcer le passage à la ligne des mots très longs sur mobile */
+  word-wrap: break-word; 
+}
+/* 1. Allègement des marges internes pour éviter l'étouffement (< 1024px) */
+@media (max-width: 1023px) {
+  .bj-mar-step-card {
+    padding: 1.5rem; 
   }
-  
+  .bj-mar-step-num {
+    top: 1.5rem; 
+    right: 1.5rem;
+  }
+  .bj-mar-step-card .bj-mar-h3 {
+    padding-right: 3rem; /* Ajustement de la protection du titre */
+  }
+}
+
+/* 2. Palier intermédiaire Tablettes (768px à 1023px) : 2 colonnes */
+@media (min-width: 768px) {
+  .bj-mar-process-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    align-items: start; 
+  }
+  /* La classe bj-mar-stagger-down fonctionnera parfaitement sur le 2ème et 4ème élément */
+  .bj-mar-stagger-down { 
+    transform: translateY(40px); 
+  }
+}
+
+/* 3. Palier Desktop (1024px et +) : 4 colonnes, l'espace est suffisant */
+@media (min-width: 1024px) {
+  .bj-mar-process-grid { 
+    grid-template-columns: repeat(4, 1fr); 
+  }
+}

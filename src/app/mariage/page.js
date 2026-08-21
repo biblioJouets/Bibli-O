@@ -168,7 +168,7 @@ export default function MariageEventPage() {
         </div>
       </section>
 
-      {/* SECTION 8 : FORMULAIRE / CONTACT FINAL */}
+      {/* SECTION 6 : FORMULAIRE / CONTACT FINAL */}
      <DevisForm />
 
     </main>
