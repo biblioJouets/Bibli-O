@@ -23,7 +23,8 @@ export default function Footer() {
             <p className="footer-title">Bibli'O</p>
             <ul>
               <li><Link href="/contact">Contact</Link></li>
-              <li><Link href="/bibliotheque">Bibliothèque de jouets</Link></li>
+              <li><Link href="/mariage">Mariage</Link></li>
+              <li><Link href="/bibliotheque">Nos Jouets</Link></li>
               <li><Link href="/abonnements">Abonnements</Link></li>
               <li><Link href="/faq">FAQ</Link></li>
             </ul>

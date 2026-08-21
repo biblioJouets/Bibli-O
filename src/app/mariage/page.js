@@ -1,24 +1,25 @@
 import '@/styles/mariage.css';
 
 import DevisForm from '@/components/DevisForm.jsx';
+import Image from 'next/image';
 
-const  IMAGE_MARIAGE1  = 'assets/mariage/image_mariage1.webp';
-const  IMAGE_MARIAGE2  = 'assets/mariage/image_mariage2.webp';
-const  IMAGE_MARIAGE3  = 'assets/mariage/image_mariage3.webp';
+const IMAGE_MARIAGE1 = '/assets/mariage/image_mariage1.webp';
+const IMAGE_MARIAGE2 = '/assets/mariage/image_mariage2.webp';
+const IMAGE_MARIAGE3 = '/assets/mariage/image_mariage3.webp';
 
 
-// export const metadata = {
-//   title: "Location Jouets Mariage & Événements | Bibli'o Jouets",
-//   description: "Offrez à vos mariés  le jour J. Des packs de location de jouets avec livraison et installation sur Montpellier et alentours.",
-//   openGraph: {
-//     title: "Location d'Espace Enfant pour Mariages | Bibli'o Jouets",
-//     description: "Des prestations irréprochables pour occuper les enfants. Découvrez nos formules à partir de 50€ avec livraison incluse.",
-//     url: 'https://www.bibliojouets.fr/mariage',
-//     siteName: "Bibli'o Jouets",
-//     locale: 'fr_FR',
-//     type: 'website',
-//   },
-// };
+export const metadata = {
+  title: "Location Jouets Mariage & Espace Enfant Montpellier | Bibli'o Jouets",
+  description: "Aménagez un espace enfant pour votre mariage avec nos packs de location de jouets. Livraison et installation incluses à Montpellier, Montpellier et alentours.",
+  openGraph: {
+    title: "Location d'Espace Enfant pour Mariages | Bibli'o Jouets",
+    description: "Des prestations irréprochables pour occuper les enfants. Découvrez nos formules avec livraison incluse dans l'Hérault.",
+    url: 'https://www.bibliojouets.fr/mariage',
+    siteName: "Bibli'o Jouets",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+};
 
 export default function MariageEventPage() {
   return (
@@ -39,8 +40,13 @@ export default function MariageEventPage() {
           </div>
           <div className="bj-mar-hero-image-wrapper">
             <div className="bj-mar-blob bj-mar-blob-blue"></div>
-            <img src={IMAGE_MARIAGE1} alt="Enfants jouant sous un tipi décoré" className="bj-mar-img" />
-          </div>
+<Image 
+  src={IMAGE_MARIAGE1} 
+  alt="Location de tipi et jouets en bois pour espace enfant mariage à Montpellier" 
+  width={800} 
+  height={1000} 
+  className="bj-mar-img" 
+/>          </div>
         </div>
       </section>
 
@@ -48,7 +54,13 @@ export default function MariageEventPage() {
       <section className="bj-mar-section bj-mar-concept bg-warm-3">
         <div className="bj-mar-container bj-mar-concept-grid">
           <div className="bj-mar-concept-image-wrapper">
-            <img src={IMAGE_MARIAGE2} alt="Espace de jeu aménagé" className="bj-mar-img" />
+            <Image 
+              src={IMAGE_MARIAGE2} 
+              alt="Espace de jeu aménagé" 
+              width={800} 
+              height={1000} 
+              className="bj-mar-img" 
+            />
             <div className="bj-mar-floating-stat bg-pink">
               <div>
                 <span className="bj-mar-stat-title">Option</span>
@@ -103,7 +115,13 @@ export default function MariageEventPage() {
         <div className="bj-mar-container bj-mar-packs-grid">
           <div className="bj-mar-packs-image-wrapper">
              <div className="bj-mar-blob bj-mar-blob-yellow"></div>
-            <img src={IMAGE_MARIAGE3} alt="Exemple de jeux en bois et loisirs créatifs" className="bj-mar-img" />
+            <Image
+              src={IMAGE_MARIAGE3}
+              alt="Exemple de jeux en bois et loisirs créatifs"
+              width={800}
+              height={1000}
+              className="bj-mar-img"
+            />
           </div>
           <div className="bj-mar-packs-content">
             <span className="bj-mar-overline">Formules <span className="bj-main-title-highlight">Mariage</span></span>
