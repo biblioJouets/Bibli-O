@@ -167,7 +167,7 @@ export default function PaiementPage() {
       };
 
       try {
-        await injectScript("[https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js](https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js)", "jquery-script");
+        await injectScript("https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js", "jquery-script");
         
         const waitForJQuery = setInterval(() => {
           if (window.jQuery) {
@@ -175,8 +175,8 @@ export default function PaiementPage() {
             window.$ = window.jQuery; 
 
             Promise.all([
-              injectScript("[https://unpkg.com/leaflet/dist/leaflet.js](https://unpkg.com/leaflet/dist/leaflet.js)", "leaflet-js"),
-              injectScript("[https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js](https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js)", "mr-plugin")
+              injectScript("https://unpkg.com/leaflet/dist/leaflet.js", "leaflet-js"),
+              injectScript("https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js", "mr-plugin")
             ]).then(() => {
               if (deliveryMode === 'MONDIAL_RELAY') loadMondialRelayWidget();
             });
@@ -286,7 +286,7 @@ export default function PaiementPage() {
 
   return (
   <div className="page-container">
-    <link rel="stylesheet" href="[https://unpkg.com/leaflet/dist/leaflet.css](https://unpkg.com/leaflet/dist/leaflet.css)" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
     <h1 className="page-title">Finaliser mon abonnement 🔒</h1>
 
