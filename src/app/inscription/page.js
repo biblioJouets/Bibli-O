@@ -100,8 +100,8 @@ export default function InscriptionPage() {
           </div>
 
           <div className="form-group">
-            <label>Téléphone (optionnel)</label>
-            <input type="tel" name="phone" onChange={handleChange} className="w-full" />
+            <label>Téléphone </label>
+            <input type="tel" name="phone" required onChange={handleChange} className="w-full" />
           </div>
 
           {/* 2. On passe handleChange en prop ici */}
