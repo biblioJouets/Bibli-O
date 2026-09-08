@@ -58,7 +58,7 @@ export default function ProductDetailClient({ product }) {
           </div>
 
           {product.highlights && product.highlights.length > 0 && (
-            <div className="product-highlights-section" style={{ marginTop: '2rem' }}>
+            <div className="product-highlights-section desktop-only" style={{ marginTop: '2rem' }}>
               <h3 style={{fontSize: '1.2rem', fontWeight: 'bold', color: '#88D4AB', marginBottom: '1rem'}}>
                 Les + du produit
               </h3>
@@ -97,20 +97,28 @@ export default function ProductDetailClient({ product }) {
           <p className="product-ref">Réf: {product.reference}</p>
 
           {product.description && (
-            <div 
-              className="product-description" 
-              style={{ 
-                marginTop: '1rem', 
-                marginBottom: '1.5rem', 
-                color: '#2E1D21', 
-                lineHeight: '1.6',
-                whiteSpace: 'pre-line' 
-              }}
-            >
-              {product.description}
-            </div>
-          )}
-
+  <div 
+    className="product-description" 
+    style={{ marginTop: '1rem', marginBottom: '1.5rem', color: '#2E1D21', lineHeight: '1.6', whiteSpace: 'pre-line' }}
+  >
+    {product.description}
+  </div>
+)}
+{product.highlights && product.highlights.length > 0 && (
+  <div className="product-highlights-section mobile-only" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+    <h3 style={{fontSize: '1.2rem', fontWeight: 'bold', color: '#88D4AB', marginBottom: '1rem'}}>
+      Les + du produit
+    </h3>
+    <ul style={{listStyle: 'none', padding: 0}}>
+      {product.highlights.map((point, index) => (
+        <li key={index} style={{display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', color: '#555', lineHeight: '1.5'}}>
+          <Check size={20} color="#88D4AB" style={{flexShrink: 0, marginTop: '2px'}} />
+          <span>{point}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
           <div className="price-block">
             {isOutOfStock ? (
                 <span style={{ color: '#999', fontSize: '1.1rem', fontWeight: 'normal' }}>

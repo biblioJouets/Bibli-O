@@ -5,6 +5,8 @@
   margin-top: 8rem;
   padding: 4rem 2rem;
   min-height: 80vh;
+  box-sizing: border-box; /* NOUVEAU: Le padding ne s'ajoute plus à la largeur */
+  overflow-x: hidden;
 }
 
 .breadcrumb {
@@ -27,6 +29,7 @@
 .product-main {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
+  box-sizing: border-box;
   gap: 4rem;
   background: white;
   padding: 3rem;
@@ -253,7 +256,12 @@
     gap: 3rem;
     padding: 2.5rem;
   }
-  
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
 
 }
 
@@ -262,7 +270,9 @@
     margin-top: 6rem; /* On réduit la marge du header */
     padding: 2rem 1rem;
   }
-
+  .product-info {
+    padding: 0; 
+  }
   .product-main {
     grid-template-columns: 1fr; /* Une seule colonne */
     gap: 3rem;
