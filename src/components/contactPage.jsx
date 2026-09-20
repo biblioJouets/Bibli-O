@@ -77,7 +77,7 @@ function ContactPage() {
             
             <a
               className="social-link tiktok"
-              href="https://www.tiktok.com/@location_jouets_biblio"
+              href="https://www.tiktok.com/@location_biblio_jouets?lang=fr"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Bibli'O Jouets sur TikTok"
