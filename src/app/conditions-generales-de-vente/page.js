@@ -36,7 +36,7 @@ function Cgv() {
       <section aria-labelledby="cgv-definition">
         <h2 id="cgv-definition">Article 2 - Définition et durée de l'abonnement</h2>
         <ul>
-          <li>Bibli’o Jouets propose un service de location de jouets et d’articles de puériculture destiné aux familles ayant des enfants de 0 à 8 ans.</li>
+          <li>Bibli’o Jouets propose un service de location de jouets et d’articles de puériculture destiné aux familles âgées de 0 à plus de 99 ans.</li>
           <li>Le service fonctionne sous forme d’abonnement mensuel sans engagement ou box, selon les formules présentées sur le site. </li>
           <li>La formule débute à la date de paiement et reste active jusqu'à son échéance. </li>
           <li>Le client peut conserver les jeux tant que l’abonnement reste actif. Le changement de formule peut être effectué à tout moment depuis l’espace client.</li>
