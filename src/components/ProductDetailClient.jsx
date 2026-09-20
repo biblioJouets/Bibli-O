@@ -1,3 +1,4 @@
+// ProductDetailClient.jsx
 'use client';
 
 import { useState } from 'react';
@@ -95,6 +96,40 @@ export default function ProductDetailClient({ product }) {
 
           <h1 className="product-title">{product.name}</h1>
           <p className="product-ref">Réf: {product.reference}</p>
+
+          {/* AJOUT : Badges Âge et Catégorie */}
+          <div style={{ 
+            display: 'flex', 
+            gap: '10px', 
+            marginTop: '12px', 
+            marginBottom: '15px', 
+            flexWrap: 'wrap' 
+          }}>
+            <span style={{ 
+              backgroundColor: '#DFF1F9', /* Bleu pastel */
+              color: '#2E1D21', 
+              padding: '6px 14px', 
+              borderRadius: '25px', 
+              fontSize: '0.9rem', 
+              fontWeight: 'bold' 
+            }}>
+              👶 {product.ageRange || 'Tout âge'}
+            </span>
+            
+            {product.category && (
+              <span style={{ 
+                backgroundColor: '#FFF7D4', /* Jaune pastel */
+                color: '#2E1D21', 
+                padding: '6px 14px', 
+                borderRadius: '25px', 
+                fontSize: '0.9rem', 
+                fontWeight: 'bold' 
+              }}>
+                🧩 {product.category}
+              </span>
+            )}
+          </div>
+
 
           {product.description && (
   <div 
