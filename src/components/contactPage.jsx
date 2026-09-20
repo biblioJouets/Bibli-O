@@ -7,7 +7,7 @@ import "@/styles/contactPage.css";
 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faSquareFacebook, faSquareInstagram, faLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
 
 
@@ -31,7 +31,14 @@ function ContactPage() {
           <p>
             Que vous ayez une question précise, besoin d'un devis sur mesure ou envie de partager une idée géniale, n'hésitez plus ! Laissez-nous un message, et notre équipe s'empressera de vous répondre plus vite qu'un jeu de construction.
           </p>
-          
+          {/* Téléphone - utilisation d'une balise <a> pour l'accessibilité */}
+          <a href="tel:+33636258718" className="contactItem">
+            <div className="icons">
+              <FontAwesomeIcon className="social-icon-contact" icon={faPhone} />
+            </div>
+            <p>06 36 25 87 18</p>
+          </a>
+
           {/* Liens Email - utilisation d'une balise <a> pour l'accessibilité */}
           <a href="mailto:contact@bibliojouets.com" className="contactItem">
             <div className="icons">
@@ -77,7 +84,7 @@ function ContactPage() {
             
             <a
               className="social-link tiktok"
-              href="https://www.tiktok.com/@location_jouets_biblio"
+              href="https://www.tiktok.com/@location_biblio_jouets?lang=fr"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Bibli'O Jouets sur TikTok"
