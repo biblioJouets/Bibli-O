@@ -1,18 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Wallet, Loader2 } from "lucide-react";
 
 export default function WidgetStripeBalance() {
   const [balance, setBalance] = useState(null); // null = chargement
   const [error, setError] = useState(false);
 
-  useEffect(() => {
+  // On isole la fonction de récupération pour la réutiliser
+  const fetchBalance = useCallback(() => {
     fetch("/api/user/stripe-balance")
       .then((r) => r.json())
       .then((data) => setBalance(data.balance ?? 0))
       .catch(() => setError(true));
   }, []);
+
+  useEffect(() => {
+    // 1. Chargement initial au montage du composant
+    fetchBalance();
+
+    // 2. Mise sur écoute de l'événement personnalisé
+    window.addEventListener("giftCodeActivated", fetchBalance);
+
+    // 3. Nettoyage de l'écouteur si le composant est démonté
+    return () => {
+      window.removeEventListener("giftCodeActivated", fetchBalance);
+    };
+  }, [fetchBalance]);
 
   // Pas de solde = rien à afficher
   if (balance === 0) return null;
@@ -39,7 +53,7 @@ export default function WidgetStripeBalance() {
       ) : (
         <>
           <div
-            className="flex items-baseline gap-1 rounded-2xl px-5 py-4"
+            className="flex items-baseline gap-1 rounded-2xl px-5 py-4 transition-all duration-500"
             style={{ background: "#ffe264" }}
           >
             <span className="text-3xl font-bold" style={{ color: "#2E1D21" }}>

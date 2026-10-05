@@ -51,7 +51,7 @@ answer: "C'est un jeu d'enfant ! Vous sélectionnez d'abord les jouets qui feron
     {
       icon: <Users size={20} />,
       question: "À qui s'adresse le service Bibli'O Jouets ?",
-      answer: "Bibli'O Jouets est conçu pour toutes les familles avec des enfants de 0 à 8 ans qui souhaitent offrir une multitude de découvertes ludiques à leurs petits explorateurs, tout en adoptant une consommation plus responsable. Parents, grands-parents, tontons, tantines... bienvenue à tous ceux qui aiment jouer et la planète !"
+      answer: "Bibli'O Jouets est conçu pour toutes les familles âgées de 0 à plus de 99 ans qui souhaitent offrir une multitude de découvertes ludiques à leurs petits explorateurs, tout en adoptant une consommation plus responsable. Parents, grands-parents, tontons, tantines... bienvenue à tous ceux qui aiment jouer et la planète !"
     },
     {
       icon: <HelpCircle size={20} />,
@@ -79,7 +79,7 @@ answer: "C'est un jeu d'enfant ! Vous sélectionnez d'abord les jouets qui feron
     {
       icon: <Blocks size={20} />,
       question: "Quel type de jouets proposez-vous ?",
-      answer: "Notre catalogue est une véritable caverne d'Ali Baba de jouets éducatifs et ludiques ! Nous sélectionnons des puzzles, jeux de construction, jeux d'éveil sensoriel, jouets en bois, jeux de société adaptés à l'âge, et bien d'autres, tous conçus pour stimuler la créativité, la logique, la motricité et l'apprentissage de vos enfants, de 0 à 8 ans."
+      answer: "Notre catalogue est une véritable caverne d'Ali Baba de jouets éducatifs et ludiques ! Nous sélectionnons des puzzles, jeux de construction, jeux d'éveil sensoriel, jouets en bois, jeux de société adaptés à l'âge, et bien d'autres, tous conçus pour stimuler la créativité, la logique, la motricité et l'apprentissage de vos enfants, de 0 à plus de 99 ans."
     },
     {
       icon: <RefreshCw size={20} />,

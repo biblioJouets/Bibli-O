@@ -39,7 +39,6 @@ export default function PaiementPage() {
     phone: ""
   });
 
-  // --- NOUVEAU : RÉCUPÉRATION DES DONNÉES UTILISATEUR POUR PRÉ-REMPLIR LE FORMULAIRE ---
   useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user?.id) {
@@ -50,11 +49,9 @@ export default function PaiementPage() {
             const userData = response.data;
             
             if (userData) {
-              // Récupération des adresses et recherche de celle par défaut
               const addresses = userData.Addresses || userData.addresses || userData.Address || [];
               const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 
-              // Mise à jour de l'état avec les données récupérées
               setShipping({
                 firstName: userData.firstName || "",
                 lastName: userData.lastName || "",
@@ -74,7 +71,6 @@ export default function PaiementPage() {
     fetchUserData();
   }, [session]);
 
-  // --- RE-VÉRIFICATION DU CODE PROMO AU CHARGEMENT ---
   useEffect(() => {
     if (!promoCode) {
       setPromoStatus("idle");
@@ -111,7 +107,6 @@ export default function PaiementPage() {
     return () => { cancelled = true; };
   }, [promoCode, loading, cart.items]);
 
-  // Zones éligibles domicile
   const AUTHORIZED_HOME_DELIVERY = {
     "34690": ["FABREGUES", "FABRÈGUES"],
     "34570": ["PIGNAN", "SAUSSAN"]
@@ -133,34 +128,29 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
-  // --- SÉPARATION DES ARTICLES PAR INTENTION ---
   const rentalItems = cart.items?.filter((item) => item.intent !== 'PURCHASE') || [];
   const purchaseItems = cart.items?.filter((item) => item.intent === 'PURCHASE') || [];
 
-  // Calcul prix — court-circuit Box Mystère
   const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
   const subscriptionPrice = isBoxMystereCart ? 24.90 : (() => {
     const pricingMap = { 1: 20, 2: 25, 3: 35, 4: 38, 5: 45, 6: 51, 7: 56, 8: 60, 9: 63 };
     return pricingMap[rentalCount] || 0;
   })();
 
-  // Total des achats définitifs (Prix Bibli'O)
   const purchaseTotal = purchaseItems.reduce((total, item) => {
     const activePrice = item.product.biblioPrice || item.product.price;
     return total + activePrice * item.quantity;
   }, 0);
 
-  // Le client est déjà abonné s'il est en mode échange ou réassort
+  // CORRECTION: Logique de calcul avec plafonnement
   const isExistingSubscriber = !!exchangeContext || !!refillContext;
+  const rentTotalToday = isExistingSubscriber ? 0 : subscriptionPrice;
+  const totalToday = purchaseTotal + rentTotalToday;
 
-  // Total à régler aujourd'hui : achats + (premier mois si nouvel abonné)
-  const totalToday = purchaseTotal + (isExistingSubscriber ? 0 : subscriptionPrice);
-
-  // --- TOTAL APRÈS DÉDUCTION DU CRÉDIT CARTE CADEAU ---
   const giftCreditAmount = giftCredit / 100;
-  const totalAfterCredit = Math.max(0, totalToday - giftCreditAmount);
+  const creditToDeduct = Math.min(giftCreditAmount, rentTotalToday);
+  const totalAfterCredit = totalToday - creditToDeduct;
 
-  // Scripts Mondial Relay
   useEffect(() => {
     const loadScripts = async () => {
       const injectScript = (src, id) => {
@@ -456,23 +446,36 @@ export default function PaiementPage() {
                     {selectedRelay.city} ({selectedRelay.id})
                 </div>
             )}
+            
             <div className="divider"></div>
+            
+            {/* CORRECTION: Affichage explicite de l'utilisation de la cagnotte */}
             {giftCredit > 0 && (
-              <div className="gift-credit-row">
-                <Gift size={18} color="#FFC93C" />
-                <span>Crédit carte cadeau disponible :</span>
-                <strong>
-                  {(giftCredit / 100).toLocaleString("fr-FR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}€
-                </strong>
+              <div className="gift-credit-row" style={{ display: 'block' }}>
+                <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-2">
+                    <Gift size={18} color="#FFC93C" />
+                    <span>Crédit carte cadeau disponible :</span>
+                  </div>
+                  <strong>
+                    {(giftCredit / 100).toLocaleString("fr-FR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}€
+                  </strong>
+                </div>
+                <p className="text-xs text-[#2E1D21] opacity-70 italic mt-1 ml-6">
+                  * S'applique uniquement sur l'abonnement (location).
+                </p>
               </div>
             )}
+            
             <div className="divider"></div>
+            
+            {/* CORRECTION: Affichage du prix barré conditionné */}
             <div className="total-row">
               <span>Total à régler</span>
-              {giftCreditAmount > 0 ? (
+              {creditToDeduct > 0 && totalToday > 0 ? (
                 <span className="total-row__values">
                   <span className="total-row__old">{totalToday.toFixed(2)}€</span>
                   <span className="total-row__new">{totalAfterCredit.toFixed(2)}€</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { getSuggestedPlan } from '@/lib/core/utils/subscription';
 import { useRouter } from 'next/navigation';

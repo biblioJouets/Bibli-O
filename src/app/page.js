@@ -72,7 +72,7 @@ export default async function Homepage() {
             "https://www.facebook.com/people/Biblio-jouets/61581916582706/?locale=fr_FR", 
             "https://www.instagram.com/location_jouets_biblio/",
             "https://www.linkedin.com/company/bibli-o-jouets/posts/?feedView=all",
-            "https://www.tiktok.com/@location_jouets_biblio"
+            "https://www.tiktok.com/@location_biblio_jouets?lang=fr"
         ]
     };
 

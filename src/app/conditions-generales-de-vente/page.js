@@ -27,7 +27,8 @@ function Cgv() {
           <dt>Site internet</dt>
           <dd><a href="https://www.bibliojouets.fr" target="_blank" rel="noopener noreferrer">www.bibliojouets.fr</a></dd>
         </dl>
-        <p>Les présentes Conditions Générales de Vente et de Location (ci-après « CGV ») régissent les relations contractuelles entre la société Bibli'o Jouets et tout client particulier ou professionnel (ci-après « le Client ») souhaitant louer un ou plusieurs jouets ou articles de puériculture via le site internet ou tout autre canal de vente à distance géré par la société. Les présentes CGV s'appliquent aux clients particuliers (consommateurs). Pour les clients professionnels, des conditions spécifiques peuvent s'appliquer, notamment l'exclusion du droit de rétractation propre aux consommateurs. </p>
+        <p>Les présentes Conditions Générales de Vente et de Location (ci-après « CGV ») régissent les relations contractuelles entre la société Bibli'o Jouets et tout client particulier ou professionnel (ci-après « le Client ») souhaitant louer des articles, que ce soit via le site internet, par bon de commande papier signé sur le terrain, ou tout autre canal de vente. Les dispositions relatives au droit de la consommation (notamment le droit de rétractation) s'appliquent exclusivement aux clients particuliers (consommateurs). 
+        </p>
         <p>Toute commande ou abonnement implique l’acceptation sans réserve des présentes CGV.</p>
       </section>
 
@@ -35,13 +36,15 @@ function Cgv() {
       <section aria-labelledby="cgv-definition">
         <h2 id="cgv-definition">Article 2 - Définition et durée de l'abonnement</h2>
         <ul>
-          <li>Bibli’o Jouets propose un service de location de jouets et d’articles de puériculture destiné aux familles ayant des enfants de 0 à 8 ans.</li>
-          <li>Le service fonctionne sous forme d’abonnement mensuel sans engagement ou box, selon les formules présentées sur le site.</li>
-          <li>La formule débute à la date de paiement et reste active jusqu'à son échéance. Le client peut conserver les jeux tant que l'abonnement reste actif.</li>
-          <li>Le changement de formule peut être effectué à tout moment depuis l'espace client.</li>
-          <li>La résiliation s'effectue depuis l'espace client et prend effet à la réception des jouets, retour dans un délai de maximum <strong>7 jours</strong> suivant la fin de l'abonnement. Toute période entamée reste due.</li>
+          <li>Bibli’o Jouets propose un service de location de jouets et d’articles de puériculture destiné aux familles âgées de 0 à plus de 99 ans.</li>
+          <li>Le service fonctionne sous forme d’abonnement mensuel sans engagement ou box, selon les formules présentées sur le site. </li>
+          <li>La formule débute à la date de paiement et reste active jusqu'à son échéance. </li>
+          <li>Le client peut conserver les jeux tant que l’abonnement reste actif. Le changement de formule peut être effectué à tout moment depuis l’espace client.</li>
+          <li>La résiliation s’effectue depuis l’espace client et prend effet à la réception des jouets, retour dans un délai de maximum 7 jours suivant la fin de l’abonnement. </li>
+          <li>Toute période entamée reste due.</li>
           <li>Bibli’o Jouets se réserve le droit de résilier un abonnement en cas de non-respect des conditions de location ou de comportement frauduleux.</li>
           <li>Chaque jouet ou article loué reste la propriété exclusive de Bibli’o Jouets.</li>
+
         </ul>
       </section>
 
@@ -63,6 +66,7 @@ function Cgv() {
       {/* Article 5: Modalités de commande et d'abonnement */}
       <section aria-labelledby="cgv-commande">
         <h2 id="cgv-commande">Articles 5 - Modalités de commande et d'abonnement</h2>
+        <p>Pour les clients professionnels démarchés par un commercial, la commande est matérialisée par la signature d'un bon de commande papier ou digital couplé à la signature d'un mandat de prélèvement SEPA et la transmission d'un RIB.</p>
         <p>Le Client peut s'abonner directement en ligne sur le site. Toute souscription implique : </p>
         <ul>
           <li> L'acceptation des présentes CGV. </li>
@@ -76,16 +80,17 @@ function Cgv() {
       <section aria-labelledby="cgv-paiement">
         <h2 id="cgv-paiement">Article 6 - Paiement</h2>
         <p>Les paiements sont effectués par <strong>Stripe</strong> via connexion sécurisée (3D Secure, SSL/TLS, norme PCI-DSS).</p>
-        <p>En cas d'échec de prélèvement, Bibli’o Jouets se réserve le droit de suspendre ou résilier l'abonnement.</p>
-        <p>Les jeux ni retournés, ni achetés seront facturés au prix d'achat déterminé selon leur état.</p>
+        <p>En cas d’échec de prélèvement, Bibli’o Jouets se réserve le droit de suspendre ou résilier l’abonnement.</p>
+        <p>Les jeux ni retournés, ni achetés seront facturés au prix d’achat déterminé selon leur état.</p>
         <p>Le montant de l'abonnement est prélevé à la date d'inscription, puis à chaque échéance mensuelle.</p>
+        <p>Paiement par prélèvement SEPA (Clients Professionnels) : Le paiement des mensualités s'effectue par prélèvement automatique SEPA conformément au mandat signé par le Client. Tout incident de paiement ou rejet de prélèvement entraînera l'exigibilité immédiate des sommes dues, ainsi que l'application de pénalités de retard calculées au taux d'intérêt appliqué par la Banque Centrale Européenne (BCE) à son opération la plus récente majoré de 10 points de pourcentage. En application de l'article D441-5 du Code de commerce, tout retard de paiement entraînera également l'application d'une indemnité forfaitaire pour frais de recouvrement d'un montant de 40 €. En cas d'échec répété de prélèvement, Bibli'o Jouets se réserve le droit de suspendre ou résilier l'abonnement et de réclamer la restitution immédiate du matériel.</p>
       </section>
-      
       {/* Article 6.1: Annulation et Frais de gestion  */}
       <section aria-labelledby="cgv-annulation">
         <h2 id="cgv-annulation">Article 6.1 - Annulation et Frais de gestion</h2>
-        <p>En cas de demande de remboursement d'une mensualité perçue automatiquement (suite à un oubli de résiliation ou d'un choix de retour non formulé dans les délais), un forfait de frais de dossier et de transaction de 5 € TTC sera systématiquement déduit du montant remboursé. Ce forfait couvre les frais non restitués par la plateforme de paiement Stripe ainsi que la gestion administrative du dossier.</p>
+        <p>En cas de demande de remboursement à titre commercial ou d'annulation par convenance personnelle du Client (hors exercice légitime du droit de rétractation), notamment suite à un oubli de résiliation ou à un défaut de retour des jouets dans les délais, un forfait de frais de dossier et de transaction de 5 € TTC sera déduit du montant remboursé. Ce forfait couvre les frais non restitués par la plateforme de paiement ainsi que la gestion administrative du dossier. </p>
       </section>
+
       {/* Article 7: Responsabilité et garantie */}
       <section aria-labelledby="cgv-garantie">
         <h2 id="cgv-garantie">Article 7 - Responsabilité et garantie</h2>
@@ -96,9 +101,21 @@ function Cgv() {
       {/* Article 8: Livraison et retours */}
       <section aria-labelledby="cgv-livraison">
         <h2 id="cgv-livraison">Article 8 - Livraison et retours</h2>
-        <p>Les jouets sont livrés en livraison locale (Saussan et environs) ou acheminés via le réseau national de points relais Mondial Relay. Le délai de retour des jouets est fixé à 7 jours après la fin de la période de location. Les jouets doivent être restitués complets et en bon état. Tout retard de restitution au-delà de 7 jours entraînera automatiquement le prélèvement d'une mensualité d'abonnement supplémentaire, sans pour autant prolonger le contrat de location.</p>
+        <p>Les jouets sont livrés en livraison locale (Saussan et environs) ou acheminés via le réseau national de points relais Mondial Relay. Le délai de retour des jouets est fixé à 7 jours après la fin de la période de location. Tout retard de restitution au-delà du délai de 7 jours entraînera automatiquement le renouvellement tacite de l'abonnement pour une durée d'un mois supplémentaire au tarif en vigueur, le Client conservant alors la jouissance des articles pour ladite période. </p>
       </section>
 
+      {/* Article  8.1 Conditions de retour en cas d'achat  */}
+      <section aria-labelledby="cgv-retour-achat">
+        <h2 id="cgv-retour-achat">Article 8.1 - Conditions de retour en cas d'achat</h2>
+      <p>Dans le cadre d’un achat définitif de jouet (hors location), les conditions de retour sont les suivantes :</p>
+      <ul>
+        <li><strong>Droit de rétractation :</strong> Conformément à la législation, le Client dispose d'un droit de rétractation de 14 jours à compter de la réception du produit pour retourner son achat sans justification.</li>
+        <li><strong>État du produit :</strong> Le jouet doit être retourné complet, dans son emballage d'origine et dans un état permettant sa remise en vente.</li>
+        <li><strong>Frais de retour :</strong>Les frais d'expédition pour le retour du produit sont à la charge exclusive du Client.</li>
+        <li><strong>Remboursement :</strong>Après vérification de l'état du jouet par nos services, le remboursement sera effectué via le moyen de paiement utilisé lors de la commande initiale, déduction faite des frais de ports. </li>
+        <li><strong>Exclusions : </strong>Tout article retourné incomplet, endommagé ou présentant des traces d'usure anormale ne pourra faire l'objet d'un remboursement.</li>
+      </ul>
+      </section>
       {/* Article 9: Hygiène et sécurité */}
       <section aria-labelledby="cgv-hygiene">
         <h2 id="cgv-hygiene">Article 9 - Hygiène et sécurité</h2>
@@ -121,10 +138,11 @@ function Cgv() {
       {/* Article 11: Droit de rétractation */}
       <section aria-labelledby="cgv-retractation">
         <h2 id="cgv-retractation">Article 11 - Droit de rétractation</h2>
-        <p>Conformément à l'article L221-18 du Code de la consommation, le Client particulier dispose d'un droit de rétractation de 14 jours à compter du jour de la souscription de l'abonnement en ligne.  Si le Client demande l'exécution immédiate du service et la livraison des jouets avant la fin de ce délai de 14 jours, il conserve son droit de rétractation. Néanmoins, s'il exerce ce droit après avoir reçu les jouets, il devra : </p>
+        <p>Le droit de rétractation de 14 jours (article L221-18 du Code de la consommation) est strictement réservé aux Clients particuliers (consommateurs). Il ne s'applique en aucun cas aux clients professionnels. Toute commande ou abonnement signé par un professionnel (sur le terrain ou en ligne) est ferme et définitif dès la signature du bon de commande.</p>
+        <p>Conformément à l'article L. 221-18 du Code de la consommation, le Client particulier dispose d'un droit de rétractation de 14 jours à compter de la souscription. Si le Client demande l'exécution immédiate du service et la livraison des jouets avant la fin de ce délai, il conserve son droit de rétractation. Néanmoins, en application de l'article L. 221-25 du Code de la consommation, s'il exerce ce droit après avoir reçu les jouets, il devra :</p>
         <ul> 
-        <li>1. Restituer les jouets à ses frais dans leur état d'origine.</li>
-        <li>2. S'acquitter auprès de Bibli'o Jouets d'un montant proportionnel au service fourni jusqu'au moment où il a informé la société de sa rétractation (calculé au prorata des jours d'utilisation).</li>  
+        <li>1. Restituer les jouets à ses frais dans leur état d'origine sous 14 jours.</li>
+        <li>S'acquitter auprès de Bibli'o Jouets d'un montant proportionnel au service fourni jusqu'à la notification de sa rétractation (calculé au prorata des jours d'utilisation).</li>  
         </ul>
       </section>
 
@@ -148,6 +166,7 @@ function Cgv() {
         <p>Les présentes CGV sont soumises au droit français. En cas de litige, le client doit contacter le service client et une solution amiable sera recherchée en priorité.</p>
         <p>À défaut d'accord, le litige pourra être porté devant le tribunal compétent du ressort de Montpellier, ou tout autre tribunal désigné selon la législation en vigueur.</p>
         <p>Conformément aux articles L.612-1 et suivants du Code de la consommation, le Client a le droit de recourir gratuitement à un médiateur de la consommation. <strong>CM2C</strong> peut être saisi via <a href="https://www.cm2c.net/" target="_blank" rel="noopener noreferrer">https://www.cm2c.net/</a>.</p>
+        <p>En cas de litige avec un client professionnel, compétence exclusive est attribuée au Tribunal de Commerce de Montpellier, nonobstant pluralité de défendeurs ou appel en garantie.</p>    
       </section>
 
       {/* Article 15: Acceptation */}
@@ -211,10 +230,22 @@ Bibli'o Jouets peut émettre des codes promotionnels ponctuellement. Sauf mentio
         <p>Conditions de Retour : Les jouets doivent être retournés complets et en bon état dans un délai de 7 jours suivant la fin de la période de location définie lors de l'achat, sous peine des pénalités prévues à l'Article 8.</p>
    <p><strong>Application des CGV :</strong> Toutes les clauses relatives aux modalités de paiement et d'autorisation de prélèvement (Article 5), l'hygiène (Article 9) et la responsabilité du client (Article 10) s'appliquent intégralement à cette offre. </p>
     </section>
+
+    {/* Article 20 - Prestations Événementielles et Formules Mariage */}
+<section aria-labelledby="cgv-prestations" className="prestations-section-evenementielles-mariage">
+<p><strong>20.1. Objet et Formules :</strong> Bibli'o Jouets propose des formules de location de matériel (jouets, jeux créatifs, décoration) destinées aux événements (mariages, fêtes de famille, événements d'entreprise). Les formules incluent la livraison, l'installation et le nettoyage (« Sérénité Hygiène ») dans la zone de Montpellier et ses alentours (10km autour de Montpellier). Hors de cette zone, un devis spécifique sera établi.</p>
+<p><strong>20.2. Réservation et Paiement :</strong> La réservation devient ferme après validation du devis et versement d'un acompte de 50%. Le solde doit être réglé au plus tard 1 jours avant la date de l'événement.</p>
+<p><strong>20.3. Annulation :</strong> En cas d'annulation par le Client à moins de 7 jours de l'événement, l'acompte reste acquis à Bibli'o Jouets. Conformément à l'article L.221-28 du Code de la consommation, ces prestations datées ne bénéficient pas du droit de rétractation.</p>
+<p><strong>20.4. Installation et Accès :</strong> Le Client doit assurer l'accès aux locaux aux horaires convenus. En cas d'événement en extérieur, un emplacement abrité doit être mis à disposition en cas d'intempéries.</p>
+<p><strong>20.5. Surveillance : </strong>La mise à disposition des jouets et espaces enfants ne constitue en aucun cas une prestation de garde ou de garderie. La surveillance des enfants reste sous la responsabilité exclusive des parents ou des responsables de l'événement.</p>
+<p><strong>20.6. Application des CGV :</strong> Toutes les clauses relatives aux modalités de paiement et d'autorisation de prélèvement (Article 5), l'hygiène (Article 9) et la responsabilité du client (Article 10) s'appliquent intégralement à cette offre. </p>
+
+
+</section>
       {/* Pied de page du document */}
       <footer className="cgv-footer">
-        <p>Ces CGV sont valables à compter du 17 mai 2026. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
-        <p><em>Mis à jour le 17 mai 2026</em></p>
+        <p> Ces CGV sont valables à compter du 6 août 2026. Bibli’o Jouets se réserve le droit de les modifier à tout moment ; la version applicable est celle en vigueur à la date de la commande.</p>
+        <p><em>Mis à jour le 17/09/2026</em></p>
       </footer>
     </div>
   );

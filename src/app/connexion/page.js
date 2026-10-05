@@ -77,11 +77,7 @@ export default function ConnexionPage() {
           </div>
         )}
 
-        {successMessage && (
-          <div className="bg-green-100 text-green-800 p-4 rounded mb-4 text-center">
-            {successMessage}
-          </div>
-        )}
+    
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">

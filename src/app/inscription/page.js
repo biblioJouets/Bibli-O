@@ -100,9 +100,17 @@ export default function InscriptionPage() {
           </div>
 
           <div className="form-group">
-            <label>Téléphone (optionnel)</label>
-            <input type="tel" name="phone" onChange={handleChange} className="w-full" />
-          </div>
+            <label>Téléphone </label>
+          <input 
+  type="tel" 
+  name="phone" 
+  required 
+  pattern="0[1-9]([\s\-\.]?[0-9]{2}){4}" 
+  title="Veuillez entrer un numéro de téléphone valide à 10 chiffres (ex: 06 12 34 56 78)"
+  maxLength="14"
+  onChange={handleChange} 
+  className="w-full" 
+/>          </div>
 
           {/* 2. On passe handleChange en prop ici */}
           <PasswordInput 

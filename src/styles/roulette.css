@@ -1,0 +1,237 @@
+/* Conteneur principal avec effet "Blob" organique en fond */
+.roulette-page{
+    margin-top: 7rem;
+}
+.roulette-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #FFF7EB; /* Fond neutre chaud, pas de blanc pur */
+  color: #2E1D21;
+  border-radius: 25px;
+  max-width: 650px;
+  margin: 0 auto;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 10px 30px rgba(46, 29, 33, 0.05);
+}
+.roulette-disclaimer {
+  font-size: 0.85rem;
+  color: #010d12; /* Bleu Principal */
+  text-align: center;
+  margin-top: 20px;
+}
+.roulette-description{
+    font-size: 1rem;
+    color: #010d12; /* Bleu Principal */
+    text-align: center;
+    margin-bottom: 30px;                    
+}
+
+/* Forme organique douce en arrière-plan */
+.roulette-blob-bg {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 120%;
+  height: 120%;
+  background-color: #FAE9CF;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.roulette-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #6EC1E4; /* Bleu Principal */
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.roulette-subtitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Conteneur de la Roue agrandie */
+.wheel-box {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* La flèche (Rose accent) */
+.wheel-pointer {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 40px solid #FF8C94;
+  filter: drop-shadow(0 4px 6px rgba(46, 29, 33, 0.2));
+}
+
+/* Bordure extérieure */
+.wheel-border {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #2E1D21;
+  padding: 12px;
+  box-shadow: 0 15px 35px rgba(46, 29, 33, 0.15);
+}
+
+/* La roue elle-même (8 parts de 45 degrés) */
+.wheel-spin-area {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  transition: transform 5s cubic-bezier(0.2, 0.8, 0.1, 1); /* Animation très douce et longue */
+  background: conic-gradient(
+    #ffe264 0deg 45deg,      /* 1. Perdu (Jaune) */
+    #88D4AB 45deg 90deg,     /* 2. Bibli'o (Vert) */
+    #FFF7D4 90deg 135deg,    /* 3. Perdu (Jaune pastel) */
+    #FF8C94 135deg 180deg,   /* 4. Baby Café (Rose) */
+    #ffe264 180deg 225deg,   /* 5. Perdu (Jaune) */
+    #DAEEE6 225deg 270deg,   /* 6. Bibli'o (Vert pastel) */
+    #FFF7D4 270deg 315deg,   /* 7. Perdu (Jaune pastel) */
+    #88D4AB 315deg 360deg    /* 8. Bibli'o (Vert) */
+  );
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.08);
+}
+
+/* Pivot central */
+.wheel-pivot {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background-color: #FFFAF4;
+  border: 8px solid #2E1D21;
+  border-radius: 50%;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Textes dans la roue */
+.slice-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 40px;
+  margin-top: -20px;
+  margin-left: -60px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #2E1D21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+/* Placement mathématique au centre de chaque part de 45° */
+.s-1 { transform: rotate(22.5deg) translateY(-145px); }
+.s-2 { transform: rotate(67.5deg) translateY(-145px); }
+.s-3 { transform: rotate(112.5deg) translateY(-145px); }
+.s-4 { transform: rotate(157.5deg) translateY(-145px); }
+.s-5 { transform: rotate(202.5deg) translateY(-145px); }
+.s-6 { transform: rotate(247.5deg) translateY(-145px); }
+.s-7 { transform: rotate(292.5deg) translateY(-145px); }
+.s-8 { transform: rotate(337.5deg) translateY(-145px); }
+
+/* Formulaire */
+.roulette-form-group {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  z-index: 2;
+}
+
+.roulette-input-mail {
+  flex: 1;
+  padding: 18px 25px;
+  border-radius: 50px;
+  border: 3px solid #DFF1F9;
+  background-color: #ffffff;
+  color: #2E1D21;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.roulette-input-mail:focus {
+  border-color: #6EC1E4;
+}
+
+.roulette-btn-spin {
+  padding: 18px 40px;
+  background-color: #6EC1E4;
+  color: #2E1D21;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roulette-btn-spin:hover:not(:disabled) {
+  background-color: #88D4AB;
+  transform: translateY(-2px);
+}
+
+.roulette-btn-spin:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.roulette-alert {
+  margin-top: 20px;
+  padding: 15px 25px;
+  background-color: #ffffff;
+  border: 3px solid #FF8C94;
+  border-radius: 25px;
+  text-align: center;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.roulette-alert.success {
+  border-color: #88D4AB;
+  background-color: #DAEEE6;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .roulette-form-group { flex-direction: column; }
+  .wheel-box { width: 300px; height: 300px; }
+  .slice-text { font-size: 0.8rem; }
+  .s-1 { transform: rotate(22.5deg) translateY(-105px); }
+  .s-2 { transform: rotate(67.5deg) translateY(-105px); }
+  .s-3 { transform: rotate(112.5deg) translateY(-105px); }
+  .s-4 { transform: rotate(157.5deg) translateY(-105px); }
+  .s-5 { transform: rotate(202.5deg) translateY(-105px); }
+  .s-6 { transform: rotate(247.5deg) translateY(-105px); }
+  .s-7 { transform: rotate(292.5deg) translateY(-105px); }
+  .s-8 { transform: rotate(337.5deg) translateY(-105px); }
+}

@@ -70,9 +70,15 @@ export async function POST(req) {
 
   // 2. ROUTAGE DES ÉVÉNEMENTS STRIPE
 
-  // --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation Réussie) ---
+// --- SCÉNARIO A : Paiement mensuel d'un abonnement (Prolongation Réussie) ---
   if (event.type === 'invoice.paid') {
     const invoice = event.data.object;
+
+    // 🛡️ BOUCLIER ANTI-DOUBLON : On ignore la toute première facture !
+    if (invoice.billing_reason === 'subscription_create') {
+      console.log(`[Webhook] Première facture d'abonnement ignorée par le Scénario A.`);
+      return NextResponse.json({ received: true });
+    }
 
     const stripeSubId = invoice.subscription || 
       invoice.parent?.subscription_details?.subscription ||
@@ -93,6 +99,59 @@ export async function POST(req) {
       });
 
       if (order) {
+        // --- SYNCHRONISATION DE LA CAGNOTTE ET ANTICIPATION CONTINUE ---
+        const discountAmount = invoice.total_discount_amounts?.reduce((sum, discount) => sum + discount.amount, 0) || 0;
+        
+      try {
+          let currentGiftCredit = 0;
+
+          // 1. On déduit ce qui vient d'être consommé
+          if (discountAmount > 0 && order.userId) {
+            const updatedUser = await prisma.users.update({
+              where: { id: order.userId },
+              data: { giftCredit: { decrement: discountAmount } }
+            });
+            currentGiftCredit = updatedUser.giftCredit;
+            console.log(`[Webhook] Prisma synchronisé : ${discountAmount / 100}€ déduits de la cagnotte.`);
+          } else if (order.userId) {
+            const user = await prisma.users.findUnique({ where: { id: order.userId } });
+            currentGiftCredit = user?.giftCredit || 0;
+          }
+
+          // 2. On prépare le mois suivant s'il reste de l'argent (Sécurisé par appel à la Subscription)
+          if (currentGiftCredit > 0) {
+            // Appel direct à l'abonnement : source de vérité infaillible
+            const subscription = await stripe.subscriptions.retrieve(stripeSubId);
+            const itemPrice = subscription.items?.data?.[0]?.price;
+
+            if (itemPrice && itemPrice.unit_amount) {
+              const subPrice = itemPrice.unit_amount;
+              const nextDeduction = Math.min(currentGiftCredit, subPrice);
+              
+              if (nextDeduction > 0) {
+                const nextCoupon = await stripe.coupons.create({
+                  amount_off: nextDeduction,
+                  currency: 'eur',
+                  duration: 'once',
+                  max_redemptions: 1,
+                  name: 'Déduction Solde Carte Cadeau',
+                  applies_to: { products: [itemPrice.product] }
+                });
+                
+                await stripe.subscriptions.update(stripeSubId, {
+                  discounts: [{ coupon: nextCoupon.id }]
+                });
+                console.log(`[Webhook] Anticipation continue : Coupon de ${nextDeduction / 100}€ attaché pour le mois suivant.`);
+              }
+            } else {
+              console.log(`[Webhook] Anticipation ignorée : Structure de prix introuvable sur l'abonnement.`);
+            }
+          }
+        } catch (dbErr) {
+          console.error("[Webhook] Erreur de gestion de la cagnotte Prisma / Anticipation:", dbErr);
+        }
+        // --------------------------------------------------------------------------
+
         const productsToRenew = order.OrderProducts.filter(p =>
           p.renewalIntention === 'PROLONGATION' ||
           p.renewalIntention === 'PROLONGATION_TACITE' ||
@@ -120,7 +179,6 @@ export async function POST(req) {
           toyNames.push(product.Products.name);
         }
 
-        // Sauvegarde URL facture sur la commande (champ rapide pour liens directs)
         if (invoice.hosted_invoice_url) {
           await prisma.orders.update({
             where: { id: order.id },
@@ -128,7 +186,6 @@ export async function POST(req) {
           });
         }
 
-        // Persiste la facture dans StripeInvoice pour l'historique client (idempotent via upsert)
         if (invoice.id && order.userId) {
           const lineItem  = invoice.lines?.data?.[0];
           const periodStart = lineItem?.period?.start  ?? invoice.period_start  ?? null;
@@ -157,13 +214,9 @@ export async function POST(req) {
           });
         }
 
-        // Invalider le cache SSR de la page facturation
         revalidatePath('/mon-compte/facturation');
-
         console.log(` [Webhook] Abonnement prolongé pour ${productsToRenew.length} jouet(s)`);
 
-
-        // 📧 ENVOI DE L'EMAIL DE SUCCÈS (Template ID: 13)
         if (toyNames.length > 0 && order.Users) {
           let prenom = "Client(e)";
           if (order.shippingName) {
@@ -205,7 +258,6 @@ export async function POST(req) {
       console.log(`[Webhook] Adoption détectée — orderId:${orderId} productId:${productId}`);
 
       try {
-        // BOUCLIER ANTI-DOUBLON : si Stripe rejoue l'événement, on ne traite pas deux fois
         const existingOrderProduct = await prisma.orderProducts.findUnique({
           where: {
             OrderId_ProductId: {
@@ -219,14 +271,12 @@ export async function POST(req) {
           console.log(`[Webhook] Adoption déjà traitée pour jouet #${productId} — idempotence OK`);
           return NextResponse.json({ received: true, note: 'Already adopted' });
         }
-
-        // Récupération de la commande source pour copier les infos de livraison
+      
         const sourceOrder = await prisma.orders.findUnique({
           where: { id: parseInt(orderId) },
           include: { Users: true },
         });
 
-        // Transaction : marquer ADOPTE + décrémenter stock + créer commande ADOPTION
         await prisma.$transaction(async (tx) => {
           await tx.orderProducts.update({
             where: {
@@ -243,8 +293,6 @@ export async function POST(req) {
             data: { stock: { decrement: 1 } },
           });
 
-          // Créer une commande ADOPTION séparée pour le dashboard admin
-          // Note : session.hosted_invoice_url n'existe pas sur mode:'payment' (abonnements uniquement)
           await tx.orders.create({
             data: {
               userId: parseInt(userId),
@@ -269,7 +317,6 @@ export async function POST(req) {
 
         console.log(`[Webhook] Adoption finalisée en BDD pour jouet #${productId} + commande ADOPTION créée`);
 
-        // Récupération pour les emails
         const order = await prisma.orders.findUnique({
           where: { id: parseInt(orderId) },
           include: {
@@ -285,7 +332,6 @@ export async function POST(req) {
           let prenom = (user.firstName || 'Client(e)').trim();
           prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
 
-          // Email client — Template 20
           await sendBrevoEmail(user.email, prenom, 20, {
             prenom,
             jouet,
@@ -293,12 +339,11 @@ export async function POST(req) {
           });
           console.log(`[Brevo] Email adoption client envoyé à ${user.email}`);
 
-          // Email admin — Template 21
           await sendBrevoEmail('contact@bibliojouets.com', 'Admin', 21, {
             client_nom: `${user.firstName} ${user.lastName || ''}`.trim(),
             client_email: user.email,
             jouet_nom: product?.name || 'Jouet inconnu',
-            jouet_id: productId, // On ajoute l'ID ici
+            jouet_id: productId,
             prix_adoption: (session.amount_total / 100).toFixed(2),
             order_id: orderId,
             lien_admin: `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
@@ -314,12 +359,12 @@ export async function POST(req) {
     }
 
     // --- B2 : NOUVELLE COMMANDE ---
-    // 💡 AJOUT DE applied_promo DANS L'EXTRACTION DES MÉTADONNÉES
     const {
       userId, cartId, cartSnapshot, shippingName, shippingAddress,
       shippingCity, shippingZip, mondialRelayPointId, shippingPhone,
       applied_promo,
       isBoxMystere, childAge, childGender,
+      creditUsed, couponId
     } = session.metadata;
 
     try {
@@ -352,7 +397,6 @@ export async function POST(req) {
         mondialRelayPointId: mondialRelayPointId && mondialRelayPointId !== "null" ? mondialRelayPointId : null
       };
       
-      // IDEMPOTENCE : si la commande existe déjà pour ce subscriptionId, ne pas recréer
       if (stripeSubscriptionId) {
         const existing = await prisma.orders.findFirst({
           where: { stripeSubscriptionId },
@@ -367,7 +411,76 @@ export async function POST(req) {
       const newOrder = await createOrder(userIdInt, virtualCartData, totalAmount, shippingData, stripeSubscriptionId);
       console.log(" Commande créée ! ID:", newOrder.id);
 
-      // Sauvegarde des données enfant pour les commandes Box Mystère
+      if (session.customer) {
+        await prisma.users.update({
+          where: { id: userIdInt },
+          data: { stripeCustomerId: session.customer }
+        });
+        console.log(`[Webhook] ID Stripe ${session.customer} rattaché au client ${userIdInt}`);
+      }
+      
+      // --- LOGIQUE NETTOYAGE CARTE CADEAU ET ANTICIPATION ---
+      const usedAmount = parseInt(creditUsed || '0', 10);
+
+      if (userIdInt && usedAmount > 0) {
+        try {
+          await prisma.users.update({
+            where: { id: userIdInt },
+            data: { giftCredit: { decrement: usedAmount } }
+          });
+          console.log(`[Webhook] Cagnotte déduite de ${usedAmount} centimes pour l'utilisateur ${userIdInt}`);
+        } catch (dbError) {
+          console.error(`[Webhook] Erreur de déduction de crédit:`, dbError);
+        }
+
+        if (couponId) {
+          try {
+            await stripe.coupons.del(couponId);
+            console.log(`[Webhook] Coupon éphémère ${couponId} supprimé avec succès.`);
+          } catch (couponErr) {
+            console.error(`[Webhook] Impossible de supprimer le coupon ${couponId}:`, couponErr);
+          }
+        }
+      }
+
+      // Préparation du mois suivant (Sécurisé)
+      if (stripeSubscriptionId) {
+        try {
+          const currentUser = await prisma.users.findUnique({ where: { id: userIdInt } });
+          
+          if (currentUser && currentUser.giftCredit > 0) {
+            const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+            
+            const item = subscription.items?.data?.[0];
+            if (item?.price?.unit_amount) {
+                const subPrice = item.price.unit_amount;
+                const nextDeduction = Math.min(currentUser.giftCredit, subPrice);
+
+                if (nextDeduction > 0) {
+                  const nextCoupon = await stripe.coupons.create({
+                    amount_off: nextDeduction,
+                    currency: 'eur',
+                    duration: 'once',
+                    max_redemptions: 1,
+                    name: 'Déduction Solde Carte Cadeau',
+                    applies_to: { products: [item.price.product] }
+                  });
+                  
+                  await stripe.subscriptions.update(stripeSubscriptionId, {
+                    discounts: [{ coupon: nextCoupon.id }]
+                  });
+                  console.log(`[Webhook] Anticipation : Coupon de ${nextDeduction / 100}€ attaché pour le prochain cycle.`);
+                }
+            } else {
+                console.log(`[Webhook] Anticipation ignorée : Structure de prix introuvable sur l'abonnement.`);
+            }
+          }
+        } catch (prepErr) {
+          console.error("[Webhook] Erreur lors de l'anticipation du cycle suivant:", prepErr);
+        }
+      }
+      // ---------------------------------------------------
+
       if (isBoxMystere === "true") {
         await prisma.orders.update({
           where: { id: newOrder.id },
@@ -386,12 +499,8 @@ export async function POST(req) {
         console.error(" Pas de cartId reçu, IMPOSSIBLE DE VIDER LE PANIER.");
       }
 
-// -------------------------------------------------------------------
-      // 🎁 GESTION DE L'OFFRE BOGO (CORRIGÉE : MODE FLEXIBLE & RETRYS)
-      // -------------------------------------------------------------------
       if (applied_promo === 'BIBLIOMOISOFFERT' && stripeSubscriptionId) {
         try {
-          // 1. Verrou Prisma avec gestion intelligente des Retrys Stripe
           try {
             await prisma.promoCodeUsage.create({
               data: { 
@@ -402,25 +511,19 @@ export async function POST(req) {
             });
           } catch (prismaError) {
             if (prismaError.code === 'P2002') {
-              // Si le code est déjà en base, on vérifie rationnellement pourquoi
               const existingUsage = await prisma.promoCodeUsage.findUnique({
                 where: { userId_promoCode: { userId: userIdInt, promoCode: applied_promo } }
               });
               
-              // Si l'ID d'abonnement est différent, c'est un vrai double achat du client
               if (existingUsage && existingUsage.subscriptionId !== stripeSubscriptionId) {
                 console.warn(`[ALERTE DOUBLE PAIEMENT] L'utilisateur ID ${userIdInt} a validé 2 fois.`);
-                // On stoppe l'exécution ici en douceur (Statut 200) sans faire crasher Stripe
                 return NextResponse.json({ received: true }, { status: 200 });
               }
-              // Si l'ID d'abonnement est identique, c'est juste Stripe qui fait 
-              // un "Retry" après une panne. On ne fait rien et on laisse le code continuer !
             } else {
               throw prismaError;
             }
           }
 
-          // 2. Application de la gratuité (Syntaxe "discounts" pour le mode Flexible)
           await stripe.subscriptions.update(stripeSubscriptionId, {
             discounts: [{
               coupon: process.env.STRIPE_BOGO_COUPON_ID, 
@@ -431,10 +534,9 @@ export async function POST(req) {
 
         } catch (error) {
           console.error(`Erreur critique webhook promo pour l'utilisateur ${userIdInt}:`, error);
-          throw error; // On force Stripe à réessayer en cas de nouvelle panne
+          throw error; 
         }
       }
-      // -------------------------------------------------------------------
 
     } catch (error) {
       console.error(" Erreur Webhook:", error);
@@ -480,7 +582,6 @@ export async function POST(req) {
         
         console.log(` [Webhook] Échec de paiement enregistré pour ${productsToRenew.length} jouet(s)`);
 
-        // 📧 ENVOI DE L'EMAIL D'ÉCHEC (Template ID: 14)
         if (toyNames.length > 0 && order.Users) {
           let prenom = "Client(e)";
           if (order.shippingName) {
@@ -525,7 +626,6 @@ export async function POST(req) {
       prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
       const lienCompte = `${appUrl}/mon-compte`;
 
-      // D1 : cancel_at_period_end vient de passer à true → email d'adieu
       if (!prevAttr.cancel_at_period_end && sub.cancel_at_period_end === true) {
         const item0 = sub.items?.data?.[0];
         const endTs = sub.current_period_end ?? item0?.current_period_end ?? null;
@@ -539,7 +639,6 @@ export async function POST(req) {
         console.log(`[Brevo] Email résiliation (template 31) envoyé à ${user.email}`);
       }
 
-      // D2 : pause_collection vient d'être activé → email de confirmation pause
       if (!prevAttr.pause_collection && sub.pause_collection?.behavior === 'keep_as_draft') {
         await sendBrevoEmail(user.email, prenom, 32, {
           prenom,
@@ -551,8 +650,6 @@ export async function POST(req) {
   }
 
   // --- SCÉNARIO E : Échec de paiement d'abonnement (alerte renforcée) ---
-  // Note : le template 14 (existant scénario C) gère déjà invoice.payment_failed.
-  // On ajoute ici un email d'alerte dédié (template 30) orienté "action urgente carte bancaire"
   if (event.type === 'invoice.payment_failed') {
     const invoice    = event.data.object;
     const stripeSubId =
@@ -581,6 +678,5 @@ export async function POST(req) {
       }
     }
   }
-
-  return NextResponse.json({ received: true });
+  return NextResponse.json({ received: true });  
 }

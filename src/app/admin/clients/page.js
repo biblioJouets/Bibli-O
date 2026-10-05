@@ -18,11 +18,9 @@ export default function AdminClientsPage() {
 
   const fetchClients = async () => {
     try {
-      // Assure-toi que cette route API existe et renvoie les données avec la relation Prisma : include: { Orders: true }
       const res = await fetch('/api/admin/users'); 
       if (res.ok) {
         const data = await res.json();
-        // Optionnel : Trier par date de création (les plus récents en premier)
         data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setClients(data);
       }
@@ -33,14 +31,12 @@ export default function AdminClientsPage() {
     }
   };
 
-  // Filtrage par nom, prénom ou email
   const filteredClients = clients.filter(c => {
     const search = searchTerm.toLowerCase();
     const fullName = `${c.firstName}${c.lastName}`.toLowerCase();
     return fullName.includes(search) || c.email?.toLowerCase().includes(search);
   });
 
-  // Formater la date en français
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -62,6 +58,7 @@ export default function AdminClientsPage() {
         </div>
       </header>
 
+      {/* BARRE DE FILTRES ET COMPTEUR */}
       <div className="admin-filters-bar">
         <div className="search-wrapper">
           <Search className="search-icon" size={20} />
@@ -73,6 +70,16 @@ export default function AdminClientsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        
+        {/* Affichage du total uniquement quand les données sont chargées */}
+        {!loading && (
+          <div className="total-clients-badge">
+            <Users size={18} style={{ color: '#6EC1E4' }} />
+            <span>
+              <strong>{clients.length}</strong> inscrit{clients.length > 1 ? 's' : ''} au total
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="table-container">

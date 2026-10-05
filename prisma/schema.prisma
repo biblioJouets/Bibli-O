@@ -22,6 +22,7 @@ model Users {
   email     String  @unique @db.VarChar(255)
   password  String  @db.VarChar(255)
   phone     String? @db.VarChar(20)
+  giftCredit Int @default(0)
 
   role Role @default(USER)
 
