@@ -1,111 +1,186 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/core/database/index';
 
-function adminOnly(session) {
-  return session?.user?.role === 'ADMIN';
+// ─── Validation ────────────────────────────────────────────────────────────
+
+const emptyToNull = (v) => (typeof v === 'string' && v.trim() === '' ? null : v);
+
+const idSchema = z.coerce.number().int().positive();
+
+const blogFieldsSchema = z.object({
+  title:       z.string().trim().min(1, 'Le titre est requis').max(255),
+  slug:        z.string().trim().min(1, 'Le slug est requis').max(300),
+  category:    z.string().trim().min(1, 'La catégorie est requise').max(100),
+  excerpt:     z.preprocess(emptyToNull, z.string().nullable().optional()),
+  author:      z.preprocess(emptyToNull, z.string().max(255).nullable().optional()),
+  readTime:    z.preprocess(emptyToNull, z.string().max(20).nullable().optional()),
+  thumbnail:   z.preprocess(emptyToNull, z.string().max(500).nullable().optional()),
+  content:     z.array(z.any()).optional(),
+  isPublished: z.boolean().optional(),
+});
+
+const createSchema = blogFieldsSchema;
+const updateSchema = blogFieldsSchema.partial().extend({ id: idSchema });
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+class HttpError extends Error {
+  constructor(status, message, details) {
+    super(message);
+    this.status = status;
+    this.details = details;
+  }
 }
 
-// GET — liste tous les articles (admin)
-export async function GET(request) {
+async function requireAdmin() {
   const session = await getServerSession(authOptions);
-  if (!adminOnly(session)) {
-    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+  if (session?.user?.role !== 'ADMIN') {
+    throw new HttpError(403, 'Accès refusé');
   }
-
-  const posts = await prisma.blogPost.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
-
-  return NextResponse.json(posts);
 }
 
-// POST — créer un article
-export async function POST(request) {
-  const session = await getServerSession(authOptions);
-  if (!adminOnly(session)) {
-    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+async function readJsonBody(request) {
+  try {
+    return await request.json();
+  } catch {
+    throw new HttpError(400, 'Corps de requête JSON invalide');
   }
+}
 
-  const body = await request.json();
-  const { title, slug, category, excerpt, author, readTime, thumbnail, content, isPublished } = body;
-
-  if (!title || !slug || !category) {
-    return NextResponse.json({ error: 'title, slug et category sont requis' }, { status: 400 });
+function parseOrThrow(schema, data) {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    throw new HttpError(400, 'Données invalides', result.error.flatten().fieldErrors);
   }
+  return result.data;
+}
 
-  // Garantit l'unicité du slug en ajoutant un suffixe numérique si nécessaire
-  let uniqueSlug = slug;
+function slugify(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+// Ajoute un suffixe numérique tant que le slug est pris par un autre article
+async function getUniqueSlug(rawSlug, excludeId) {
+  const base = slugify(rawSlug);
+  if (!base) throw new HttpError(400, 'Le slug ne contient aucun caractère valide');
+
+  let candidate = base;
   let suffix = 1;
-  while (await prisma.blogPost.findUnique({ where: { slug: uniqueSlug } })) {
-    uniqueSlug = `${slug}-${suffix++}`;
+  for (;;) {
+    const existing = await prisma.blogPost.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!existing || existing.id === excludeId) return candidate;
+    candidate = `${base}-${suffix++}`;
   }
+}
 
-  const post = await prisma.blogPost.create({
+async function createPost(body) {
+  const { slug, author, content, isPublished, ...fields } = parseOrThrow(createSchema, body);
+
+  return prisma.blogPost.create({
     data: {
-      title,
-      slug: uniqueSlug,
-      category,
-      excerpt: excerpt ?? null,
+      ...fields,
+      slug: await getUniqueSlug(slug),
       author: author ?? "L'équipe Bibli'o",
-      readTime: readTime ?? null,
-      thumbnail: thumbnail ?? null,
       content: content ?? [],
       isPublished: isPublished ?? false,
     },
   });
-
-  return NextResponse.json(post, { status: 201 });
 }
 
-// PUT — mettre à jour un article
-export async function PUT(request) {
-  const session = await getServerSession(authOptions);
-  if (!adminOnly(session)) {
-    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
-  }
+async function updatePost(body) {
+  const { id, slug, ...fields } = parseOrThrow(updateSchema, body);
 
-  const body = await request.json();
-  const { id, title, slug, category, excerpt, author, readTime, thumbnail, content, isPublished } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'id requis' }, { status: 400 });
-  }
-
-  const post = await prisma.blogPost.update({
-    where: { id: Number(id) },
+  return prisma.blogPost.update({
+    where: { id },
     data: {
-      ...(title !== undefined && { title }),
-      ...(slug !== undefined && { slug }),
-      ...(category !== undefined && { category }),
-      ...(excerpt !== undefined && { excerpt }),
-      ...(author !== undefined && { author }),
-      ...(readTime !== undefined && { readTime }),
-      ...(thumbnail !== undefined && { thumbnail }),
-      ...(content !== undefined && { content }),
-      ...(isPublished !== undefined && { isPublished }),
+      ...fields,
+      ...(slug !== undefined && { slug: await getUniqueSlug(slug, id) }),
     },
   });
-
-  return NextResponse.json(post);
 }
 
-// DELETE — supprimer un article
+function errorResponse(error, action) {
+  if (error instanceof HttpError) {
+    return NextResponse.json(
+      { error: error.message, ...(error.details && { details: error.details }) },
+      { status: error.status },
+    );
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Article introuvable' }, { status: 404 });
+    }
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: 'Un article avec ce slug existe déjà' }, { status: 409 });
+    }
+  }
+
+  console.error(`[api/admin/blogs] ${action}:`, error);
+  return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+}
+
+// ─── Handlers ──────────────────────────────────────────────────────────────
+
+// GET — liste tous les articles (admin)
+export async function GET() {
+  try {
+    await requireAdmin();
+    const posts = await prisma.blogPost.findMany({ orderBy: { createdAt: 'desc' } });
+    return NextResponse.json(posts);
+  } catch (error) {
+    return errorResponse(error, 'GET');
+  }
+}
+
+// POST — crée un article, ou le met à jour si un id est fourni
+export async function POST(request) {
+  try {
+    await requireAdmin();
+    const body = await readJsonBody(request);
+
+    if (body?.id != null) {
+      return NextResponse.json(await updatePost(body));
+    }
+    return NextResponse.json(await createPost(body), { status: 201 });
+  } catch (error) {
+    return errorResponse(error, 'POST');
+  }
+}
+
+// PUT — met à jour un article existant
+export async function PUT(request) {
+  try {
+    await requireAdmin();
+    const body = await readJsonBody(request);
+    return NextResponse.json(await updatePost(body));
+  } catch (error) {
+    return errorResponse(error, 'PUT');
+  }
+}
+
+// DELETE — supprime un article
 export async function DELETE(request) {
-  const session = await getServerSession(authOptions);
-  if (!adminOnly(session)) {
-    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+  try {
+    await requireAdmin();
+    const body = await readJsonBody(request);
+    const id = parseOrThrow(idSchema, body?.id);
+
+    await prisma.blogPost.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return errorResponse(error, 'DELETE');
   }
-
-  const body = await request.json();
-  const { id } = body;
-
-  if (!id) {
-    return NextResponse.json({ error: 'id requis' }, { status: 400 });
-  }
-
-  await prisma.blogPost.delete({ where: { id: Number(id) } });
-
-  return NextResponse.json({ ok: true });
 }

@@ -63,6 +63,38 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function slugify(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+// Lit la réponse sans planter si le serveur renvoie un corps vide ou du HTML
+async function readApiResponse(res) {
+  const text = await res.text();
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = null;
+    }
+  }
+
+  if (!res.ok) {
+    const details = data?.details
+      ? Object.entries(data.details).map(([field, msgs]) => `${field} : ${[].concat(msgs).join(', ')}`).join('\n')
+      : '';
+    const message = data?.error ?? `Erreur serveur (${res.status} ${res.statusText})`;
+    throw new Error(details ? `${message}\n${details}` : message);
+  }
+
+  return data;
+}
+
 // ─── Bloc sortable dans le canvas ─────────────────────────────────────────
 
 function SortableBlock({ block, isSelected, onSelect, onUpdate, onDelete, onMoveUp, onMoveDown }) {
@@ -490,7 +522,8 @@ function ArticleListView({ articles, onNew, onEdit, onDelete }) {
 // ─── Builder principal ────────────────────────────────────────────────────
 
 function BlogBuilder({ initialArticle, onBack, onSaved }) {
-  const isEdit = !!initialArticle;
+  const [articleId, setArticleId] = useState(initialArticle?.id ?? null);
+  const isEdit = articleId != null;
 
   const [title, setTitle] = useState(initialArticle?.title ?? 'Nouvel article');
   const [blocks, setBlocks] = useState(
@@ -562,40 +595,47 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
   }, []);
 
   const handlePublish = useCallback(async (publish = true) => {
-    setIsSaving(true);
+    const cleanTitle = title.trim();
+    const slug = slugify(meta.slug || cleanTitle);
+    if (!cleanTitle || !slug) {
+      alert("Merci de renseigner un titre (et un slug valide) avant d'enregistrer.");
+      return;
+    }
+
     const payload = {
-      id: initialArticle?.id,
-      title,
-      slug: meta.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      title: cleanTitle,
+      slug,
       category: meta.category,
-      excerpt: meta.metaDescription,
-      author: meta.author,
-      readTime: meta.readTime,
-      thumbnail: meta.thumbnail,
+      excerpt: meta.metaDescription.trim() || null,
+      author: meta.author.trim() || null,
+      readTime: meta.readTime.trim() || null,
+      thumbnail: meta.thumbnail.trim() || null,
       content: blocks,
       isPublished: publish,
+      ...(isEdit && { id: articleId }),
     };
-    // TODO: persist — replace console.log with fetch('/api/admin/blogs', { method: isEdit ? 'PUT' : 'POST', body: JSON.stringify(payload) })
-    console.log('[BlogBuilder] payload:', payload);
+
+    setIsSaving(true);
     try {
-      const method = isEdit ? 'PUT' : 'POST';
       const res = await fetch('/api/admin/blogs', {
-        method,
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Erreur serveur');
+      const saved = await readApiResponse(res);
+
+      if (saved?.id != null) setArticleId(saved.id);
+      if (saved?.slug) setMeta((m) => ({ ...m, slug: saved.slug }));
       setSavedAt(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
       setIsDirty(false);
-      if (onSaved) onSaved(data);
+      if (onSaved && saved) onSaved(saved);
     } catch (err) {
-      console.error(err);
+      console.error('[BlogBuilder] sauvegarde échouée :', err);
       alert('Erreur lors de la sauvegarde : ' + err.message);
     } finally {
       setIsSaving(false);
     }
-  }, [title, meta, blocks, isEdit, initialArticle, onSaved]);
+  }, [title, meta, blocks, isEdit, articleId, onSaved]);
 
   const selectedBlock = blocks.find((b) => b.id === selectedId) ?? null;
   const cat = CAT_COLORS[meta.category] ?? { bg: '#FFD9DC', fg: '#FF8C94' };
@@ -774,9 +814,9 @@ export default function AdminBlogsPage() {
   // Chargement initial
   useEffect(() => {
     fetch('/api/admin/blogs')
-      .then((r) => r.json())
+      .then(readApiResponse)
       .then((data) => { if (Array.isArray(data)) setArticles(data); })
-      .catch(() => {})
+      .catch((err) => console.error('[AdminBlogs] chargement échoué :', err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -793,10 +833,11 @@ export default function AdminBlogsPage() {
   const handleDelete = async (id) => {
     if (!confirm('Supprimer cet article ?')) return;
     try {
-      await fetch('/api/admin/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      const res = await fetch('/api/admin/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      await readApiResponse(res);
       setArticles((prev) => prev.filter((a) => a.id !== id));
-    } catch (e) {
-      alert('Erreur lors de la suppression');
+    } catch (err) {
+      alert('Erreur lors de la suppression : ' + err.message);
     }
   };
 
