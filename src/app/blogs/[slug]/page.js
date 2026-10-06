@@ -13,6 +13,12 @@ const CAT_COLORS = {
   Hygiène:  { bg: '#FFF7D4', fg: '#C19A1B' },
 };
 
+const WIDTH_CSS = {
+  Étroit:   '42rem',
+  Standard: '56rem',
+  Large:    '72rem',
+};
+
 function authorInitials(name = '') {
   return name.split(' ').map((s) => s[0]).slice(0, 2).join('').toUpperCase();
 }
@@ -60,8 +66,21 @@ export default function ArticleDetailPage({ params }) {
     ? new Date(article.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : '';
 
+  const accentColor = article.accentColor || '#FF8C94';
+  const contentWidth = WIDTH_CSS[article.contentWidth] || WIDTH_CSS.Standard;
+  const spacing = Math.min(10, Math.max(1, Number(article.spacing) || 5));
+  const bodyGap = `${0.35 + spacing * 0.28}rem`;
+  const leadText = article.excerpt || article.metaDescription;
+
   return (
-    <div className="article-page">
+    <div
+      className="article-page"
+      style={{
+        '--article-accent': accentColor,
+        '--article-max-width': contentWidth,
+        '--article-gap': bodyGap,
+      }}
+    >
 
       {/* Fil d'Ariane */}
       <nav className="article-breadcrumb">
@@ -81,8 +100,8 @@ export default function ArticleDetailPage({ params }) {
 
           <h1 className="article-title">{article.title}</h1>
 
-          {article.excerpt && (
-            <p className="article-excerpt">{article.excerpt}</p>
+          {leadText && (
+            <p className="article-excerpt">{leadText}</p>
           )}
 
           <div className="article-meta">
@@ -130,7 +149,12 @@ export default function ArticleDetailPage({ params }) {
             <p style={{ color: '#8C7B7F', fontStyle: 'italic' }}>Aucun contenu pour cet article.</p>
           ) : (
             blocks.map((block, i) => (
-              <BlockRenderer key={block.id ?? i} block={block} index={i} />
+              <BlockRenderer
+                key={block.id ?? i}
+                block={block}
+                index={i}
+                accentColor={accentColor}
+              />
             ))
           )}
         </article>

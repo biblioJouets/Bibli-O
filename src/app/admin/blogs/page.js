@@ -7,6 +7,7 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -16,6 +17,7 @@ import {
   verticalListSortingStrategy,
   useSortable,
   arrayMove,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import '@/styles/blogs/builder.css';
@@ -37,9 +39,21 @@ const FILTER_STYLES = {
   Hygiène:  { bg: '#FFF7D4', radius: '50% 50% 60% 40% / 60% 40% 50% 50%', shadow: 'rgba(255,226,100,.55)' },
 };
 
-const ACCENT_COLORS = ['#FF8C94', '#6EC1E4', '#88D4AB', '#FFE264'];
+const ACCENT_COLORS = [
+  { value: '#FF8C94', label: 'Rose' },
+  { value: '#6EC1E4', label: 'Bleu' },
+  { value: '#88D4AB', label: 'Vert' },
+  { value: '#FFE264', label: 'Jaune' },
+  { value: '#2E1D21', label: 'Noir classique' },
+];
 
 const LIST_ACCENTS = ['#FFD9DC', '#DFF1F9', '#FFF7D4', '#DAEEE6', '#FFE0F0'];
+
+const WIDTH_MAP = {
+  Étroit:   '36rem',
+  Standard: '42rem',
+  Large:    '52rem',
+};
 
 const PALETTE_ITEMS = [
   { type: 'h',  label: 'Titre',        icon: '𝐓', color: '#FFD9DC' },
@@ -61,6 +75,21 @@ const DEFAULT_VALUES = {
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function normalizeBlocks(content) {
+  if (!Array.isArray(content)) return [];
+  return content.map((block) => ({
+    ...block,
+    id: block?.id != null ? String(block.id) : uid(),
+    ...(block?.type === 'b' ? { href: block.href || '/abonnements' } : {}),
+  }));
+}
+
+function createBlock(type) {
+  const block = { id: uid(), type, value: DEFAULT_VALUES[type] };
+  if (type === 'b') block.href = '/abonnements';
+  return block;
 }
 
 function slugify(value) {
@@ -95,46 +124,150 @@ async function readApiResponse(res) {
   return data;
 }
 
+// ─── Zone d'upload image à la une ─────────────────────────────────────────
+
+function ThumbnailDropzone({ value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+
+  const uploadFile = useCallback(async (file) => {
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Merci de déposer une image (JPG, PNG ou WebP).');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Erreur lors de l'upload");
+      }
+      onChange(data.url);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }, [onChange]);
+
+  return (
+    <div className="props-field" style={{ gridColumn: '1 / -1' }}>
+      <label className="props-field-label">Image à la une</label>
+      <div
+        className={`thumbnail-dropzone ${dragOver ? 'thumbnail-dropzone--over' : ''} ${value ? 'thumbnail-dropzone--filled' : ''}`}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          uploadFile(e.dataTransfer.files?.[0]);
+        }}
+        onClick={() => !uploading && inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={(e) => uploadFile(e.target.files?.[0])}
+        />
+        {value ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={value} alt="Image à la une" className="thumbnail-dropzone__preview" />
+            <div className="thumbnail-dropzone__actions">
+              <button
+                type="button"
+                className="thumbnail-dropzone__btn"
+                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              >
+                Remplacer
+              </button>
+              <button
+                type="button"
+                className="thumbnail-dropzone__btn thumbnail-dropzone__btn--danger"
+                onClick={(e) => { e.stopPropagation(); onChange(''); }}
+              >
+                Supprimer
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="thumbnail-dropzone__empty">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>{uploading ? 'Upload en cours…' : 'Glissez une image ici ou cliquez pour parcourir'}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Bloc sortable dans le canvas ─────────────────────────────────────────
 
-function SortableBlock({ block, isSelected, onSelect, onUpdate, onDelete, onMoveUp, onMoveDown }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
+function SortableBlock({ block, isSelected, onSelect, onUpdate, onDelete, onMoveUp, onMoveDown, accentColor }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: String(block.id) });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.4 : 1,
+    opacity: isDragging ? 0.35 : 1,
+    zIndex: isDragging ? 40 : undefined,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`canvas-block ${isSelected ? 'canvas-block--selected' : ''}`}
+      className={`canvas-block ${isSelected ? 'canvas-block--selected' : ''} ${isDragging ? 'canvas-block--dragging' : ''}`}
       onClick={(e) => { e.stopPropagation(); onSelect(block.id); }}
     >
+      {/* Poignée toujours visible — hors du groupe opacity:0 qui bloquait le DnD */}
+      <button
+        type="button"
+        className="canvas-block__ctrl-btn canvas-block__ctrl-btn--move canvas-block__drag-handle"
+        title="Déplacer"
+        style={{ touchAction: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
+        onClick={(e) => e.stopPropagation()}
+        {...attributes}
+        {...listeners}
+      >
+        ⠿
+      </button>
       <div className="canvas-block__controls">
-        <button
-          className="canvas-block__ctrl-btn canvas-block__ctrl-btn--move"
-          {...listeners}
-          {...attributes}
-          title="Déplacer"
-          onClick={(e) => e.stopPropagation()}
-        >
-          ⠿
-        </button>
-        <button className="canvas-block__ctrl-btn canvas-block__ctrl-btn--up" onClick={(e) => { e.stopPropagation(); onMoveUp(block.id); }} title="Monter">↑</button>
-        <button className="canvas-block__ctrl-btn canvas-block__ctrl-btn--dn" onClick={(e) => { e.stopPropagation(); onMoveDown(block.id); }} title="Descendre">↓</button>
-        <button className="canvas-block__ctrl-btn canvas-block__ctrl-btn--del" onClick={(e) => { e.stopPropagation(); onDelete(block.id); }} title="Supprimer">✕</button>
+        <button type="button" className="canvas-block__ctrl-btn canvas-block__ctrl-btn--up" onClick={(e) => { e.stopPropagation(); onMoveUp(block.id); }} title="Monter">↑</button>
+        <button type="button" className="canvas-block__ctrl-btn canvas-block__ctrl-btn--dn" onClick={(e) => { e.stopPropagation(); onMoveDown(block.id); }} title="Descendre">↓</button>
+        <button type="button" className="canvas-block__ctrl-btn canvas-block__ctrl-btn--del" onClick={(e) => { e.stopPropagation(); onDelete(block.id); }} title="Supprimer">✕</button>
       </div>
-      <BlockPreview block={block} onUpdate={onUpdate} isSelected={isSelected} />
+      <BlockPreview block={block} onUpdate={onUpdate} isSelected={isSelected} accentColor={accentColor} />
     </div>
   );
 }
 
 // ─── Rendu WYSIWYG d'un bloc ──────────────────────────────────────────────
 
-function BlockPreview({ block, onUpdate, isSelected }) {
+function BlockPreview({ block, onUpdate, isSelected, accentColor }) {
   const handleTextChange = useCallback((e) => {
     onUpdate(block.id, { value: e.target.value });
   }, [block.id, onUpdate]);
@@ -190,7 +323,7 @@ function BlockPreview({ block, onUpdate, isSelected }) {
 
     case 'q':
       return (
-        <div className="canvas-q">
+        <div className="canvas-q" style={{ borderLeftColor: accentColor }}>
           <textarea
             className="canvas-editable"
             value={block.value}
@@ -263,7 +396,13 @@ function BlockPreview({ block, onUpdate, isSelected }) {
             className="canvas-editable canvas-b__btn"
             value={block.value}
             onChange={handleTextChange}
-            style={{ textAlign: 'center', cursor: 'text', maxWidth: '18rem' }}
+            style={{
+              textAlign: 'center',
+              cursor: 'text',
+              maxWidth: '18rem',
+              background: accentColor || '#FF8C94',
+              boxShadow: `0 4px 14px ${accentColor || '#FF8C94'}66`,
+            }}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -299,7 +438,7 @@ function PropertiesPanel({
           </div>
         ) : (
           <div style={{ fontSize: '0.8rem', color: '#B09BA0', marginBottom: '1rem' }}>
-            Cliquez sur un bloc pour l'éditer.
+            Cliquez sur un bloc pour l&apos;éditer.
           </div>
         )}
       </div>
@@ -344,11 +483,13 @@ function PropertiesPanel({
         <div className="props-colors">
           {ACCENT_COLORS.map((c) => (
             <button
-              key={c}
-              className={`props-color-swatch ${accentColor === c ? 'props-color-swatch--active' : ''}`}
-              style={{ background: c }}
-              onClick={() => onAccentChange(c)}
-              title={c}
+              key={c.value}
+              type="button"
+              className={`props-color-swatch ${accentColor === c.value ? 'props-color-swatch--active' : ''}`}
+              style={{ background: c.value }}
+              onClick={() => onAccentChange(c.value)}
+              title={c.label}
+              aria-label={c.label}
             />
           ))}
         </div>
@@ -358,6 +499,7 @@ function PropertiesPanel({
           {['Étroit', 'Standard', 'Large'].map((w) => (
             <button
               key={w}
+              type="button"
               className={`props-width-btn ${meta.width === w ? 'props-width-btn--active' : ''}`}
               onClick={() => onMetaChange('width', w)}
             >{w}</button>
@@ -370,11 +512,39 @@ function PropertiesPanel({
           className="props-slider"
           value={meta.spacing}
           onChange={(e) => onMetaChange('spacing', Number(e.target.value))}
+          style={{ accentColor }}
         />
+        <div style={{ fontSize: '0.75rem', color: '#8C7B7F', marginTop: '0.35rem' }}>
+          Niveau {meta.spacing}/10
+        </div>
       </div>
+
+      {selectedBlock?.type === 'b' && (
+        <div className="builder-props__section">
+          <p className="builder-props__label">Bouton CTA</p>
+          <div className="props-field">
+            <label className="props-field-label">Texte du bouton</label>
+            <input
+              className="props-input"
+              value={selectedBlock.value || ''}
+              onChange={(e) => onUpdateBlock(selectedBlock.id, { value: e.target.value })}
+            />
+          </div>
+          <div className="props-field">
+            <label className="props-field-label">URL de redirection</label>
+            <input
+              className="props-input"
+              placeholder="/abonnements ou https://…"
+              value={selectedBlock.href || ''}
+              onChange={(e) => onUpdateBlock(selectedBlock.id, { href: e.target.value })}
+            />
+          </div>
+        </div>
+      )}
 
       {selectedBlock && (
         <button
+          type="button"
           className="props-delete-btn"
           onClick={() => onDeleteBlock(selectedBlock.id)}
         >
@@ -393,8 +563,10 @@ function PropertiesPanel({
             onChange={(e) => onMetaChange('metaDescription', e.target.value)}
             rows={3}
           />
+          <div style={{ fontSize: '0.72rem', color: '#8C7B7F', marginTop: '0.35rem' }}>
+            {(meta.metaDescription || '').length}/160 caractères recommandés
+          </div>
         </div>
-
       </div>
     </div>
   );
@@ -526,36 +698,44 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
   const isEdit = articleId != null;
 
   const [title, setTitle] = useState(initialArticle?.title ?? 'Nouvel article');
-  const [blocks, setBlocks] = useState(
-    Array.isArray(initialArticle?.content) ? initialArticle.content : []
-  );
+  const [blocks, setBlocks] = useState(() => normalizeBlocks(initialArticle?.content));
   const [selectedId, setSelectedId] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
-  const [accentColor, setAccentColor] = useState(ACCENT_COLORS[0]);
+  const [accentColor, setAccentColor] = useState(
+    initialArticle?.accentColor || ACCENT_COLORS[0].value
+  );
   const [meta, setMeta] = useState({
     category: initialArticle?.category ?? 'Éveil',
     categories: initialArticle?.category ? [initialArticle.category] : ['Éveil'],
-    metaDescription: initialArticle?.excerpt ?? '',
+    metaDescription: initialArticle?.metaDescription ?? initialArticle?.excerpt ?? '',
     slug: initialArticle?.slug ?? '',
     author: initialArticle?.author ?? "L'équipe Bibli'o",
     readTime: initialArticle?.readTime ?? '5 min',
     thumbnail: initialArticle?.thumbnail ?? '',
-    width: 'Standard',
-    spacing: 5,
+    width: initialArticle?.contentWidth || 'Standard',
+    spacing: initialArticle?.spacing ?? 5,
   });
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const handleMetaChange = useCallback((key, value) => {
     setMeta((m) => ({ ...m, [key]: value }));
     setIsDirty(true);
   }, []);
 
+  const handleAccentChange = useCallback((color) => {
+    setAccentColor(color);
+    setIsDirty(true);
+  }, []);
+
   const addBlock = useCallback((type) => {
-    const newBlock = { id: uid(), type, value: DEFAULT_VALUES[type] };
+    const newBlock = createBlock(type);
     setBlocks((prev) => [...prev, newBlock]);
     setSelectedId(newBlock.id);
     setIsDirty(true);
@@ -584,14 +764,15 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
 
   const handleDragEnd = useCallback(({ active, over }) => {
     setActiveId(null);
-    if (over && active.id !== over.id) {
-      setBlocks((prev) => {
-        const from = prev.findIndex((b) => b.id === active.id);
-        const to = prev.findIndex((b) => b.id === over.id);
-        return arrayMove(prev, from, to);
-      });
-      setIsDirty(true);
-    }
+    if (!over || active.id === over.id) return;
+
+    setBlocks((prev) => {
+      const from = prev.findIndex((b) => String(b.id) === String(active.id));
+      const to = prev.findIndex((b) => String(b.id) === String(over.id));
+      if (from < 0 || to < 0) return prev;
+      return arrayMove(prev, from, to);
+    });
+    setIsDirty(true);
   }, []);
 
   const handlePublish = useCallback(async (publish = true) => {
@@ -602,16 +783,22 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
       return;
     }
 
+    const metaDescription = meta.metaDescription.trim() || null;
+
     const payload = {
       title: cleanTitle,
       slug,
       category: meta.category,
-      excerpt: meta.metaDescription.trim() || null,
+      excerpt: metaDescription,
+      metaDescription,
       author: meta.author.trim() || null,
       readTime: meta.readTime.trim() || null,
       thumbnail: meta.thumbnail.trim() || null,
       content: blocks,
       isPublished: publish,
+      accentColor,
+      contentWidth: meta.width,
+      spacing: meta.spacing,
       ...(isEdit && { id: articleId }),
     };
 
@@ -635,10 +822,13 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
     } finally {
       setIsSaving(false);
     }
-  }, [title, meta, blocks, isEdit, articleId, onSaved]);
+  }, [title, meta, blocks, isEdit, articleId, onSaved, accentColor]);
 
   const selectedBlock = blocks.find((b) => b.id === selectedId) ?? null;
   const cat = CAT_COLORS[meta.category] ?? { bg: '#FFD9DC', fg: '#FF8C94' };
+  const canvasMaxWidth = WIDTH_MAP[meta.width] || WIDTH_MAP.Standard;
+  const canvasGap = `${0.2 + meta.spacing * 0.22}rem`;
+  const activeBlock = activeId ? blocks.find((b) => String(b.id) === String(activeId)) : null;
 
   return (
     <div className="builder-page">
@@ -714,9 +904,16 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
 
         {/* Canvas central */}
         <div className="builder-canvas-wrap" onClick={() => setSelectedId(null)}>
-          <div className="builder-canvas">
+          <div
+            className="builder-canvas"
+            style={{
+              maxWidth: canvasMaxWidth,
+              gap: canvasGap,
+              '--builder-accent': accentColor,
+            }}
+          >
             {/* Indicateur catégorie */}
-            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
               <span className="builder-canvas__hero-badge" style={{ background: cat.bg, color: cat.fg }}>
                 {meta.category.toUpperCase()}
               </span>
@@ -728,8 +925,12 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
               collisionDetection={closestCenter}
               onDragStart={({ active }) => setActiveId(active.id)}
               onDragEnd={handleDragEnd}
+              onDragCancel={() => setActiveId(null)}
             >
-              <SortableContext items={blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext
+                items={blocks.map((b) => String(b.id))}
+                strategy={verticalListSortingStrategy}
+              >
                 {blocks.map((block) => (
                   <SortableBlock
                     key={block.id}
@@ -740,14 +941,15 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
                     onDelete={deleteBlock}
                     onMoveUp={(id) => moveBlock(id, 'up')}
                     onMoveDown={(id) => moveBlock(id, 'dn')}
+                    accentColor={accentColor}
                   />
                 ))}
               </SortableContext>
 
-              <DragOverlay>
-                {activeId ? (
-                  <div style={{ opacity: 0.8, background: '#fff', borderRadius: 14, padding: '0.5rem 1rem', boxShadow: '0 8px 24px rgba(46,29,33,.15)' }}>
-                    Déplacement en cours...
+              <DragOverlay dropAnimation={null}>
+                {activeBlock ? (
+                  <div className="canvas-block canvas-block--overlay">
+                    <BlockPreview block={activeBlock} onUpdate={() => {}} accentColor={accentColor} />
                   </div>
                 ) : null}
               </DragOverlay>
@@ -764,7 +966,10 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
           </div>
 
           {/* Champs meta sous le canvas */}
-          <div style={{ background: '#fff', borderRadius: 20, padding: '1.5rem', width: '100%', maxWidth: '42rem', boxShadow: '0 4px 20px rgba(46,29,33,.06)' }}>
+          <div
+            className="builder-meta-card"
+            style={{ maxWidth: canvasMaxWidth }}
+          >
             <p className="builder-props__label" style={{ margin: '0 0 0.75rem' }}>Métadonnées de l&apos;article</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div className="props-field">
@@ -779,10 +984,10 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
                 <label className="props-field-label">Temps de lecture</label>
                 <input className="props-input" placeholder="5 min" value={meta.readTime} onChange={(e) => handleMetaChange('readTime', e.target.value)} />
               </div>
-              <div className="props-field">
-                <label className="props-field-label">URL image à la une</label>
-                <input className="props-input" placeholder="/assets/..." value={meta.thumbnail} onChange={(e) => handleMetaChange('thumbnail', e.target.value)} />
-              </div>
+              <ThumbnailDropzone
+                value={meta.thumbnail}
+                onChange={(url) => handleMetaChange('thumbnail', url)}
+              />
             </div>
           </div>
         </div>
@@ -796,7 +1001,7 @@ function BlogBuilder({ initialArticle, onBack, onSaved }) {
           meta={meta}
           onMetaChange={handleMetaChange}
           accentColor={accentColor}
-          onAccentChange={setAccentColor}
+          onAccentChange={handleAccentChange}
         />
       </div>
     </div>

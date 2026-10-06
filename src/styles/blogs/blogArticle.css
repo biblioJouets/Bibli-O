@@ -3,6 +3,7 @@
    ============================================================ */
 
 .article-page {
+  margin-top: 80px;
   background: #FFFAF4;
   width: 100%;
   padding-bottom: 5rem;
@@ -45,7 +46,7 @@
 }
 
 .article-header__inner {
-  max-width: 52rem;
+  max-width: var(--article-max-width, 56rem);
   margin: 0 auto;
   text-align: center;
 }
@@ -133,7 +134,9 @@
 
 /* ── Hero image ── */
 .article-hero-img {
-  margin: 2.25rem 6vw 0;
+  margin: 2.25rem auto 0;
+  width: calc(100% - 12vw);
+  max-width: var(--article-max-width, 56rem);
   border-radius: 25px;
   overflow: hidden;
   position: relative;
@@ -166,7 +169,7 @@
   padding: 2.5rem 6vw 0;
   display: grid;
   justify-content: center;
-  grid-template-columns: minmax(0, 45rem);
+  grid-template-columns: minmax(0, var(--article-max-width, 56rem));
 }
 
 .article-body {
@@ -175,7 +178,7 @@
   color: #2E1D21;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--article-gap, 1.4rem);
 }
 
 /* ── Blocs de contenu ── */
@@ -208,7 +211,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: #6EC1E4;
+  background: var(--article-accent, #6EC1E4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -283,13 +286,13 @@
 .block-cta__btn {
   display: inline-block;
   padding: 0.875rem 1.75rem;
-  background: #FF8C94;
+  background: var(--article-accent, #FF8C94);
   color: #fff;
   border-radius: 50px;
   font-weight: 700;
   font-size: 0.95rem;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(255, 140, 148, 0.5);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--article-accent, #FF8C94) 50%, transparent);
   transition: transform 0.18s;
 }
 

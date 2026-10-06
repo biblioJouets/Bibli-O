@@ -11,16 +11,22 @@ const emptyToNull = (v) => (typeof v === 'string' && v.trim() === '' ? null : v)
 
 const idSchema = z.coerce.number().int().positive();
 
+const WIDTH_VALUES = ['Étroit', 'Standard', 'Large'];
+
 const blogFieldsSchema = z.object({
-  title:       z.string().trim().min(1, 'Le titre est requis').max(255),
-  slug:        z.string().trim().min(1, 'Le slug est requis').max(300),
-  category:    z.string().trim().min(1, 'La catégorie est requise').max(100),
-  excerpt:     z.preprocess(emptyToNull, z.string().nullable().optional()),
-  author:      z.preprocess(emptyToNull, z.string().max(255).nullable().optional()),
-  readTime:    z.preprocess(emptyToNull, z.string().max(20).nullable().optional()),
-  thumbnail:   z.preprocess(emptyToNull, z.string().max(500).nullable().optional()),
-  content:     z.array(z.any()).optional(),
-  isPublished: z.boolean().optional(),
+  title:           z.string().trim().min(1, 'Le titre est requis').max(255),
+  slug:            z.string().trim().min(1, 'Le slug est requis').max(300),
+  category:        z.string().trim().min(1, 'La catégorie est requise').max(100),
+  excerpt:         z.preprocess(emptyToNull, z.string().nullable().optional()),
+  metaDescription: z.preprocess(emptyToNull, z.string().nullable().optional()),
+  author:          z.preprocess(emptyToNull, z.string().max(255).nullable().optional()),
+  readTime:        z.preprocess(emptyToNull, z.string().max(20).nullable().optional()),
+  thumbnail:       z.preprocess(emptyToNull, z.string().max(500).nullable().optional()),
+  content:         z.array(z.any()).optional(),
+  isPublished:     z.boolean().optional(),
+  accentColor:     z.preprocess(emptyToNull, z.string().max(20).nullable().optional()),
+  contentWidth:    z.enum(WIDTH_VALUES).optional(),
+  spacing:         z.coerce.number().int().min(1).max(10).optional(),
 });
 
 const createSchema = blogFieldsSchema;
@@ -85,12 +91,27 @@ async function getUniqueSlug(rawSlug, excludeId) {
   }
 }
 
+/** Normalise SEO + design : metaDescription alimente aussi excerpt si absent. */
+function normalizeSeoAndDesign(fields) {
+  const metaDescription = fields.metaDescription ?? fields.excerpt ?? null;
+  const excerpt = fields.excerpt ?? metaDescription;
+
+  return {
+    ...fields,
+    metaDescription,
+    excerpt,
+    contentWidth: fields.contentWidth ?? 'Standard',
+    spacing: fields.spacing ?? 5,
+  };
+}
+
 async function createPost(body) {
-  const { slug, author, content, isPublished, ...fields } = parseOrThrow(createSchema, body);
+  const parsed = parseOrThrow(createSchema, body);
+  const { slug, author, content, isPublished, ...rest } = normalizeSeoAndDesign(parsed);
 
   return prisma.blogPost.create({
     data: {
-      ...fields,
+      ...rest,
       slug: await getUniqueSlug(slug),
       author: author ?? "L'équipe Bibli'o",
       content: content ?? [],
@@ -100,12 +121,22 @@ async function createPost(body) {
 }
 
 async function updatePost(body) {
-  const { id, slug, ...fields } = parseOrThrow(updateSchema, body);
+  const parsed = parseOrThrow(updateSchema, body);
+  const { id, slug, ...rest } = parsed;
+
+  // Sur update partiel : ne synchronise excerpt/meta que si l'un des deux est fourni
+  const data = { ...rest };
+  if (rest.metaDescription !== undefined && rest.excerpt === undefined) {
+    data.excerpt = rest.metaDescription;
+  }
+  if (rest.excerpt !== undefined && rest.metaDescription === undefined) {
+    data.metaDescription = rest.excerpt;
+  }
 
   return prisma.blogPost.update({
     where: { id },
     data: {
-      ...fields,
+      ...data,
       ...(slug !== undefined && { slug: await getUniqueSlug(slug, id) }),
     },
   });
@@ -134,7 +165,6 @@ function errorResponse(error, action) {
 
 // ─── Handlers ──────────────────────────────────────────────────────────────
 
-// GET — liste tous les articles (admin)
 export async function GET() {
   try {
     await requireAdmin();
@@ -145,7 +175,6 @@ export async function GET() {
   }
 }
 
-// POST — crée un article, ou le met à jour si un id est fourni
 export async function POST(request) {
   try {
     await requireAdmin();
@@ -160,7 +189,6 @@ export async function POST(request) {
   }
 }
 
-// PUT — met à jour un article existant
 export async function PUT(request) {
   try {
     await requireAdmin();
@@ -171,7 +199,6 @@ export async function PUT(request) {
   }
 }
 
-// DELETE — supprime un article
 export async function DELETE(request) {
   try {
     await requireAdmin();

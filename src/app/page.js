@@ -1,5 +1,4 @@
 
-
 //import components
 import CommitmentsCarousel from "@/components/CommitmentsCarousel";
 import ButtonRed from "@/components/ButtonRed";
@@ -17,6 +16,7 @@ import SubChoice from "@/components/SubChoice";
 import GoogleReviews from '@/components/GoogleReviews';
 import prisma from "@/lib/core/database";
 import Feature from '@/components/FeaturesSection';
+import BlogPresentation from "@/components/blogPresentation";
 
 //import style
 import '@/styles/homepage.css';
@@ -57,9 +57,25 @@ async function getGoogleReviews() {
 }
 export default async function Homepage() {
 
-    const [reviews, boxProduct] = await Promise.all([
+    const [reviews, boxProduct, latestBlogPosts] = await Promise.all([
         getGoogleReviews(),
         prisma.products.findUnique({ where: { reference: "BOX-MYSTERE" } }),
+        prisma.blogPost.findMany({
+            where: { isPublished: true },
+            orderBy: { createdAt: 'desc' },
+            take: 3,
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                thumbnail: true,
+                category: true,
+                excerpt: true,
+                author: true,
+                readTime: true,
+                createdAt: true,
+            },
+        }).catch(() => []),
     ]);
   const jsonLd = {
         "@context": "https://schema.org",
@@ -158,9 +174,10 @@ export default async function Homepage() {
                 </section>
 
 
-                <Feature />
-
-                 <section className="bg-green-homepage">
+                <Feature />  
+                <section className="bg-green-homepage">
+                <BlogPresentation articles={latestBlogPosts} />
+               
                   <Protocol />
                 </section>
                
@@ -178,6 +195,8 @@ export default async function Homepage() {
                 <section>
                     <Newsletter />
                 </section>
+
+                <BlogPresentation articles={latestBlogPosts} />
 
             </div>
         </>

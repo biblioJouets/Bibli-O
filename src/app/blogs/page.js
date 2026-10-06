@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BlogCard from '@/components/blogs/BlogCard';
 import '@/styles/blogs/blogList.css';
 
@@ -16,10 +17,23 @@ const FILTER_STYLES = {
 
 const PAGE_SIZE = 6;
 
-export default function BlogsPage() {
+function resolveCategory(raw) {
+  if (!raw) return 'Tous';
+  const match = CATEGORIES.find((c) => c.toLowerCase() === decodeURIComponent(raw).toLowerCase());
+  return match || 'Tous';
+}
+
+function BlogsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [articles, setArticles] = useState([]);
-  const [filter, setFilter] = useState('Tous');
+  const [filter, setFilter] = useState(() => resolveCategory(searchParams.get('category')));
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setFilter(resolveCategory(searchParams.get('category')));
+    setPage(1);
+  }, [searchParams]);
 
   useEffect(() => {
     fetch('/api/blogs')
@@ -35,6 +49,11 @@ export default function BlogsPage() {
   const handleFilter = (cat) => {
     setFilter(cat);
     setPage(1);
+    const params = new URLSearchParams(searchParams.toString());
+    if (cat === 'Tous') params.delete('category');
+    else params.set('category', cat);
+    const qs = params.toString();
+    router.replace(qs ? `/blogs?${qs}` : '/blogs', { scroll: false });
   };
 
   return (
@@ -124,5 +143,13 @@ export default function BlogsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BlogsPage() {
+  return (
+    <Suspense fallback={<div className="blog-page" style={{ padding: '6rem 2rem', textAlign: 'center', color: '#8C7B7F' }}>Chargement du Mag&apos;...</div>}>
+      <BlogsPageContent />
+    </Suspense>
   );
 }

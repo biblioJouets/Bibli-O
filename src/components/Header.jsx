@@ -21,10 +21,12 @@ export default function HeaderBiblioJouets() {
   // États pour les menus déroulants
   const [isDropdownOpen, setDropdownOpen] = useState(false); // Profil
   const [isOffersOpen, setOffersOpen] = useState(false);     // Nos Offres
+  const [isUniversOpen, setUniversOpen] = useState(false);   // Notre Univers
   
   const menuRef = useRef(null);
   const dropdownRef = useRef(null); 
-  const offersRef = useRef(null); // Ref pour le clic extérieur de Nos Offres
+  const offersRef = useRef(null);
+  const universRef = useRef(null);
 
   // Clic extérieur : Menu Burger
   useEffect(() => {
@@ -60,6 +62,17 @@ export default function HeaderBiblioJouets() {
     return () => document.removeEventListener('mousedown', handleClickOutsideOffers);
   }, []);
 
+  // Clic extérieur : Menu Notre Univers
+  useEffect(() => {
+    const handleClickOutsideUnivers = (event) => {
+      if (universRef.current && !universRef.current.contains(event.target)) {
+        setUniversOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutsideUnivers);
+    return () => document.removeEventListener('mousedown', handleClickOutsideUnivers);
+  }, []);
+
   // Gestion du scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +86,8 @@ export default function HeaderBiblioJouets() {
   const toggleBurger = () => setBurgerOpen(!isBurgerOpen);
   const closeBurger = () => {
     setBurgerOpen(false);
-    setOffersOpen(false); // On ferme aussi le sous-menu au cas où
+    setOffersOpen(false);
+    setUniversOpen(false);
   };
 
   return ( 
@@ -102,32 +116,55 @@ export default function HeaderBiblioJouets() {
         <Link href="/bibliotheque" onClick={closeBurger}>Nos Jouets</Link>
         <Link href="/fonctionnement" onClick={closeBurger}>Comment ça marche ?</Link>
         
-        {/* NOUVEAU MENU DÉROULANT : NOS OFFRES (Calqué sur le profil utilisateur) */}
+        {/* MENU DÉROULANT : NOS OFFRES */}
         <div className="user-dropdown-container offers-container" ref={offersRef}>
           <button 
             className="dropdown-trigger nav-link-trigger" 
-            onClick={() => setOffersOpen(!isOffersOpen)}
+            onClick={() => { setOffersOpen(!isOffersOpen); setUniversOpen(false); }}
             aria-expanded={isOffersOpen}
+            aria-haspopup="true"
           >
             Nos Offres {isOffersOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
           {isOffersOpen && (
-            <div className="user-dropdown-menu offers-dropdown">
-              {/* <Link href="/blogs" className="dropdown-item" onClick={closeBurger}>
-                Blogs & Conseils
-              </Link> */}
-              <Link href="/abonnements" className="dropdown-item" onClick={closeBurger}>
+            <div className="user-dropdown-menu offers-dropdown" role="menu">
+              <Link href="/abonnements" className="dropdown-item" role="menuitem" onClick={closeBurger}>
                 Nos Abonnements
               </Link>
-              <Link href="/mariage" className="dropdown-item" onClick={closeBurger} style={{ color: '#FF8C94' }}>
+              <Link href="/mariage" className="dropdown-item" role="menuitem" onClick={closeBurger} style={{ color: '#FF8C94' }}>
                 Mariages & Événements
               </Link>
             </div>
           )}
         </div>
 
-        <Link href="/a-propos" onClick={closeBurger}>Notre histoire</Link>
+        {/* MENU DÉROULANT : NOTRE UNIVERS (même design que Nos Offres) */}
+        <div className="user-dropdown-container offers-container" ref={universRef}>
+          <button
+            className="dropdown-trigger nav-link-trigger"
+            onClick={() => { setUniversOpen(!isUniversOpen); setOffersOpen(false); }}
+            aria-expanded={isUniversOpen}
+            aria-haspopup="true"
+          >
+            Notre Univers {isUniversOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          {isUniversOpen && (
+            <div className="user-dropdown-menu offers-dropdown" role="menu">
+              <Link href="/a-propos" className="dropdown-item" role="menuitem" onClick={closeBurger}>
+                Notre histoire
+              </Link>
+              <Link href="/blogs" className="dropdown-item" role="menuitem" onClick={closeBurger}>
+                Le Mag&apos;
+              </Link>
+              <Link href="/fonctionnement" className="dropdown-item" role="menuitem" onClick={closeBurger}>
+                Notre charte hygiène 
+              </Link>
+            </div>
+          )}
+        </div>
+
         <Link href="/contact" onClick={closeBurger}>Nous contacter</Link>
 
         <div className="nav-actions-mobile">

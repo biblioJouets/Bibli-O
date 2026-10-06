@@ -1,26 +1,45 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import 'styles/Footer.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquareFacebook, faSquareInstagram, faLinkedin, faTiktok } from '@fortawesome/free-brands-svg-icons';
 
-const logo = "/assets/logoBiblioJouets.png"
+const logo = "/assets/logoBiblioJouets.png";
+const FOOTER_ARTICLES_LIMIT = 5;
+
 export default function Footer() {
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/blogs')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return;
+        setArticles(data.slice(0, FOOTER_ARTICLES_LIMIT));
+      })
+      .catch(() => {
+        if (!cancelled) setArticles([]);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <footer className="footer">
       <div className="footer-container">
-        {/* Bloc logo */}
         <div className="footer-columns">
           <div className="footer-logo-section">
             <Image src={logo} alt="Logo Bibli'O Jouets" className="footer-logo" width={100} height={100} />
           </div>
 
-          {/* Colonnes principales */}
           {/* Colonne Bibli'O */}
-          <div className="footer-column">
-            <p className="footer-title">Bibli'O</p>
+          <nav className="footer-column" aria-label="Bibli'O">
+            <p className="footer-title">Bibli&apos;O</p>
             <ul>
               <li><Link href="/contact">Contact</Link></li>
               <li><Link href="/mariage">Mariage</Link></li>
@@ -28,20 +47,35 @@ export default function Footer() {
               <li><Link href="/abonnements">Abonnements</Link></li>
               <li><Link href="/faq">FAQ</Link></li>
             </ul>
-          </div>
+          </nav>
+
+          {/* Colonne Notre Univers — SEO / Le Mag' + articles dynamiques */}
+          <nav className="footer-column" aria-label="Notre Univers">
+            <p className="footer-title">Notre Univers</p>
+            <ul>
+              <li><Link href="/blogs">Le Mag&apos;</Link></li>
+              {articles.map((article) => (
+                <li key={article.id}>
+                  <Link href={`/blogs/${article.slug}`}>
+                    {article.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           {/* Colonne Informations */}
-          <div className="footer-column">
+          <nav className="footer-column" aria-label="Informations légales">
             <p className="footer-title">Informations</p>
             <ul>
-              <li><Link href="/conditions-generales-utilisation">Conditions générales d'utilisation</Link></li>
+              <li><Link href="/conditions-generales-utilisation">Conditions générales d&apos;utilisation</Link></li>
               <li><Link href="/conditions-generales-de-vente">Conditions générales de ventes</Link></li>
               <li><Link href="/mentions-legales">Mentions légales</Link></li>
               <li><Link href="/politique-confidentialite">Politique de confidentialité</Link></li>
             </ul>
-          </div>
+          </nav>
 
-          {/* Colonne Coordonnées */}
+          {/* Colonne Réseaux sociaux */}
           <div className="footer-column">
             <p className="footer-title">Nos réseaux sociaux</p>
             <ul className="footer-coordonnees">
@@ -78,7 +112,8 @@ export default function Footer() {
                   aria-label="Bibli'O Jouets sur LinkedIn"
                   title="LinkedIn"
                 >
-              <FontAwesomeIcon className="social-icon" icon={faLinkedin} />                </a>
+                  <FontAwesomeIcon className="social-icon" icon={faLinkedin} />
+                </a>
               </li>
               <li>
                 <a
@@ -98,7 +133,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        © 2026 Bibli'o Jouets | Tous droits réservés
+        © 2026 Bibli&apos;o Jouets | Tous droits réservés
       </div>
     </footer>
   );
