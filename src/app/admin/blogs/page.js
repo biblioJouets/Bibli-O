@@ -268,6 +268,8 @@ function SortableBlock({ block, isSelected, onSelect, onUpdate, onDelete, onMove
 // ─── Rendu WYSIWYG d'un bloc ──────────────────────────────────────────────
 
 function BlockPreview({ block, onUpdate, isSelected, accentColor }) {
+  const [imageUploading, setImageUploading] = useState(false);
+
   const handleTextChange = useCallback((e) => {
     onUpdate(block.id, { value: e.target.value });
   }, [block.id, onUpdate]);
@@ -288,14 +290,32 @@ function BlockPreview({ block, onUpdate, isSelected, accentColor }) {
     onUpdate(block.id, { value: arr.filter((_, idx) => idx !== i) });
   }, [block.id, block.value, onUpdate]);
 
-  const handleImageDrop = useCallback((e) => {
+  const handleImageDrop = useCallback(async (e) => {
     e.preventDefault();
+    if (imageUploading) return;
     const file = e.dataTransfer?.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onUpdate(block.id, { value: ev.target.result });
-    reader.readAsDataURL(file);
-  }, [block.id, onUpdate]);
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Merci de déposer une image (JPG, PNG ou WebP).');
+      return;
+    }
+
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success || !data.url) {
+        throw new Error(data.message || "Erreur lors de l'upload");
+      }
+      onUpdate(block.id, { value: data.url });
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setImageUploading(false);
+    }
+  }, [block.id, onUpdate, imageUploading]);
 
   switch (block.type) {
     case 'h':
@@ -375,7 +395,9 @@ function BlockPreview({ block, onUpdate, isSelected, accentColor }) {
           onDrop={handleImageDrop}
           onClick={(e) => e.stopPropagation()}
         >
-          {block.value ? (
+          {imageUploading ? (
+            <div className="canvas-img-placeholder">Upload en cours…</div>
+          ) : block.value ? (
             <img src={block.value} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div className="canvas-img-placeholder">

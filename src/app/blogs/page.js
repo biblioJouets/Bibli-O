@@ -27,6 +27,7 @@ function BlogsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState(() => resolveCategory(searchParams.get('category')));
   const [page, setPage] = useState(1);
 
@@ -39,7 +40,8 @@ function BlogsPageContent() {
     fetch('/api/blogs')
       .then((r) => r.json())
       .then((data) => { if (Array.isArray(data)) setArticles(data); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = filter === 'Tous' ? articles : articles.filter((a) => a.category === filter);
@@ -106,10 +108,12 @@ function BlogsPageContent() {
       </div>
 
       {/* Grille */}
-      {paginated.length === 0 ? (
+      {loading ? (
+        <div className="blog-empty">Chargement des articles...</div>
+      ) : paginated.length === 0 ? (
         <div className="blog-empty">
           {articles.length === 0
-            ? 'Chargement des articles...'
+            ? 'Aucun article pour le moment'
             : 'Aucun article dans cette catégorie.'}
         </div>
       ) : (

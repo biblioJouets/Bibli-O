@@ -44,6 +44,7 @@ export async function POST(req) {
     }
 
     // Nom de fichier sans données issues du body dans le path
+    // TODO (URGENT: Migrer les étiquettes hors du dossier public)
     const filename = `return-label-${randomUUID()}.pdf`;
     const uploadDir = join(process.cwd(), "public", "uploads");
     await writeFile(join(uploadDir, filename), buffer);

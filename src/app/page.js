@@ -196,8 +196,6 @@ export default async function Homepage() {
                     <Newsletter />
                 </section>
 
-                <BlogPresentation articles={latestBlogPosts} />
-
             </div>
         </>
     );

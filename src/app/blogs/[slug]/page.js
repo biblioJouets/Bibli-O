@@ -1,8 +1,8 @@
-'use client';
-
-import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import prisma from '@/lib/core/database';
 import BlockRenderer from '@/components/blogs/BlockRenderer';
 import '@/styles/blogs/blogArticle.css';
 
@@ -23,40 +23,28 @@ function authorInitials(name = '') {
   return name.split(' ').map((s) => s[0]).slice(0, 2).join('').toUpperCase();
 }
 
-export default function ArticleDetailPage({ params }) {
-  const { slug } = use(params);
-  const [article, setArticle] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+function ArticleNotFound() {
+  return (
+    <div className="article-page" style={{ textAlign: 'center', padding: '6rem 2rem' }}>
+      <h1 style={{ color: '#2E1D21', marginBottom: '1rem' }}>Article introuvable</h1>
+      <Link href="/blogs" style={{ color: '#6EC1E4', fontWeight: 700, textDecoration: 'none' }}>
+        ← Retour au blog
+      </Link>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    fetch(`/api/blogs/${slug}`)
-      .then((r) => {
-        if (r.status === 404) { setNotFound(true); return null; }
-        return r.json();
-      })
-      .then((data) => { if (data) setArticle(data); })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
-  }, [slug]);
+export default async function ArticleDetailPage({ params }) {
+  const { slug } = await params;
+  const session = await getServerSession(authOptions);
+  const isAdmin = session?.user?.role === 'ADMIN';
 
-  if (loading) {
-    return (
-      <div className="article-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div style={{ color: '#8C7B7F', fontSize: '1rem' }}>Chargement de l&apos;article...</div>
-      </div>
-    );
-  }
+  const article = await prisma.blogPost.findFirst({
+    where: isAdmin ? { slug } : { slug, isPublished: true },
+  });
 
-  if (notFound || !article) {
-    return (
-      <div className="article-page" style={{ textAlign: 'center', padding: '6rem 2rem' }}>
-        <h1 style={{ color: '#2E1D21', marginBottom: '1rem' }}>Article introuvable</h1>
-        <Link href="/blogs" style={{ color: '#6EC1E4', fontWeight: 700, textDecoration: 'none' }}>
-          ← Retour au blog
-        </Link>
-      </div>
-    );
+  if (!article) {
+    return <ArticleNotFound />;
   }
 
   const cat = CAT_COLORS[article.category] ?? { bg: '#F0E8E0', fg: '#8C7B7F' };
@@ -90,6 +78,24 @@ export default function ArticleDetailPage({ params }) {
         <span>›</span>
         <span className="article-breadcrumb__current">{article.title}</span>
       </nav>
+
+      {!article.isPublished && (
+        <p
+          role="status"
+          style={{
+            margin: '0 auto 1.25rem',
+            maxWidth: 'var(--article-max-width)',
+            padding: '0.75rem 1.25rem',
+            background: '#FFF7D4',
+            color: '#2E1D21',
+            borderRadius: '25px',
+            fontWeight: 700,
+            textAlign: 'center',
+          }}
+        >
+          Brouillon — cet article n&apos;est pas encore publié.
+        </p>
+      )}
 
       {/* Header */}
       <header className="article-header">
