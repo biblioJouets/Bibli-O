@@ -125,6 +125,17 @@ async function updatePost(body) {
   const parsed = parseOrThrow(updateSchema, body);
   const { id, slug, ...rest } = parsed;
 
+  const existing = await prisma.blogPost.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+
+  // Id stale / article jamais persisté en prod → créer plutôt que renvoyer 404
+  if (!existing) {
+    const { id: _ignored, ...createBody } = body;
+    return createPost(createBody);
+  }
+
   // Sur update partiel : ne synchronise excerpt/meta que si l'un des deux est fourni
   const data = { ...rest };
   if (rest.metaDescription !== undefined && rest.excerpt === undefined) {

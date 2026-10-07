@@ -1078,6 +1078,7 @@ export default function AdminBlogsPage() {
   if (view === 'builder') {
     return (
       <BlogBuilder
+        key={editingArticle?.id ?? 'new'}
         initialArticle={editingArticle}
         onBack={() => setView('list')}
         onSaved={handleSaved}
