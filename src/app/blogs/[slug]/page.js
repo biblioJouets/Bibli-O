@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/core/database';
+import { ensureBlogPostSchema } from '@/lib/modules/blogs/ensureBlogPostSchema';
 import BlockRenderer from '@/components/blogs/BlockRenderer';
 import '@/styles/blogs/blogArticle.css';
 
@@ -39,6 +40,7 @@ export default async function ArticleDetailPage({ params }) {
   const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === 'ADMIN';
 
+  await ensureBlogPostSchema();
   const article = await prisma.blogPost.findFirst({
     where: isAdmin ? { slug } : { slug, isPublished: true },
   });

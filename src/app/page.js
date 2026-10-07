@@ -175,9 +175,9 @@ export default async function Homepage() {
 
 
                 <Feature />  
-                <section className="bg-green-homepage">
                 <BlogPresentation articles={latestBlogPosts} />
-               
+                <section className="bg-green-homepage">
+
                   <Protocol />
                 </section>
                

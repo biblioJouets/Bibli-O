@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/core/database/index';
+import { ensureBlogPostSchema } from '@/lib/modules/blogs/ensureBlogPostSchema';
 
 // ─── Validation ────────────────────────────────────────────────────────────
 
@@ -168,6 +169,7 @@ function errorResponse(error, action) {
 export async function GET() {
   try {
     await requireAdmin();
+    await ensureBlogPostSchema();
     const posts = await prisma.blogPost.findMany({ orderBy: { createdAt: 'desc' } });
     return NextResponse.json(posts);
   } catch (error) {
@@ -178,6 +180,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     await requireAdmin();
+    await ensureBlogPostSchema();
     const body = await readJsonBody(request);
 
     if (body?.id != null) {
@@ -192,6 +195,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     await requireAdmin();
+    await ensureBlogPostSchema();
     const body = await readJsonBody(request);
     return NextResponse.json(await updatePost(body));
   } catch (error) {
@@ -202,6 +206,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     await requireAdmin();
+    await ensureBlogPostSchema();
     const body = await readJsonBody(request);
     const id = parseOrThrow(idSchema, body?.id);
 
