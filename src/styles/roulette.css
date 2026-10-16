@@ -1,7 +1,8 @@
 /* Conteneur principal avec effet "Blob" organique en fond */
-.roulette-page{
-    margin-top: 7rem;
+.roulette-page {
+  margin-top: 7rem;
 }
+
 .roulette-wrapper {
   position: relative;
   display: flex;
@@ -18,17 +19,19 @@
   z-index: 1;
   box-shadow: 0 10px 30px rgba(46, 29, 33, 0.05);
 }
+
 .roulette-disclaimer {
   font-size: 0.85rem;
-  color: #010d12; /* Bleu Principal */
+  color: #010d12;
   text-align: center;
   margin-top: 20px;
 }
-.roulette-description{
-    font-size: 1rem;
-    color: #010d12; /* Bleu Principal */
-    text-align: center;
-    margin-bottom: 30px;                    
+
+.roulette-description {
+  font-size: 1rem;
+  color: #010d12;
+  text-align: center;
+  margin-bottom: 30px;                    
 }
 
 /* Forme organique douce en arrière-plan */
@@ -70,7 +73,7 @@
   justify-content: center;
 }
 
-/* La flèche (Rose accent) */
+/* La flèche */
 .wheel-pointer {
   position: absolute;
   top: -25px;
@@ -96,7 +99,7 @@
   box-shadow: 0 15px 35px rgba(46, 29, 33, 0.15);
 }
 
-/* La roue elle-même (8 parts de 45 degrés) */
+/* La roue elle-même (10 parts de 36 degrés : 5 Rose/Rouge et 5 Vertes) */
 .wheel-spin-area {
   width: 100%;
   height: 100%;
@@ -105,14 +108,16 @@
   overflow: hidden;
   transition: transform 5s cubic-bezier(0.2, 0.8, 0.1, 1); /* Animation très douce et longue */
   background: conic-gradient(
-    #ffe264 0deg 45deg,      /* 1. Perdu (Jaune) */
-    #88D4AB 45deg 90deg,     /* 2. Bibli'o (Vert) */
-    #FFF7D4 90deg 135deg,    /* 3. Perdu (Jaune pastel) */
-    #FF8C94 135deg 180deg,   /* 4. Baby Café (Rose) */
-    #ffe264 180deg 225deg,   /* 5. Perdu (Jaune) */
-    #DAEEE6 225deg 270deg,   /* 6. Bibli'o (Vert pastel) */
-    #FFF7D4 270deg 315deg,   /* 7. Perdu (Jaune pastel) */
-    #88D4AB 315deg 360deg    /* 8. Bibli'o (Vert) */
+    #ffe264 36deg,     /* 1. Oups ! Raté (Rose/Rouge) */
+    #88D4AB 36deg 72deg,    /* 2. Gain Bibli'o (Vert) */
+    #ffe264 72deg 108deg,   /* 3. Oups ! Raté (Rose/Rouge) */
+    #88D4AB 108deg 144deg,  /* 4. Gain Bibli'o (Vert) */
+    #ffe264 144deg 180deg,  /* 5. Oups ! Raté (Rose/Rouge) */
+    #88D4AB 180deg 216deg,  /* 6. Gain Bibli'o (Vert) */
+    #ffe264 216deg 252deg,  /* 7. Oups ! Raté (Rose/Rouge) */
+    #88D4AB 252deg 288deg,  /* 8. Gain Bibli'o (Vert) */
+    #ffe264 288deg 324deg,  /* 9. Oups ! Raté (Rose/Rouge) */
+    #88D4AB 324deg 360deg   /* 10. Gain Bibli'o (Vert) */
   );
   box-shadow: inset 0 0 20px rgba(0,0,0,0.08);
 }
@@ -134,13 +139,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 120px;
+  width: 110px;
   height: 40px;
   margin-top: -20px;
-  margin-left: -60px;
+  margin-left: -55px;
   text-align: center;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #2E1D21;
   display: flex;
   align-items: center;
@@ -148,15 +153,17 @@
   line-height: 1.1;
 }
 
-/* Placement mathématique au centre de chaque part de 45° */
-.s-1 { transform: rotate(22.5deg) translateY(-145px); }
-.s-2 { transform: rotate(67.5deg) translateY(-145px); }
-.s-3 { transform: rotate(112.5deg) translateY(-145px); }
-.s-4 { transform: rotate(157.5deg) translateY(-145px); }
-.s-5 { transform: rotate(202.5deg) translateY(-145px); }
-.s-6 { transform: rotate(247.5deg) translateY(-145px); }
-.s-7 { transform: rotate(292.5deg) translateY(-145px); }
-.s-8 { transform: rotate(337.5deg) translateY(-145px); }
+/* Placement mathématique au centre de chaque part de 36° */
+.s-1  { transform: rotate(18deg) translateY(-145px); }
+.s-2  { transform: rotate(54deg) translateY(-145px); }
+.s-3  { transform: rotate(90deg) translateY(-145px); }
+.s-4  { transform: rotate(126deg) translateY(-145px); }
+.s-5  { transform: rotate(162deg) translateY(-145px); }
+.s-6  { transform: rotate(198deg) translateY(-145px); }
+.s-7  { transform: rotate(234deg) translateY(-145px); }
+.s-8  { transform: rotate(270deg) translateY(-145px); }
+.s-9  { transform: rotate(306deg) translateY(-145px); }
+.s-10 { transform: rotate(342deg) translateY(-145px); }
 
 /* Formulaire */
 .roulette-form-group {
@@ -225,13 +232,15 @@
 @media (max-width: 500px) {
   .roulette-form-group { flex-direction: column; }
   .wheel-box { width: 300px; height: 300px; }
-  .slice-text { font-size: 0.8rem; }
-  .s-1 { transform: rotate(22.5deg) translateY(-105px); }
-  .s-2 { transform: rotate(67.5deg) translateY(-105px); }
-  .s-3 { transform: rotate(112.5deg) translateY(-105px); }
-  .s-4 { transform: rotate(157.5deg) translateY(-105px); }
-  .s-5 { transform: rotate(202.5deg) translateY(-105px); }
-  .s-6 { transform: rotate(247.5deg) translateY(-105px); }
-  .s-7 { transform: rotate(292.5deg) translateY(-105px); }
-  .s-8 { transform: rotate(337.5deg) translateY(-105px); }
+  .slice-text { font-size: 0.75rem; width: 90px; margin-left: -45px; }
+  .s-1  { transform: rotate(18deg) translateY(-105px); }
+  .s-2  { transform: rotate(54deg) translateY(-105px); }
+  .s-3  { transform: rotate(90deg) translateY(-105px); }
+  .s-4  { transform: rotate(126deg) translateY(-105px); }
+  .s-5  { transform: rotate(162deg) translateY(-105px); }
+  .s-6  { transform: rotate(198deg) translateY(-105px); }
+  .s-7  { transform: rotate(234deg) translateY(-105px); }
+  .s-8  { transform: rotate(270deg) translateY(-105px); }
+  .s-9  { transform: rotate(306deg) translateY(-105px); }
+  .s-10 { transform: rotate(342deg) translateY(-105px); }
 }
