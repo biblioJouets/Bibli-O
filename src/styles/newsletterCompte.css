@@ -1,0 +1,331 @@
+/* src/styles/newsletterCompte.css — Admin Newsletter & Roulette */
+
+.nl-admin-container {
+  max-width: 1400px;
+  margin: 8rem auto 2rem;
+  padding: 0 2rem;
+  color: #2E1D21;
+}
+
+.nl-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.nl-admin-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2E1D21;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 0.35rem;
+}
+
+.nl-title-icon {
+  color: #6EC1E4;
+  flex-shrink: 0;
+}
+
+.nl-admin-subtitle {
+  margin: 0;
+  color: #2E1D21;
+  opacity: 0.75;
+  font-size: 1rem;
+}
+
+/* --- Compteurs --- */
+.nl-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.nl-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1.25rem 1.5rem;
+  border-radius: 25px;
+  background-color: #FFFAF4;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 16px rgba(46, 29, 33, 0.04);
+}
+
+.nl-stat-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nl-stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #2E1D21;
+}
+
+.nl-stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.nl-stat-total {
+  border-color: #6EC1E4;
+  background-color: #DFF1F9;
+  color: #2E1D21;
+}
+
+.nl-stat-won {
+  border-color: #88D4AB;
+  background-color: #DAEEE6;
+  color: #2E1D21;
+}
+
+.nl-stat-lost {
+  border-color: #FF8C94;
+  background-color: #FFD9DC;
+  color: #2E1D21;
+}
+
+.nl-stat-none {
+  border-color: #FAE9CF;
+  background-color: #FFF7EB;
+  color: #2E1D21;
+}
+
+/* --- Filtres --- */
+.nl-filters-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.nl-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+
+.nl-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+.nl-search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 2px solid #FAE9CF;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  background-color: #FFFAF4;
+  color: #2E1D21;
+  transition: border-color 0.25s ease;
+  box-sizing: border-box;
+}
+
+.nl-search-input:focus {
+  border-color: #6EC1E4;
+}
+
+.nl-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nl-filter-btn {
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 2px solid #FAE9CF;
+  background-color: #FFFAF4;
+  color: #2E1D21;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nl-filter-btn:hover {
+  border-color: #6EC1E4;
+  background-color: #DFF1F9;
+}
+
+.nl-filter-btn.nl-filter-active {
+  background-color: #6EC1E4;
+  border-color: #6EC1E4;
+  color: #2E1D21;
+}
+
+.nl-filter-btn.nl-filter-won.nl-filter-active {
+  background-color: #88D4AB;
+  border-color: #88D4AB;
+}
+
+.nl-filter-btn.nl-filter-lost.nl-filter-active {
+  background-color: #FF8C94;
+  border-color: #FF8C94;
+}
+
+.nl-filter-btn.nl-filter-none.nl-filter-active {
+  background-color: #ffe264;
+  border-color: #ffe264;
+}
+
+/* --- Tableau --- */
+.nl-table-container {
+  background-color: #FFFAF4;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(46, 29, 33, 0.05);
+  border: 2px solid #FAE9CF;
+}
+
+.nl-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.nl-table thead {
+  background-color: #FFF7EB;
+}
+
+.nl-table th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #2E1D21;
+  border-bottom: 2px solid #FAE9CF;
+}
+
+.nl-th-icon {
+  display: inline;
+  vertical-align: middle;
+  margin-right: 6px;
+  color: #6EC1E4;
+}
+
+.nl-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #FAE9CF;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.nl-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.nl-table tbody tr:hover {
+  background-color: #FFF7EB;
+}
+
+.nl-email-link {
+  color: #2E1D21;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nl-email-link:hover {
+  color: #6EC1E4;
+}
+
+/* --- Badges Roulette --- */
+.nl-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nl-badge-won {
+  background-color: #DAEEE6;
+  color: #2E1D21;
+  border: 1.5px solid #88D4AB;
+}
+
+.nl-badge-lost {
+  background-color: #FFD9DC;
+  color: #2E1D21;
+  border: 1.5px solid #FF8C94;
+}
+
+.nl-badge-none {
+  background-color: #FFF7EB;
+  color: #2E1D21;
+  border: 1.5px solid #FAE9CF;
+  opacity: 0.9;
+}
+
+.nl-loading-state,
+.nl-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #2E1D21;
+  opacity: 0.6;
+  font-weight: 600;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .nl-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .nl-admin-container {
+    margin-top: 6rem;
+    padding: 0 1rem;
+  }
+
+  .nl-admin-title {
+    font-size: 1.5rem;
+  }
+
+  .nl-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nl-filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nl-search-wrapper {
+    max-width: none;
+  }
+
+  .nl-filter-buttons {
+    justify-content: flex-start;
+  }
+
+  .nl-table-container {
+    overflow-x: auto;
+  }
+
+  .nl-table {
+    min-width: 520px;
+  }
+}
