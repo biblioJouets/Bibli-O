@@ -31,14 +31,21 @@ export async function POST(request) {
   if (!userId) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   try {
-    const { productId, quantity, intent } = await request.json();
-    await cartService.addToCart(userId, productId, quantity, intent || "RENTAL");
+    const body = await request.json();
+    const { productId, quantity, intent, customAmount, giftMetadata } = body;
+
+    if (intent === "GIFT_CARD") {
+      await cartService.addGiftCard(userId, { customAmount, giftMetadata });
+    } else {
+      await cartService.addToCart(userId, productId, quantity, intent || "RENTAL");
+    }
 
     const cart = await cartService.getCart(userId);
     return NextResponse.json(cart);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: error.message || "Erreur ajout" }, { status: 400 });
+    const status = error.code === "CART_MIXED" ? 409 : 400;
+    return NextResponse.json({ error: error.message || "Erreur ajout", code: error.code || null }, { status });
   }
   
 }

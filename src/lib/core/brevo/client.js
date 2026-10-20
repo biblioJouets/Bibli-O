@@ -69,6 +69,33 @@ export const testBrevoConnection = async () => {
     }
 }
 
+/**
+ * Envoie un e-mail transactionnel HTML (sans template Brevo).
+ */
+export const sendBrevoHtml = async ({ toEmail, toName, subject, html, text }) => {
+  if (!toEmail) return { success: false, error: "Destinataire manquant" };
+
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.sender = {
+    name: process.env.BREVO_SENDER_NAME || "Bibli'o Jouets",
+    email: process.env.BREVO_SENDER_EMAIL,
+  };
+  sendSmtpEmail.to = [{ email: toEmail, name: toName || undefined }];
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = html;
+  if (text) sendSmtpEmail.textContent = text;
+
+  try {
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const messageId = data.messageId || data.body?.messageId;
+    console.log(`[BREVO] HTML envoyé. ID: ${messageId}`);
+    return { success: true, messageId };
+  } catch (error) {
+    console.error("[BREVO] Erreur envoi HTML:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 export const sendResetEmail = async (email, resetUrl) => {
   const TEMPLATE_ID = 10; 
 

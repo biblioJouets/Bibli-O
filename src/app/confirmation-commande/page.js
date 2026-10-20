@@ -4,6 +4,14 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, Home, Package } from "lucide-react";
 
 const CONTEXTS = {
+  gift: {
+    accent: "#FF8C94",
+    icon: "🎁",
+    title: "Carte cadeau confirmée !",
+    subtitle: "Le paiement est bien reçu.",
+    body: "Le code cadeau part par e-mail, ou la carte postale est mise en préparation.\nRetrouvez le code dans Mes commandes.",
+    cta: { label: "Voir mes commandes", href: "/mon-compte/commandes", icon: "package" },
+  },
   refill: {
     accent: "#88D4AB",
     icon: "🎁",
@@ -73,7 +81,7 @@ export default function ConfirmationPage() {
           alignItems: "center",
           gap: "10px",
         }}>
-          {type === "refill" ? <Package size={20} /> : <Home size={20} />}
+          {ctx.cta.icon === "package" || type === "refill" ? <Package size={20} /> : <Home size={20} />}
           {ctx.cta.label}
         </Link>
       </div>

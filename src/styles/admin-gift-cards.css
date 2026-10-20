@@ -1,0 +1,180 @@
+.admin-gifts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: #2E1D21;
+}
+
+.admin-gifts__header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.admin-gifts__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #ffe264;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-gifts__header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.admin-gifts__header p {
+  margin: 0.15rem 0 0;
+  color: #8a6a62;
+}
+
+.admin-gifts__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.admin-gifts__stat {
+  background: #FFFAF4;
+  border: 1px solid #FAE9CF;
+  border-radius: 25px;
+  padding: 1rem;
+}
+
+.admin-gifts__stat strong {
+  display: block;
+  font-size: 1.8rem;
+}
+
+.admin-gifts__panel,
+.admin-gifts__table-wrap {
+  background: #fff;
+  border: 1px solid #FAE9CF;
+  border-radius: 25px;
+  padding: 1.25rem;
+}
+
+.admin-gifts__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.admin-gifts__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-gifts__field input {
+  border: 1px solid #FAE9CF;
+  border-radius: 16px;
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  color: #2E1D21;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.admin-gifts__submit {
+  border: none;
+  border-radius: 999px;
+  background: #2E1D21;
+  color: #FFFAF4;
+  padding: 0.7rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.admin-gifts__feedback {
+  margin-top: 0.8rem;
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  background: #DAEEE6;
+}
+
+.admin-gifts__feedback--error {
+  background: #FFD9DC;
+}
+
+.admin-gifts__table-wrap {
+  padding: 0;
+  overflow: hidden;
+}
+
+.admin-gifts__table-wrap h2 {
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+.admin-gifts table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-gifts th,
+.admin-gifts td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+}
+
+.admin-gifts th {
+  background: #FFFAF4;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-gifts tr + tr td {
+  border-top: 1px solid #FAE9CF;
+}
+
+.admin-gifts__code {
+  border: none;
+  background: #FFF7EB;
+  border-radius: 12px;
+  padding: 0.35rem 0.55rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  cursor: pointer;
+  color: #2E1D21;
+}
+
+.admin-gifts__badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.admin-gifts__badge--ok {
+  background: #DAEEE6;
+  color: #2E1D21;
+}
+
+.admin-gifts__badge--used {
+  background: #FFD9DC;
+  color: #2E1D21;
+}
+
+.admin-gifts__order-link {
+  color: #2E1D21;
+  font-weight: 700;
+}
+
+.admin-gifts__scroll {
+  overflow-x: auto;
+}

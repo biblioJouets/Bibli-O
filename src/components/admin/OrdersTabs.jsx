@@ -513,6 +513,14 @@ function OrderCard({ order, type, onStatusUpdate }) {
             {isHybrid && (
               <span className={styles.hybridBadgeMixed}>🔄 HYBRIDE</span>
             )}
+            {order.orderType === "GIFT_CARD" && (
+              <span className={order.giftDeliveryMethod === "POSTAL" ? styles.giftBadgePostal : styles.giftBadgeMail}>
+                {order.giftDeliveryMethod === "POSTAL" ? "📮 Voie Postale +2€" : "📧 Mail"}
+              </span>
+            )}
+            {order.giftCode?.code && (
+              <span className={styles.giftCodeChip}>{order.giftCode.code}</span>
+            )}
           </div>
         </div>
 
@@ -567,7 +575,11 @@ function OrderCard({ order, type, onStatusUpdate }) {
             <p className={styles.subInfo}>{order.shippingAddress ?? ""}</p>
             <p className={styles.subInfo}>{order.shippingZip ?? ""} {order.shippingCity ?? ""}</p>
             {order.shippingPhone && <p className={styles.subInfo}>{order.shippingPhone}</p>}
-            {isMondialRelay ? (
+            {order.orderType === "GIFT_CARD" ? (
+              <p className={styles.domicileTag}>
+                {order.giftDeliveryMethod === "POSTAL" ? "Carte postale à domicile" : "Envoi par e-mail"}
+              </p>
+            ) : isMondialRelay ? (
               <p className={styles.mrPoint}>Point Relais : <strong>{order.mondialRelayPointId}</strong></p>
             ) : (
               <p className={styles.domicileTag}>Domicile</p>
@@ -577,7 +589,18 @@ function OrderCard({ order, type, onStatusUpdate }) {
 
         {/* Contenu */}
         <div className={styles.infoCol}>
-          <h4 className={styles.infoColTitle}>Contenu ({order.OrderProducts.length})</h4>
+          <h4 className={styles.infoColTitle}>
+            {order.orderType === "GIFT_CARD" ? "Carte cadeau" : `Contenu (${order.OrderProducts.length})`}
+          </h4>
+          {order.orderType === "GIFT_CARD" && (
+            <div>
+              <p className={styles.highlight}>{order.giftCode?.amount ?? order.totalAmount} €</p>
+              {order.giftCode?.code && <p className={styles.giftCodeChip}>{order.giftCode.code}</p>}
+              {order.giftCode?.recipientName && <p className={styles.subInfo}>Pour {order.giftCode.recipientName}</p>}
+              {order.giftCode?.recipientEmail && <p className={styles.subInfo}>{order.giftCode.recipientEmail}</p>}
+              {order.giftCode?.message && <p className={styles.subInfo}>« {order.giftCode.message} »</p>}
+            </div>
+          )}
           {(order.childAge || order.childGender) && (
             <div style={{
               background: '#fffbef', border: '1.5px solid #f5d16e', borderRadius: '10px',
@@ -590,6 +613,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
               </div>
             </div>
           )}
+          {order.orderType !== "GIFT_CARD" && (
           <ul className={styles.productsList}>
             {order.OrderProducts.map((op, idx) => {
               const isPurchased  = op.intent === 'PURCHASE';
@@ -653,6 +677,7 @@ function OrderCard({ order, type, onStatusUpdate }) {
               );
             })}
           </ul>
+          )}
         </div>
       </div>
 
@@ -664,10 +689,12 @@ function OrderCard({ order, type, onStatusUpdate }) {
 
       {/* Zone bordereau de retour — toujours visible */}
       <div className={styles.cardFooter}>
-        <ReturnLabelUpload order={order} onRefresh={onStatusUpdate} />
+        {type !== "GIFT_CARD" && (
+          <ReturnLabelUpload order={order} onRefresh={onStatusUpdate} />
+        )}
 
         {/* Zone tracking → SHIPPED */}
-        {(type === "RENTAL" || type === "EXCHANGE" || type === "REFILL") && order.status === "PREPARING" && (
+        {(type === "RENTAL" || type === "EXCHANGE" || type === "REFILL" || type === "GIFT_CARD") && order.status === "PREPARING" && (
           <>
             <input
               className={styles.trackingInput}
@@ -921,6 +948,7 @@ export default function OrdersTabs({
   returningOrders,
   adoptionOrders,
   refillOrders = [],
+  giftOrders = [],
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -932,6 +960,7 @@ export default function OrdersTabs({
     if (typeParam === "EXCHANGE") return "EXCHANGE";
     if (typeParam === "ADOPTION") return "ADOPTION";
     if (typeParam === "REFILL")   return "REFILL";
+    if (typeParam === "GIFT_CARD") return "GIFT_CARD";
     if (statusParam === "RETURNING") return "RETURNING";
     return "RENTAL";
   };
@@ -948,6 +977,7 @@ export default function OrdersTabs({
     if (tab === "EXCHANGE")  params.set("type", "EXCHANGE");
     else if (tab === "ADOPTION")  params.set("type", "ADOPTION");
     else if (tab === "REFILL")    params.set("type", "REFILL");
+    else if (tab === "GIFT_CARD") params.set("type", "GIFT_CARD");
     else if (tab === "RETURNING") params.set("status", "RETURNING");
     else params.set("type", "RENTAL");
     router.replace(`/admin/orders?${params.toString()}`, { scroll: false });
@@ -961,6 +991,7 @@ export default function OrdersTabs({
     { key: "RETURNING", label: "↩️ Retours",        count: returningOrders.length },
     { key: "ADOPTION",  label: "💜 Adoptions",      count: adoptionOrders.length },
     { key: "REFILL",    label: "🎁 Réassorts",      count: refillOrders.length },
+    { key: "GIFT_CARD", label: "🎀 Cartes Cadeaux", count: giftOrders.length },
   ];
 
   return (
@@ -978,6 +1009,11 @@ export default function OrdersTabs({
       {activeTab === "REFILL" && (
         <div className={styles.adoptionNotice} style={{ background: "#DAEEE6", borderColor: "#88D4AB", color: "#2E1D21" }}>
           🎁 Réassorts gratuits — un jouet adopté est remplacé par un nouveau. Préparer et expédier comme une Boîte Navette.
+        </div>
+      )}
+      {activeTab === "GIFT_CARD" && (
+        <div className={styles.adoptionNotice} style={{ background: "#FFF7D4", borderColor: "#ffe264", color: "#2E1D21" }}>
+          Cartes cadeaux — le code BJ-XXXX-XXXX est affiché sur chaque commande pour préparer l&apos;envoi postal.
         </div>
       )}
 
@@ -1009,6 +1045,9 @@ export default function OrdersTabs({
         )}
         {activeTab === "REFILL" && (
           <OrdersList orders={refillOrders} type="REFILL" onRefresh={handleRefresh} />
+        )}
+        {activeTab === "GIFT_CARD" && (
+          <OrdersList orders={giftOrders} type="GIFT_CARD" onRefresh={handleRefresh} />
         )}
       </div>
     </div>

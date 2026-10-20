@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import ProductCard from '@/components/productCard';
 import { useCart } from '@/context/CartContext';
 import '@/styles/bibliotheque.css';
+import '@/styles/gift-card.css';
 
 export default function LibraryPage() {
   const searchParams = useSearchParams();
@@ -225,6 +227,18 @@ export default function LibraryPage() {
           </select>
         </div>
       </div>
+
+      {!exchangeMode && !refillMode && (
+        <Link href="/nos-offres/carte-cadeau" className="gift-library-card">
+          <span className="gift-library-card__badge">Nouveau</span>
+          <span className="gift-library-card__emoji" aria-hidden="true">🎁</span>
+          <span className="gift-library-card__body">
+            <span className="gift-library-card__title">Carte Cadeau Bibli&apos;o Jouets</span>
+            <span className="gift-library-card__text">Montant libre, à partir de 10 €. Offrez des heures de jeu, sans encombrer la maison.</span>
+          </span>
+          <span className="gift-library-card__cta">Choisir le montant</span>
+        </Link>
+      )}
 
       {loading ? (
         <div style={{textAlign: 'center', padding: '50px'}}>Chargement des jouets...</div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import OrderItemRow from './OrderItemRow';
+import '@/styles/gift-order.css';
 
 const STATUS_TRANSLATIONS = {
   PENDING:   "En attente",
@@ -86,6 +87,8 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError,   setActionError]   = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const isGiftCard = order.orderType === 'GIFT_CARD';
 
   const enterMode = (mode) => {
     setActiveMode(mode);
@@ -167,7 +170,8 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
 
   return (
     <div className={`order-card p-6 rounded-[25px] shadow-sm mb-6 flex flex-col gap-4 ${
-      isAdoption ? 'bg-[#F5F0FA] border border-[#c4a8d5]'
+      isGiftCard ? 'order-card--gift'
+      : isAdoption ? 'bg-[#F5F0FA] border border-[#c4a8d5]'
       : isExchange ? 'bg-[#EBF7FD] border border-[#6EC1E4]'
       : isRefill   ? 'bg-[#F2FAF6] border border-[#88D4AB]'
       : 'bg-[#FFFAF4]'
@@ -192,6 +196,11 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
             {isRefill && (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#DAEEE6] text-[#2E1D21]">
                 🎁 Réassort
+              </span>
+            )}
+            {isGiftCard && (
+              <span className="gift-order-badge">
+                {order.giftDeliveryMethod === 'POSTAL' ? 'Carte postale' : 'Carte cadeau'}
               </span>
             )}
             {isBoxMystere && (
@@ -220,6 +229,36 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
           )}
         </div>
       </div>
+
+      {isGiftCard && (
+        <div className="gift-order-box">
+          <span className="gift-order-box__label">Carte cadeau</span>
+          <strong>{Number(order.giftCode?.amount || order.totalAmount || 0).toFixed(0)} €</strong>
+          {order.giftCode?.code ? (
+            <>
+              <span className="gift-order-box__code">{order.giftCode.code}</span>
+              <button
+                type="button"
+                className="gift-order-copy"
+                onClick={() => {
+                  navigator.clipboard.writeText(order.giftCode.code).then(() => {
+                    setCodeCopied(true);
+                    setTimeout(() => setCodeCopied(false), 2000);
+                  });
+                }}
+              >
+                {codeCopied ? "Code copié" : "Copier le code"}
+              </button>
+            </>
+          ) : (
+            <p>Le code apparaîtra ici dès la confirmation du paiement.</p>
+          )}
+          {order.giftCode?.recipientName && <p>Pour {order.giftCode.recipientName}</p>}
+          {order.giftDeliveryMethod === 'POSTAL'
+            ? <p>Envoi postal en préparation.</p>
+            : <p>Code envoyé par e-mail.</p>}
+        </div>
+      )}
 
       {/* ── BOX MYSTÈRE EN ATTENTE D'ASSIGNATION ── */}
       {isBoxPending && (
@@ -337,7 +376,7 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
       )}
 
       {/* Liste des jouets — masquée si Box Mystère non encore assignée */}
-      {!isBoxPending && (
+      {!isBoxPending && !isGiftCard && (
         <div className="order-items-container flex flex-col gap-3">
           {items.map((item, index) => (
             <OrderItemRow
@@ -374,7 +413,7 @@ export default function OrderCard({ order, canExchange = true, canExchangeReason
       )}
 
       {/* Info commande en préparation */}
-      {isInactive && !isAdoption && (
+      {isInactive && !isAdoption && !isGiftCard && (
         <div className="px-4 py-3 rounded-[16px] bg-[#FFF7E6] border border-[#FFE08A] text-sm text-[#7a5c00]">
           ⏳ Votre commande est en cours de préparation — les actions seront disponibles dès l&apos;expédition.
         </div>

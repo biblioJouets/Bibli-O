@@ -790,7 +790,16 @@ export const getUserOrders = async (userId) => {
         include: {
           OrderProducts: {
             include: { Products: true }
-          }
+          },
+          giftCode: {
+            select: {
+              code: true,
+              amount: true,
+              recipientName: true,
+              recipientEmail: true,
+              message: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' }
       });

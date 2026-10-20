@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Truck, Package, MapPin, AlertCircle, Gift } from "lucide-react";
 import '@/styles/paiement.css';
+import '@/styles/paiement-gift.css';
 
 export default function PaiementPage() {
   const { cart, loading, boxMystereData, isBoxMystereCart, planName, cartTotalDisplay, exchangeContext, refillContext } = useCart();
@@ -21,6 +22,9 @@ export default function PaiementPage() {
   const [promoStatus, setPromoStatus] = useState(promoCode ? "loading" : "idle");
   const [promoMessage, setPromoMessage] = useState("");
   const [giftCredit, setGiftCredit] = useState(0);
+  const [postalDelivery, setPostalDelivery] = useState(false);
+  const [acceptCgv, setAcceptCgv] = useState(false);
+  const [giftError, setGiftError] = useState("");
 
   useEffect(() => {
     fetch("/api/user/stripe-balance")
@@ -128,7 +132,13 @@ export default function PaiementPage() {
   
   const canSubmit = isEligibleForHome();
 
-  const rentalItems = cart.items?.filter((item) => item.intent !== 'PURCHASE') || [];
+  const isGiftCart = Array.isArray(cart.items) && cart.items.length > 0 && cart.items.every((item) => item.intent === 'GIFT_CARD');
+  const giftAmount = (cart.items || [])
+    .filter((item) => item.intent === 'GIFT_CARD')
+    .reduce((sum, item) => sum + (item.customAmount || 0), 0);
+  const postalFee = postalDelivery ? 2 : 0;
+
+  const rentalItems = cart.items?.filter((item) => item.intent !== 'PURCHASE' && item.intent !== 'GIFT_CARD') || [];
   const purchaseItems = cart.items?.filter((item) => item.intent === 'PURCHASE') || [];
 
   const rentalCount = rentalItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -280,8 +290,124 @@ export default function PaiementPage() {
     }
   };
 
+  const handleGiftOrder = async (e) => {
+    e.preventDefault();
+    setGiftError("");
+    if (!acceptCgv) {
+      setGiftError("Cochez l'acceptation des conditions générales de vente.");
+      return;
+    }
+    if (postalDelivery && (!shipping.firstName.trim() || !shipping.lastName.trim() || !shipping.address.trim() || !shipping.zipCode.trim() || !shipping.city.trim())) {
+      setGiftError("Renseignez les coordonnées de livraison postale.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cartItems: cart.items,
+          cartId: cart.id,
+          giftDeliveryMethod: postalDelivery ? "POSTAL" : "EMAIL",
+          shippingData: postalDelivery ? {
+            shippingName: `${shipping.firstName} ${shipping.lastName}`.trim(),
+            shippingPhone: shipping.phone,
+            shippingAddress: shipping.address,
+            shippingZip: shipping.zipCode,
+            shippingCity: shipping.city,
+          } : {},
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setGiftError(data.error || "Le paiement n'a pas pu démarrer.");
+        setIsSubmitting(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setGiftError("Erreur réseau. Réessayez dans un instant.");
+      setIsSubmitting(false);
+    }
+  };
+
   if (!loading && (!cart.items || cart.items.length === 0)) {
     return <div className="page-container cart-empty-msg">Votre panier est vide.</div>;
+  }
+
+  if (!loading && isGiftCart) {
+    const giftItem = cart.items[0];
+    const meta = giftItem.giftMetadata || {};
+    const recipient = [meta.recipientFirstName, meta.recipientLastName].filter(Boolean).join(" ");
+    return (
+      <div className="page-container">
+        <h1 className="page-title">Payer la carte cadeau</h1>
+        <form className="checkout-grid" onSubmit={handleGiftOrder}>
+          <div>
+            <div className="card-section">
+              <h2 className="section-title">Réception de la carte</h2>
+              <div className="gift-pay-choice">
+                <button
+                  type="button"
+                  className={`gift-pay-option${!postalDelivery ? " gift-pay-option--active" : ""}`}
+                  onClick={() => setPostalDelivery(false)}
+                >
+                  <strong>Non — envoi par e-mail</strong>
+                  <span>Le code part par mail, sans frais supplémentaires.</span>
+                </button>
+                <button
+                  type="button"
+                  className={`gift-pay-option${postalDelivery ? " gift-pay-option--active" : ""}`}
+                  onClick={() => setPostalDelivery(true)}
+                >
+                  <strong>Oui — carte postale à domicile</strong>
+                  <span>+ 2,00 € de frais d&apos;envoi.</span>
+                </button>
+              </div>
+
+              {postalDelivery && (
+                <div className="gift-pay-address">
+                  <div className="gift-pay-address-row">
+                    <input className="input-field" placeholder="Prénom" value={shipping.firstName} onChange={(e) => setShipping({ ...shipping, firstName: e.target.value })} />
+                    <input className="input-field" placeholder="Nom" value={shipping.lastName} onChange={(e) => setShipping({ ...shipping, lastName: e.target.value })} />
+                  </div>
+                  <input className="input-field" placeholder="Adresse" value={shipping.address} onChange={(e) => setShipping({ ...shipping, address: e.target.value })} />
+                  <div className="gift-pay-address-row">
+                    <input className="input-field" placeholder="Code postal" value={shipping.zipCode} onChange={(e) => setShipping({ ...shipping, zipCode: e.target.value })} />
+                    <input className="input-field" placeholder="Ville" value={shipping.city} onChange={(e) => setShipping({ ...shipping, city: e.target.value })} />
+                  </div>
+                  <input className="input-field" placeholder="Téléphone" value={shipping.phone} onChange={(e) => setShipping({ ...shipping, phone: e.target.value })} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="card-section">
+            <h2 className="section-title"><Gift size={18} color="#FF8C94" /> Récapitulatif</h2>
+            <p>Carte cadeau — {giftAmount.toFixed(0)} €</p>
+            {meta.offerToSomeone && recipient && <p>Pour {recipient}</p>}
+            {postalDelivery && <p>Livraison postale — 2,00 €</p>}
+            <div className="total-row">
+              <span>Total à régler</span>
+              <span>{(giftAmount + postalFee).toFixed(2)} €</span>
+            </div>
+            <label className="gift-cgv">
+              <input type="checkbox" checked={acceptCgv} onChange={(e) => setAcceptCgv(e.target.checked)} />
+              <span>
+                J&apos;accepte les <a href="/conditions-generales-de-vente" target="_blank" rel="noreferrer">conditions générales de vente</a>.
+              </span>
+            </label>
+            {giftError && <p className="gift-pay-error">{giftError}</p>}
+            <button type="submit" className={`submit-btn${isSubmitting ? " disabled" : ""}`} disabled={isSubmitting}>
+              {isSubmitting ? "Redirection..." : "Payer la carte cadeau"} <ShieldCheck size={20} />
+            </button>
+            <p className="secure-text">Paiement sécurisé par Stripe.</p>
+          </div>
+        </form>
+      </div>
+    );
   }
 
   return (

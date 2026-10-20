@@ -52,8 +52,12 @@ export default function ConnexionPage() {
         }
         setLoading(false);
       } else {
-        router.refresh(); 
-        router.push('/'); 
+        const callbackUrl = searchParams.get("callbackUrl");
+        const nextUrl = callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/";
+        router.refresh();
+        router.push(nextUrl);
       }
     } catch (err) {
       setError("Une erreur est survenue.");
@@ -128,7 +132,7 @@ export default function ConnexionPage() {
         </form>
 
         <div className="auth-footer">
-          Pas encore de compte ? <Link href="/inscription" className="auth-link">Créer un compte</Link>
+          Pas encore de compte ? <Link href={searchParams.get("callbackUrl") ? `/inscription?callbackUrl=${encodeURIComponent(searchParams.get("callbackUrl"))}` : "/inscription"} className="auth-link">Créer un compte</Link>
         </div>
       </div>
     </div>

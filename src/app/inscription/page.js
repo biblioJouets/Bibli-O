@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import '@/styles/auth.css';
@@ -35,6 +35,7 @@ const PasswordInput = ({ name, label, show, setShow, value, onChange }) => (
 
 export default function InscriptionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '', password: '', confirmPassword: ''
   });
@@ -68,7 +69,11 @@ export default function InscriptionPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Une erreur est survenue");
-      router.push('/connexion?success=true');
+      const callbackUrl = searchParams.get("callbackUrl");
+      const safeCallback = callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+        ? `&callbackUrl=${encodeURIComponent(callbackUrl)}`
+        : "";
+      router.push(`/connexion?success=true${safeCallback}`);
     } catch (err) {
       setError(err.message);
     } finally {

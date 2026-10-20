@@ -230,6 +230,18 @@ describe('CartService - Règle BOX-MYSTERE', () => {
       .toThrow('La Box Mystère s\'achète seule');
   });
 
+  it("interdit d'ajouter un jouet si le panier contient une carte cadeau", async () => {
+    prisma.cartItem.findMany.mockResolvedValue([
+      { intent: 'GIFT_CARD', product: null },
+    ]);
+
+    await expect(cartService.addToCart(userId, 8, 1, 'RENTAL'))
+      .rejects
+      .toThrow('carte-cadeau');
+
+    expect(prisma.products.findUnique).not.toHaveBeenCalled();
+  });
+
   it("interdit d'ajouter un jouet normal si la Box Mystere est deja dans le panier", async () => {
     prisma.products.findUnique.mockResolvedValue({ id: 8, stock: 3, reference: 'LEGO-001' });
     // La box est déjà présente
@@ -240,5 +252,43 @@ describe('CartService - Règle BOX-MYSTERE', () => {
     await expect(cartService.addToCart(userId, 8, 1))
       .rejects
       .toThrow('Votre panier contient déjà la Box Mystère');
+  });
+});
+
+describe('CartService - Carte cadeau isolée', () => {
+  const userId = 1;
+  const cartId = 100;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    prisma.cart.findUnique.mockResolvedValue({ id: cartId, userId, items: [] });
+  });
+
+  it('refuse une carte cadeau si le panier contient déjà un jouet', async () => {
+    prisma.cartItem.findMany.mockResolvedValue([{ id: 3, intent: 'RENTAL' }]);
+
+    await expect(cartService.addGiftCard(userId, { customAmount: 30, giftMetadata: null }))
+      .rejects
+      .toMatchObject({ code: 'CART_MIXED' });
+  });
+
+  it('enregistre un montant entier et sans produit catalogue', async () => {
+    prisma.cartItem.findMany.mockResolvedValue([]);
+    prisma.cartItem.create.mockResolvedValue({ id: 9, intent: 'GIFT_CARD' });
+
+    await cartService.addGiftCard(userId, {
+      customAmount: 30.8,
+      giftMetadata: { offerToSomeone: false },
+    });
+
+    expect(prisma.cartItem.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        cartId,
+        productId: null,
+        quantity: 1,
+        intent: 'GIFT_CARD',
+        customAmount: 30,
+      }),
+    });
   });
 });

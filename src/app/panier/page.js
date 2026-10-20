@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ButtonBlue from "@/components/ButtonBlue";
 import "@/styles/panier.css";
+import "@/styles/panier-gift.css";
 
 // Grille tarifaire pour affichage dans la modale downgrade
 const PRICING_MAP = {
@@ -215,8 +216,11 @@ export default function PanierPage() {
   };
 
   // --- SÉPARATION DES ARTICLES PAR INTENTION ---
+  const giftItems =
+    cart.items?.filter((item) => item.intent === "GIFT_CARD") || [];
+  const isGiftCart = giftItems.length > 0;
   const rentalItems =
-    cart.items?.filter((item) => item.intent !== "PURCHASE") || [];
+    cart.items?.filter((item) => item.intent !== "PURCHASE" && item.intent !== "GIFT_CARD") || [];
   const purchaseItems =
     cart.items?.filter((item) => item.intent === "PURCHASE") || [];
 
@@ -225,7 +229,8 @@ export default function PanierPage() {
     (acc, item) => acc + item.quantity,
     0,
   );
-  const totalItemCount = rentalCount + purchaseCount;
+  const giftAmount = giftItems.reduce((sum, item) => sum + (item.customAmount || 0), 0);
+  const totalItemCount = rentalCount + purchaseCount + giftItems.length;
 
   const rentalTheoreticalValue = rentalItems.reduce(
     (total, item) => total + item.product.price * item.quantity,
@@ -400,6 +405,25 @@ export default function PanierPage() {
       <div className="cart-layout">
         {/* --- COLONNE GAUCHE : LISTE DES JOUETS --- */}
         <div className="cart-items-list">
+          {giftItems.map((item) => {
+            const meta = item.giftMetadata || {};
+            const recipient = [meta.recipientFirstName, meta.recipientLastName].filter(Boolean).join(" ");
+            return (
+              <article key={item.id} className="gift-cart-card">
+                <span className="gift-cart-card__badge">Carte cadeau</span>
+                <h3>Carte Cadeau Bibli&apos;o Jouets</h3>
+                <p className="gift-cart-card__amount">{item.customAmount || 0} €</p>
+                {meta.offerToSomeone && recipient && (
+                  <p>Pour {recipient}{meta.recipientEmail ? ` — ${meta.recipientEmail}` : ""}</p>
+                )}
+                {meta.message && <p>« {meta.message} »</p>}
+                <button type="button" className="gift-cart-card__remove" onClick={() => removeFromCart(item.id)}>
+                  Retirer
+                </button>
+              </article>
+            );
+          })}
+
           {/* SECTION LOCATION */}
           {rentalItems.length > 0 && (
             <div>
@@ -612,8 +636,15 @@ export default function PanierPage() {
         <div className="cart-summary-card">
           <h3 className="cart-summary-title">Résumé de la commande</h3>
 
+          {isGiftCart && (
+            <div className="gift-cart-note">
+              <strong>Carte cadeau : {giftAmount.toFixed(0)} €</strong>
+              <p>Le choix entre l&apos;envoi par e-mail et la carte postale (+ 2,00 €) se fait à l&apos;étape suivante.</p>
+            </div>
+          )}
+
           {/* RÉSUMÉ LOCATION */}
-          {rentalItems.length > 0 && (
+          {!isGiftCart && rentalItems.length > 0 && (
             <div className="cart-plan-box">
               <p className="cart-plan-label">
                 Abonnement ({rentalCount} jouet{rentalCount > 1 ? "s" : ""}) :
@@ -635,7 +666,7 @@ export default function PanierPage() {
           )}
 
           {/* RÉSUMÉ ACHAT */}
-          {purchaseItems.length > 0 && (
+          {!isGiftCart && purchaseItems.length > 0 && (
             <div className="cart-summary-purchase-row">
               <span className="cart-summary-purchase-label">
                 <Package size={18} color="#FF8C94" /> Achat définitif (
@@ -648,7 +679,7 @@ export default function PanierPage() {
           )}
 
           {/* CORRECTION: Affichage explicite de l'utilisation de la cagnotte */}
-          {giftCredit > 0 && (
+          {!isGiftCart && giftCredit > 0 && (
             <div className="cart-gift-credit" style={{ display: 'block' }}>
               <div className="flex justify-between items-center w-full">
                 <div className="flex items-center gap-2">
@@ -668,12 +699,14 @@ export default function PanierPage() {
             </div>
           )}
 
+          {!isGiftCart && (
           <div className="cart-summary-row cart-summary-margin-bottom">
             <span className="cart-summary-delivery-label">
               <Truck size={18} color="#88D4AB" /> Livraison
             </span>
             <span className="cart-summary-delivery-value">OFFERTE</span>
           </div>
+          )}
 
           {/* CORRECTION: On n'affiche le prix barré que si on déduit VRAIMENT du crédit */}
           {creditToDeduct > 0 && baseTotal > 0 && (
@@ -692,15 +725,17 @@ export default function PanierPage() {
 
           <div className="cart-checkout-section">
             <p className="cart-checkout-text">
-              Aucun paiement n'est prélevé maintenant. Vous confirmerez{" "}
+              {isGiftCart
+                ? "Le paiement de la carte cadeau est demandé à l'étape suivante."
+                : <>Aucun paiement n&apos;est prélevé maintenant. Vous confirmerez{" "}
               {rentalCount > 0 && purchaseCount > 0
                 ? "votre abonnement et votre achat"
                 : "votre commande"}{" "}
-              à l'étape suivante.
+              à l&apos;étape suivante.</>}
             </p>
 
             {/* CODE PROMO */}
-            {!isBoxMystereCart && (
+            {!isBoxMystereCart && !isGiftCart && (
               <div className="cart-promo-wrapper">
                 <form onSubmit={handleVerifyPromo} className="cart-promo-form">
                   <input
@@ -770,8 +805,8 @@ export default function PanierPage() {
                 </>
               ) : (
                 <ButtonBlue
-                  text="Valider ma sélection"
-                  href={`/paiement${promoStatus === "success" ? `?promo=${promoCode.trim().toUpperCase()}` : ""}`}
+                  text={isGiftCart ? "Continuer vers le paiement" : "Valider ma sélection"}
+                  href={isGiftCart ? "/paiement" : `/paiement${promoStatus === "success" ? `?promo=${promoCode.trim().toUpperCase()}` : ""}`}
                 />
               )}
             </div>

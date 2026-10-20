@@ -30,6 +30,7 @@
 /* ── Onglets ── */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   border-bottom: 2px solid rgba(46, 29, 33, 0.08);
   margin-bottom: 1.5rem;
@@ -671,6 +672,33 @@
   padding: 3px 10px;
   border-radius: 50px;
   white-space: nowrap;
+}
+
+.giftBadgeMail,
+.giftBadgePostal,
+.giftCodeChip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.giftBadgeMail {
+  background: #DFF1F9;
+  color: #2E1D21;
+}
+
+.giftBadgePostal {
+  background: #ffe264;
+  color: #2E1D21;
+}
+
+.giftCodeChip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: #FFFAF4;
+  border: 1px solid #FAE9CF;
+  letter-spacing: 0.04em;
 }
 
 .hybridBadgeMixed {

@@ -20,13 +20,22 @@ const orderInclude = {
       },
     },
   },
+  giftCode: {
+    select: {
+      code: true,
+      amount: true,
+      recipientName: true,
+      recipientEmail: true,
+      message: true,
+    },
+  },
 };
 
 export default async function AdminOrdersPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") redirect("/");
 
-  const [rentalOrders, exchangeOrders, returningOrders, adoptionOrders, refillOrders] =
+  const [rentalOrders, exchangeOrders, returningOrders, adoptionOrders, refillOrders, giftOrders] =
     await Promise.all([
       prisma.orders.findMany({
         where: { orderType: "RENTAL" },
@@ -63,6 +72,11 @@ export default async function AdminOrdersPage() {
         include: orderInclude,
         orderBy: { createdAt: "desc" },
       }),
+      prisma.orders.findMany({
+        where: { orderType: "GIFT_CARD" },
+        include: orderInclude,
+        orderBy: { createdAt: "desc" },
+      }),
     ]);
 
   // Exclure de Location les commandes dont TOUS les produits sont marqués ADOPTE
@@ -93,6 +107,7 @@ export default async function AdminOrdersPage() {
       returningOrders={serialize(returningOrders)}
       adoptionOrders={serialize(adoptionOrders)}
       refillOrders={serialize(refillOrders)}
+      giftOrders={serialize(giftOrders)}
     />
   );
 }

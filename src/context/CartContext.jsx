@@ -35,6 +35,37 @@ export function CartProvider({ children }) {
   };
 
 
+const addGiftCard = async ({ customAmount, giftMetadata, replace = false }) => {
+  if (!session) {
+    router.push('/connexion?callbackUrl=/nos-offres/carte-cadeau');
+    return { ok: false, code: 'AUTH' };
+  }
+  setLoading(true);
+  try {
+    if (replace) {
+      const currentRes = await fetch('/api/cart');
+      const current = currentRes.ok ? await currentRes.json() : { items: [] };
+      for (const item of current.items || []) {
+        await fetch(`/api/cart?itemId=${item.id}`, { method: 'DELETE' });
+      }
+    }
+    const res = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intent: 'GIFT_CARD', customAmount, giftMetadata }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { ok: false, error: data.error, code: data.code };
+    setCart(data);
+    return { ok: true };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, error: "Impossible d'ajouter la carte cadeau." };
+  } finally {
+    setLoading(false);
+  }
+};
+
 const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
     if (!session) {
       router.push('/connexion?message=Veuillez vous connecter pour ajouter un article au panier.');
@@ -142,7 +173,7 @@ const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
 
   const cartTotalDisplay = planInfo.price;
   return (
-    <CartContext.Provider value={{ cart, addToCart, addBoxToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, isBoxMystereCart, exchangeContext, setExchangeContext, refillContext, setRefillContext, boxMystereData, setBoxMystereData }}>
+    <CartContext.Provider value={{ cart, addToCart, addGiftCard, addBoxToCart, updateQuantity, removeFromCart, clearCart, cartTotalDisplay, cartCount, loading, planName: planInfo.name, isBoxMystereCart, exchangeContext, setExchangeContext, refillContext, setRefillContext, boxMystereData, setBoxMystereData }}>
       {children}
     </CartContext.Provider>
   );

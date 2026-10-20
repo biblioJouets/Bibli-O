@@ -41,7 +41,8 @@ model Users {
   promoCodeUsages PromoCodeUsage[]
   cart            Cart?
   stripeInvoices  StripeInvoice[]
-  giftCodesUsed   GiftCode[]
+  giftCodesUsed      GiftCode[] @relation("GiftCodeUsedBy")
+  giftCodesPurchased GiftCode[] @relation("GiftCodePurchasedBy")
 }
 
 model Address {
@@ -72,12 +73,16 @@ model CartItem {
   cartId Int
   cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
-  productId Int
-  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int?
+  product   Products? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   quantity Int @default(1)
-  
-  intent   String @default("RENTAL") @db.VarChar(20) 
+
+  intent   String @default("RENTAL") @db.VarChar(20)
+
+  // Carte cadeau : montant libre en euros entiers, et infos bénéficiaire
+  customAmount Int?
+  giftMetadata Json?
 
   @@unique([cartId, productId, intent])
 }
@@ -114,9 +119,14 @@ model Orders {
   childAge    String? @db.VarChar(20)
   childGender String? @db.VarChar(20)
 
+  // --- CARTE CADEAU ---
+  giftDeliveryMethod String? @db.VarChar(20) // EMAIL | POSTAL
+  giftMetadata       Json?
+
   userId        Int?
   Users         Users?          @relation(fields: [userId], references: [id])
   OrderProducts OrderProducts[]
+  giftCode      GiftCode?
 }
 
 enum OrderStatus {
@@ -135,6 +145,7 @@ enum OrderType {
   EXCHANGE  // Boîte Navette (échange de jouets en cours de mois)
   ADOPTION  // Achat définitif one-shot d'un jouet actuellement loué
   REFILL    // Réassort gratuit : remplacement d'un jouet adopté par un nouveau
+  GIFT_CARD // Achat d'une carte cadeau (paiement unique, isolé du panier jouets)
 }
 
 model OrderProducts {
@@ -274,7 +285,15 @@ model GiftCode {
   usedAt    DateTime? @db.Timestamptz(6)
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
 
-  user      Users?    @relation(fields: [usedBy], references: [id], onDelete: SetNull)
+  orderId       Int?    @unique
+  order         Orders? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  purchasedById Int?
+  purchaser     Users?  @relation("GiftCodePurchasedBy", fields: [purchasedById], references: [id], onDelete: SetNull)
+  recipientName  String? @db.VarChar(255)
+  recipientEmail String? @db.VarChar(255)
+  message        String? @db.Text
+
+  user      Users?    @relation("GiftCodeUsedBy", fields: [usedBy], references: [id], onDelete: SetNull)
 }
 
 model BlogPost {

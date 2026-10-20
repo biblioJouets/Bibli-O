@@ -1,28 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Gift, Plus, Copy, Check, Loader2 } from "lucide-react";
+import "@/styles/admin-gift-cards.css";
 
-const STATUS = {
-  idle: null,
-  loading: "loading",
-  success: "success",
-  error: "error",
-};
-
-function Badge({ used }) {
-  return (
-    <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-      style={
-        used
-          ? { background: "#fee2e2", color: "#991b1b" }
-          : { background: "#DAEEE6", color: "#3b8c6e" }
-      }
-    >
-      {used ? "Utilisé" : "Disponible"}
-    </span>
-  );
+function personName(user) {
+  if (!user) return "—";
+  const name = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+  return name || user.email || "—";
 }
 
 function CopyButton({ text }) {
@@ -34,14 +20,8 @@ function CopyButton({ text }) {
     });
   }
   return (
-    <button
-      onClick={handleCopy}
-      title="Copier le code"
-      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-mono font-semibold transition"
-      style={{ background: "#f3f4f6", color: "#2E1D21" }}
-    >
-      {copied ? <Check size={12} /> : <Copy size={12} />}
-      {text}
+    <button type="button" className="admin-gifts__code" onClick={handleCopy} title="Copier le code">
+      {copied ? <Check size={12} /> : <Copy size={12} />} {text}
     </button>
   );
 }
@@ -49,10 +29,9 @@ function CopyButton({ text }) {
 export default function CartCadeauxPage() {
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [amount, setAmount] = useState(30);
   const [count, setCount] = useState(1);
-  const [genStatus, setGenStatus] = useState(STATUS.idle);
+  const [genStatus, setGenStatus] = useState("idle");
   const [genMessage, setGenMessage] = useState("");
   const [newCodes, setNewCodes] = useState([]);
 
@@ -68,24 +47,24 @@ export default function CartCadeauxPage() {
 
   async function handleGenerate(e) {
     e.preventDefault();
-    setGenStatus(STATUS.loading);
+    setGenStatus("loading");
     setNewCodes([]);
     setGenMessage("");
 
     const res = await fetch("/api/admin/gift-codes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: parseFloat(amount), count: parseInt(count) }),
+      body: JSON.stringify({ amount: parseFloat(amount), count: parseInt(count, 10) }),
     });
     const data = await res.json();
 
     if (res.ok) {
-      setGenStatus(STATUS.success);
+      setGenStatus("success");
       setGenMessage(`${data.codes.length} code(s) généré(s) avec succès.`);
       setNewCodes(data.codes);
       fetchCodes();
     } else {
-      setGenStatus(STATUS.error);
+      setGenStatus("error");
       setGenMessage(data.error || "Erreur lors de la génération.");
     }
   }
@@ -95,201 +74,99 @@ export default function CartCadeauxPage() {
   const available = total - used;
 
   return (
-    <div className="flex flex-col gap-8 max-w-5xl mx-auto">
-      {/* En-tête */}
-      <div className="flex items-center gap-3">
-        <div
-          className="flex items-center justify-center rounded-2xl"
-          style={{ width: 48, height: 48, background: "#ffe264" }}
-        >
-          <Gift size={24} style={{ color: "#2E1D21" }} />
-        </div>
+    <div className="admin-gifts">
+      <div className="admin-gifts__header">
+        <div className="admin-gifts__icon"><Gift size={24} color="#2E1D21" /></div>
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#2E1D21" }}>
-            Cartes Cadeaux
-          </h1>
-          <p className="text-sm text-gray-500">
-            Génère et gère les codes cadeaux tombola
-          </p>
+          <h1>Cartes Cadeaux</h1>
+          <p>Codes générés à la main et codes issus des commandes clients.</p>
         </div>
       </div>
 
-      {/* Stats rapides */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="admin-gifts__stats">
         {[
           { label: "Total générés", value: total, color: "#6EC1E4" },
           { label: "Disponibles", value: available, color: "#3b8c6e" },
           { label: "Utilisés", value: used, color: "#a0888c" },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="rounded-[25px] bg-white p-5 flex flex-col gap-1 shadow-sm"
-            style={{ border: "1px solid #eee" }}
-          >
-            <span className="text-3xl font-bold" style={{ color: s.color }}>
-              {s.value}
-            </span>
-            <span className="text-xs text-gray-500 font-medium">{s.label}</span>
+        ].map((stat) => (
+          <div key={stat.label} className="admin-gifts__stat">
+            <strong style={{ color: stat.color }}>{stat.value}</strong>
+            <span>{stat.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Formulaire génération */}
-      <div
-        className="rounded-[25px] bg-white p-6 shadow-sm flex flex-col gap-5"
-        style={{ border: "1px solid #eee" }}
-      >
-        <h2 className="font-bold text-lg" style={{ color: "#2E1D21" }}>
-          Générer de nouveaux codes
-        </h2>
-
-        <form onSubmit={handleGenerate} className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Montant (€)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="500"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="rounded-xl border px-4 py-2.5 text-sm w-32 outline-none"
-              style={{ borderColor: "#e5e7eb", color: "#2E1D21" }}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Quantité
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="50"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
-              className="rounded-xl border px-4 py-2.5 text-sm w-24 outline-none"
-              style={{ borderColor: "#e5e7eb", color: "#2E1D21" }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={genStatus === STATUS.loading}
-            className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition disabled:opacity-60"
-            style={{ background: "#2E1D21", color: "#fff" }}
-          >
-            {genStatus === STATUS.loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Plus size={16} />
-            )}
-            Générer
+      <div className="admin-gifts__panel">
+        <h2>Générer de nouveaux codes</h2>
+        <form onSubmit={handleGenerate} className="admin-gifts__form">
+          <label className="admin-gifts__field">
+            Montant (€)
+            <input type="number" min="1" max="500" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </label>
+          <label className="admin-gifts__field">
+            Quantité
+            <input type="number" min="1" max="50" value={count} onChange={(e) => setCount(e.target.value)} />
+          </label>
+          <button type="submit" className="admin-gifts__submit" disabled={genStatus === "loading"}>
+            {genStatus === "loading" ? <Loader2 size={16} /> : <Plus size={16} />} Générer
           </button>
         </form>
-
-        {/* Feedback génération */}
-        {genStatus === STATUS.success && (
-          <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: "#DAEEE6", color: "#3b8c6e" }}
-          >
-            <p className="font-semibold mb-2">{genMessage}</p>
-            <div className="flex flex-wrap gap-2">
-              {newCodes.map((c) => (
-                <CopyButton key={c.id} text={c.code} />
-              ))}
-            </div>
+        {genStatus === "success" && (
+          <div className="admin-gifts__feedback">
+            <p>{genMessage}</p>
+            <div>{newCodes.map((c) => <CopyButton key={c.id} text={c.code} />)}</div>
           </div>
         )}
-        {genStatus === STATUS.error && (
-          <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: "#fee2e2", color: "#991b1b" }}
-          >
-            {genMessage}
-          </div>
-        )}
+        {genStatus === "error" && <div className="admin-gifts__feedback admin-gifts__feedback--error">{genMessage}</div>}
       </div>
 
-      {/* Table des codes */}
-      <div
-        className="rounded-[25px] bg-white shadow-sm overflow-hidden"
-        style={{ border: "1px solid #eee" }}
-      >
-        <div className="px-6 py-4 border-b" style={{ borderColor: "#f3f4f6" }}>
-          <h2 className="font-bold text-lg" style={{ color: "#2E1D21" }}>
-            Tous les codes ({total})
-          </h2>
-        </div>
-
+      <div className="admin-gifts__table-wrap">
+        <h2>Tous les codes ({total})</h2>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 size={28} className="animate-spin text-gray-300" />
-          </div>
+          <p>Chargement...</p>
         ) : codes.length === 0 ? (
-          <p className="text-center text-sm text-gray-400 py-16">
-            Aucun code généré pour l'instant.
-          </p>
+          <p>Aucun code généré pour l&apos;instant.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="admin-gifts__scroll">
+            <table>
               <thead>
-                <tr style={{ background: "#FFFAF4" }}>
-                  {["Code", "Montant", "Statut", "Utilisé par", "Date activation", "Créé le"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide"
-                        style={{ color: "#a0888c" }}
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                <tr>
+                  {["Code", "Montant", "Statut", "Commande", "Acheteur", "Bénéficiaire", "Réception", "Utilisé par", "Créé le"].map((heading) => (
+                    <th key={heading}>{heading}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {codes.map((c, i) => (
-                  <tr
-                    key={c.id}
-                    style={{
-                      borderTop: i > 0 ? "1px solid #f3f4f6" : undefined,
-                    }}
-                  >
-                    <td className="px-5 py-3">
-                      <CopyButton text={c.code} />
+                {codes.map((code) => (
+                  <tr key={code.id}>
+                    <td><CopyButton text={code.code} /></td>
+                    <td>{Number(code.amount).toFixed(2)} €</td>
+                    <td>
+                      <span className={`admin-gifts__badge ${code.isUsed ? "admin-gifts__badge--used" : "admin-gifts__badge--ok"}`}>
+                        {code.isUsed ? "Utilisé" : "Disponible"}
+                      </span>
                     </td>
-                    <td className="px-5 py-3 font-semibold" style={{ color: "#2E1D21" }}>
-                      {c.amount.toFixed(2)} €
+                    <td>
+                      {code.order?.id ? (
+                        <Link className="admin-gifts__order-link" href="/admin/orders?type=GIFT_CARD">
+                          #{code.order.id}
+                        </Link>
+                      ) : "—"}
                     </td>
-                    <td className="px-5 py-3">
-                      <Badge used={c.isUsed} />
+                    <td>{personName(code.purchaser)}</td>
+                    <td>
+                      {code.recipientName || "—"}
+                      {code.recipientEmail ? <><br />{code.recipientEmail}</> : null}
                     </td>
-                    <td className="px-5 py-3 text-gray-500">
-                      {c.user
-                        ? `${c.user.firstName ?? ""} ${c.user.lastName ?? ""}`.trim() ||
-                          c.user.email
-                        : "—"}
+                    <td>
+                      {!code.order
+                        ? "Manuel"
+                        : code.order.giftDeliveryMethod === "POSTAL"
+                          ? "Voie postale +2 €"
+                          : "E-mail"}
                     </td>
-                    <td className="px-5 py-3 text-gray-500">
-                      {c.usedAt
-                        ? new Date(c.usedAt).toLocaleDateString("fr-FR", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          })
-                        : "—"}
-                    </td>
-                    <td className="px-5 py-3 text-gray-400">
-                      {new Date(c.createdAt).toLocaleDateString("fr-FR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
-                    </td>
+                    <td>{personName(code.user)}</td>
+                    <td>{new Date(code.createdAt).toLocaleDateString("fr-FR")}</td>
                   </tr>
                 ))}
               </tbody>

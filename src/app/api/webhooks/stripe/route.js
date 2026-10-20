@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import prisma from "@/lib/core/database";
 import { createOrder } from "@/lib/modules/orders/order.service";
+import { fulfillGiftCardOrder } from "@/lib/modules/gift-cards/gift-card.service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -356,6 +357,17 @@ export async function POST(req) {
       }
 
       return NextResponse.json({ received: true });
+    }
+
+    // --- B1b : ACHAT D'UNE CARTE CADEAU ---
+    if (session.metadata?.orderType === "GIFT_CARD") {
+      try {
+        await fulfillGiftCardOrder(session);
+        return NextResponse.json({ received: true });
+      } catch (err) {
+        console.error("[Webhook] Erreur traitement carte cadeau:", err);
+        return NextResponse.json({ error: "Erreur traitement carte cadeau" }, { status: 500 });
+      }
     }
 
     // --- B2 : NOUVELLE COMMANDE ---

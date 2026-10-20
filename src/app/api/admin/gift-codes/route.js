@@ -26,6 +26,8 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     include: {
       user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      purchaser: { select: { id: true, firstName: true, lastName: true, email: true } },
+      order: { select: { id: true, status: true, giftDeliveryMethod: true, totalAmount: true, createdAt: true } },
     },
   });
 

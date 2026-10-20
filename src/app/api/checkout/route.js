@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
 import prisma from "@/lib/core/database";
 import { checkRateLimit, getRateLimitKey } from "@/lib/core/security/rateLimit";
+import { createGiftCardCheckoutSession } from "@/lib/modules/gift-cards/gift-card.service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -33,6 +34,24 @@ export async function POST(req) {
 
     if (hasInvalidItems) {
         return NextResponse.json({ error: "Quantités invalides détectées." }, { status: 400 });
+    }
+
+    if (cartItems.some((item) => item.intent === "GIFT_CARD")) {
+      try {
+        const url = await createGiftCardCheckoutSession({
+          userId: parseInt(session.user.id, 10),
+          email: session.user.email,
+          giftDeliveryMethod: body.giftDeliveryMethod,
+          shippingData: shippingData,
+          baseUrl,
+        });
+        return NextResponse.json({ url });
+      } catch (giftError) {
+        return NextResponse.json(
+          { error: giftError.message || "Impossible de payer la carte cadeau." },
+          { status: giftError.status || 400 }
+        );
+      }
     }
     
     // Snapshot enrichi du panier pour le transmettre de manière transparente au Webhook

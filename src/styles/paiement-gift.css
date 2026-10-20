@@ -1,0 +1,75 @@
+.gift-pay-choice {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.gift-pay-option {
+  text-align: left;
+  border: 2px solid #FAE9CF;
+  background: #FFFAF4;
+  color: #2E1D21;
+  border-radius: 25px;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gift-pay-option strong,
+.gift-pay-option span {
+  display: block;
+}
+
+.gift-pay-option span {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.gift-pay-option--active {
+  border-color: #6EC1E4;
+  background: #DFF1F9;
+}
+
+.gift-pay-address {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.gift-pay-address-row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.gift-cgv {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 1rem 0;
+  line-height: 1.4;
+}
+
+.gift-cgv input {
+  margin-top: 0.2rem;
+  accent-color: #88D4AB;
+}
+
+.gift-cgv a {
+  color: #2E1D21;
+  font-weight: 700;
+}
+
+.gift-pay-error {
+  background: #FFD9DC;
+  color: #2E1D21;
+  border-radius: 25px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+}
+
+@media (min-width: 720px) {
+  .gift-pay-choice,
+  .gift-pay-address-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

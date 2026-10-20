@@ -28,6 +28,15 @@ export const cartService = {
     const cart = await this.getCart(userId);
     const pId = parseInt(productId);
 
+    const BOX_REF = 'BOX-MYSTERE';
+    const cartProducts = await prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+      include: { product: { select: { reference: true } } },
+    });
+    if (cartProducts.some(ci => ci.intent === 'GIFT_CARD')) {
+      throw new Error("Votre panier contient une carte-cadeau. Retirez-la avant d'ajouter un jouet.");
+    }
+
     // 1. Récupérer le produit pour connaître son stock
     const product = await prisma.products.findUnique({
       where: { id: pId }
@@ -35,13 +44,7 @@ export const cartService = {
 
     if (!product) throw new Error("Produit introuvable");
 
-    // RÈGLE BOX MYSTÈRE : la box s'achète seule
-    const BOX_REF = 'BOX-MYSTERE';
-    const cartProducts = await prisma.cartItem.findMany({
-      where: { cartId: cart.id },
-      include: { product: { select: { reference: true } } },
-    });
-    const hasBox = cartProducts.some(ci => ci.product.reference === BOX_REF);
+    const hasBox = cartProducts.some(ci => ci.product?.reference === BOX_REF);
 
     if (product.reference === BOX_REF && cartProducts.length > 0) {
       throw new Error("La Box Mystère s'achète seule. Veuillez d'abord vider votre panier.");
@@ -98,6 +101,10 @@ export const cartService = {
 
     if(!item) throw new Error("Article introuvable");
 
+    if (!item.product || item.intent === 'GIFT_CARD') {
+      throw new Error("La quantité d'une carte cadeau ne se modifie pas.");
+    }
+
     if (quantity > item.product.stock) {
          throw new Error(`Impossible d'ajouter plus. Stock max : ${item.product.stock}`);
     }
@@ -105,6 +112,55 @@ export const cartService = {
     return await prisma.cartItem.update({
       where: { id: parseInt(itemId) },
       data: { quantity: parseInt(quantity) }
+    });
+  },
+
+  async addGiftCard(userId, { customAmount, giftMetadata }) {
+    const amount = Math.floor(Number(customAmount));
+    if (!Number.isInteger(amount) || amount < 10 || amount > 500) {
+      throw new Error("Le montant doit être un nombre entier entre 10 € et 500 €.");
+    }
+
+    const meta = giftMetadata && typeof giftMetadata === 'object' ? giftMetadata : null;
+    if (meta?.offerToSomeone) {
+      const firstName = String(meta.recipientFirstName || '').trim();
+      const lastName = String(meta.recipientLastName || '').trim();
+      const email = String(meta.recipientEmail || '').trim();
+      if (!firstName || !lastName || !email || !email.includes('@')) {
+        throw new Error("Renseignez le prénom, le nom et l'e-mail du bénéficiaire.");
+      }
+    }
+
+    const cart = await this.getCart(userId);
+    const existing = await prisma.cartItem.findMany({ where: { cartId: cart.id } });
+    const others = existing.filter((item) => item.intent !== 'GIFT_CARD');
+    if (others.length > 0) {
+      const error = new Error("Votre panier contient déjà des jouets. Une carte-cadeau doit rester seule.");
+      error.code = 'CART_MIXED';
+      throw error;
+    }
+
+    const payload = {
+      customAmount: amount,
+      giftMetadata: meta,
+      quantity: 1,
+      intent: 'GIFT_CARD',
+    };
+
+    const current = existing.find((item) => item.intent === 'GIFT_CARD');
+    if (current) {
+      return prisma.cartItem.update({
+        where: { id: current.id },
+        data: payload,
+      });
+    }
+
+    return prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        productId: null,
+        ...payload,
+      },
     });
   },
 
