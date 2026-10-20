@@ -68,7 +68,12 @@ export default function GiftCardForm() {
       message: offer ? recipient.message.trim() : "",
     };
 
-    if (offer && (!giftMetadata.recipientFirstName || !giftMetadata.recipientLastName || !giftMetadata.recipientEmail.includes("@"))) {
+    if (
+      offer &&
+      (!giftMetadata.recipientFirstName ||
+        !giftMetadata.recipientLastName ||
+        !giftMetadata.recipientEmail.includes("@"))
+    ) {
       setError("Indiquez le prénom, le nom et un e-mail valide du bénéficiaire.");
       return;
     }
@@ -76,14 +81,17 @@ export default function GiftCardForm() {
     if (status === "loading") return;
 
     if (!session) {
-      sessionStorage.setItem(PENDING_KEY, JSON.stringify({
-        amount: numericAmount,
-        isGift: offer,
-        recipientFirstName: giftMetadata.recipientFirstName,
-        recipientLastName: giftMetadata.recipientLastName,
-        recipientEmail: giftMetadata.recipientEmail,
-        message: giftMetadata.message,
-      }));
+      sessionStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({
+          amount: numericAmount,
+          isGift: offer,
+          recipientFirstName: giftMetadata.recipientFirstName,
+          recipientLastName: giftMetadata.recipientLastName,
+          recipientEmail: giftMetadata.recipientEmail,
+          message: giftMetadata.message,
+        })
+      );
       router.push(LOGIN_URL);
       return;
     }
@@ -97,7 +105,11 @@ export default function GiftCardForm() {
         setError(result.error);
         return;
       }
-      const replaced = await addGiftCard({ customAmount: numericAmount, giftMetadata, replace: true });
+      const replaced = await addGiftCard({
+        customAmount: numericAmount,
+        giftMetadata,
+        replace: true,
+      });
       if (!replaced.ok) {
         setError(replaced.error || "Impossible d'isoler le panier.");
         return;
@@ -112,8 +124,30 @@ export default function GiftCardForm() {
 
   return (
     <form className="gift-card-panel" onSubmit={handleSubmit}>
-      <h2>Montant de la carte</h2>
-      <div className="gift-presets">
+      {/* APERÇU VISUEL DYNAMIQUE DE LA CARTE */}
+      <div className="gift-preview" aria-hidden="true">
+        <div className="gift-preview__top">
+          <span className="gift-preview__brand">Bibli&apos;o Jouets</span>
+          <span className="gift-preview__amount">{numericAmount || 0} €</span>
+        </div>
+        <p className="gift-preview__slogan">Louez, Jouez, Échangez !</p>
+        {offer && (recipient.recipientFirstName || recipient.message) && (
+          <div className="gift-preview__recipient">
+            {recipient.recipientFirstName && (
+              <strong>
+                Pour : {recipient.recipientFirstName} {recipient.recipientLastName}
+              </strong>
+            )}
+            {recipient.message && <p>&laquo; {recipient.message} &raquo;</p>}
+          </div>
+        )}
+      </div>
+
+      <h2 id="buy-section-title" className="gift-card-panel__title">
+        1. Choisissez le montant de la carte
+      </h2>
+
+      <div className="gift-presets" role="group" aria-label="Montants suggérés">
         {PRESETS.map((value) => (
           <button
             key={value}
@@ -125,69 +159,95 @@ export default function GiftCardForm() {
           </button>
         ))}
       </div>
+
       <label className="gift-amount-field">
-        <span>Montant personnalisé</span>
-        <input
-          inputMode="numeric"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
-          aria-describedby="gift-amount-hint"
-        />
+        <span>Ou saisissez un montant libre (en €)</span>
+        <div className="gift-amount-input-wrapper">
+          <input
+            inputMode="numeric"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ""))}
+            aria-describedby="gift-amount-hint"
+            placeholder="Ex: 45"
+          />
+          <span className="gift-amount-suffix">€</span>
+        </div>
       </label>
       <p id="gift-amount-hint" className="gift-hint">
-        Minimum 10 €, uniquement des euros entiers. Montant retenu : {numericAmount || 0} €.
+        Minimum 10 €, uniquement des euros entiers. Montant retenu :{" "}
+        <strong>{numericAmount || 0} €</strong>.
       </p>
 
-      <label className="gift-offer">
-        <input type="checkbox" checked={offer} onChange={(event) => setOffer(event.target.checked)} />
-        Offrir à un proche par mail
+      <hr className="gift-divider" />
+
+      <h2 className="gift-card-panel__title">2. Choisissez le mode d&apos;envoi</h2>
+
+      <label className={`gift-offer ${offer ? "gift-offer--checked" : ""}`}>
+        <input
+          type="checkbox"
+          checked={offer}
+          onChange={(event) => setOffer(event.target.checked)}
+        />
+        <div className="gift-offer__text">
+          <strong>Offrir directement à un proche par e-mail</strong>
+          <span>Nous envoyons la carte cadeau et votre petit mot au bénéficiaire</span>
+        </div>
       </label>
 
       {offer && (
         <div className="gift-recipient">
           <div className="gift-recipient-row">
             <label className="gift-field">
-              <span>Prénom</span>
+              <span>Prénom du bénéficiaire *</span>
               <input
                 value={recipient.recipientFirstName}
                 onChange={(event) => updateRecipient("recipientFirstName", event.target.value)}
+                placeholder="Ex: Laura"
                 required
               />
             </label>
             <label className="gift-field">
-              <span>Nom</span>
+              <span>Nom du bénéficiaire *</span>
               <input
                 value={recipient.recipientLastName}
                 onChange={(event) => updateRecipient("recipientLastName", event.target.value)}
+                placeholder="Ex: Dupont"
                 required
               />
             </label>
           </div>
           <label className="gift-field">
-            <span>E-mail du bénéficiaire</span>
+            <span>E-mail du bénéficiaire *</span>
             <input
               type="email"
               value={recipient.recipientEmail}
               onChange={(event) => updateRecipient("recipientEmail", event.target.value)}
+              placeholder="parent@exemple.fr"
               required
             />
           </label>
           <label className="gift-field">
-            <span>Petit mot</span>
+            <span>Votre petit mot doux (optionnel)</span>
             <textarea
               maxLength={500}
               value={recipient.message}
               onChange={(event) => updateRecipient("message", event.target.value)}
-              placeholder="Un message qui accompagnera le code..."
+              placeholder="Écrivez un message chaleureux qui accompagnera le code de la carte cadeau..."
             />
           </label>
         </div>
       )}
 
-      {error && <p className="gift-error">{error}</p>}
+      {error && (
+        <p className="gift-error" role="alert">
+          ⚠️ {error}
+        </p>
+      )}
 
       <button type="submit" className="gift-submit" disabled={loading}>
-        {loading ? "Ajout..." : "Ajouter au panier"}
+        {loading
+          ? "Ajout en cours..."
+          : `Ajouter la carte de ${numericAmount || 0} € au panier`}
       </button>
     </form>
   );
