@@ -69,20 +69,43 @@ const addGiftCard = async ({ customAmount, giftMetadata, replace = false }) => {
 const addToCart = async (productId, quantity = 1, intent = "RENTAL") => {
     if (!session) {
       router.push('/connexion?message=Veuillez vous connecter pour ajouter un article au panier.');
-      return;
+      return { ok: false, code: 'AUTH' };
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/cart', {
+      const sendAdd = () => fetch('/api/cart', {
         method: 'POST',
-        // inclut intent dans le payload envoyé à l'API
-        body: JSON.stringify({ productId, quantity, intent }), 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity, intent }),
       });
-      if (res.ok) setCart(await res.json());
-      else {
+
+      let res = await sendAdd();
+      if (res.status === 409) {
         const data = await res.json();
-        throw new Error(data.error || "Erreur ajout au panier");
+        if (data.code !== 'CART_MIXED') {
+          throw new Error(data.error || "Erreur ajout au panier");
+        }
+        const replace = window.confirm(
+          "Votre panier contient une carte cadeau. La retirer pour ajouter ce jouet ?"
+        );
+        if (!replace) return { ok: false, code: 'CART_MIXED' };
+
+        const currentRes = await fetch('/api/cart');
+        const current = currentRes.ok ? await currentRes.json() : { items: [] };
+        for (const item of current.items || []) {
+          if (item.intent === 'GIFT_CARD') {
+            await fetch(`/api/cart?itemId=${item.id}`, { method: 'DELETE' });
+          }
+        }
+        res = await sendAdd();
       }
+
+      if (res.ok) {
+        setCart(await res.json());
+        return { ok: true };
+      }
+      const data = await res.json();
+      throw new Error(data.error || "Erreur ajout au panier");
     } finally {
       setLoading(false);
     }

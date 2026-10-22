@@ -1,12 +1,20 @@
 .gift-cart-card {
-  display: grid;
-  gap: 0.4rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   background: #ffffff;
   border: 2px solid #FAE9CF;
   border-radius: 25px;
   padding: 1.25rem;
   color: #2E1D21;
   margin-bottom: 1rem;
+}
+
+.gift-cart-card__content {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
 }
 
 .gift-cart-card__badge {
@@ -35,14 +43,21 @@
 }
 
 .gift-cart-card__remove {
-  justify-self: start;
-  margin-top: 0.4rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: transparent;
-  color: #FF8C94;
-  font-weight: 700;
+  color: #ff8c94;
   cursor: pointer;
-  font-family: inherit;
+  padding: 0.25rem;
+  border-radius: 999px;
+}
+
+.gift-cart-card__remove:hover {
+  background: #FFD9DC;
 }
 
 .gift-cart-note {

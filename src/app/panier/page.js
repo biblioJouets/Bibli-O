@@ -410,15 +410,22 @@ export default function PanierPage() {
             const recipient = [meta.recipientFirstName, meta.recipientLastName].filter(Boolean).join(" ");
             return (
               <article key={item.id} className="gift-cart-card">
-                <span className="gift-cart-card__badge">Carte cadeau</span>
-                <h3>Carte Cadeau Bibli&apos;o Jouets</h3>
-                <p className="gift-cart-card__amount">{item.customAmount || 0} €</p>
-                {meta.offerToSomeone && recipient && (
-                  <p>Pour {recipient}{meta.recipientEmail ? ` — ${meta.recipientEmail}` : ""}</p>
-                )}
-                {meta.message && <p>« {meta.message} »</p>}
-                <button type="button" className="gift-cart-card__remove" onClick={() => removeFromCart(item.id)}>
-                  Retirer
+                <div className="gift-cart-card__content">
+                  <span className="gift-cart-card__badge">Carte cadeau</span>
+                  <h3>Carte Cadeau Bibli&apos;o Jouets</h3>
+                  <p className="gift-cart-card__amount">{item.customAmount || 0} €</p>
+                  {meta.offerToSomeone && recipient && (
+                    <p>Pour {recipient}{meta.recipientEmail ? ` — ${meta.recipientEmail}` : ""}</p>
+                  )}
+                  {meta.message && <p>« {meta.message} »</p>}
+                </div>
+                <button
+                  type="button"
+                  className="gift-cart-card__remove"
+                  onClick={() => removeFromCart(item.id)}
+                  aria-label="Retirer la carte cadeau"
+                >
+                  <Trash2 size={20} aria-hidden="true" />
                 </button>
               </article>
             );

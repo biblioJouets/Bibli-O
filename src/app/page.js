@@ -3,7 +3,7 @@
 import CommitmentsCarousel from "@/components/CommitmentsCarousel";
 import ButtonRed from "@/components/ButtonRed";
 import PromotionBanner from '@/components/PromoBanner';
-
+import GiftCardPromotion from '@/components/gift-card-promotion';
 // import NewToys from "../components/NewToys";
 import Banner from "@/components/Banner";
 import CatalogOverview from "@/components/CatalogOverview";
@@ -105,7 +105,7 @@ export default async function Homepage() {
                 {/* Le H1 est à l'intérieur, c'est parfait */}
                 <Banner />
                 < PromotionBanner />
-
+                <GiftCardPromotion />
                 {/* NOTE SEO : Remplacement de div par section pour délimiter le sujet */}
                 <section className="functionalityCardsSection" aria-labelledby="fonctionnement-title">
                     {/* NOTE A11Y : Ajout d'un ID pour lier le titre à la section */}

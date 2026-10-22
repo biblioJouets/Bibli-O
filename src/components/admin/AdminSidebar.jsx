@@ -86,6 +86,11 @@ export default function AdminSidebar() {
             <span className={styles.navLabel}>Réassort</span>
             {counts.refillPending > 0 && <span className={`${styles.badge} ${styles.badgeGreen}`}>{counts.refillPending}</span>}
           </Link>
+          <Link href="/admin/orders?type=GIFT_CARD" className={`${styles.navItem} ${styles.navItemGiftCard} ${pathname === "/admin/orders" ? styles.navItemActive : ""}`}>
+            <span className={styles.navIcon}>🎀</span>
+            <span className={styles.navLabel}>Carte Cadeau</span>
+            {counts.giftCardPreparing > 0 && <span className={`${styles.badge} ${styles.badgeOrange}`}>{counts.giftCardPreparing}</span>}
+          </Link>
         </nav>
 
         <nav className={styles.navGroup}>

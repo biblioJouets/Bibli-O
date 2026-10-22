@@ -132,7 +132,7 @@ export default function HeaderBiblioJouets() {
               <Link href="/abonnements" className="dropdown-item" role="menuitem" onClick={closeBurger}>
                 Nos Abonnements
               </Link>
-              <Link href="/mariage" className="dropdown-item" role="menuitem" onClick={closeBurger} style={{ color: '#FF8C94' }}>
+              <Link href="/mariage" className="dropdown-item" role="menuitem" onClick={closeBurger}>
                 Mariages & Événements
               </Link>
               <Link href="/nos-offres/carte-cadeau" className="dropdown-item" role="menuitem" onClick={closeBurger}>

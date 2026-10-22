@@ -1,5 +1,5 @@
 /* src/lib/modules/emails/email.service.js */
-import { sendBrevoTemplate, sendBrevoHtml } from '@/lib/core/brevo/client';
+import { sendBrevoTemplate } from '@/lib/core/brevo/client';
 import { getSuggestedPlan } from '@/lib/core/utils/subscription';
 
 // ============================================================
@@ -124,34 +124,34 @@ const sendReturnLabel = async (orderInfo) => {
   }
 };
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+const GIFT_CARD_TEMPLATES = {
+  BUYER_EMAIL: 40,
+  BUYER_POSTAL: 41,
+  BENEFICIARY: 42,
+  ADMIN_EMAIL: 43,
+  ADMIN_POSTAL: 44,
+};
+
+const GIFT_CARD_ADMIN_EMAIL = 'contact@bibliojouets.com';
+const DEFAULT_GIFT_MESSAGE = "Un petit cadeau pour jouer encore et encore. Louez, Jouez, Échangez !";
+
+function appPath(path) {
+  const base = (process.env.NEXT_PUBLIC_URL || process.env.NEXTAUTH_URL || 'https://www.bibliojouets.fr').replace(/\/$/, '');
+  return `${base}${path}`;
 }
 
-function giftEmailLayout(title, bodyHtml) {
-  return `<!DOCTYPE html>
-<html lang="fr">
-<body style="margin:0;padding:0;background:#FFFAF4;font-family:Georgia, 'Times New Roman', serif;color:#2E1D21;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFAF4;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFF7EB;border-radius:25px;overflow:hidden;">
-        <tr><td style="background:#ffe264;padding:22px 28px;">
-          <p style="margin:0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;">Bibli'o Jouets</p>
-          <h1 style="margin:8px 0 0;font-size:24px;line-height:1.3;">${title}</h1>
-        </td></tr>
-        <tr><td style="padding:28px;font-size:16px;line-height:1.6;">
-          ${bodyHtml}
-          <p style="margin:28px 0 0;font-size:14px;">Louez, Jouez, Échangez !</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+function formatOrderDate(date = new Date()) {
+  return new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Europe/Paris',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
+function personName(person, fallback = '') {
+  const name = [person?.firstName, person?.lastName].filter(Boolean).join(' ').trim();
+  return name || fallback;
 }
 
 const sendGiftCardEmails = async ({
@@ -165,82 +165,98 @@ const sendGiftCardEmails = async ({
   orderId,
   shipping,
 }) => {
-  const appUrl = process.env.NEXT_PUBLIC_URL || process.env.NEXTAUTH_URL || 'https://www.bibliojouets.fr';
-  const activationUrl = `${appUrl.replace(/\/$/, '')}/mon-compte`;
-  const amountLabel = Number(amount).toFixed(0);
   const isPostal = method === 'POSTAL';
-  const hasRecipient = Boolean(recipientEmail && recipientEmail !== buyer?.email);
-  const codeTarget = hasRecipient ? recipientEmail : buyer?.email;
-  const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
-  const safeName = escapeHtml(recipientName || buyer?.firstName || 'vous');
-  const safeCode = escapeHtml(code);
-
-  const buyerNote = isPostal
-    ? "Votre carte cadeau au format postal est en préparation. Nous l'envoyons à l'adresse indiquée, frais de port de 2,00 € inclus."
-    : hasRecipient
-      ? `${recipientName || 'Le bénéficiaire'} a bien reçu son code par e-mail.`
-      : "Votre code cadeau vous a été envoyé dans un e-mail séparé.";
-
-  const buyerHtml = giftEmailLayout(
-    'Votre carte cadeau est confirmée',
-    `<p>Bonjour ${escapeHtml(buyer?.firstName || 'Client')},</p>
-     <p>Merci pour votre commande <strong>#${orderId}</strong>. La carte cadeau de <strong>${amountLabel} €</strong> est bien enregistrée.</p>
-     <p>${buyerNote}</p>`
+  const amountLabel = String(Number(amount));
+  const totalPaid = (Number(amount) + (isPostal ? 2 : 0)).toFixed(2);
+  const orderLabel = String(orderId);
+  const dateLabel = formatOrderDate();
+  const buyerName = personName(buyer, buyer?.firstName || 'Client');
+  const buyerFirstName = buyer?.firstName || 'Client';
+  const giftMessage = String(message || '').trim() || DEFAULT_GIFT_MESSAGE;
+  const hasRecipient = Boolean(
+    recipientEmail && recipientEmail.toLowerCase() !== String(buyer?.email || '').toLowerCase()
   );
+  const beneficiaryEmail = hasRecipient ? recipientEmail : buyer?.email;
+  const beneficiaryName = recipientName || buyerFirstName;
+  const deliveryStatusText = hasRecipient
+    ? `Le code a été envoyé par e-mail à ${recipientName || recipientEmail}.`
+    : 'Le code vous a été envoyé par e-mail.';
 
-  const codeHtml = giftEmailLayout(
-    'Un cadeau vous attend',
-    `<p>Bonjour ${safeName},</p>
-     <p>Vous recevez une carte cadeau Bibli'o Jouets de <strong>${amountLabel} €</strong>.</p>
-     ${safeMessage ? `<p style="background:#FFD9DC;border-radius:25px;padding:16px 20px;"><em>${safeMessage}</em></p>` : ''}
-     <p style="font-size:22px;letter-spacing:0.08em;font-weight:bold;background:#fff;border-radius:25px;padding:16px;text-align:center;">${safeCode}</p>
-     <p>Activez-la depuis votre espace client, une fois connecté :</p>
-     <p><a href="${activationUrl}" style="display:inline-block;background:#FF8C94;color:#2E1D21;text-decoration:none;border-radius:999px;padding:12px 22px;font-weight:bold;">Activer ma carte</a></p>`
-  );
+  const jobs = [];
 
-  const addressLine = isPostal
-    ? `${shipping?.shippingName || ''} — ${shipping?.shippingAddress || ''}, ${shipping?.shippingZip || ''} ${shipping?.shippingCity || ''}`
-    : 'Envoi par e-mail';
+  if (buyer?.email) {
+    jobs.push(isPostal
+      ? sendBrevoTemplate(buyer.email, GIFT_CARD_TEMPLATES.BUYER_POSTAL, {
+          ORDER_ID: orderLabel,
+          BUYER_FIRSTNAME: buyerFirstName,
+          AMOUNT: amountLabel,
+          RECIPIENT_NAME: recipientName || buyerName,
+          TOTAL_PAID: totalPaid,
+          SHIPPING_NAME: shipping?.shippingName || '',
+          SHIPPING_ADDRESS: shipping?.shippingAddress || '',
+          SHIPPING_ZIP: shipping?.shippingZip || '',
+          SHIPPING_CITY: shipping?.shippingCity || '',
+          CODE: code,
+          ORDERS_URL: appPath('/mon-compte/commandes'),
+        })
+      : sendBrevoTemplate(buyer.email, GIFT_CARD_TEMPLATES.BUYER_EMAIL, {
+          ORDER_ID: orderLabel,
+          BUYER_FIRSTNAME: buyerFirstName,
+          DATE: dateLabel,
+          AMOUNT: amountLabel,
+          CODE: code,
+          TOTAL_PAID: totalPaid,
+          DELIVERY_STATUS_TEXT: deliveryStatusText,
+          ORDERS_URL: appPath('/mon-compte/commandes'),
+        }));
+  }
 
-  const adminHtml = giftEmailLayout(
-    'Nouvelle carte cadeau',
-    `<p>Commande <strong>#${orderId}</strong> — <strong>${amountLabel} €</strong>${isPostal ? ' + 2,00 € de port' : ''}.</p>
-     <p>Mode : <strong>${isPostal ? 'Voie postale (+2 €)' : 'E-mail'}</strong></p>
-     <p>Code : <strong>${safeCode}</strong></p>
-     <p>Acheteur : ${escapeHtml(buyer?.firstName || '')} ${escapeHtml(buyer?.lastName || '')} — ${escapeHtml(buyer?.email || '')}</p>
-     <p>Bénéficiaire : ${safeName}${recipientEmail ? ` — ${escapeHtml(recipientEmail)}` : ''}</p>
-     <p>Livraison : ${escapeHtml(addressLine)}</p>`
-  );
-
-  const jobs = [
-    sendBrevoHtml({
-      toEmail: buyer?.email,
-      toName: buyer?.firstName,
-      subject: `Carte cadeau confirmée — commande #${orderId}`,
-      html: buyerHtml,
-      text: `Votre carte cadeau de ${amountLabel} € est confirmée. ${buyerNote}`,
-    }),
-  ];
-
-  if (codeTarget) {
-    jobs.push(sendBrevoHtml({
-      toEmail: codeTarget,
-      toName: recipientName || buyer?.firstName,
-      subject: `Votre carte cadeau Bibli'o Jouets — ${amountLabel} €`,
-      html: codeHtml,
-      text: `Votre code cadeau ${code} d'un montant de ${amountLabel} €. Activez-le sur ${activationUrl}`,
+  if (beneficiaryEmail) {
+    jobs.push(sendBrevoTemplate(beneficiaryEmail, GIFT_CARD_TEMPLATES.BENEFICIARY, {
+      AMOUNT: amountLabel,
+      RECIPIENT_NAME: beneficiaryName,
+      BUYER_NAME: buyerName,
+      MESSAGE: giftMessage,
+      CODE: code,
+      ACTIVATION_URL: appPath('/mon-compte'),
     }));
   }
 
-  jobs.push(sendBrevoHtml({
-    toEmail: 'contact@bibliojouets.com',
-    toName: 'Admin',
-    subject: `Carte cadeau #${orderId} — ${isPostal ? 'postal +2€' : 'e-mail'}`,
-    html: adminHtml,
-    text: `Commande #${orderId}, code ${code}, ${amountLabel} €, ${isPostal ? 'voie postale' : 'e-mail'}. ${addressLine}`,
-  }));
+  jobs.push(isPostal
+    ? sendBrevoTemplate(GIFT_CARD_ADMIN_EMAIL, GIFT_CARD_TEMPLATES.ADMIN_POSTAL, {
+        ORDER_ID: orderLabel,
+        AMOUNT: amountLabel,
+        TOTAL_PAID: totalPaid,
+        CODE: code,
+        SHIPPING_NAME: shipping?.shippingName || '',
+        SHIPPING_ADDRESS: shipping?.shippingAddress || '',
+        SHIPPING_ZIP: shipping?.shippingZip || '',
+        SHIPPING_CITY: shipping?.shippingCity || '',
+        SHIPPING_PHONE: shipping?.shippingPhone || '',
+        BUYER_NAME: buyerName,
+        BUYER_EMAIL: buyer?.email || '',
+        RECIPIENT_NAME: recipientName || buyerName,
+        MESSAGE: giftMessage,
+        ADMIN_URL: appPath('/admin/orders'),
+      })
+    : sendBrevoTemplate(GIFT_CARD_ADMIN_EMAIL, GIFT_CARD_TEMPLATES.ADMIN_EMAIL, {
+        ORDER_ID: orderLabel,
+        DATE: dateLabel,
+        AMOUNT: amountLabel,
+        CODE: code,
+        BUYER_NAME: buyerName,
+        BUYER_EMAIL: buyer?.email || '',
+        RECIPIENT_NAME: recipientName || buyerName,
+        RECIPIENT_EMAIL: recipientEmail || buyer?.email || '',
+        MESSAGE: giftMessage,
+        ADMIN_URL: appPath('/admin/orders'),
+      }));
 
-  await Promise.all(jobs);
+  const results = await Promise.all(jobs);
+  const failed = results.filter((result) => result?.success === false);
+  if (failed.length > 0) {
+    throw new Error(`Échec d'envoi de ${failed.length} e-mail(s) carte cadeau.`);
+  }
 };
 
 export const emailService = {

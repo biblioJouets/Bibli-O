@@ -237,7 +237,7 @@ describe('CartService - Règle BOX-MYSTERE', () => {
 
     await expect(cartService.addToCart(userId, 8, 1, 'RENTAL'))
       .rejects
-      .toThrow('carte-cadeau');
+      .toMatchObject({ code: 'CART_MIXED' });
 
     expect(prisma.products.findUnique).not.toHaveBeenCalled();
   });

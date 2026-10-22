@@ -34,7 +34,9 @@ export const cartService = {
       include: { product: { select: { reference: true } } },
     });
     if (cartProducts.some(ci => ci.intent === 'GIFT_CARD')) {
-      throw new Error("Votre panier contient une carte-cadeau. Retirez-la avant d'ajouter un jouet.");
+      const error = new Error("Votre panier contient une carte-cadeau. Elle doit rester seule.");
+      error.code = 'CART_MIXED';
+      throw error;
     }
 
     // 1. Récupérer le produit pour connaître son stock

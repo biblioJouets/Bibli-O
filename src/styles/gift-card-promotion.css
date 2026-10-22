@@ -1,0 +1,362 @@
+/* src/styles/gift-card-promotion.css */
+
+.gcp-section {
+    padding: 48px 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .gcp-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .gcp-card {
+    position: relative;
+    background-color: #FFF7EB;
+    border: 2px solid #FAE9CF;
+    border-radius: 25px;
+    padding: 32px 22px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    box-shadow: 0 12px 32px rgba(46, 29, 33, 0.06);
+  }
+  
+  /* Formes organiques ("blobs") */
+  .gcp-blob {
+    position: absolute;
+    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .gcp-blob--pink {
+    width: 240px;
+    height: 240px;
+    background-color: #FFD9DC;
+    top: -80px;
+    right: -60px;
+    opacity: 0.7;
+  }
+  
+  .gcp-blob--blue {
+    width: 180px;
+    height: 180px;
+    background-color: #DFF1F9;
+    bottom: -60px;
+    left: -50px;
+    opacity: 0.8;
+  }
+  
+  .gcp-blob--green {
+    width: 120px;
+    height: 120px;
+    background-color: #DAEEE6;
+    bottom: 20px;
+    right: 30%;
+    opacity: 0.6;
+  }
+  
+  /* Colonne Texte */
+  .gcp-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .gcp-badge {
+    display: inline-block;
+    background-color: #FFF7D4;
+    border: 1.5px solid #ffe264;
+    color: #2E1D21;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    margin-bottom: 16px;
+  }
+  
+  .gcp-title {
+    color: #2E1D21;
+    font-size: 1.85rem;
+    line-height: 1.25;
+    font-weight: 800;
+    margin: 0 0 16px 0;
+  }
+  
+  .gcp-title-highlight {
+    display: inline-block;
+    background-color: #ffe264;
+    padding: 2px 12px;
+    border-radius: 14px;
+  }
+  
+  .gcp-description {
+    color: #2E1D21;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    margin: 0 0 22px 0;
+    opacity: 0.92;
+  }
+  
+  /* Liste des avantages */
+  .gcp-perks {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .gcp-perk-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #2E1D21;
+    font-size: 0.96rem;
+    line-height: 1.4;
+  }
+  
+  .gcp-perk-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  
+  .gcp-perk-icon--yellow {
+    background-color: #FFF7D4;
+  }
+  
+  .gcp-perk-icon--blue {
+    background-color: #DFF1F9;
+  }
+  
+  .gcp-perk-icon--green {
+    background-color: #DAEEE6;
+  }
+  
+  /* Bouton CTA & Sous-texte */
+  .gcp-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .gcp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #FF8C94;
+    color: #2E1D21;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 15px 30px;
+    border-radius: 9999px;
+    box-shadow: 0 6px 18px rgba(255, 140, 148, 0.38);
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
+  .gcp-cta:hover {
+    background-color: #6EC1E4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(110, 193, 228, 0.4);
+  }
+  
+  .gcp-cta-arrow {
+    transition: transform 0.2s ease;
+  }
+  
+  .gcp-cta:hover .gcp-cta-arrow {
+    transform: translateX(4px);
+  }
+  
+  .gcp-subtext {
+    font-size: 0.85rem;
+    color: #2E1D21;
+    opacity: 0.75;
+    padding-left: 8px;
+  }
+  
+  /* Colonne Droite : Visuel Mockup Carte Cadeau */
+  .gcp-visual-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+  }
+  
+  .gcp-mockup-card {
+    width: 100%;
+    max-width: 380px;
+    background: linear-gradient(135deg, #6EC1E4 0%, #88D4AB 100%);
+    border-radius: 25px;
+    padding: 26px 24px;
+    color: #2E1D21;
+    box-shadow: 0 16px 36px rgba(46, 29, 33, 0.14);
+    transform: rotate(-2deg);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 22px;
+    border: 3px solid #FFFAF4;
+  }
+  
+  .gcp-card:hover .gcp-mockup-card {
+    transform: rotate(0deg) scale(1.02);
+  }
+  
+  .gcp-mockup-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .gcp-mockup-brand {
+    font-weight: 800;
+    font-size: 1.2rem;
+    background-color: #FFFAF4;
+    padding: 6px 14px;
+    border-radius: 9999px;
+  }
+  
+  .gcp-mockup-tag {
+    background-color: #ffe264;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  
+  .gcp-mockup-center {
+    background-color: #FFFAF4;
+    border-radius: 20px;
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .gcp-mockup-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+  
+  .gcp-mockup-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .gcp-pill {
+    background-color: #FFF7EB;
+    border: 1.5px solid #FAE9CF;
+    border-radius: 9999px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  
+  .gcp-pill--active {
+    background-color: #FF8C94;
+    border-color: #FF8C94;
+  }
+  
+  .gcp-mockup-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 700;
+    background-color: rgba(255, 250, 244, 0.85);
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+  
+  .gcp-mockup-code {
+    letter-spacing: 0.06em;
+  }
+  
+  /* Badges flottants */
+  .gcp-floating-badge {
+    position: absolute;
+    background-color: #FFFAF4;
+    border: 2px solid #FAE9CF;
+    color: #2E1D21;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 8px 14px;
+    border-radius: 9999px;
+    box-shadow: 0 6px 16px rgba(46, 29, 33, 0.1);
+  }
+  
+  .gcp-floating-badge--top {
+    top: 0;
+    right: 8px;
+    background-color: #DFF1F9;
+    border-color: #6EC1E4;
+  }
+  
+  .gcp-floating-badge--bottom {
+    bottom: 0;
+    left: 8px;
+    background-color: #FFD9DC;
+    border-color: #FF8C94;
+  }
+  
+  /* Responsive Tablet & Desktop (Mobile First) */
+  @media (min-width: 768px) {
+    .gcp-section {
+      padding: 64px 24px;
+    }
+  
+    .gcp-card {
+      padding: 48px 44px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+    }
+  
+    .gcp-content {
+      flex: 1.15;
+    }
+  
+    .gcp-visual-wrapper {
+      flex: 0.85;
+    }
+  
+    .gcp-title {
+      font-size: 2.3rem;
+    }
+  
+    .gcp-cta {
+      width: auto;
+    }
+  }
