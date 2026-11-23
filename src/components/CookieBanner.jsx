@@ -1,6 +1,7 @@
 "use client";
 
 import CookieConsent from "react-cookie-consent";
+import { CONSENT_EVENT } from "@/components/ConsentAnalytics";
 
 export default function CookieBanner() {
   // Couleurs inspirées de l'univers ludique (à ajuster avec vos codes HEX exacts)
@@ -20,6 +21,9 @@ export default function CookieBanner() {
       declineButtonText="Continuer sans tracer"
       cookieName="biblio-jouets-consent"
       expires={365}
+      onAccept={() => {
+        window.dispatchEvent(new Event(CONSENT_EVENT));
+      }}
       
       // 1. Le conteneur principal (La bannière)
       style={{

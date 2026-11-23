@@ -1,0 +1,1 @@
+{"skill":"review","type":"operational","key":"windows-git-bash","insight":"On this machine WSL bash is missing and PowerShell expands dollar substitutions, so gstack scripts must run through C:/Program Files/Git/bin/bash.exe with the JSON in a file.","confidence":8,"source":"observed","files":[]}

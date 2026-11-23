@@ -4,8 +4,8 @@ import "@/app/globals.css";
 import "@/styles/homepage.css"; 
 import "@/styles/cardsContentMission.css"; 
 import "@/styles/header.css";
-
 import CookieBanner from "@/components/CookieBanner";
+import ConsentAnalytics from "@/components/ConsentAnalytics";
 import ConditionalShell from "@/components/ConditionalShell";
 import SessionProviderClient from "@/components/SessionProviderClient";
 import { getServerSession } from "next-auth";
@@ -89,6 +89,7 @@ const session = await getServerSession(authOptions);
       </SessionProviderClient>
 
       </body>
+      <ConsentAnalytics />
     </html>
   );
 }

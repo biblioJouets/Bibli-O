@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/core/database";
-import { writeFile } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { randomUUID } from "crypto";
 
@@ -47,6 +47,7 @@ export async function POST(req) {
     // TODO (URGENT: Migrer les étiquettes hors du dossier public)
     const filename = `return-label-${randomUUID()}.pdf`;
     const uploadDir = join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
     await writeFile(join(uploadDir, filename), buffer);
 
     const returnLabelUrl = `/uploads/${filename}`;

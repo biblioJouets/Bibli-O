@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Lucas/Documents/dev/bibliojouets-next/bibliojouets/src/components/account -type f -name *.ts* -o -name *.jsx -o -name *.js)",
+      "Bash(cmd /c \"taskkill /f /im node.exe\")",
+      "Bash(npx prisma:*)",
+      "Bash(node -e ':*)",
+      "WebFetch(domain:api.anthropic.com)"
+    ]
+  }
+}
