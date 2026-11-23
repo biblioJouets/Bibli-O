@@ -110,12 +110,22 @@ function Cgv() {
       <p>Dans le cadre d’un achat définitif de jouet (hors location), les conditions de retour sont les suivantes :</p>
       <ul>
         <li><strong>Droit de rétractation :</strong> Conformément à la législation, le Client dispose d'un droit de rétractation de 14 jours à compter de la réception du produit pour retourner son achat sans justification.</li>
-        <li><strong>État du produit :</strong> Le jouet doit être retourné complet, dans son emballage d'origine et dans un état permettant sa remise en vente.</li>
-        <li><strong>Frais de retour :</strong>Les frais d'expédition pour le retour du produit sont à la charge exclusive du Client.</li>
+        <li><strong>État du produit :</strong> Le jouet doit être retourné complet et dans un état permettant sa remise en vente, accompagné de son emballage d'origine le cas échéant (s'il était fourni lors de l'achat)</li>
+        <li><strong>Frais de retour :</strong>En cas d'exercice du droit de rétractation ou de retour d'un produit acheté (hors garanties légales ou erreur de préparation), les frais d'expédition et de renvoi du jouet sont à la charge exclusive du Client. Pour les retours d'achats, aucun bon de retour prépayé n'est fourni. </li>
         <li><strong>Remboursement :</strong>Après vérification de l'état du jouet par nos services, le remboursement sera effectué via le moyen de paiement utilisé lors de la commande initiale, déduction faite des frais de ports. </li>
         <li><strong>Exclusions : </strong>Tout article retourné incomplet, endommagé ou présentant des traces d'usure anormale ne pourra faire l'objet d'un remboursement.</li>
       </ul>
       </section>
+       {/* Article  8.1 État des jouets vendus (Reconditionnement et Seconde Main  */}
+       <section aria-labelledby="cgv-jouets-vendus">
+        <h2 id="cgv-jouets-vendus">Article 8.2 - État des jouets vendus (Reconditionnement et Seconde Main)</h2>
+        <p>Les jouets et articles proposés à la vente (en achat direct ou en achat post-location) sont des produits reconditionnés issus du parc de location de Bibli'o Jouets.</p>
+        <ul>
+<li><strong>État matériel :</strong> Bien que contrôlés, désinfectés et testés selon notre protocole d'hygiène et de sécurité (Article 9), ces articles de seconde main sont susceptibles de présenter de légères marques d'usure esthétiques n'altérant en rien leur fonctionnement ou leur sécurité.</li>
+<li><strong>Emballage :</strong> Les jouets vendus reconditionnés peuvent être livrés sans leur boîte ou emballage d'origine.</li>
+      <li><strong>Acceptation :</strong> Le Client reconnaît et accepte qu'en achetant un produit reconditionné, il achète un article ayant déjà été utilisé.</li>  </ul>
+      </section>
+      
       {/* Article 9: Hygiène et sécurité */}
       <section aria-labelledby="cgv-hygiene">
         <h2 id="cgv-hygiene">Article 9 - Hygiène et sécurité</h2>
