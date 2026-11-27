@@ -5,10 +5,10 @@ import '@/styles/promoBanner.css';
 
 const PromoBanner = () => {
   const baseMessages = [
-    "🎁 Box Mystère : 4 jouets, 24.90€ au lieu de 38€",
+    "10€ offert sur toutes les formules avec le code: BLACKFRIDAY10",
     // "🐻 Code : BIBLIOMOISOFFERT",
     "🚚 Livraison dans toute la France", 
-    "✨ Sans engagement : la liberté de jouer !",
+    "✨ Sans engagement et sans caution !",
   ];
 
   const contentBlock = [
